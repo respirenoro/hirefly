@@ -1,0 +1,354 @@
+{
+  "id": "sql-u10",
+  "title": "Interview problem set",
+  "summary": "Sixteen graded problems against the practice data, from warm-ups to hard puzzles: rates, joins, dates, windows, ranking, calendar gaps and a data-quality audit.",
+  "lessons": [
+    {
+      "id": "sql-u10-l1",
+      "title": "Problem set A: warm-ups",
+      "minutes": 15,
+      "body": "This unit is a graded problem set against the practice data, ordered from easy to hard. Load `practice.sql` into SQLite (DB Browser for SQLite works) or SQL Server, or use the sandbox in the app, and write each answer before you open the model answer.\n\n\n```text\npharmacies(id, name, city, state)                                          40 rows\npharmacists(id, name, license_state, active)                               60 rows\nshifts(id, pharmacy_id, pharmacist_id, requested_at, filled_at, starts_at,\n       status, cancel_reason, is_emergency)                              1019 rows\nassignments(id, shift_id, pharmacist_id, status, completed_at)            906 rows\ntickets(id, opened_at, closed_at, pharmacy_id, category, severity,\n        status, title)                                                    734 rows\n```\n\nFacts to keep in mind while you work. `shifts.status` is `completed`, `cancelled` or `open`. `cancel_reason` is `no coverage`, `pharmacy cancelled` or `pharmacist cancelled`. Datetimes are text in the form `YYYY-MM-DD HH:MM:SS`. A shift can have a `filled_at` and still be cancelled later. Ticket categories are `How do I`, `Bug`, `Access`, `Feature request` and `Data fix`.\n\nThe model answers are written in T-SQL. Each problem also has a runnable check for the SQLite sandbox, which compares your result rows with the reference answer. In SQLite use `LIMIT` instead of `TOP`, `strftime` instead of `DATEPART`, and `strftime('%s', x)` to turn a timestamp into seconds.\n\nHow to work each problem, in the same five steps as the live-test lesson:\n\n1. Say what one row of the result is.\n2. Name the tables and the columns that link them.\n3. Write the `FROM` and `WHERE` first, then the grouping, then the calculated columns.\n4. Run it and look at the first rows.\n5. Check one number by hand, and ask whether NULLs or ties could change the answer.\n\nThis first lesson is the warm-up set: single table, a filter, a sort and a count. Interviewers use problems like these to see whether you stay calm and precise. They should take you a couple of minutes each.\n\nDo not skip the easy ones. Typical errors at this level are `= NULL` instead of `IS NULL`, forgetting `ORDER BY` when the problem asks for an order, and returning every column when only two were requested. The runnable check compares columns as well as rows, so the column names and their order in your answer matter. If a problem asks for \"the five most recent\", sort descending by the date and limit the result; if it asks for \"oldest first\", sort ascending.",
+      "keyPoints": [
+        "Say what one row of the result is before you type.",
+        "Return exactly the columns asked for, in the order asked.",
+        "Use IS NULL for missing values and ORDER BY whenever order is requested.",
+        "In SQLite use LIMIT; in T-SQL use TOP.",
+        "Check the result against a few rows by hand."
+      ],
+      "interviewAngle": "Easy problems are a calm-down test. Narrate your steps and name the trap you avoid (NULL, ordering, DISTINCT). If asked how you practise, you can say you worked through graded problems on a practice dataset in the tools you would use at work, and that you aim for accuracy first and speed second.",
+      "exercises": [
+        {
+          "id": "sql-u10-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A problem asks for the five most recent critical bug tickets. Which ordering and limit is correct?",
+          "choices": [
+            "ORDER BY opened_at ASC with LIMIT 5",
+            "ORDER BY opened_at DESC with LIMIT 5",
+            "No ORDER BY; take the first 5",
+            "ORDER BY id with LIMIT 5"
+          ],
+          "answer": 1,
+          "explanation": "Most recent first means a descending date sort, then cut to five. Without ORDER BY the order is not guaranteed."
+        },
+        {
+          "id": "sql-u10-l1-e2",
+          "type": "open",
+          "prompt": "Problem 1 (easy). Count the shifts in each status. Return `status` and `shifts`, largest count first.",
+          "answer": "```sql\nSELECT status, COUNT(*) AS shifts\nFROM shifts\nGROUP BY status\nORDER BY shifts DESC;\n```\n\nOne row per status; the completed group is by far the largest.\n\nOn the practice data this returns 3 rows (columns: status, shifts); the first row is completed, 828.",
+          "rubric": [
+            "Groups by status",
+            "Counts rows with COUNT(*) named shifts",
+            "Orders by the count descending",
+            "Returns only the two columns asked for"
+          ],
+          "sqlite": "SELECT status, COUNT(*) AS shifts FROM shifts GROUP BY status ORDER BY shifts DESC",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l1-e3",
+          "type": "open",
+          "prompt": "Problem 2 (easy). List the emergency shifts that are still open. Return `id` and `requested_at`, oldest request first.",
+          "answer": "```sql\nSELECT id, requested_at\nFROM shifts\nWHERE status = 'open' AND is_emergency = 1\nORDER BY requested_at;\n```\n\nBoth conditions are plain comparisons, so AND is all you need. is_emergency is a 0/1 flag.\n\nOn the practice data this returns 3 rows (columns: id, requested_at); the first row is 1987, 2026-09-24 04:20:28.",
+          "rubric": [
+            "Filters status = open",
+            "Filters is_emergency = 1 with AND",
+            "Returns id and requested_at only",
+            "Sorts oldest first"
+          ],
+          "sqlite": "SELECT id, requested_at FROM shifts WHERE status = 'open' AND is_emergency = 1 ORDER BY requested_at",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l1-e4",
+          "type": "open",
+          "prompt": "Problem 3 (easy). List the inactive pharmacists (active = 0). Return `name` and `license_state`, sorted by name.",
+          "answer": "```sql\nSELECT name, license_state\nFROM pharmacists\nWHERE active = 0\nORDER BY name;\n```\n\nNames are personal data, so share a list like this only with the people who need it.\n\nOn the practice data this returns 4 rows (columns: name, license_state); the first row is Carlos Fischer, AL.",
+          "rubric": [
+            "Filters active = 0",
+            "Returns name and license_state",
+            "Sorts by name"
+          ],
+          "sqlite": "SELECT name, license_state FROM pharmacists WHERE active = 0 ORDER BY name",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l1-e5",
+          "type": "open",
+          "prompt": "Problem 4 (easy). Return the five most recently opened critical bug tickets: `id`, `opened_at` and `title`, newest first. Use TOP 5 in T-SQL and LIMIT 5 in the SQLite sandbox.",
+          "answer": "```sql\nSELECT TOP 5 id, opened_at, title\nFROM tickets\nWHERE category = 'Bug' AND severity = 'critical'\nORDER BY opened_at DESC;\n```\n\nIn SQLite, drop TOP and end the query with LIMIT 5.\n\nOn the practice data this returns 5 rows (columns: id, opened_at, title); the first row is 20701, 2026-09-17 11:48:00, Duplicate assignment created on double click.",
+          "rubric": [
+            "Filters category = Bug and severity = critical",
+            "Sorts opened_at descending",
+            "Limits to five rows (TOP or LIMIT)",
+            "Returns id, opened_at and title"
+          ],
+          "sqlite": "SELECT id, opened_at, title FROM tickets WHERE category = 'Bug' AND severity = 'critical' ORDER BY opened_at DESC LIMIT 5",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u10-l2",
+      "title": "Problem set B: rates and joins",
+      "minutes": 20,
+      "body": "Medium problems add a join, a rate or a time window. This is the level of most entry-level analyst, QA and data-operations assessments, and it is also where your real work lives: fill rate, cancellation rate and assignments per month.\n\nThree habits make these problems safe.\n\n**Define the rate first.** Write the numerator and the denominator in words before the SQL. Fill rate here means shifts with a `filled_at` divided by all requested shifts. That counts a shift that was filled and later cancelled as filled, so state that assumption when you give the number.\n\n**Multiply by 100.0, not 100.** Integer division gives 0 for any rate under 100 percent.\n\n**Keep right-table filters in `ON`.** When the question is \"which pharmacies had no emergency shifts in September\", the September and emergency conditions belong in the join condition of a `LEFT JOIN`. Putting them in `WHERE` quietly turns it into an inner join and returns the wrong set.\n\nA pattern worth memorising for rate-by-group problems:\n\n```sql\nSELECT p.state,\n       COUNT(*) AS requested,\n       SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,\n       ROUND(100.0 * SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END)\n             / COUNT(*), 1) AS cancel_rate_pct\nFROM shifts s\nJOIN pharmacies p ON p.id = s.pharmacy_id\nGROUP BY p.state;\n```\n\nThe shape is: join to get the label, group by the label, count the whole group and a conditional subset. Change the `CASE` and you have a different rate.\n\nWhen you finish, sanity-check by summing: the group counts should add up to the total number of shifts. If the sum is too high, a join multiplied rows. If it is too low, an inner join dropped some.\n\nIn the interview, say the denominator aloud each time. It is the most common source of a quietly wrong number, and naming it shows the care that these roles want.",
+      "keyPoints": [
+        "Write the numerator and denominator in words before the SQL.",
+        "Use 100.0 so division is not integer division.",
+        "Right-table conditions in a LEFT JOIN belong in ON.",
+        "Join to get a label, group by the label, count the group and a conditional subset.",
+        "Check that group counts add up to the total."
+      ],
+      "interviewAngle": "These are your real reports: fill rate, cancellation rate by group, assignments per month. Tell the story in order: the definition, the query, the sanity check, who used the number. State the denominator every time. Do not pad it with tools you did not use; the SQL and the care are the point.",
+      "exercises": [
+        {
+          "id": "sql-u10-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You want every pharmacy that had no emergency shift in September 2026. Where do the date and emergency conditions go?",
+          "choices": [
+            "In the WHERE clause after a LEFT JOIN",
+            "In the ON clause of the LEFT JOIN, then WHERE shift id IS NULL",
+            "In a HAVING clause",
+            "In ORDER BY"
+          ],
+          "answer": 1,
+          "explanation": "Conditions on the right table go in ON, so unmatched pharmacies survive; then IS NULL on the right key keeps only the ones with no match."
+        },
+        {
+          "id": "sql-u10-l2-e2",
+          "type": "open",
+          "prompt": "Problem 5 (easy-medium). What share of all requested shifts has a fill time? Return one value, `fill_rate_pct`, rounded to one decimal.",
+          "answer": "```sql\nSELECT ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) AS fill_rate_pct\nFROM shifts;\n```\n\nCOUNT(filled_at) skips NULLs, COUNT(*) counts every requested shift, and 100.0 avoids integer division. State that shifts that were filled and later cancelled count as filled.\n\nOn the practice data this returns 1 row (columns: fill_rate_pct); the first row is 88.9.",
+          "rubric": [
+            "Numerator is COUNT(filled_at), denominator is COUNT(*)",
+            "Multiplies by 100.0, not 100",
+            "Rounds to one decimal and names the column fill_rate_pct",
+            "States the filled-then-cancelled assumption"
+          ],
+          "sqlite": "SELECT ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) AS fill_rate_pct FROM shifts"
+        },
+        {
+          "id": "sql-u10-l2-e3",
+          "type": "open",
+          "prompt": "Problem 6 (medium). Cancellation rate by pharmacy state. Return `state`, `requested`, `cancelled` and `cancel_rate_pct` (one decimal), highest rate first, ties by state.",
+          "answer": "```sql\nSELECT p.state,\n       COUNT(*) AS requested,\n       SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,\n       ROUND(100.0 * SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END)\n             / COUNT(*), 1) AS cancel_rate_pct\nFROM shifts s\nJOIN pharmacies p ON p.id = s.pharmacy_id\nGROUP BY p.state\nORDER BY cancel_rate_pct DESC, p.state;\n```\n\nCheck: the requested column should add up to 1,019.\n\nOn the practice data this returns 4 rows (columns: state, requested, cancelled, cancel_rate_pct); the first row is AL, 57, 10, 17.5.",
+          "rubric": [
+            "Joins shifts to pharmacies on pharmacy_id",
+            "Groups by state",
+            "Conditional SUM(CASE ...) for cancelled",
+            "Divides by COUNT(*) with 100.0 and rounds to one decimal",
+            "Sorts by rate descending then state"
+          ],
+          "sqlite": "SELECT p.state, COUNT(*) AS requested, SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled, ROUND(100.0 * SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*), 1) AS cancel_rate_pct FROM shifts s JOIN pharmacies p ON p.id = s.pharmacy_id GROUP BY p.state ORDER BY cancel_rate_pct DESC, p.state",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l2-e4",
+          "type": "open",
+          "prompt": "Problem 7 (medium). List the pharmacies that had no emergency shift requested in September 2026. Return `id` and `name`, sorted by id. Use a half-open date range.",
+          "answer": "```sql\nSELECT p.id, p.name\nFROM pharmacies p\nLEFT JOIN shifts s\n       ON s.pharmacy_id = p.id\n      AND s.is_emergency = 1\n      AND s.requested_at >= '2026-09-01'\n      AND s.requested_at <  '2026-10-01'\nWHERE s.id IS NULL\nORDER BY p.id;\n```\n\nEvery condition on shifts is in ON. If they were in WHERE, the LEFT JOIN would collapse to an inner join and return nothing useful.\n\nOn the practice data this returns 23 rows (columns: id, name); the first row is 2, Pinecrest Apothecary #102.",
+          "rubric": [
+            "LEFT JOINs shifts from pharmacies",
+            "Puts is_emergency and the date range in ON",
+            "Uses a half-open range for September",
+            "Filters WHERE s.id IS NULL and sorts by id"
+          ],
+          "sqlite": "SELECT p.id, p.name FROM pharmacies p LEFT JOIN shifts s ON s.pharmacy_id = p.id AND s.is_emergency = 1 AND s.requested_at >= '2026-09-01' AND s.requested_at < '2026-10-01' WHERE s.id IS NULL ORDER BY p.id",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l2-e5",
+          "type": "open",
+          "prompt": "Problem 8 (medium). Assignments completed per month. Return `month_start` (first day of the month of completed_at, as text) and `completed`, in month order. In SQLite use `strftime('%Y-%m-01', completed_at)`.",
+          "answer": "```sql\nSELECT DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1) AS month_start,\n       COUNT(*) AS completed\nFROM assignments\nWHERE status = 'completed'\nGROUP BY DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1)\nORDER BY month_start;\n```\n\nCancelled assignments have no completed_at and are excluded by the status filter.\n\nOn the practice data this returns 10 rows (columns: month_start, completed); the first row is 2026-01-01, 72.",
+          "rubric": [
+            "Filters status = completed",
+            "Buckets completed_at to a month",
+            "Counts assignments per month",
+            "Sorts by month"
+          ],
+          "sqlite": "SELECT strftime('%Y-%m-01', completed_at) AS month_start, COUNT(*) AS completed FROM assignments WHERE status = 'completed' GROUP BY month_start ORDER BY month_start",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u10-l3",
+      "title": "Problem set C: dates, windows and trends",
+      "minutes": 25,
+      "body": "This set combines dates and window functions. You build monthly series, compare periods and find the best row in each group. These are the problems that separate someone who has seen a window function from someone who can use one.\n\n**Monthly series.** Group by a month key built from the timestamp. In SQLite that is `strftime('%Y-%m-01', requested_at)`, and in T-SQL `DATEFROMPARTS(YEAR(x), MONTH(x), 1)`. The practice data has four shifts requested in late December 2025, so a monthly report starts in December unless you filter the date range. Decide whether they belong, and say so.\n\n**Hours to fill.** Subtract the two timestamps in seconds and divide by 3600.0. Average only over filled shifts: `AVG` ignores NULL for you, but a `WHERE filled_at IS NOT NULL` makes the intent obvious.\n\n**Period over period.** Build the monthly figure in a CTE, then apply `LAG` over the month. The first month has no previous value, so expect NULL.\n\n**Best per group.** `RANK() OVER (PARTITION BY state ORDER BY completed DESC)` then keep rank 1. Ties stay together; `ROW_NUMBER` would pick one arbitrarily. Say which you chose and why.\n\nTwo of the built-in patterns in this data are worth finding with these tools. \"How do I\" tickets fall sharply from May, after the documentation rewrite. Emergency shifts fill much faster from June, after the alert feature. A good analyst does not stop at spotting it. Show the monthly series, point to the month the pattern changes, and name what else could explain it, such as fewer emergency shifts or a different mix of pharmacies.\n\nA caution on claims. A month-by-month table shows that the change happened and when. It does not prove the feature caused it. Phrase it as \"consistent with\" unless you have ruled out other explanations. That is the honest and the more credible way to present it, and it matches what you actually did at work.\n\nCheck your work on the window problems by looking at the first two rows of each group by hand.",
+      "keyPoints": [
+        "Build monthly series with a month key and decide how to treat edge months.",
+        "Hours to fill: seconds difference divided by 3600.0, averaged over filled shifts.",
+        "Period over period: monthly CTE, then LAG.",
+        "Best per group: RANK keeps ties, ROW_NUMBER picks one.",
+        "A monthly table shows when something changed, not why."
+      ],
+      "interviewAngle": "This set is your two real stories: emergency fill time after the alert feature, and the fall in how-do-I tickets after the documentation rewrite (ticket inflow fell 35 percent). Show the series, name the month it changed and say what else could explain it. Say the table is consistent with the change, not proof of cause.",
+      "exercises": [
+        {
+          "id": "sql-u10-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A monthly table shows emergency fill time dropping sharply from June, after an alert feature was released. What is the most defensible statement?",
+          "choices": [
+            "The alert feature proved to cause the drop.",
+            "The drop is consistent with the feature; other causes, such as demand or mix, should be checked.",
+            "The data must be wrong, because it changed suddenly.",
+            "Nothing can be said without a machine learning model."
+          ],
+          "answer": 1,
+          "explanation": "A time series shows when the change happened, not why. Say it is consistent with the release and list what you would check."
+        },
+        {
+          "id": "sql-u10-l3-e2",
+          "type": "open",
+          "prompt": "Problem 9 (medium-hard). Prove the June improvement. For emergency shifts that have a fill time, requested from 2026-01-01 up to but excluding 2026-10-01, return by month: `month_start`, `filled_shifts` and `avg_hours_to_fill` (one decimal). Month order.",
+          "answer": "```sql\nSELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n       COUNT(*) AS filled_shifts,\n       ROUND(AVG(DATEDIFF(MINUTE, requested_at, filled_at) / 60.0), 1) AS avg_hours_to_fill\nFROM shifts\nWHERE is_emergency = 1\n  AND filled_at IS NOT NULL\n  AND requested_at >= '2026-01-01' AND requested_at < '2026-10-01'\nGROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\nORDER BY month_start;\n```\n\nThe average falls from about 1.6 to 1.9 hours before June to about 0.6 to 0.7 hours from June. The table is consistent with the alert feature, and does not by itself prove it.\n\nOn the practice data this returns 9 rows (columns: month_start, filled_shifts, avg_hours_to_fill); the first row is 2026-01-01, 16, 1.7.",
+          "rubric": [
+            "Filters is_emergency = 1 and filled_at IS NOT NULL",
+            "Restricts the date range with a half-open range",
+            "Converts the time difference to hours with a decimal divisor",
+            "Groups by month and orders by month",
+            "States the claim as consistent with, not proof of, the feature"
+          ],
+          "sqlite": "SELECT strftime('%Y-%m-01', requested_at) AS month_start, COUNT(*) AS filled_shifts, ROUND(AVG((strftime('%s', filled_at) - strftime('%s', requested_at)) / 3600.0), 1) AS avg_hours_to_fill FROM shifts WHERE is_emergency = 1 AND filled_at IS NOT NULL AND requested_at >= '2026-01-01' AND requested_at < '2026-10-01' GROUP BY month_start ORDER BY month_start",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l3-e3",
+          "type": "open",
+          "prompt": "Problem 10 (hard). Top pharmacy per state. For each state, return the pharmacy (or pharmacies, if tied) with the most completed shifts: `state`, `pharmacy_id`, `completed`. Sort by state then pharmacy_id.",
+          "answer": "```sql\nWITH c AS (\n  SELECT p.state, p.id AS pharmacy_id, COUNT(*) AS completed\n  FROM shifts s\n  JOIN pharmacies p ON p.id = s.pharmacy_id\n  WHERE s.status = 'completed'\n  GROUP BY p.state, p.id\n), r AS (\n  SELECT *, RANK() OVER (PARTITION BY state ORDER BY completed DESC) AS rnk\n  FROM c\n)\nSELECT state, pharmacy_id, completed\nFROM r\nWHERE rnk = 1\nORDER BY state, pharmacy_id;\n```\n\nRANK keeps ties; ROW_NUMBER would pick one pharmacy arbitrarily.\n\nOn the practice data this returns 4 rows (columns: state, pharmacy_id, completed); the first row is AL, 37, 24.",
+          "rubric": [
+            "Counts completed shifts per state and pharmacy",
+            "Ranks within each state using PARTITION BY state",
+            "Uses RANK so ties stay together, and says why",
+            "Filters rank 1 in an outer query",
+            "Orders by state then pharmacy_id"
+          ],
+          "sqlite": "WITH c AS (SELECT p.state, p.id AS pharmacy_id, COUNT(*) AS completed FROM shifts s JOIN pharmacies p ON p.id = s.pharmacy_id WHERE s.status = 'completed' GROUP BY p.state, p.id), r AS (SELECT state, pharmacy_id, completed, RANK() OVER (PARTITION BY state ORDER BY completed DESC) AS rnk FROM c) SELECT state, pharmacy_id, completed FROM r WHERE rnk = 1 ORDER BY state, pharmacy_id",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l3-e4",
+          "type": "open",
+          "prompt": "Problem 11 (hard). Find the documentation effect. For tickets in the category `How do I`, return by month: `month_start`, `tickets`, `prev_tickets` (previous month with such tickets) and `change` (tickets minus prev_tickets). Month order, months that have at least one such ticket only.",
+          "answer": "```sql\nWITH m AS (\n  SELECT DATEFROMPARTS(YEAR(opened_at), MONTH(opened_at), 1) AS month_start,\n         COUNT(*) AS tickets\n  FROM tickets\n  WHERE category = 'How do I'\n  GROUP BY DATEFROMPARTS(YEAR(opened_at), MONTH(opened_at), 1)\n)\nSELECT month_start, tickets,\n       LAG(tickets) OVER (ORDER BY month_start) AS prev_tickets,\n       tickets - LAG(tickets) OVER (ORDER BY month_start) AS change\nFROM m\nORDER BY month_start;\n```\n\nThe big negative change lands in May, matching the documentation rewrite. As before, say consistent with, and check total ticket volume and mix.\n\nOn the practice data this returns 9 rows (columns: month_start, tickets, prev_tickets, change); the first row is 2026-01-01, 35, None, None.",
+          "rubric": [
+            "Filters category = How do I",
+            "Aggregates to one row per month in a CTE",
+            "Uses LAG over month order for prev_tickets",
+            "Computes change from the same LAG expression",
+            "Locates the big drop in May and does not overclaim cause"
+          ],
+          "sqlite": "WITH m AS (SELECT strftime('%Y-%m-01', opened_at) AS month_start, COUNT(*) AS tickets FROM tickets WHERE category = 'How do I' GROUP BY month_start) SELECT month_start, tickets, LAG(tickets) OVER (ORDER BY month_start) AS prev_tickets, tickets - LAG(tickets) OVER (ORDER BY month_start) AS change FROM m ORDER BY month_start",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l3-e5",
+          "type": "open",
+          "prompt": "Problem 12 (medium-hard). Ticket resolution speed. For closed tickets only, return by severity: `severity`, `tickets_closed` and `avg_hours_to_close` (one decimal). Slowest average first.",
+          "answer": "```sql\nSELECT severity,\n       COUNT(*) AS tickets_closed,\n       ROUND(AVG(DATEDIFF(MINUTE, opened_at, closed_at) / 60.0), 1) AS avg_hours_to_close\nFROM tickets\nWHERE closed_at IS NOT NULL\nGROUP BY severity\nORDER BY avg_hours_to_close DESC;\n```\n\nOpen tickets have no closed_at, so they must be excluded or they would add NULLs. Critical tickets close fastest and low-severity ones slowest, which is what a triage policy should produce.\n\nOn the practice data this returns 4 rows (columns: severity, tickets_closed, avg_hours_to_close); the first row is low, 422, 37.9.",
+          "rubric": [
+            "Filters closed_at IS NOT NULL",
+            "Converts the time difference to hours with a decimal divisor",
+            "Groups by severity with a count and an average",
+            "Orders by the average descending"
+          ],
+          "sqlite": "SELECT severity, COUNT(*) AS tickets_closed, ROUND(AVG((strftime('%s', closed_at) - strftime('%s', opened_at)) / 3600.0), 1) AS avg_hours_to_close FROM tickets WHERE closed_at IS NOT NULL GROUP BY severity ORDER BY avg_hours_to_close DESC",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u10-l4",
+      "title": "Problem set D: puzzles and data quality",
+      "minutes": 25,
+      "body": "The hard set is made of the puzzles that interviewers keep coming back to: the second highest value, a relational-division question (\"every month\"), a calendar with gaps and a data-quality audit in one query. None needs new syntax. Each needs you to pick the right shape and to handle ties, NULLs and empty groups.\n\n**Second highest.** Count shifts per pharmacist, then rank the counts. Several pharmacists share the same count, so use `DENSE_RANK` on the counts, or select the distinct counts first. `ORDER BY ... LIMIT 1 OFFSET 1` returns the second row, not the second value, and fails when the top value is tied.\n\n**Every month.** To find pharmacists active in all nine months from January to September, group by pharmacist and require `COUNT(DISTINCT month) = 9`. The same idea answers \"customers who bought every product\".\n\n**Calendar gaps.** To list the days with no emergency request, generate the days with a recursive CTE and `LEFT JOIN` the shifts, keeping rows where the shift side is NULL. Use a half-open range in the join: `requested_at >= day AND requested_at < next day`.\n\n**Audit in one query.** A data-quality report can stack several checks, each returning a name and a count, with `UNION ALL`. Zero means the rule holds:\n\n```sql\nSELECT 'cancelled without reason' AS check_name, COUNT(*) AS violations\nFROM shifts WHERE status = 'cancelled' AND cancel_reason IS NULL\nUNION ALL\nSELECT 'filled before requested', COUNT(*)\nFROM shifts WHERE filled_at < requested_at;\n```\n\nPresent results the way you would in a bug report: the rule, the count and, for anything non-zero, an example row.\n\nWorking order for a hard problem: restate it, name the shape, write the inner piece first and check its output, then wrap it. If you get stuck in an interview, solve the easier version first. For second highest, get the highest, and say what you would change.\n\nAfter this set, go back over any problem you needed the answer for and redo it a day later from a blank editor. Repetition on the same dataset is what makes the patterns automatic.",
+      "keyPoints": [
+        "Second highest: DENSE_RANK on the distinct values, not OFFSET on rows.",
+        "Every month: group by the entity and require COUNT(DISTINCT month) = N.",
+        "Calendar gaps: recursive calendar, LEFT JOIN, keep unmatched rows.",
+        "An audit can be one UNION ALL query of check name and violation count.",
+        "If stuck, solve the easier version first and say what you would change."
+      ],
+      "interviewAngle": "These are the problems that leave an impression. Say the shape before you code, handle ties and empty groups on purpose, and show a data-quality audit as the habit you bring from testing. Be honest if you have only practised the harder shapes: \"I have not needed this at work, and here is how I would approach it\" is a good answer.",
+      "exercises": [
+        {
+          "id": "sql-u10-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Several pharmacists tie for the highest number of shifts. Which method returns the second highest count correctly?",
+          "choices": [
+            "ORDER BY n DESC LIMIT 1 OFFSET 1",
+            "DENSE_RANK over the counts, then rank = 2",
+            "MAX(n) - 1",
+            "ROW_NUMBER = 2 on the counts"
+          ],
+          "answer": 1,
+          "explanation": "OFFSET and ROW_NUMBER return the second row, which may equal the highest when there is a tie. DENSE_RANK = 2 gives the second distinct value."
+        },
+        {
+          "id": "sql-u10-l4-e2",
+          "type": "open",
+          "prompt": "Problem 13 (hard). Second-highest workload. Count shifts per pharmacist (ignore shifts with no pharmacist). Return the second-highest distinct count as one value, `second_highest`.",
+          "answer": "```sql\nWITH c AS (\n  SELECT pharmacist_id, COUNT(*) AS n\n  FROM shifts\n  WHERE pharmacist_id IS NOT NULL\n  GROUP BY pharmacist_id\n), r AS (\n  SELECT n, DENSE_RANK() OVER (ORDER BY n DESC) AS dr FROM c\n)\nSELECT DISTINCT n AS second_highest FROM r WHERE dr = 2;\n```\n\nSeveral pharmacists share counts, so DENSE_RANK over the counts gives the second distinct value. DISTINCT collapses the tied rows to one answer.\n\nOn the practice data this returns 1 row (columns: second_highest); the first row is 23.",
+          "rubric": [
+            "Counts shifts per pharmacist and excludes NULL pharmacist_id",
+            "Ranks the counts with DENSE_RANK descending",
+            "Filters dr = 2 in an outer query",
+            "Returns a single value using DISTINCT",
+            "Explains why ties rule out OFFSET"
+          ],
+          "sqlite": "WITH c AS (SELECT pharmacist_id, COUNT(*) AS n FROM shifts WHERE pharmacist_id IS NOT NULL GROUP BY pharmacist_id), r AS (SELECT n, DENSE_RANK() OVER (ORDER BY n DESC) AS dr FROM c) SELECT DISTINCT n AS second_highest FROM r WHERE dr = 2"
+        },
+        {
+          "id": "sql-u10-l4-e3",
+          "type": "open",
+          "prompt": "Problem 14 (hard). Reliable pharmacists. Which pharmacists completed at least one assignment in every month from January to September 2026 (9 months)? Return `pharmacist_id` and `name`, sorted by pharmacist_id. Use assignments.completed_at.",
+          "answer": "```sql\nSELECT ph.id AS pharmacist_id, ph.name\nFROM assignments a\nJOIN pharmacists ph ON ph.id = a.pharmacist_id\nWHERE a.status = 'completed'\n  AND a.completed_at >= '2026-01-01' AND a.completed_at < '2026-10-01'\nGROUP BY ph.id, ph.name\nHAVING COUNT(DISTINCT DATEFROMPARTS(YEAR(a.completed_at), MONTH(a.completed_at), 1)) = 9\nORDER BY ph.id;\n```\n\nThe pattern is relational division: group by the entity and require every month to be present. COUNT(DISTINCT month) = 9 does it. In SQLite use strftime('%Y-%m', completed_at) for the month.\n\nOn the practice data this returns 9 rows (columns: pharmacist_id, name); the first row is 11, Tom Whitaker.",
+          "rubric": [
+            "Restricts to completed assignments in January to September",
+            "Groups by pharmacist",
+            "Uses HAVING COUNT(DISTINCT month) = 9",
+            "Joins pharmacists for the name and sorts by id"
+          ],
+          "sqlite": "SELECT ph.id AS pharmacist_id, ph.name FROM assignments a JOIN pharmacists ph ON ph.id = a.pharmacist_id WHERE a.status = 'completed' AND a.completed_at >= '2026-01-01' AND a.completed_at < '2026-10-01' GROUP BY ph.id, ph.name HAVING COUNT(DISTINCT strftime('%Y-%m', a.completed_at)) = 9 ORDER BY ph.id",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l4-e4",
+          "type": "open",
+          "prompt": "Problem 15 (hard). Quiet days. List every day from 2026-06-01 to 2026-09-30 on which no emergency shift was requested. Return `day` (text, YYYY-MM-DD) in date order. Build the days with a recursive CTE; in SQLite use `WITH RECURSIVE` and `date(day, '+1 day')`.",
+          "answer": "```sql\nWITH days AS (\n  SELECT CAST('2026-06-01' AS date) AS day\n  UNION ALL\n  SELECT DATEADD(DAY, 1, day) FROM days WHERE day < '2026-09-30'\n)\nSELECT d.day\nFROM days d\nLEFT JOIN shifts s\n       ON s.is_emergency = 1\n      AND s.requested_at >= d.day\n      AND s.requested_at <  DATEADD(DAY, 1, d.day)\nWHERE s.id IS NULL\nORDER BY d.day\nOPTION (MAXRECURSION 200);\n```\n\nThe calendar supplies every day, the LEFT JOIN with a half-open range finds the matches, and IS NULL keeps the days with none. T-SQL needs MAXRECURSION above the default 100 for this range.\n\nOn the practice data this returns 61 rows (columns: day); the first row is 2026-06-04.",
+          "rubric": [
+            "Generates every day in the range with a recursive CTE",
+            "LEFT JOINs emergency shifts with a half-open range in ON",
+            "Keeps days where the shift id IS NULL",
+            "Orders by day"
+          ],
+          "sqlite": "WITH RECURSIVE days(day) AS (SELECT '2026-06-01' UNION ALL SELECT date(day, '+1 day') FROM days WHERE day < '2026-09-30') SELECT d.day FROM days d LEFT JOIN shifts s ON s.is_emergency = 1 AND s.requested_at >= d.day AND s.requested_at < date(d.day, '+1 day') WHERE s.id IS NULL ORDER BY d.day",
+          "ordered": true
+        },
+        {
+          "id": "sql-u10-l4-e5",
+          "type": "open",
+          "prompt": "Problem 16 (hard). Data-quality audit in one query. Return one row per check, `check_name` and `violations`, sorted by check_name, for these five rules: (1) cancelled shifts with no cancel_reason, (2) shifts filled before they were requested, (3) completed shifts with no completed assignment, (4) assignments whose pharmacist differs from the shift's pharmacist, (5) shifts whose pharmacy does not exist. Name them exactly: `cancelled without reason`, `filled before requested`, `completed without assignment`, `assignment pharmacist mismatch`, `orphan pharmacy`.",
+          "answer": "```sql\nSELECT 'cancelled without reason' AS check_name, COUNT(*) AS violations\nFROM shifts WHERE status = 'cancelled' AND cancel_reason IS NULL\nUNION ALL\nSELECT 'filled before requested', COUNT(*)\nFROM shifts WHERE filled_at < requested_at\nUNION ALL\nSELECT 'completed without assignment', COUNT(*)\nFROM shifts s WHERE s.status = 'completed'\n  AND NOT EXISTS (SELECT 1 FROM assignments a WHERE a.shift_id = s.id AND a.status = 'completed')\nUNION ALL\nSELECT 'assignment pharmacist mismatch', COUNT(*)\nFROM assignments a JOIN shifts s ON s.id = a.shift_id\nWHERE a.pharmacist_id <> s.pharmacist_id\nUNION ALL\nSELECT 'orphan pharmacy', COUNT(*)\nFROM shifts s LEFT JOIN pharmacies p ON p.id = s.pharmacy_id\nWHERE p.id IS NULL\nORDER BY check_name;\n```\n\nEach check returns a count, and 0 means the rule holds. A passing audit does not prove the data is right; it shows these rules hold.\n\nOn the practice data this returns 5 rows (columns: check_name, violations); the first row is assignment pharmacist mismatch, 0.",
+          "rubric": [
+            "One SELECT per rule, each returning a name and a COUNT",
+            "Stacks the checks with UNION ALL",
+            "Uses NOT EXISTS or an anti-join for the missing assignment and orphan checks",
+            "Sorts by check_name",
+            "States that zero means the rule holds, not that the data is correct"
+          ],
+          "sqlite": "SELECT * FROM (SELECT 'cancelled without reason' AS check_name, COUNT(*) AS violations FROM shifts WHERE status = 'cancelled' AND cancel_reason IS NULL UNION ALL SELECT 'filled before requested', COUNT(*) FROM shifts WHERE filled_at < requested_at UNION ALL SELECT 'completed without assignment', COUNT(*) FROM shifts s WHERE s.status = 'completed' AND NOT EXISTS (SELECT 1 FROM assignments a WHERE a.shift_id = s.id AND a.status = 'completed') UNION ALL SELECT 'assignment pharmacist mismatch', COUNT(*) FROM assignments a JOIN shifts s ON s.id = a.shift_id WHERE a.pharmacist_id <> s.pharmacist_id UNION ALL SELECT 'orphan pharmacy', COUNT(*) FROM shifts s LEFT JOIN pharmacies p ON p.id = s.pharmacy_id WHERE p.id IS NULL) ORDER BY check_name",
+          "ordered": true
+        }
+      ]
+    }
+  ]
+}

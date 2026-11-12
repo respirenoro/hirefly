@@ -1,0 +1,110 @@
+{
+  "id": "jira-u6",
+  "title": "In the interview",
+  "summary": "Explain how you used Jira honestly, translate between Jira and Azure DevOps vocabulary, and handle the questions you are most likely to get.",
+  "lessons": [
+    {
+      "id": "jira-u6-l1",
+      "title": "Explaining how you used Jira",
+      "minutes": 7,
+      "body": "Interview answers about tools go wrong in two ways: too vague ('I used Jira for tracking') or inflated ('I managed Jira'). The fix is a short structure built on specifics.\n\n**The structure: tool, task, result.**\n\n1. What you used it for (specific tasks).\n2. How often and in what role (daily, as a user).\n3. One concrete result or habit that shows judgment.\n\nA model answer:\n\n> I used Jira and Azure DevOps every day as the project manager at a small software company. I wrote tickets and user stories with acceptance criteria, kept the product backlog ordered, and planned our two-week sprints. I used filters to check what was left for each release, and I raised and tracked bugs from UAT. I was a regular user rather than an administrator, so I did not configure workflows or permissions.\n\nThat is about 15 seconds of speech, and every claim can be followed up.\n\n**Be ready for follow-ups.** The interviewer picks one phrase and digs in. If you say 'filters', you may be asked to write one. If you say 'backlog', expect: how did you decide what went on top? Prepare one example for each phrase you use.\n\n**Honest limits and how to say them.**\n\n| If asked about | Say |\n|---|---|\n| Administering Jira | 'I was a daily user, not the admin. I worked with the admin when we needed a workflow or field changed.' |\n| Advanced JQL or plugins | 'I write basic and intermediate JQL comfortably and look up the rest.' |\n| Jira Service Management | 'I understand the concepts. I have not configured one. My support experience was phone and email, logging cases in Salesforce.' |\n| Test apps in Jira | 'I managed test cases in Azure DevOps Test Plans. The process transfers.' |\n\n**Stories that show judgment, with dispatch-software examples:**\n\n- A ticket with a vague title ('schedule is wrong') that you turned into a reproducible bug by asking for the pharmacist's time zone and the shift id.\n- A backlog clean-up where you closed stale items after checking with the team.\n- A sprint where a late urgent bug forced a trade-off and you communicated what moved out.\n\nPractice saying each in 30 to 45 seconds, then stop. Silence is fine; interviewers will ask for more if they want it.",
+      "keyPoints": [
+        "Use tool, task, result: what you used it for, how often, and one concrete outcome.",
+        "Be ready to defend every phrase you say with an example.",
+        "State limits plainly: daily user, not administrator.",
+        "Prepare short stories that show judgment, not just feature lists."
+      ],
+      "interviewAngle": "This lesson is the interview angle. Practice the answer aloud until it sounds like you talking, not like reading. Keep the claim at your real level: equal, daily use of Jira and Azure DevOps for tickets, backlog and sprints; no admin experience.",
+      "exercises": [
+        {
+          "id": "jira-u6-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is the best way to describe your Jira experience if you were a daily user but not an administrator?",
+          "choices": [
+            "I managed Jira for the company.",
+            "I used Jira every day for tickets, backlog and sprints, and worked with an admin when configuration needed to change.",
+            "I know Jira.",
+            "I am an expert in all Atlassian products."
+          ],
+          "answer": 1,
+          "explanation": "It is specific, true and invites follow-ups you can answer. The other options are vague or overclaim."
+        },
+        {
+          "id": "jira-u6-l1-e2",
+          "type": "mcq",
+          "prompt": "You tell the interviewer you used filters. What is the best preparation?",
+          "choices": [
+            "Hope they do not ask",
+            "Have one real filter example ready, including the JQL idea behind it",
+            "Memorize the whole JQL reference",
+            "Change the subject immediately"
+          ],
+          "answer": 1,
+          "explanation": "Every phrase you offer can be followed up, so prepare a concrete example for each."
+        },
+        {
+          "id": "jira-u6-l1-e3",
+          "type": "open",
+          "prompt": "Write your own 'tool, task, result' answer (about 80 to 110 words, first person) to 'Tell me about your experience with Jira', using the scheduling and dispatch software work. Include one honest limit.",
+          "answer": "I used Jira and Azure DevOps daily as the project manager for a scheduling and dispatch product that assigns pharmacists to pharmacies with emergency shortages. I wrote tickets and user stories with acceptance criteria, kept the product backlog ordered, and planned two-week sprints with standups and retrospectives. When a customer reported a shift not appearing, I turned it into a reproducible bug with the shift id, time zone and steps, and linked it to the story it came from. I also used saved filters to see what was left for each release. I was a user, not an administrator, so workflow configuration went through an admin.",
+          "rubric": [
+            "Names specific tasks, not just 'tracking'",
+            "Includes one concrete example from the real work",
+            "States an honest limit such as not being an administrator",
+            "First person, spoken style, around 80 to 110 words"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u6-l2",
+      "title": "Jira and Azure DevOps vocabulary, and common questions",
+      "minutes": 8,
+      "body": "You used Jira and Azure DevOps at an equal level, which is an asset: many employers use one or the other and want someone who adapts. Be ready to translate between the two. The mapping is approximate; process templates and configuration change names.\n\n| Jira | Azure DevOps | Note |\n|---|---|---|\n| Issue | Work item | Both are the unit of work |\n| Epic > Story/Task/Bug > Sub-task | Epic > Feature > User Story (or Product Backlog Item) > Task | Azure DevOps usually has one more level, Feature |\n| Status and workflow | State | Azure DevOps states depend on the process (Agile, Scrum, CMMI) |\n| Resolution | Reason (and state) | Not an exact match |\n| Sprint | Iteration (sprint) | Iteration paths define the calendar |\n| Board | Boards (Kanban) and Taskboard | Similar visual |\n| Backlog | Backlog | Same idea; Azure DevOps has product and portfolio levels |\n| JQL / filters | Queries (WIQL) | Azure DevOps uses a query builder; WIQL is its SQL-like language |\n| Saved filter | Saved query, shared in folders | Both can feed dashboards |\n| Dashboard gadgets | Dashboard widgets | |\n| Labels | Tags | |\n| Components | Area paths | Loose match only. Area paths are a hierarchy that also decides which team owns the work; components are a flat list |\n| Fix version | Often iteration, tag or a release pipeline | No exact field by default |\n| Story points | Story points (Agile) or Effort (Scrum) | |\n| Test tools (apps) | Test Plans built in | You used Test Plans |\n| Automation rules | Rules, service hooks, pipelines | |\n\nSay it in a sentence: 'In Jira I would write a JQL filter for open bugs in the current sprint; in Azure DevOps I built the same thing as a query on work item type and iteration path.'\n\n**Common questions and the thread of a good answer.**\n\n- *What is the difference between a story and a task?* Story gives user value with acceptance criteria; task is supporting work.\n- *How do you prioritize a backlog?* Value, urgency, risk and dependencies, agreed with stakeholders; top items small and ready.\n- *What do you do with a ticket that has too little information?* Ask specific questions, set a waiting status, follow up, and close with a note if no answer.\n- *How do you measure whether a sprint went well?* Goal met, completed versus committed, scope change, and quality, discussed in the retrospective.\n- *Have you used automation?* Honest answer: basic Playwright tests in Azure DevOps Pipelines, not Jira automation rules.\n\nOn a practical test, expect: write a JQL query from a description, write a ticket from a messy report, or order a small backlog and justify it.",
+      "keyPoints": [
+        "Issue equals work item, sprint equals iteration, JQL equals queries (WIQL), labels equal tags.",
+        "Components roughly map to area paths; fix version has no exact default equivalent.",
+        "Practice one-sentence translations between the two tools.",
+        "A practical test usually asks for a query, a ticket or a justified backlog order."
+      ],
+      "interviewAngle": "If the employer uses Jira and your strongest recent memory is Azure DevOps, say the concepts are the same and name the mapping. Do not say the tools are identical. Admit the gaps: you have not built Jira automation rules or administered either tool.",
+      "exercises": [
+        {
+          "id": "jira-u6-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the closest Azure DevOps equivalent of a Jira issue?",
+          "choices": ["Work item", "Pipeline", "Repository", "Wiki page"],
+          "answer": 0,
+          "explanation": "Work items are the unit of tracked work in Azure DevOps."
+        },
+        {
+          "id": "jira-u6-l2-e2",
+          "type": "mcq",
+          "prompt": "Which pairing is a reasonable rough mapping?",
+          "choices": [
+            "Jira sprint to Azure DevOps repository",
+            "Jira label to Azure DevOps tag",
+            "Jira JQL to Azure DevOps pipeline YAML",
+            "Jira resolution to Azure DevOps wiki"
+          ],
+          "answer": 1,
+          "explanation": "Labels and tags are both free-form groupings on a work item."
+        },
+        {
+          "id": "jira-u6-l2-e3",
+          "type": "open",
+          "prompt": "Answer in your own words, as if spoken: 'You know Azure DevOps but our team uses Jira. How quickly could you be productive?' Name three concept mappings and be honest about what you would need to learn.",
+          "answer": "I'd be productive quickly on the daily work, because I used both tools at the same level and the ideas are the same. An Azure DevOps work item is a Jira issue, a sprint is an iteration, and a query I built on work item type and iteration path is the same thing as a JQL filter for the active sprint. Labels are tags too. What I would need to learn is your team's specific setup: your workflow statuses, components and any custom fields, plus whatever automation you have. I never administered either tool, so I would ask for a walkthrough in my first week and keep a cheat sheet of your conventions.",
+          "rubric": [
+            "Confident but honest about the time needed",
+            "Names at least three correct mappings",
+            "Identifies what is team-specific and needs learning",
+            "Does not claim administration experience"
+          ]
+        }
+      ]
+    }
+  ]
+}

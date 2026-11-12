@@ -1,0 +1,197 @@
+{
+  "id": "excel-u5",
+  "title": "Working like an analyst",
+  "summary": "Reconcile two lists, highlight what matters with conditional formatting, get a first look at Power Query, and move fast with the keyboard.",
+  "lessons": [
+    {
+      "id": "excel-u5-l1",
+      "title": "Reconciling two lists",
+      "minutes": 9,
+      "body": "Reconciliation means comparing two sources that should agree and listing the differences. Here the scheduling system and the payroll export should each contain every completed shift.\n\nScheduling IDs are in A2:A6. Payroll IDs are in D2:D5.\n\n| A: Scheduling | D: Payroll |\n|---|---|\n| HBR-1 | HBR-1 |\n| HBR-2 | HBR-3 |\n| HBR-3 | EST-2 |\n| EST-1 | LKV-1 |\n| EST-2 |  |\n\n**Step 1: make keys comparable.** Use TRIM on both columns, make case and format consistent, and check that numbers are numbers. Mismatches hide here.\n\n**Step 2: flag each side.** In B2, check whether the scheduling ID appears in payroll:\n\n```text\n=IF(COUNTIF($D$2:$D$5, A2) > 0, \"Found\", \"Missing\")\n```\n\nResult: HBR-1 Found, HBR-2 Missing, HBR-3 Found, EST-1 Missing, EST-2 Found. Two scheduling shifts are missing from payroll. Two other ways to write the same test:\n\n```text\n=IF(ISNUMBER(MATCH(A2, $D$2:$D$5, 0)), \"Found\", \"Missing\")\n=XLOOKUP(A2, $D$2:$D$5, $D$2:$D$5, \"Missing\")\n```\n\n**Step 3: check the other direction.** In E2 flag payroll IDs missing from scheduling with the ranges swapped:\n\n```text\n=IF(COUNTIF($A$2:$A$6, D2) > 0, \"Found\", \"Missing\")\n```\n\nLKV-1 comes back Missing: it was paid but is not in the schedule. A one-direction check would never find it.\n\n**Step 4: compare values for matches.** For items found in both, pull the amount or date from the other list (lookup) and subtract. Flag differences that are not zero.\n\n**Step 5: prove the totals.** Matched count plus missing count must equal the row count of each list: here 3 + 2 = 5 scheduling rows. Also look for duplicates, because `COUNTIF` returning 2 means the ID is listed twice.\n\nKeep a short note of what you found and what you did not investigate. Reconciliation is often asked as \"what would you do\", so name the steps in order: normalise the keys, check both ways, compare values, prove the totals.",
+      "keyPoints": [
+        "Clean and normalise the keys before comparing.",
+        "Flag with COUNTIF, MATCH or a lookup, and check both directions.",
+        "For matching items, compare values and flag non-zero differences.",
+        "Prove the totals: matched plus missing equals the list size.",
+        "A COUNTIF above 1 reveals duplicates."
+      ],
+      "interviewAngle": "Data-quality tasks are common for data operations and support analyst roles. Walk through the steps in order and mention checking both directions. It maps naturally to your experience writing SQL to find shifts that were not completed or reported consistently, but describe only the checks you really ran.",
+      "exercises": [
+        {
+          "id": "excel-u5-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why should you run a list comparison in both directions?",
+          "choices": [
+            "Excel formulas only work in one direction at a time",
+            "To make the totals larger",
+            "Items that exist only in the second list are never flagged by a check of the first list",
+            "Because COUNTIF cannot be copied down"
+          ],
+          "answer": 2,
+          "explanation": "Checking list A against list B finds A's items missing from B only. Items that appear only in B need the reverse check."
+        },
+        {
+          "id": "excel-u5-l1-e2",
+          "type": "short",
+          "prompt": "Using the two lists above, how many scheduling IDs (A2:A6) are missing from the payroll list?",
+          "accept": ["2"],
+          "answer": "2",
+          "explanation": "HBR-2 and EST-1 do not appear in payroll."
+        },
+        {
+          "id": "excel-u5-l1-e3",
+          "type": "open",
+          "prompt": "You get a scheduling export and a payroll export that should list the same completed shifts. Describe how you would reconcile them in Excel and prove you have not missed anything.",
+          "answer": "Clean the ID columns with TRIM and make sure the data types match. Add a check column to each list that uses COUNTIF or MATCH against the other list to mark Found or Missing. Filter for Missing on both lists to see shifts in one system but not the other. For shifts found in both, look up the amount or date from the other list and flag non-zero differences. Check for duplicate IDs using COUNTIF above 1. Finally confirm that found plus missing equals the row count of each list, and keep a note of the exceptions.",
+          "rubric": [
+            "Normalises or trims the keys first",
+            "Uses COUNTIF, MATCH or a lookup to flag Found or Missing",
+            "Checks both directions",
+            "Compares values for matched items",
+            "Proves totals or checks for duplicates"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u5-l2",
+      "title": "Conditional formatting",
+      "minutes": 8,
+      "body": "Conditional formatting changes how cells look depending on their values. Analysts use it to draw the reader's eye to exceptions. Find it on the Home tab.\n\n**Built-in rules**\n\n- Highlight Cells Rules: greater than, less than, between, equal to, text that contains, duplicate values.\n- Top/Bottom Rules: top 10, above average.\n- Data Bars and Color Scales: show size inside the cell. Use them for one column of numbers, not for text.\n- Icon Sets: arrows or traffic lights. Use sparingly and add a legend, because colour alone is hard for some readers.\n\n**Formula-based rules** are the most powerful. Choose New Rule > Use a formula to determine which cells to format. Take a pharmacy table in A2:D4:\n\n| A Pharmacy | B Requested | C Filled | D Fill rate |\n|---|---|---|---|\n| Eastside | 40 | 36 | 90% |\n| Harbor | 25 | 18 | 72% |\n| Lakeview | 30 | 27 | 90% |\n\nTo shade the whole row when the fill rate is below 75%, select `A2:D4` and use:\n\n```text\n=$D2<0.75\n```\n\nThe rule is written for the **first** cell of the selection (A2) and Excel adjusts it for each other cell. The `$` before D locks the column so every cell in the row checks column D. The row number is left free so each row checks itself. Only Harbor turns colour. If you wrote `=D2<0.75`, column A would test A2, column B would test B2, and so on, and the shading would be wrong.\n\nMore formula examples:\n\n```text\n=$C2=\"Cancelled\"            highlight cancelled rows\n=COUNTIF($A$2:$A$100,$A2)>1 highlight duplicate IDs\n=$D2<AVERAGE($D$2:$D$100)   below average\n```\n\nManage rules from Conditional Formatting > Manage Rules, where you can see the range each rule applies to. Copying and pasting cells often splits one rule into many, so tidy it up if the sheet gets slow.\n\nGood practice: highlight only what the reader must act on, use one or two colours, and explain the rule in a note. A sheet where everything is coloured tells the reader nothing.",
+      "keyPoints": [
+        "Home > Conditional Formatting offers highlight rules, data bars, colour scales and icons.",
+        "A formula rule is written for the top-left cell and adjusts for others.",
+        "Lock the column ($D2) to format a whole row based on one column.",
+        "Use colour sparingly; add a legend or note.",
+        "Manage Rules shows and fixes the applied ranges."
+      ],
+      "interviewAngle": "Tests often say \"make exceptions stand out\". A formula rule with the correct dollar sign shows you understand references, which links back to the first lesson. Use plain language: \"I shade the row if the fill rate is under target.\" This is a moderate-level skill you can claim.",
+      "exercises": [
+        {
+          "id": "excel-u5-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You select A2:D4 and want to shade the whole row when the fill rate in column D is below 0.75. Which rule formula is correct?",
+          "choices": ["=D2<0.75", "=$D$2<0.75", "=$D2<0.75", "=D$2<0.75"],
+          "answer": 2,
+          "explanation": "$D2 locks the column so every cell checks column D, and leaves the row free so each row tests its own value. The others either shift the column or freeze the row."
+        },
+        {
+          "id": "excel-u5-l2-e2",
+          "type": "short",
+          "prompt": "Write the rule formula, applied from row 2, that highlights rows whose Status in column C equals Cancelled.",
+          "accept": ["=$c2=\"cancelled\"", "$c2=\"cancelled\"", "=$c2 = \"cancelled\""],
+          "answer": "=$C2=\"Cancelled\"",
+          "explanation": "The column is locked with $C and the row is relative."
+        },
+        {
+          "id": "excel-u5-l2-e3",
+          "type": "open",
+          "prompt": "A sheet lists shifts in A2:E200 with the cancel reason in column E. Describe how you would highlight, in one colour, every row where the reason is missing for a cancelled shift (Status in column C).",
+          "answer": "Select A2:E200. Choose Conditional Formatting > New Rule > Use a formula. Enter `=AND($C2=\"Cancelled\", $E2=\"\")`, pick a fill colour and click OK. Columns are locked with $ so the whole row tests columns C and E, and the row number is relative so each row checks itself.",
+          "rubric": [
+            "Selects the full data range starting at row 2",
+            "Uses a formula rule with AND on Status and a blank reason",
+            "Locks the columns but leaves the row relative",
+            "Applies a single highlight colour"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u5-l3",
+      "title": "A first look at Power Query (newly learned)",
+      "minutes": 9,
+      "body": "Power Query is Excel's built-in tool for importing and reshaping data. It is something you are learning now, not a skill from the job, so treat it as a promising addition rather than a strength.\n\n**The idea.** Cleaning by hand (TRIM, Text to Columns, Remove Duplicates) works once. When next month's export arrives you repeat every click. Power Query **records the steps** and replays them whenever you refresh.\n\n**A first run**\n\n1. On the Data tab choose Get Data > From File > From Text/CSV (or select a Table and choose From Table/Range).\n2. Choose Transform Data to open the Power Query Editor.\n3. Clean the data with the ribbon. Each action is added to the **Applied Steps** list on the right.\n4. Choose Close & Load to send the result to a sheet or Table.\n\nA typical list of applied steps for the shift export:\n\n| Step | What it does |\n|---|---|\n| Source | reads the file |\n| Promoted Headers | uses row 1 as column names |\n| Changed Type | sets dates, numbers and text types |\n| Trimmed Text | removes extra spaces |\n| Removed Duplicates | drops repeated shift IDs |\n| Filtered Rows | keeps only Status of Filled or Cancelled |\n| Split Column | separates \"Cole, Dana\" at the comma |\n\nClick any step to see the data as it was at that point. Steps can be reordered, renamed or deleted. This is the easiest way to debug.\n\nWhen next month's file replaces the old one in the same location, go to Data > Refresh All and every step runs again. The source data is never changed; Power Query makes a cleaned copy.\n\nUseful extras: **Merge Queries** joins two tables on a key like a lookup (or a SQL join), **Append Queries** stacks tables with the same columns, **Group By** summarises rows, and **Unpivot** turns month columns into rows. Behind the scenes the steps are written in a language called M, but you do not need to write it for everyday cleaning.\n\nHonest limits: it handles repeatable cleaning very well, but it does not do the final analysis. You still need pivots or formulas on the loaded result.",
+      "keyPoints": [
+        "Power Query records cleaning steps and replays them on refresh.",
+        "Get Data > Transform Data opens the editor; Close & Load returns the result.",
+        "Applied Steps can be clicked, reordered and deleted.",
+        "Merge combines tables like a join; Append stacks tables.",
+        "It is newly learned for you; present it that way."
+      ],
+      "interviewAngle": "Say it directly: \"I have started learning Power Query. I did the equivalent cleaning by hand in Excel and in SQL, and I like that Power Query records the steps so they repeat.\" Do not claim you used it at work. The idea of repeatable, documented cleaning is the part interviewers care about, and it also leads naturally into Power BI.",
+      "exercises": [
+        {
+          "id": "excel-u5-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the main benefit of Power Query over cleaning data by hand in a worksheet?",
+          "choices": [
+            "It automatically fixes any data problem without instructions",
+            "It only works with small files",
+            "It stores the steps and re-runs them on refresh, leaving the source unchanged",
+            "It replaces the need for pivot tables"
+          ],
+          "answer": 2,
+          "explanation": "Power Query records each step so a new export can be cleaned with one refresh. You still choose the steps, and you still use pivots for the analysis."
+        },
+        {
+          "id": "excel-u5-l3-e2",
+          "type": "short",
+          "prompt": "Which Data-tab command re-runs all recorded Power Query steps on new source data? (Two words or fewer.)",
+          "accept": ["refresh", "refresh all"],
+          "answer": "Refresh All",
+          "explanation": "Refresh (or Refresh All) re-runs the query against the current source."
+        },
+        {
+          "id": "excel-u5-l3-e3",
+          "type": "open",
+          "prompt": "Each month you receive a CSV of shifts with extra spaces and duplicates. Explain how you would use Power Query so next month's cleanup takes one click, and name two steps you would expect to see in Applied Steps.",
+          "answer": "Use Data > Get Data > From Text/CSV and choose Transform Data. In the Power Query Editor, promote headers, set data types, trim text and remove duplicates; each action appears in Applied Steps. Close & Load to a Table. Next month, replace the file in the same location and choose Refresh All, and Excel reruns every step on the new data. Example steps: Trimmed Text and Removed Duplicates.",
+          "rubric": [
+            "Imports the file with Get Data and Transform Data",
+            "Names two valid steps such as Trimmed Text, Removed Duplicates, Changed Type",
+            "Explains refresh re-runs the steps on new data"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u5-l4",
+      "title": "Keyboard shortcuts that matter in a timed test",
+      "minutes": 6,
+      "body": "In a 45-minute test the mouse costs time. You do not need many shortcuts, only a handful practised until they are automatic. These work in current desktop Excel for Windows.\n\n**Moving and selecting**\n\n| Keys | Action |\n|---|---|\n| Ctrl+Arrow | jump to the edge of the data block |\n| Ctrl+Shift+Arrow | select to the edge of the data block |\n| Ctrl+A | select the current data region (press again for the whole sheet) |\n| Ctrl+Space / Shift+Space | select the whole column / row |\n| Ctrl+Home | go to A1 |\n\n**Editing and filling**\n\n| Keys | Action |\n|---|---|\n| F2 | edit the active cell |\n| F4 | cycle reference type ($) while editing; repeats the last action otherwise |\n| Ctrl+D / Ctrl+R | fill down / fill right from the selection |\n| Ctrl+Enter | enter the same formula in all selected cells |\n| Alt+= | AutoSum |\n| Ctrl+; | insert today's date |\n| Ctrl+Z / Ctrl+Y | undo / redo |\n\n**Structure and formatting**\n\n| Keys | Action |\n|---|---|\n| Ctrl+T | make a Table |\n| Ctrl+Shift+L | toggle filters |\n| Ctrl+1 | Format Cells |\n| Ctrl+Shift+% | percentage format |\n| Ctrl+Shift+Plus / Ctrl+Minus | insert / delete cells, rows or columns |\n| Alt, N, V | start a PivotTable (press the keys in sequence) |\n| Alt+F5 | refresh the selected pivot |\n\nA fast routine for a fill-down formula: type the formula in the first row, press Ctrl+Shift+Down to select the column, then Ctrl+D. In a Table, the formula fills itself.\n\nTwo habits matter as much as speed. First, save often and press Ctrl+Z at once if something unexpected happens. Second, before pasting over data, ask whether you need Paste Special > Values; a formula pasted as values stops updating, which is what you want when freezing a cleaned column.\n\nPractise by doing a real task with the mouse put aside for ten minutes. Shortcut menus differ by Excel version and on Mac, so learn the actions first and the keys second.",
+      "keyPoints": [
+        "Ctrl+Arrow and Ctrl+Shift+Arrow cover most navigation and selection.",
+        "F4 cycles dollar signs; Ctrl+D fills down.",
+        "Ctrl+T, Ctrl+Shift+L and Alt, N, V set up tables, filters and pivots quickly.",
+        "Use Paste Special > Values to freeze results.",
+        "Learn a few shortcuts well rather than many badly."
+      ],
+      "interviewAngle": "Nobody asks you to recite shortcuts, but a timed test rewards them. If asked, give examples you actually use, and be honest that your goal is accuracy first and speed second. If the test runs in a browser or on Mac, some keys differ, so describe the action rather than only the key.",
+      "exercises": [
+        {
+          "id": "excel-u5-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You are typing =C2*G1 and need to lock the rate reference as $G$1. Which key do you press while the cursor is in G1?",
+          "choices": ["F2", "F4", "Ctrl+D", "Alt+="],
+          "answer": 1,
+          "explanation": "F4 cycles a reference through $G$1, G$1, $G1 and G1. F2 only enters edit mode, Ctrl+D fills down, and Alt+= inserts AutoSum."
+        },
+        {
+          "id": "excel-u5-l4-e2",
+          "type": "short",
+          "prompt": "Which shortcut fills the formula from the top cell of a selection down into the rest of the selection?",
+          "accept": ["ctrl+d", "ctrl + d", "control+d"],
+          "answer": "Ctrl+D",
+          "explanation": "Ctrl+D copies the top cell of the selected range down; Ctrl+R does the same to the right."
+        },
+        {
+          "id": "excel-u5-l4-e3",
+          "type": "open",
+          "prompt": "List five keyboard shortcuts you would use in a timed test and say what task each speeds up.",
+          "answer": "Examples: Ctrl+T to make a Table so formulas and pivots expand; Ctrl+Shift+L to toggle filters; F4 to lock references when writing a formula; Ctrl+Shift+Arrow to select a data column, then Ctrl+D to fill a formula down; Alt, N, V to start a PivotTable; Ctrl+1 to open Format Cells for number formats. Any five valid shortcuts with the correct purpose are acceptable.",
+          "rubric": [
+            "Lists five shortcuts that exist in Excel",
+            "Each has a correct, specific purpose",
+            "Includes at least one for formulas or references (F4, Ctrl+D)",
+            "Includes at least one for structure or analysis (Ctrl+T, filters, pivot)"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "id": "sql-u1",
+  "title": "Tables, SELECT, WHERE and NULL",
+  "summary": "Read a table, choose columns, filter and sort rows, and handle missing values correctly. Everything later builds on these habits.",
+  "lessons": [
+    {
+      "id": "sql-u1-l1",
+      "title": "Tables, rows and SELECT",
+      "minutes": 8,
+      "body": "A relational database stores data in tables. A table has columns (the fields) and rows (one record each). In the dispatch product you worked on, the core tables look like this:\n\n```text\npharmacies(id, name, city, state)\npharmacists(id, name, license_state, active)\nshifts(id, pharmacy_id, pharmacist_id, requested_at, filled_at, starts_at, status, cancel_reason, is_emergency)\nassignments(id, shift_id, pharmacist_id, status, completed_at)\n```\n\nEvery table has an `id` that identifies a row. `shifts.pharmacy_id` points at a row in `pharmacies`. That link is called a foreign key, and unit 3 uses it for joins. This course uses one small sample dataset throughout, so you can work out every result by hand. The file `lesson_sample.sql` in the practice data folder creates exactly these rows in SQLite, so you can reproduce any result in a lesson. The much larger `practice.sql` has the same tables, and the exercises marked as runnable use it. Here are the main columns of `shifts`, one row per shift:\n\n| id | pharmacy_id | pharmacist_id | status | cancel_reason |\n|---|---|---|---|---|\n| 101 | 1 | 10 | completed | NULL |\n| 102 | 1 | 11 | completed | NULL |\n| 103 | 2 | NULL | cancelled | no coverage |\n| 104 | 2 | 12 | completed | NULL |\n| 105 | 3 | 10 | completed | NULL |\n| 106 | 3 | NULL | cancelled | pharmacy cancelled |\n| 107 | 1 | NULL | open | NULL |\n| 108 | 2 | 11 | cancelled | pharmacist cancelled |\n\nNULL means no value. Shift 107 is still open, so no pharmacist is assigned yet.\n\n`SELECT` chooses the columns and `FROM` chooses the table:\n\n```sql\nSELECT id, pharmacy_id, status\nFROM shifts;\n```\n\nThat returns all 8 rows with three columns. `SELECT *` returns every column. It is fine for a quick look, but avoid it in saved reports: a column added later changes the output, and you move more data than you need.\n\nRename a column in the output with `AS`:\n\n```sql\nSELECT id AS shift_id, status AS shift_status\nFROM shifts;\n```\n\nThe alias changes only the output header, not the table.\n\n`DISTINCT` removes duplicate rows from the result:\n\n```sql\nSELECT DISTINCT pharmacy_id\nFROM shifts;\n```\n\nThe column holds eight values but only three different ones, so this returns 3 rows: 1, 2 and 3. Pharmacy 4 exists in the `pharmacies` table but never appears here because it has no shifts.\n\nTwo habits help. Put each clause on its own line so a query reads top to bottom, and end statements with a semicolon. Keywords are not case-sensitive, so `select` and `SELECT` are the same. Text comparison can differ: SQL Server is usually case-insensitive by default, while PostgreSQL treats 'Open' and 'open' as different values.",
+      "keyPoints": [
+        "A table is rows (records) and columns (fields); ask what one row represents before writing anything.",
+        "SELECT picks columns, FROM picks the table; name the columns in saved reports instead of using *.",
+        "AS renames a column in the output only.",
+        "DISTINCT removes duplicate rows from the result.",
+        "NULL means no value, not zero or empty text."
+      ],
+      "interviewAngle": "A live SQL test often starts with a table and a plain-English request. Say out loud what one row represents ('one row per shift') before you type. For your own work, say you used SQL to retrieve and report on shift data. Keep it to retrieval and reporting, self-taught. Do not describe yourself as designing or administering databases.",
+      "exercises": [
+        {
+          "id": "sql-u1-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Using the sample `shifts` table, how many rows does `SELECT DISTINCT pharmacy_id FROM shifts;` return?",
+          "choices": [
+            "8",
+            "4",
+            "3",
+            "1"
+          ],
+          "answer": 2,
+          "explanation": "The pharmacy_id column holds eight values (1, 1, 2, 2, 3, 3, 1, 2) but only 1, 2 and 3 are distinct. Pharmacy 4 has no shifts, so it is not in the shifts table."
+        },
+        {
+          "id": "sql-u1-l1-e2",
+          "type": "short",
+          "prompt": "Which keyword gives a column a new name in the query output?",
+          "accept": [
+            "as",
+            "the as keyword"
+          ],
+          "answer": "AS",
+          "explanation": "SELECT id AS shift_id renames the column in the result only. The table itself is unchanged."
+        },
+        {
+          "id": "sql-u1-l1-e3",
+          "type": "mcq",
+          "prompt": "Why do experienced analysts avoid `SELECT *` in a saved report query?",
+          "choices": [
+            "It is slower than naming columns only on SQL Server, never on PostgreSQL.",
+            "If a column is added to the table later, the report output changes, and it returns more data than needed.",
+            "It does not return NULL values.",
+            "It is not valid SQL."
+          ],
+          "answer": 1,
+          "explanation": "SELECT * is valid and returns NULLs, but the output shape depends on the table, so a later schema change can break a report or a downstream file."
+        },
+        {
+          "id": "sql-u1-l1-e4",
+          "type": "open",
+          "prompt": "Write one query against `shifts` that returns the pharmacy ids that have at least one shift, with no repeats, sorted ascending. Say how many rows it returns on the lesson sample, and how you would also show `id` under the name `shift_id`.",
+          "answer": "```sql\nSELECT DISTINCT pharmacy_id\nFROM shifts\nORDER BY pharmacy_id;\n```\n\nOn the lesson sample it returns 3 rows (pharmacy ids 1, 2 and 3), because pharmacy 4 has no shifts. To rename the id, write `SELECT id AS shift_id, ...`; the alias changes only the output header.\n\nOn the practice data this returns 40 rows (columns: pharmacy_id); the first row is 1.",
+          "rubric": [
+            "Uses SELECT DISTINCT pharmacy_id FROM shifts",
+            "Sorts with ORDER BY pharmacy_id",
+            "States 3 rows on the lesson sample",
+            "Uses AS to rename id to shift_id"
+          ],
+          "sqlite": "SELECT DISTINCT pharmacy_id FROM shifts ORDER BY pharmacy_id",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u1-l2",
+      "title": "Filtering and sorting: WHERE, ORDER BY, TOP",
+      "minutes": 10,
+      "body": "`WHERE` keeps only the rows that meet a condition:\n\n```sql\nSELECT id, status\nFROM shifts\nWHERE status = 'cancelled';\n```\n\nThat returns shifts 103, 106 and 108. Comparison operators are `=`, `<>` (not equal), `<`, `<=`, `>` and `>=`. Text goes in single quotes.\n\nCombine conditions with `AND`, `OR` and parentheses. `AND` is evaluated before `OR`, which catches people out:\n\n```sql\n-- Reads as: open, OR (cancelled AND pharmacy 2)\nWHERE status = 'open' OR status = 'cancelled' AND pharmacy_id = 2\n```\n\nThat returns 103, 107 and 108. If you meant 'open or cancelled, and also pharmacy 2', add parentheses:\n\n```sql\nWHERE (status = 'open' OR status = 'cancelled') AND pharmacy_id = 2\n```\n\nNow the result is 103 and 108, because shift 107 belongs to pharmacy 1. When in doubt, use parentheses.\n\n`IN` is shorthand for several ORs. `WHERE status IN ('open', 'cancelled')` returns 103, 106, 107 and 108.\n\n`LIKE` matches text patterns, where `%` stands for any run of characters. `WHERE cancel_reason LIKE 'pharmacy%'` returns only 106. The value 'pharmacist cancelled' does not match, because 'pharmacist' and 'pharmacy' differ at the eighth letter.\n\nFor dates, use a half-open range. Here are the timestamps for the same shifts:\n\n| id | requested_at | filled_at | starts_at |\n|---|---|---|---|\n| 101 | 2026-03-02 08:00 | 2026-03-02 09:30 | 2026-03-03 09:00 |\n| 102 | 2026-03-05 10:00 | 2026-03-05 10:45 | 2026-03-06 09:00 |\n| 103 | 2026-03-08 07:00 | NULL | 2026-03-09 09:00 |\n| 104 | 2026-03-12 14:00 | 2026-03-12 18:00 | 2026-03-15 09:00 |\n| 105 | 2026-04-01 09:00 | 2026-04-01 09:20 | 2026-04-02 09:00 |\n| 106 | 2026-04-04 11:00 | NULL | 2026-04-05 09:00 |\n| 107 | 2026-04-10 08:00 | NULL | 2026-04-12 09:00 |\n| 108 | 2026-04-15 13:00 | 2026-04-15 15:00 | 2026-04-16 09:00 |\n\n```sql\nWHERE requested_at >= '2026-04-01' AND requested_at < '2026-05-01'\n```\n\nThis returns 105 to 108. Avoid `BETWEEN` for timestamps. Its upper bound is inclusive, and a date like '2026-04-30' means midnight at the start of that day, so you would lose most of the last day.\n\n`ORDER BY` sorts the result. The default is ascending; add `DESC` for descending. Without `ORDER BY`, the database may return rows in any order, so never rely on it.\n\n```sql\nSELECT TOP 3 id, requested_at\nFROM shifts\nORDER BY requested_at DESC;\n```\n\nThis returns 108, 107 and 106, the three most recent requests. `TOP` is T-SQL (SQL Server). PostgreSQL, MySQL and SQLite put `LIMIT 3` at the end of the query instead. SQL Server also accepts the standard form `OFFSET 0 ROWS FETCH NEXT 3 ROWS ONLY` after `ORDER BY`.",
+      "keyPoints": [
+        "AND binds tighter than OR; use parentheses to say what you mean.",
+        "IN replaces a chain of ORs; LIKE with % matches text patterns.",
+        "Filter timestamps with >= start and < next start, not BETWEEN.",
+        "Row order is only guaranteed with ORDER BY.",
+        "TOP n is SQL Server; LIMIT n is PostgreSQL, MySQL and SQLite."
+      ],
+      "interviewAngle": "Live tests love the AND/OR precedence trap and the 'latest N' question. Say 'I will add parentheses so the logic is explicit'. If asked which database you used, say you are strongest in SQL Server style syntax (T-SQL) from the Microsoft stack at work, and that you know the PostgreSQL equivalents such as LIMIT.",
+      "exercises": [
+        {
+          "id": "sql-u1-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which shift ids does this return?\n\n```sql\nSELECT id FROM shifts\nWHERE status = 'open' OR status = 'cancelled' AND pharmacy_id = 2;\n```",
+          "choices": [
+            "103 and 108",
+            "103, 107 and 108",
+            "107 only",
+            "103, 106, 107 and 108"
+          ],
+          "answer": 1,
+          "explanation": "AND is evaluated first: cancelled shifts at pharmacy 2 are 103 and 108. OR then adds every open shift, which is 107."
+        },
+        {
+          "id": "sql-u1-l2-e2",
+          "type": "short",
+          "prompt": "How many rows does `SELECT id FROM shifts WHERE status IN ('open', 'cancelled');` return on the sample data? Answer with a number.",
+          "accept": [
+            "4",
+            "four"
+          ],
+          "answer": "4",
+          "explanation": "Open: 107. Cancelled: 103, 106, 108. That is four rows."
+        },
+        {
+          "id": "sql-u1-l2-e3",
+          "type": "mcq",
+          "prompt": "A query has no ORDER BY clause. What can you rely on about the row order?",
+          "choices": [
+            "Rows come back in id order.",
+            "Rows come back in the order they were inserted.",
+            "Nothing; the order is not guaranteed.",
+            "Rows come back in alphabetical order of the first column."
+          ],
+          "answer": 2,
+          "explanation": "Without ORDER BY the database is free to return rows in any order, and it can change between runs."
+        },
+        {
+          "id": "sql-u1-l2-e4",
+          "type": "open",
+          "prompt": "Write a T-SQL query that returns the id and requested_at of the two most recently requested cancelled shifts, newest first. Say which ids it returns on the sample data, and how you would write the limit in PostgreSQL. (In the practice sandbox, which is SQLite, write `LIMIT 2` at the end instead of `TOP 2`.)",
+          "answer": "```sql\nSELECT TOP 2 id, requested_at\nFROM shifts\nWHERE status = 'cancelled'\nORDER BY requested_at DESC;\n```\n\nIt returns 108 (2026-04-15) then 106 (2026-04-04). Shift 103 (2026-03-08) is the oldest cancelled shift, so it is cut off. In PostgreSQL, drop TOP and end the query with `LIMIT 2`, which is also what the SQLite sandbox needs.\n\nOn the practice data this returns 2 rows (columns: id, requested_at); the first row is 1975, 2026-09-20 01:31:01.",
+          "rubric": [
+            "Filters with WHERE status = 'cancelled'",
+            "Sorts by requested_at DESC so the newest comes first",
+            "Limits to two rows with TOP 2 (or LIMIT 2 for PostgreSQL)",
+            "States ids 108 then 106"
+          ],
+          "sqlite": "SELECT id, requested_at FROM shifts WHERE status = 'cancelled' ORDER BY requested_at DESC LIMIT 2",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u1-l3",
+      "title": "NULL: the missing-value trap",
+      "minutes": 9,
+      "body": "NULL means unknown or missing. It is not zero and not an empty string. Because it means unknown, any comparison with NULL is itself unknown, and `WHERE` keeps only rows where the condition is true.\n\nThis is the most common beginner bug. In the sample data, shifts 103, 106 and 107 have no pharmacist:\n\n```sql\nSELECT id FROM shifts\nWHERE pharmacist_id = NULL;\n```\n\nThis returns zero rows, not those three. The test is never true, even for NULL rows. Use `IS NULL` instead:\n\n```sql\nSELECT id FROM shifts\nWHERE pharmacist_id IS NULL;\n```\n\nThat returns 103, 106 and 107. `IS NOT NULL` returns the other five.\n\nNULL also hides in the opposite filter. The `cancel_reason` column is NULL for the five shifts that were not cancelled (101, 102, 104, 105 and 107):\n\n```sql\nSELECT id FROM shifts\nWHERE cancel_reason <> 'no coverage';\n```\n\nYou might expect every shift except 103, which is 7 rows. You get only 106 and 108. The NULL rows fail the test, so they are dropped silently. To keep them, say so:\n\n```sql\nWHERE cancel_reason <> 'no coverage' OR cancel_reason IS NULL\n```\n\nThat returns 7 rows. Silent row loss is exactly the sort of error that makes a report wrong without any error message.\n\nTo replace NULL with a value for display, use `COALESCE`, which returns the first non-NULL argument and works in both SQL Server and PostgreSQL:\n\n```sql\nSELECT id, COALESCE(cancel_reason, 'n/a') AS reason\nFROM shifts;\n```\n\nSQL Server also has `ISNULL(x, y)`, which does the same for two arguments. Prefer `COALESCE` because it is standard.\n\nOne more rule: arithmetic with NULL gives NULL. If `filled_at` is NULL, then the time between `requested_at` and `filled_at` is NULL too, not zero. Later units show how aggregate functions treat NULL, which matters when you calculate averages and rates.\n\n| Expression | Result when the column is NULL |\n|---|---|\n| `col = 5` | unknown, row dropped |\n| `col <> 5` | unknown, row dropped |\n| `col IS NULL` | true |\n| `col + 1` | NULL |\n| `COALESCE(col, 0)` | 0 |",
+      "keyPoints": [
+        "Never write = NULL or <> NULL; use IS NULL and IS NOT NULL.",
+        "A not-equals filter silently drops NULL rows.",
+        "COALESCE(x, fallback) replaces NULL for display or calculations.",
+        "Arithmetic involving NULL returns NULL."
+      ],
+      "interviewAngle": "NULL handling is one of the most common SQL screening questions, and it is a good place to show care. Say 'I decide what NULL should mean for this question, then handle it on purpose.' You can honestly connect it to open or unfilled shifts that have no pharmacist or no fill time yet.",
+      "exercises": [
+        {
+          "id": "sql-u1-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "On the sample data, what does `SELECT id FROM shifts WHERE pharmacist_id = NULL;` return?",
+          "choices": [
+            "An error",
+            "All 8 rows",
+            "The 3 shifts with no pharmacist",
+            "Zero rows"
+          ],
+          "answer": 3,
+          "explanation": "Comparing to NULL with = is never true, so no row passes the filter. The query runs without an error and returns nothing. The correct test is IS NULL."
+        },
+        {
+          "id": "sql-u1-l3-e2",
+          "type": "short",
+          "prompt": "Which two-word operator tests whether a column has no value?",
+          "accept": [
+            "is null",
+            "is null operator"
+          ],
+          "answer": "IS NULL",
+          "explanation": "IS NULL is true for missing values. The equals sign cannot be used for this."
+        },
+        {
+          "id": "sql-u1-l3-e3",
+          "type": "mcq",
+          "prompt": "How many rows does `SELECT id FROM shifts WHERE cancel_reason <> 'no coverage';` return on the sample data?",
+          "choices": [
+            "7",
+            "2",
+            "8",
+            "1"
+          ],
+          "answer": 1,
+          "explanation": "Only shifts 106 and 108 have a non-NULL reason other than 'no coverage'. The five rows where cancel_reason is NULL fail the comparison and are dropped."
+        },
+        {
+          "id": "sql-u1-l3-e4",
+          "type": "open",
+          "prompt": "Write a query that lists the id and status of shifts that have no pharmacist assigned and are not cancelled. Say what it returns on the sample data and why a plain `pharmacist_id <> 5` style filter would not work for the first condition.",
+          "answer": "```sql\nSELECT id, status\nFROM shifts\nWHERE pharmacist_id IS NULL\n  AND status <> 'cancelled';\n```\n\nIt returns shift 107 (open). Shifts 103 and 106 also have no pharmacist but are cancelled. A comparison like `= value` or `<> value` never matches NULL, so only `IS NULL` can find missing values.\n\nOn the practice data this returns 20 rows (columns: id, status); the first row is 1987, open.",
+          "rubric": [
+            "Uses pharmacist_id IS NULL, not = NULL",
+            "Adds status <> 'cancelled' with AND",
+            "States the result is shift 107 only",
+            "Explains that comparisons with NULL are never true"
+          ],
+          "sqlite": "SELECT id, status FROM shifts WHERE pharmacist_id IS NULL AND status <> 'cancelled'"
+        }
+      ]
+    }
+  ]
+}

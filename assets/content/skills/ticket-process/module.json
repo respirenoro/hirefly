@@ -1,0 +1,461 @@
+{
+  "id": "ticket-process",
+  "title": "The ticket process",
+  "tagline": "Take a messy report from intake to a verified fix, and write tickets people can act on.",
+  "claim": "Resume: liaison between customers and developers who wrote tickets, user stories and acceptance criteria, ran UAT, and cut ticket inflow 35% by rewriting documentation. To back it you must walk through a ticket lifecycle, triage by severity and priority, write a clear bug report, turn feedback into a story, and handle difficult scenarios calmly.",
+  "units": [
+    "unit-1.json",
+    "unit-7.json",
+    "unit-2.json",
+    "unit-3.json",
+    "unit-11.json",
+    "unit-4.json",
+    "unit-8.json",
+    "unit-5.json",
+    "unit-9.json",
+    "unit-10.json",
+    "unit-12.json",
+    "unit-6.json"
+  ],
+  "resources": [
+    {
+      "title": "Incident response (Atlassian Incident Management Handbook)",
+      "url": "https://www.atlassian.com/incident-management/handbook/incident-response",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 25,
+      "free": true,
+      "why": "The roles and the sequence of a real incident response, which deepens unit 8.",
+      "units": [
+        "ticket-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it after \"Major incidents and root cause\" if a role touches outages.",
+      "versus": "A real company's published roles and sequence; HireFly is shorter and puts it in your own words."
+    },
+    {
+      "title": "Severity levels",
+      "url": "https://www.atlassian.com/incident-management/kpis/severity-levels",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 10,
+      "free": true,
+      "why": "A published SEV 1 to SEV 3 scale to compare with the matrix in units 2 and 8.",
+      "units": [
+        "ticket-u2",
+        "ticket-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it after \"Intake and triage\" to compare the matrix with a published scale.",
+      "versus": "Atlassian's SEV scale is a real example; HireFly's drills make you apply severity and priority."
+    },
+    {
+      "title": "Incident communication templates",
+      "url": "https://wac-cdn.atlassian.com/incident-management/incident-communication/templates",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "Short internal and public templates to adapt for the communication lab.",
+      "units": [
+        "ticket-u8",
+        "ticket-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Use it with the lab \"Write a major-incident update thread\".",
+      "versus": "Ready templates from a vendor; HireFly writes messages in your voice and grades them."
+    },
+    {
+      "title": "Major incident management",
+      "url": "https://www.atlassian.com/incident-management/itsm/major-incident-management",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "How major incidents differ from ordinary ones in an ITSM setting.",
+      "units": [
+        "ticket-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it if a posting says ITSM or major incidents.",
+      "versus": "Explains the ITSM setting; HireFly covers what an entry-level person does."
+    },
+    {
+      "title": "5 whys",
+      "url": "https://www.atlassian.com/incident-management/postmortem/5-whys",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 10,
+      "free": true,
+      "why": "The method, with Atlassian's guidance on blame and when to stop.",
+      "units": [
+        "ticket-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after \"Major incidents and root cause\".",
+      "versus": "A ten-minute method page; HireFly adds a worked example and the blame pitfall."
+    },
+    {
+      "title": "Blameless postmortems",
+      "url": "https://www.atlassian.com/incident-management/handbook/postmortems",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "What a postmortem record holds and how actions are tracked.",
+      "units": [
+        "ticket-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it if you will write postmortems.",
+      "versus": "Shows what a record holds; HireFly teaches the talk about it."
+    },
+    {
+      "title": "IT service management guide",
+      "url": "https://www.atlassian.com/collections/service/guides/it-service-management",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 25,
+      "free": true,
+      "why": "Incident, problem, change and request management explained with the tooling.",
+      "units": [
+        "ticket-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Skim it after \"Record types and the defect life cycle\" for tool-based context.",
+      "versus": "Explains ITSM with tooling; HireFly gives the interview vocabulary."
+    },
+    {
+      "title": "ITIL 4 practice guide: reader's manual",
+      "url": "https://www.axelos.com/resource-hub/practice/readers-manual-itil-4-practice-guide",
+      "source": "AXELOS",
+      "kind": "reference",
+      "minutes": 10,
+      "free": true,
+      "why": "Official orientation to how ITIL 4 describes its practices, behind the vocabulary in unit 7.",
+      "units": [
+        "ticket-u7"
+      ],
+      "priority": "optional",
+      "useWhen": "Look at it only if a posting names ITIL.",
+      "versus": "Official orientation, not a course; HireFly gives the words you need."
+    },
+    {
+      "title": "KCS v6 Practices Guide",
+      "url": "https://library.serviceinnovation.org/KCS/KCS_v6/KCS_v6_Practices_Guide",
+      "source": "Consortium for Service Innovation",
+      "kind": "reference",
+      "minutes": 60,
+      "free": true,
+      "why": "The source for knowledge-centered service, free online; read the practices section for unit 9.",
+      "units": [
+        "ticket-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Dip into the practices section after \"Support operations: knowledge, escalation and metrics\".",
+      "versus": "The authoritative source on knowledge-centered service and long; HireFly gives the short version."
+    },
+    {
+      "title": "ISTQB Certified Tester Foundation Level syllabus v4.0.1",
+      "url": "https://www.istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf",
+      "source": "ISTQB",
+      "kind": "certification",
+      "minutes": 120,
+      "free": true,
+      "why": "The official testing syllabus, with defect management and defect reports, for the QA side of unit 7. You are reading it, not claiming the certificate.",
+      "units": [
+        "ticket-u7"
+      ],
+      "priority": "optional",
+      "useWhen": "Read the defect sections for a QA-leaning role.",
+      "versus": "Long and exam oriented; HireFly keeps to defect life cycle and reports."
+    },
+    {
+      "title": "Customer service reports: a complete guide and metrics to track",
+      "url": "https://www.zendesk.com/resources/customer-service-reports/",
+      "source": "Zendesk",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "Plain definitions of first reply time, wait time and CSAT, behind unit 9 lesson 3.",
+      "units": [
+        "ticket-u9",
+        "ticket-u5"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it before the support metrics lab.",
+      "versus": "Plain definitions of first reply time and CSAT; HireFly lets you calculate them from the ticket file."
+    },
+    {
+      "title": "About service level agreements (SLAs) in Jira Service Management",
+      "url": "https://support.atlassian.com/jira-service-management-cloud/docs/what-are-slas-and-how-do-i-view-them-in-my-service-project/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "How SLA goals, clocks and breaches are actually set up in a tool.",
+      "units": [
+        "ticket-u5"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it after \"Keeping tickets moving\".",
+      "versus": "Shows SLAs as set up in a real tool; HireFly explains what to say about them."
+    }
+  ],
+  "labs": [
+    {
+      "id": "ticket-lab-1",
+      "title": "Categorise the tickets and find the repeat pattern",
+      "minutes": 40,
+      "goal": "A one-page table of ticket volume by category and month, and the evidence that two topics repeat.",
+      "setup": "Open `datasets/tickets.csv` (734 rows) in Excel or Google Sheets, or load it into SQLite with the free DB Browser for SQLite as table `tickets`. Use the dataset export from the app.",
+      "steps": [
+        "Count rows and tickets per category (How do I, Bug, Access, Feature request, Data fix).",
+        "Add a month column from `opened_at` (first 7 characters) and pivot count by month and category.",
+        "Find the ten most frequent titles. In SQL: `SELECT title, COUNT(*) FROM tickets GROUP BY title ORDER BY 2 DESC LIMIT 10;`",
+        "Sum 'How do I' tickets for January to April and for May to September.",
+        "Write two sentences saying what likely changed in May and what to do about the repeated bug title.",
+        "Write the knowledge base article title that would target the top 'How do I' topic."
+      ],
+      "check": [
+        "Total is 734 tickets; 205 How do I, 184 Bug, 123 Access, 122 Feature request, 100 Data fix.",
+        "The most frequent title is 'Duplicate assignment created on double click' with 50 tickets.",
+        "How do I tickets: 151 in January to April versus 54 in May to September.",
+        "Your note says the drop matches a documentation rewrite and proposes a problem record for the duplicate-assignment pattern."
+      ],
+      "talkTrack": "I used ticket data to find the topics that repeat, measured the fall in how-to tickets, and proposed a root-cause fix for the repeating bug."
+    },
+    {
+      "id": "ticket-lab-2",
+      "title": "Calculate support metrics from the ticket file",
+      "minutes": 35,
+      "goal": "Resolution time by severity, a backlog count and a short written summary.",
+      "setup": "Use `tickets.csv` in SQLite (DB Browser for SQLite is free). Resolution hours are `(julianday(closed_at) - julianday(opened_at)) * 24`. Tickets with no `closed_at` are still open.",
+      "steps": [
+        "Count tickets with status 'open' and the ones with a blank closed_at.",
+        "Compute the average hours to close for each severity.",
+        "Compute the median hours for low severity using an ordered query with LIMIT and OFFSET, or a spreadsheet MEDIAN.",
+        "List the open tickets with their age as of 2026-10-05.",
+        "Write a five-sentence weekly-style summary using the figures, a concern and an action.",
+        "State the definition of your resolution time at the top."
+      ],
+      "check": [
+        "Nine tickets are open; the other 725 have a closed date.",
+        "Average hours to close: critical about 2.4, high about 7.5, medium about 20.6, low about 37.9.",
+        "The ordering matches severity, and your summary says so.",
+        "Your summary states the definition and names one risk, such as the nine open tickets."
+      ],
+      "talkTrack": "I can pull resolution time and backlog age with SQL or a spreadsheet and explain what the numbers do and do not show."
+    },
+    {
+      "id": "ticket-lab-3",
+      "title": "Triage ten sample tickets",
+      "minutes": 40,
+      "goal": "An ordered list of ten tickets with type, severity, priority, next action and a customer reply for the top two.",
+      "setup": "Work in a document or spreadsheet. The ten tickets, all received in one morning, are:\n\n1. Alerts for emergency shifts have not been sent for 30 minutes; eight pharmacies are calling.\n2. How do I repost a cancelled shift?\n3. A pharmacist cancelled, but the shift still shows as assigned for Pharmacy 7; it starts in three hours.\n4. Request: dark mode for the dispatcher screen.\n5. Report total does not match the roster for Pharmacy 21; their billing run is tomorrow.\n6. A new dispatcher at Pharmacy 14 cannot log in; the reset email never arrives.\n7. Typo on the login page: 'Pasword'.\n8. A former employee of Pharmacy 22 can still log in.\n9. Data fix: 12 assignments from last week have the wrong completed date.\n10. Duplicate assignment created on double click; fifth report this month.",
+      "steps": [
+        "For each ticket write type (incident, bug, access, how-to, feature request, data fix).",
+        "Assign severity (Critical, Major, Moderate, Minor) with one line of reasoning.",
+        "Assign priority P1 to P4 and note any clock (shift starts, billing, SLA).",
+        "Mark duplicates or patterns and say what record you would open.",
+        "Write the next action and owner for each.",
+        "Put the ten in order.",
+        "Draft a customer reply for the top two tickets that could be sent to the customer."
+      ],
+      "check": [
+        "Ticket 8 (access that should be revoked) and ticket 1 are the first two in your order, or you justify another order in writing.",
+        "Ticket 10 is linked to a problem record, not treated as a one-off.",
+        "Ticket 2 is answered with an article link and closed quickly.",
+        "Every ticket has a next action; the top two have replies with a time for the next update."
+      ],
+      "talkTrack": "Given ten tickets I can order them by impact, clock and workaround, and explain what I would say to the customers waiting."
+    },
+    {
+      "id": "ticket-lab-4",
+      "title": "Write a major-incident update thread",
+      "minutes": 30,
+      "goal": "Four messages that carry one incident from detection to resolution, plus a five-whys note.",
+      "setup": "Scenario: at 08:40 a release changed a database column name and the alert service stopped sending emergency shift alerts. 14 pharmacies are affected. Manual assignment still works. At 10:15 the release is rolled back. Alerts created between 08:40 and 10:15 were not sent. Use the template shapes from unit 8; no tools are needed other than a text editor.",
+      "steps": [
+        "Write the initial public notice (investigating) with the next update time.",
+        "Write a progress update at 09:30 that confirms the release as the likely trigger, without naming a person.",
+        "Write the resolved notice at 10:30, with the missed-alert window and the follow-up promise.",
+        "Write an internal update with severity, impact and a customer script.",
+        "Run the five whys and name the root cause and two actions with owners and dates.",
+        "Reread all four messages for jargon, blame and promised times you cannot keep."
+      ],
+      "check": [
+        "Each public message has impact, workaround and the next update time.",
+        "The resolved notice states the exact window 08:40 to 10:15.",
+        "No message names an individual or guesses a cause beyond what is known.",
+        "The five whys ends with a system-level cause and actions with owners."
+      ],
+      "talkTrack": "I can draft clear incident updates on a schedule and I run a blameless five-whys to turn an outage into tracked actions."
+    },
+    {
+      "id": "ticket-lab-5",
+      "title": "Walk a defect through its life cycle in Jira",
+      "minutes": 35,
+      "goal": "One bug with a complete report, a status history, a rejected duplicate and a customer closing message.",
+      "setup": "Use a free Jira Cloud site with a Scrum or Kanban project (the same as the Jira module lab 1). Add the statuses New, Triaged, In Progress, Ready for Retest, Verified, Closed to the workflow, or use the closest default statuses.",
+      "steps": [
+        "Create a bug using the report skeleton: title, environment, steps, expected, actual, evidence, impact.",
+        "Create a second, near-identical bug and link it to the first as a duplicate; close it with a comment.",
+        "Move the first bug through triage: set severity and priority in the description or fields.",
+        "Move it to In Progress, then Ready for Retest and add a retest comment that fails, so you reopen it.",
+        "Fix and retest again: write a verification comment with build and cases checked.",
+        "Close it and write the customer closing message.",
+        "Run `status CHANGED TO \"Done\"` or your closed status as a query and screenshot the history tab."
+      ],
+      "check": [
+        "The bug's history tab shows at least one reopen.",
+        "The duplicate has a link and a closing comment.",
+        "The verification comment names the build and at least two cases.",
+        "The closing message says what changed, how it was verified and how to reopen."
+      ],
+      "talkTrack": "I walked a bug through report, triage, fix, failed retest, verification and closure, and I can show the history."
+    }
+  ],
+  "interviewQuestions": [
+    {
+      "id": "ticket-iq-1",
+      "prompt": "Walk me through what happens when a customer reports a problem.",
+      "strongAnswer": "First I acknowledge it and collect the basics: who is affected, what they were doing, what they expected, what happened, and when. Then I try to reproduce it. If I can, I write it up with steps, environment and evidence, check for duplicates, and set severity and priority with the team. I link it to the customer so updates go back to them. After the fix I verify it on a real build, tell the customer, and close the ticket. At my last company I did this between pharmacy staff and developers."
+    },
+    {
+      "id": "ticket-iq-2",
+      "prompt": "What is the difference between severity and priority?",
+      "strongAnswer": "Severity is how much damage the problem does: a crash or wrong data is severe. Priority is how soon we fix it, which also depends on how many customers are affected, whether there is a workaround and what else is on the plate. They often match but not always. A typo on the login page is low severity but could be high priority before a demo. A rare data error might be high severity but lower priority if it affects one test account. I set both, and I explain the reasoning in the ticket."
+    },
+    {
+      "id": "ticket-iq-3",
+      "prompt": "Describe a time you turned unclear feedback into something a developer could build.",
+      "strongAnswer": "Pharmacy staff told us they could not tell which shifts needed filling first. That was vague, so I asked what they did each morning and found they were scanning a long list. I wrote a story: as a dispatcher, I can see urgent shifts at the top of the list. I added acceptance criteria in Given, When, Then form, checked them with the customer, and split sorting from filtering so it would fit a sprint. The developers had no open questions at planning."
+    },
+    {
+      "id": "ticket-iq-4",
+      "prompt": "A developer says they cannot reproduce a bug you reported. What do you do?",
+      "strongAnswer": "I assume the report is missing something rather than that the developer is wrong. I ask what they tried and compare it with my steps, looking at environment, build version, user role, data and time zone. I re-run it myself on the same build and capture a screen recording or logs. If it is intermittent, I record how often and under what conditions. If we still cannot reproduce it, I agree what extra logging to add, ask the customer for a session, and park the ticket in a waiting status with a clear next step."
+    },
+    {
+      "id": "ticket-iq-5",
+      "prompt": "How did you reduce support ticket volume?",
+      "strongAnswer": "I looked at the tickets that kept coming in and found many were questions the documentation answered poorly. I rewrote the end-user documentation and the knowledge base around the actual tasks people were trying to do, with steps and screenshots, in the words customers used. Ticket inflow fell by 35 percent afterward. I would not claim documentation was the only cause, but it was the main change I made to that part of the process."
+    },
+    {
+      "id": "ticket-iq-6",
+      "prompt": "Two urgent tickets arrive at the same time. How do you decide which comes first?",
+      "strongAnswer": "I compare impact, urgency and workarounds. How many users are affected, is there patient or revenue risk, is there a deadline, and can anyone work around it? If one ticket means pharmacies cannot fill an emergency shift and the other is a report error, the first goes first. If it is truly a tie, I tell both requesters the order and an honest time estimate, and ask my manager or the developer lead if I need a decision. I do not quietly pick one and hope."
+    },
+    {
+      "id": "ticket-iq-7",
+      "prompt": "What is the difference between an incident, a problem and a change?",
+      "strongAnswer": "An incident is an unplanned disruption, and the goal is to restore service quickly, even with a workaround. A problem is the underlying cause of one or more incidents, and the goal is to find it and stop it recurring. A change is a planned alteration to the system, assessed for risk, like the fix for that problem. For example, alerts stop sending: the incident is the outage, the problem is the schema change nobody checked, and the change is adding a test and a release check. I have not worked in a formal ITIL shop, but I know these concepts."
+    },
+    {
+      "id": "ticket-iq-8",
+      "prompt": "Walk me through your process during a major outage.",
+      "strongAnswer": "I confirm it is real and tell the on-call developer immediately with what, since when, and how many customers. I help get a severity agreed from the matrix, link every customer report to one incident record, and give customers a first message quickly, even if it only says we are investigating and when the next update is. I feed customer impact to whoever is leading, and I keep the update schedule. Restoring service comes before finding the cause. Afterward I help track actions from a blameless review. I have handled urgent customer issues as the liaison, though not as an on-call commander."
+    },
+    {
+      "id": "ticket-iq-9",
+      "prompt": "How do you run a root cause analysis?",
+      "strongAnswer": "I start from the impact and ask why repeatedly, answering each why with something I can check in logs, data or the code history. I stop when I reach a process or design gap that we can change, rather than a person. 'Sam forgot' is not a root cause; why was forgetting possible? I end with actions that change the system, such as a test or a checklist step, each with an owner and a date, and track them as tickets. I use the five whys as a guide, not a rule that it must be five."
+    },
+    {
+      "id": "ticket-iq-10",
+      "prompt": "How do you tell a customer no?",
+      "strongAnswer": "Clearly and early. I state the decision, give the real reason in plain words, tell them I recorded their request and why that helps us rank it, and offer a workaround if one exists. For example, if a bulk upload will not be built soon, I say so, note their weekly volume, and offer to load their spreadsheet for them. I avoid 'we will look into it' when I know we will not, because it only delays the disappointment and then they chase us."
+    },
+    {
+      "id": "ticket-iq-11",
+      "prompt": "Which support metrics do you pay attention to, and why?",
+      "strongAnswer": "Ticket volume by category, because it shows what to fix or document. First response time and resolution time, using the median and the long tail rather than just the average. Reopen rate, because it shows weak fixes or verification. Backlog age in buckets, since a few very old tickets hide in averages. And satisfaction scores with the number of responses shown. I pair speed with quality so nobody games a number. I measured ticket inflow by category in my last role, which is how I knew documentation work had cut it by 35%."
+    },
+    {
+      "id": "ticket-iq-12",
+      "prompt": "A customer is angry and sends you an abusive email. What do you do?",
+      "strongAnswer": "I do not reply right away. I read it for the real problem under the tone, then I check the facts: what happened, what we promised, what we missed. My reply starts with the impact on them, states what I will do and by when, and apologises once for anything that was our fault. I do not argue with the tone. If the message is abusive rather than just angry, I follow the policy and bring in my lead. Then I do exactly what I said by the time I said it."
+    },
+    {
+      "id": "ticket-iq-13",
+      "prompt": "What goes into a good bug report?",
+      "strongAnswer": "A title that says where, what and for whom. The environment: version, device, browser and user role. Numbered steps a stranger can follow, the expected result and the actual result, kept separate. Evidence such as a screenshot, shift id and time. How often it happens and how many people it affects, plus any workaround. Where I do not know something, I label it to confirm. In my last role I tested manually and kept test cases in Azure DevOps Test Plans, so I wrote these daily."
+    },
+    {
+      "id": "ticket-iq-14",
+      "prompt": "What is a knowledge base article worth, and how do you write one?",
+      "strongAnswer": "It is a ticket that never gets filed. I write the title in the customer's own words, one problem per article, with numbered steps and a note for what to do if it does not work. I link it in replies and on the portal, and I give it an owner and a review date. When I rewrote our end-user documentation and knowledge base, ticket inflow fell 35%. I checked that by comparing counts of the how-to topics before and after, not just by feel."
+    },
+    {
+      "id": "ticket-iq-15",
+      "prompt": "When do you escalate a ticket, and how do you hand it off?",
+      "strongAnswer": "I escalate when the SLA will be missed, the severity is high, a fix needs access or code I do not have, or I have run out of next steps. The handoff note says the impact, who is affected, what I checked, the evidence, what the customer has been told and what I need back, so nobody has to call the customer again. I name the new owner and stay the customer's contact unless told otherwise. I write the note I would want to receive."
+    },
+    {
+      "id": "ticket-iq-16",
+      "prompt": "You see 50 tickets with the same title. What do you do?",
+      "strongAnswer": "I treat it as one problem, not 50 fixes. I link the tickets to a primary record, count how many customers and what it costs, and raise it as a problem needing a root-cause fix. Meanwhile I publish a workaround for the front line. In practice data I analysed, 'Duplicate assignment created on double click' appeared 50 times. I would propose a server-side check and a database constraint, then verify by watching the count fall."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly is the right place to learn the ticket process for an entry-level role: lifecycle, triage, a clear bug report, user stories and calm answers to scenario questions, all with your scheduling examples. It cannot give you a real queue to work or a tool's live screens. Outside reading is for vocabulary, not core skill.",
+    "hireflyBetter": [
+      "You need to triage tickets and decide severity against priority.",
+      "You want twelve weak tickets to rewrite with model answers.",
+      "You need scenario answers built on your own work.",
+      "You want customer message templates you can adapt.",
+      "You have little time and need the interview parts."
+    ],
+    "externalBetter": [
+      "You want to read how real companies run incidents.",
+      "You need the original ITIL or KCS source for a posting.",
+      "You want the real Jira Service Management screens for SLAs.",
+      "You are heading for a QA role and want ISTQB defect material.",
+      "You want a certificate, which HireFly cannot give."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for \"Intake and triage\" and \"Writing a ticket a developer can act on\" and study only what you miss (30 minutes).",
+          "Work \"Triage drills: six sets of five tickets\" first three sets (40 minutes).",
+          "Do the lab \"Triage ten sample tickets\" (40 minutes).",
+          "Work \"Rewrite bad tickets: a graded bank of 12\" set A (15 minutes).",
+          "Read \"In the interview\" (17 minutes).",
+          "Do the lab \"Calculate support metrics from the ticket file\" (35 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Work \"The ticket lifecycle\" and \"Intake and triage\" (40 minutes).",
+          "Work \"Writing a ticket a developer can act on\" and \"Rewrite bad tickets: a graded bank of 12\" (1.2 hours).",
+          "Work \"From request to user story\" (20 minutes).",
+          "Do the lab \"Categorise the tickets and find the repeat pattern\" (40 minutes).",
+          "Work \"Triage drills: six sets of five tickets\" (40 minutes) and the lab \"Triage ten sample tickets\" (40 minutes).",
+          "Work \"Keeping tickets moving\" and the lab \"Calculate support metrics from the ticket file\" (1 hour).",
+          "Work \"Record types and the defect life cycle\" and the lab \"Walk a defect through its life cycle in Jira\" (1 hour).",
+          "Work \"Customer communication templates\" and \"Major incidents and root cause\" (50 minutes), then the lab \"Write a major-incident update thread\" (30 minutes).",
+          "Read \"Severity levels\" (10 minutes).",
+          "Work \"Support operations: knowledge, escalation and metrics\" and \"In the interview\" (45 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Work every HireFly unit in order and do all five labs (11 hours).",
+          "Read \"Incident response (Atlassian Incident Management Handbook)\", \"Severity levels\" and \"Major incident management\" (1 hour).",
+          "Read \"IT service management guide\" and \"ITIL 4 practice guide: reader's manual\" (40 minutes).",
+          "Read the practices section of \"KCS v6 Practices Guide\" (1 hour).",
+          "Keep a ticket log from your own work or a practice queue and triage a set each day (20 hours).",
+          "Redo \"Triage drills: six sets of five tickets\" and \"Rewrite bad tickets: a graded bank of 12\" at speed (3 hours).",
+          "Reread \"In the interview\" (1 hour)."
+        ]
+      }
+    ]
+  }
+}

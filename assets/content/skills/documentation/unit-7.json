@@ -1,0 +1,164 @@
+{
+  "id": "doc-u7",
+  "title": "Choosing and structuring a document",
+  "summary": "Pick the right type with the Diátaxis framework, then structure headings and lists so readers can scan.",
+  "lessons": [
+    {
+      "id": "doc-u7-l1",
+      "title": "Diátaxis: choose the document type first",
+      "minutes": 9,
+      "body": "Many weak help pages try to do four jobs at once: teach, instruct, list facts and explain why. The Diátaxis framework (Daniele Procida, diataxis.fr) names four kinds of documentation, each for a different need. Decide which one you are writing before you write.\n\n| Type | Reader's need | Reader is | Scheduling example |\n|---|---|---|---|\n| **Tutorial** | \"Teach me\" | Learning, new to it | \"Fill your first shift: a guided walkthrough with sample data\" |\n| **How-to guide** | \"Help me do this task\" | Working, knows the basics | \"Cancel a shift and record the reason\" |\n| **Reference** | \"Tell me the facts\" | Working, looking something up | \"Shift statuses: Open, Filled, Cancelled, what each means\" |\n| **Explanation** | \"Help me understand why\" | Studying, wants context | \"How the system picks which pharmacists get an emergency alert\" |\n\nTwo questions sort most pages. Is the reader **acting or thinking**? Are they **learning or working**? A tutorial is action while learning; a how-to is action while working; reference is facts while working; explanation is understanding while learning.\n\n**A page that mixes them**\n\nA knowledge base article titled \"Emergency requests\" opens with three paragraphs on why the feature exists, then a status list, then steps to send a request, then a tutorial-style \"let's try it\". A dispatcher with a pharmacy waiting on the phone scrolls past all of it. Split it:\n\n- How-to: \"Send an emergency request\" (steps only).\n- Reference: \"Emergency request statuses and timeouts\".\n- Explanation: \"How emergency alerts reach pharmacists\".\n- Link between them; do not paste one into another.\n\n**Rules of thumb**\n\n- A how-to starts at the goal and has no theory. Link to the explanation.\n- Reference is neutral and complete, laid out like the product (alphabetical or by screen), with no instructions mixed in.\n- A tutorial must work every time; test it on a clean account.\n- Explanation can be opinionated and discursive; it is the only type that can say \"because\".\n\nDiátaxis is a way to think, not a law. A short product may keep how-to and reference in the same article if each part is clearly separate. The point is to know what each part is for.",
+      "keyPoints": [
+        "Four types: tutorial (learn by doing), how-to (finish a task), reference (look up facts), explanation (understand why).",
+        "Ask: is the reader acting or thinking, learning or working?",
+        "A page that does several jobs should be split and linked.",
+        "How-tos carry no theory; explanation carries the reasons."
+      ],
+      "interviewAngle": "Interviewers for writing-heavy roles may ask how you decide what type of document to write. Your real work matches how-to and troubleshooting articles and requirements. Diátaxis is vocabulary you can use for it; say you learned the framework to name what you already did, not that you applied it formally at work.",
+      "exercises": [
+        {
+          "id": "doc-u7-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A dispatcher needs to know how to cancel a shift while a pharmacy waits on the phone. Which document type serves them best?",
+          "choices": [
+            "A reference table of every field",
+            "An explanation of the cancellation policy history",
+            "A how-to guide with numbered steps",
+            "A tutorial that teaches the whole scheduling product"
+          ],
+          "answer": 2,
+          "explanation": "They are working and need to act now. Theory and background belong elsewhere and are linked."
+        },
+        {
+          "id": "doc-u7-l1-e2",
+          "type": "mcq",
+          "prompt": "A table listing every shift status, with a one-line meaning of each, is best classed as:",
+          "choices": [
+            "Reference",
+            "How-to guide",
+            "Explanation",
+            "Tutorial"
+          ],
+          "answer": 0,
+          "explanation": "It is facts to look up, with no task and no reasoning."
+        },
+        {
+          "id": "doc-u7-l1-e3",
+          "type": "short",
+          "prompt": "Which Diátaxis type answers \"why does the system do this?\" (One word.)",
+          "accept": [
+            "explanation",
+            "explanations"
+          ],
+          "answer": "explanation",
+          "explanation": "Explanation helps the reader understand context and reasons."
+        },
+        {
+          "id": "doc-u7-l1-e4",
+          "type": "mcq",
+          "prompt": "An article mixes a status list, steps and a long background section. What is the best fix?",
+          "choices": [
+            "Move the steps to the bottom",
+            "Make it longer so it covers everything",
+            "Split it into a how-to, a reference page and an explanation, and link them",
+            "Delete the background and the status list"
+          ],
+          "answer": 2,
+          "explanation": "Each part serves a different reader need. Linking keeps each short."
+        },
+        {
+          "id": "doc-u7-l1-e5",
+          "type": "open",
+          "prompt": "Classify each as tutorial, how-to, reference or explanation and give a one-line reason: (a) \"Add a pharmacy to your account\"; (b) \"Notification settings: every option and its default\"; (c) \"Why emergency shifts fill faster than normal ones\"; (d) \"Your first day: set up a pharmacy and fill a practice shift\".",
+          "answer": "(a) How-to: a task the reader is trying to finish. (b) Reference: facts about each option to look up. (c) Explanation: reasons and context, no steps. (d) Tutorial: a guided lesson for a newcomer using practice data, designed to teach rather than to meet a work goal.",
+          "rubric": [
+            "All four classified correctly",
+            "Reasons refer to the reader's need",
+            "Distinguishes tutorial (learning) from how-to (working)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u7-l2",
+      "title": "Structure and headings that people can scan",
+      "minutes": 8,
+      "body": "Readers scan before they read. Structure is how you help them find the part they need in seconds.\n\n**Headings are a map**\n\nA heading should tell the reader what is in the section, in their words, and be unique on the page. Compare two outlines for the same article:\n\n| Weak | Better |\n|---|---|\n| Overview | What this article covers |\n| Details | Before you start |\n| Process | Cancel a shift |\n| Other | If the shift has already started |\n| Notes | Related articles |\n\nUse task headings with verbs (\"Cancel a shift\") for how-tos, and nouns (\"Shift statuses\") for reference. Keep to one H1 (the title) and nest H2 and H3 without skipping levels, because screen reader users navigate by heading level.\n\n**Lead with the point**\n\nThe first sentence under a heading carries the answer or the purpose. In search results, the first lines are often what the reader sees. Zendesk's guidance for help centres is to put the solution first and write titles in words customers would search for.\n\n**Choose the right container**\n\n| Content | Use |\n|---|---|\n| Steps in order | Numbered list |\n| Options in no order | Bulleted list |\n| Comparing items on several attributes | Table |\n| One idea | A short paragraph (two to four sentences) |\n| A warning that prevents damage | A labelled note, placed *before* the step it applies to |\n\n**Progressive disclosure**\n\nPut the common path first. Move the rare case to the end under its own heading (\"If the shift has already started\"). Google's Technical Writing Two course says to outline first, introduce a large document by what it covers, and split how-to and overview material into shorter documents for newcomers.\n\n**Short beats long**\n\nAim for sections a reader can finish on a phone between calls. If a heading has more than about seven items under it, group them.\n\n**A quick audit**\n\nRead only the headings. Can you tell what the article does? If not, rewrite the headings first; the body is usually fine.",
+      "keyPoints": [
+        "Headings state what a section contains in the reader's words, with no repeated or vague titles.",
+        "Lead each section with the point; put the common path before the rare case.",
+        "Numbered lists for steps, bullets for unordered options, tables for comparisons.",
+        "Put a warning before the step it protects."
+      ],
+      "interviewAngle": "A writing test may be judged mainly on structure. Show it: a verb title, a one-line purpose, prerequisites, numbered steps, and the rare case last. Say you checked the headings alone to see if the article made sense. This reflects the knowledge base rewrite you did.",
+      "exercises": [
+        {
+          "id": "doc-u7-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which heading best suits a how-to article?",
+          "choices": [
+            "Shifts",
+            "Cancel a shift and record the reason",
+            "Miscellaneous",
+            "Overview"
+          ],
+          "answer": 1,
+          "explanation": "A verb phrase in the reader's words names the task and is searchable."
+        },
+        {
+          "id": "doc-u7-l2-e2",
+          "type": "mcq",
+          "prompt": "Where should a warning about permanent deletion appear in a procedure?",
+          "choices": [
+            "After the step, once it has happened",
+            "At the end of the article",
+            "In a footnote",
+            "Immediately before the step that deletes"
+          ],
+          "answer": 3,
+          "explanation": "A warning only helps if the reader sees it before acting."
+        },
+        {
+          "id": "doc-u7-l2-e3",
+          "type": "short",
+          "prompt": "Which kind of list should you use for steps that must be done in order? (One word.)",
+          "accept": [
+            "numbered",
+            "numbered list",
+            "ordered",
+            "ordered list"
+          ],
+          "answer": "numbered",
+          "explanation": "Numbers show the order and let readers say \"I am on step 4\"."
+        },
+        {
+          "id": "doc-u7-l2-e4",
+          "type": "mcq",
+          "prompt": "Why should heading levels not skip (an H4 directly under an H2)?",
+          "choices": [
+            "It is only a colour issue",
+            "Screen reader users navigate by heading level, so skipped levels break the outline",
+            "Search engines reject the page",
+            "It makes the page load slower"
+          ],
+          "answer": 1,
+          "explanation": "Heading structure is also an accessibility feature."
+        },
+        {
+          "id": "doc-u7-l2-e5",
+          "type": "open",
+          "prompt": "Rewrite this outline into task headings a dispatcher would search for: \"Overview / Details / Process / Other / Notes\" for an article about reassigning a shift to a different pharmacist. Give five headings, and say what goes under the last one.",
+          "answer": "1. Reassign a shift to a different pharmacist (title). 2. Before you start. 3. Reassign the shift (numbered steps). 4. If the original pharmacist has already been notified. 5. Related articles. The last section holds links to \"Cancel a shift\" and \"Shift statuses\" rather than pasted content.",
+          "rubric": [
+            "Headings are task-based or noun-based and specific",
+            "Includes prerequisites and a rare case",
+            "Common path before the rare case",
+            "Related articles are links, not copied text"
+          ]
+        }
+      ]
+    }
+  ]
+}

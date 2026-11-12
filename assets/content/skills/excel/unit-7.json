@@ -1,0 +1,164 @@
+{
+  "id": "excel-u7",
+  "title": "Names, errors and dates in practice",
+  "summary": "Readable formulas with names and Tables, error handling, and date maths on the practice shift data.",
+  "lessons": [
+    {
+      "id": "excel-u7-l1",
+      "title": "Named ranges and structured references",
+      "minutes": 8,
+      "body": "A **name** is a label for a cell, a range or a constant, so a formula reads like a sentence. Select the cell, type a name in the Name Box (left of the formula bar) and press Enter, or use Formulas > Define Name. A name starts with a letter or underscore, has no spaces (use `Bonus_Rate`), and cannot look like a cell address (`Q1` is rejected). Open the Name Manager with **Ctrl+F3** to edit, delete or see what each name points at.\n\nIf G1 holds the bonus per filled shift and is named `BonusRate`:\n\n```text\n=C2*BonusRate\n```\n\nA name always points at the same cell, so it behaves like an absolute reference without the dollar signs.\n\n**Tables go further.** Load `shifts.csv` from the practice data, press Ctrl+T and call the table `tblShifts`. Its columns now have names you can use in any formula:\n\n| Reference | Meaning |\n|---|---|\n| `tblShifts[status]` | every value in the status column |\n| `[@status]` | the status on this row (inside the table) |\n| `tblShifts[[#Headers],[status]]` | the header cell |\n| `tblShifts[#Totals]` | the total row |\n\nShare of shifts that were completed:\n\n```text\n=COUNTIFS(tblShifts[status],\"completed\")/ROWS(tblShifts[id])\n```\n\nThat is 828 / 1019 = 81.3%. Emergency shifts that were cancelled:\n\n```text\n=COUNTIFS(tblShifts[status],\"cancelled\",tblShifts[is_emergency],1)\n```\n\nThe answer is 33.\n\n**Why this beats `$H$2:$H$1020`.**\n\n- The reference grows when you paste more rows under the table, so formulas, pivots and charts stay correct.\n- The formula can be read aloud, which makes review easier.\n- You cannot end up with mismatched range sizes, a common cause of `#VALUE!` in SUMIFS.\n\n**Limits.** A name that points at a plain range does not grow by itself. Deleting the cells a name points at turns it into `#REF!`. Keep names short and consistent (a prefix such as `tbl` for tables helps), and delete unused ones in Name Manager. A name can also be the source of a data validation list, which the validation lesson uses.",
+      "keyPoints": [
+        "A name labels a cell, range or constant; Ctrl+F3 opens the Name Manager.",
+        "A Table column reference like tblShifts[status] grows with the data.",
+        "[@col] means this row's value inside a Table.",
+        "Names pointing at plain ranges do not grow and can break to #REF!."
+      ],
+      "interviewAngle": "Tests rarely ask for named ranges by name, but readable formulas and Tables show care. Say: \"I turn the export into a Table and use structured references so the formulas grow with the data.\" That is honest at a moderate level. Do not claim dynamic named ranges built with OFFSET unless you have practised them.",
+      "exercises": [
+        {
+          "id": "excel-u7-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why is `COUNTIFS(tblShifts[status],\"completed\")` better than `COUNTIFS($H$2:$H$1020,\"completed\")`?",
+          "choices": [
+            "It grows automatically when rows are added to the Table and reads clearly",
+            "It calculates faster on every workbook",
+            "It ignores blank rows that the fixed range would count",
+            "It works in every version of Excel including the web and Mac"
+          ],
+          "answer": 0,
+          "explanation": "A structured reference follows the Table as it grows and names the column. Speed and blank-row handling are not the reason."
+        },
+        {
+          "id": "excel-u7-l1-e2",
+          "type": "short",
+          "prompt": "Which keyboard shortcut opens the Name Manager?",
+          "accept": [
+            "ctrl+f3",
+            "ctrl f3",
+            "control+f3"
+          ],
+          "answer": "Ctrl+F3",
+          "explanation": "Ctrl+F3 lists every name, its value and what it refers to."
+        },
+        {
+          "id": "excel-u7-l1-e3",
+          "type": "open",
+          "prompt": "With the practice shifts loaded as `tblShifts`, write one formula for the share of shifts that have a filled time, and state the figure you should get.",
+          "answer": "```text\n=COUNTA(tblShifts[filled_at])/ROWS(tblShifts[id])\n```\n906 of 1019 shifts have a filled time, so the result is 88.9%. COUNTA counts non-empty cells; the 113 blanks are cancelled and open shifts that were never filled.",
+          "rubric": [
+            "Uses structured references, not cell addresses",
+            "Counts non-empty filled_at values over all rows",
+            "States 906 / 1019 = 88.9%"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u7-l2",
+      "title": "Errors, IFERROR and silent wrong answers",
+      "minutes": 8,
+      "body": "Excel errors are messages, and each points at a cause.\n\n| Error | Usual cause | Fix |\n|---|---|---|\n| `#DIV/0!` | dividing by zero or an empty cell | test the denominator first |\n| `#N/A` | a lookup found nothing | check the key; label with `IFNA` |\n| `#VALUE!` | text where a number is needed, such as a stray space | clean the data |\n| `#REF!` | a deleted reference, or a VLOOKUP column number too large | repair the reference |\n| `#NAME?` | a misspelt function or name, or text without quotes | check spelling; XLOOKUP in an old version |\n| `#NUM!` | an impossible number | check inputs |\n| `#SPILL!` | a dynamic array blocked by other cells | clear the cells in its path |\n| `#####` | column too narrow, or a negative date | widen the column |\n\n**IFERROR** replaces any error with a fallback: `=IFERROR(AVERAGEIFS(...),\"No filled shifts\")`. Use a clear label, not 0, because 0 hours to fill would read as an instant fill. Where only one error is expected use the narrower tool: `IFNA` for lookups, or `=IF(B2=0,\"\",C2/B2)` for ratios. `IFERROR` also hides mistakes of your own, such as a `#REF!`.\n\n**The dangerous case is no error at all.** In `shifts.csv`, 113 shifts have no `filled_at` (93 cancelled and 20 open). A hours-to-fill column of `=([@filled_at]-[@requested_at])*24` treats the empty cell as 0, which is the year 1900. The answer is a negative number of about -1.1 million hours with no warning, and `IFERROR` would not catch it. Guard the blank:\n\n```text\n=IF([@filled_at]=\"\",\"\",([@filled_at]-[@requested_at])*24)\n```\n\n`AVERAGE` skips the empty text, so the column averages 9.52 hours over the 906 filled shifts. Without the guard the average is nonsense. Always scan a new column with MIN, MAX and COUNT before trusting it: a minimum below zero is the clue.\n\n**Auditing tools** (Formulas tab): Error Checking, Trace Precedents and Dependents, Show Formulas, and **Evaluate Formula**, which steps through a formula one operation at a time. In the formula bar, select part of a formula and press F9 to see its value, then Esc to put it back.",
+      "keyPoints": [
+        "Read the error: #DIV/0!, #N/A, #REF!, #NAME? and #SPILL! each point at a cause.",
+        "Use IFNA for lookups and an explicit test for ratios; IFERROR hides real mistakes.",
+        "Fallbacks should be labels, not 0.",
+        "Blank cells in date maths give wrong answers without any error: guard them."
+      ],
+      "interviewAngle": "A common test question is a formula that \"returns an error\" or a column of strange numbers. Describe your habit: read the error, check inputs, then add a guard. Mention checking MIN, MAX and COUNT of new columns. This is moderate-level work you can claim from your real reporting and checking.",
+      "exercises": [
+        {
+          "id": "excel-u7-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "An AVERAGEIFS for one pharmacy returns #DIV/0! because it has no filled shifts. What is the best handling?",
+          "choices": [
+            "Wrap it so it shows a label such as \"No filled shifts\"",
+            "Wrap it so it shows 0 hours",
+            "Delete the pharmacy's row from the report",
+            "Change AVERAGEIFS to SUMIFS"
+          ],
+          "answer": 0,
+          "explanation": "A label tells the reader there is no data. 0 would look like an instant fill and silently mislead."
+        },
+        {
+          "id": "excel-u7-l2-e2",
+          "type": "short",
+          "prompt": "Which error appears when a VLOOKUP column number is larger than the number of columns in the table array?",
+          "accept": [
+            "#ref!",
+            "ref",
+            "#ref"
+          ],
+          "answer": "#REF!",
+          "explanation": "The column index points outside the range, which Excel reports as #REF!."
+        },
+        {
+          "id": "excel-u7-l2-e3",
+          "type": "open",
+          "prompt": "A new column `=(C2-B2)*24` is meant to give hours to fill, but a few rows show about -1,100,000. Explain the cause and give the fixed formula.",
+          "answer": "C2 (filled_at) is empty for cancelled and open shifts. Excel treats an empty cell as 0, so the formula subtracts a 2026 date from 1900 and returns a huge negative number with no error. Fix: `=IF(C2=\"\",\"\",(C2-B2)*24)`. Check afterwards that MIN is not negative and that the average is about 9.52 hours.",
+          "rubric": [
+            "Identifies the empty filled_at as the cause",
+            "Explains an empty cell counts as 0",
+            "Gives an IF guard that returns an empty string",
+            "Suggests checking MIN/MAX"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u7-l3",
+      "title": "Dates, times and TEXT in practice",
+      "minutes": 9,
+      "body": "Dates are numbers, so most date work is arithmetic plus a display format. Take shift 1001 from the practice data. B2 is requested 2026-01-03 05:23:10, C2 is filled 2026-01-03 22:03:41 and D2 is starts 2026-01-05 07:00:00.\n\n| Formula | Result |\n|---|---|\n| `=(C2-B2)*24` | 16.68 hours to fill |\n| `=(D2-B2)*24` | 49.61 hours of lead time |\n| `=INT(B2)` (format as date) | 2026-01-03 |\n| `=TEXT(B2,\"yyyy-mm\")` | 2026-01 |\n| `=TEXT(B2,\"ddd\")` | Sat |\n| `=WEEKDAY(B2,2)` | 6 (Monday is 1) |\n| `=HOUR(B2)` | 5 |\n\n**Is it really a date?** Excel often converts ISO text such as `2026-01-03 05:23:10` when it opens a CSV, but a file loaded another way may keep it as text. A real date is right-aligned, and switching the format to General shows a number such as 46025.22. For text, rebuild it: `=DATEVALUE(LEFT(A2,10))+TIMEVALUE(MID(A2,12,8))`.\n\n**Counting by month.** Do not compare dates with a month name. Use a half-open interval, because times have decimals:\n\n```text\n=COUNTIFS(tblShifts[requested_at],\">=\"&DATE(2026,3,1),\n          tblShifts[requested_at],\"<\"&DATE(2026,4,1))\n```\n\nThat returns 105, the shifts requested in March 2026. A test of `\"<=\"&DATE(2026,3,31)` would drop everything after midnight on the 31st.\n\n**TEXT** turns a number or date into formatted text: `=\"Filled in \"&TEXT((C2-B2)*24,\"0.0\")&\" hours\"` gives \"Filled in 16.7 hours\". Common codes are `yyyy-mm-dd`, `mmm`, `ddd`, `0.0%` and `#,##0`. Two cautions. In a time format `mm` after `h` means minutes, otherwise months. And the result is **text**, so a pivot sorts \"Apr\" before \"Jan\"; for charts keep a real date and group by month in the pivot, or sort by `yyyy-mm`.\n\n**Other tools.** `EOMONTH(date,0)` is month end, `NETWORKDAYS` counts weekdays, `WORKDAY(date,5)` moves forward five working days, and `DATEDIF(start,end,\"d\")` counts whole days (it is undocumented in the function list but works). `TODAY()` and `NOW()` recalculate on every open, so do not use them in a figure you want frozen.",
+      "keyPoints": [
+        "Dates are day counts; multiply a difference by 24 for hours.",
+        "Check a date is real: right-aligned, and a number under General format.",
+        "Count a month with >= first day and < first day of next month.",
+        "TEXT returns text; keep real dates for charts and pivots."
+      ],
+      "interviewAngle": "Time-to-fill and month labels come up in almost every operations test. Explain the days-to-hours conversion and the half-open date interval, which shows care. You reported time to fill in SQL, so you can say you know the metric and are showing the Excel version.",
+      "exercises": [
+        {
+          "id": "excel-u7-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which formula counts shifts requested in March 2026 when `requested_at` includes times?",
+          "choices": [
+            "=COUNTIFS(tblShifts[requested_at],\">=\"&DATE(2026,3,1),tblShifts[requested_at],\"<\"&DATE(2026,4,1))",
+            "=COUNTIFS(tblShifts[requested_at],\"March\")",
+            "=COUNTIFS(tblShifts[requested_at],\"<=\"&DATE(2026,3,31))",
+            "=COUNTIFS(tblShifts[requested_at],DATE(2026,3,1))"
+          ],
+          "answer": 0,
+          "explanation": "A start-inclusive, end-exclusive interval catches every time of day in March. The 31 March version stops at midnight and also includes earlier months."
+        },
+        {
+          "id": "excel-u7-l3-e2",
+          "type": "short",
+          "prompt": "A time difference is 0.5 days. How many hours is that? (Number only.)",
+          "accept": [
+            "12",
+            "12 hours"
+          ],
+          "answer": "12",
+          "explanation": "Multiply days by 24."
+        },
+        {
+          "id": "excel-u7-l3-e3",
+          "type": "open",
+          "prompt": "Shift 1002 was requested 2025-12-27 22:55:55 and filled 2025-12-28 12:05:40. Show the formula for hours to fill and roughly what it returns, then say how you would label each shift by request month.",
+          "answer": "Hours to fill: `=(C2-B2)*24`, which is about 13.16 hours (13 hours 9 minutes 45 seconds). Month label: `=TEXT(B2,\"yyyy-mm\")`, giving 2025-12 for this shift. For a pivot, keep the real date and group by Months and Years instead, because TEXT results are text.",
+          "rubric": [
+            "Subtracts the timestamps and multiplies by 24",
+            "Gets about 13.2 hours",
+            "Uses TEXT with yyyy-mm or pivot grouping",
+            "Notes TEXT returns text"
+          ]
+        }
+      ]
+    }
+  ]
+}

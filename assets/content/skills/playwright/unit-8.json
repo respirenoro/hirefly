@@ -1,0 +1,239 @@
+{
+  "id": "pw-u8",
+  "title": "Beyond the basics (learned in practice)",
+  "summary": "Network waits and mocking, a first API check, and accessibility and visual comparisons. These go past basic tests; every example was run on public demo sites.",
+  "lessons": [
+    {
+      "id": "pw-u8-l1",
+      "title": "Network waits and mocking at a reader's level",
+      "minutes": 10,
+      "body": "Most pages call a server. Two techniques deal with that, and both can go wrong if used casually.\n\n**Waiting for a response**\n\nWhen a visible signal is missing, wait for the response. Create the promise **before** the action that triggers it:\n\n```ts\nconst responsePromise = page.waitForResponse(\n  r => r.url().endsWith('/docs/intro') && r.status() === 200\n);\nawait page.goto('https://playwright.dev/docs/intro');\nconst response = await responsePromise;\nexpect(response.ok()).toBeTruthy();\n```\n\nI ran this and it passes. A trap I also hit: on playwright.dev, clicking the \"Get started\" link did not fire a matching network response (the site switches pages in the browser), so `waitForResponse` waited 30 seconds and timed out. Wait only for a request that really happens. If you can assert on something visible, do that instead.\n\n**Mocking: replace the server's answer**\n\n`page.route` intercepts matching requests; `route.fulfill` answers them yourself. Playwright's docs describe this as replacing the real API call:\n\n```ts\nawait page.route('**/api/shifts', route =>\n  route.fulfill({ json: [{ id: 1042, status: 'filled' }] })\n);\nawait page.goto('./');\nconst data = await page.evaluate(() => fetch('/api/shifts').then(r => r.json()));\nexpect(data).toEqual([{ id: 1042, status: 'filled' }]);\n```\n\nRegister the route before the page makes the call. I ran this against the demo, using `fetch` from the page to stand in for the app's own call. A failure is mocked the same way:\n\n```ts\nawait page.route('**/api/shifts', route => route.fulfill({ status: 500, body: 'boom' }));\n```\n\nUse that to check that the app shows a clear error when the server fails, which is hard to cause for real. `route.abort()` simulates a dropped connection. A HAR file can record and replay a whole set of calls.\n\n**When to mock**\n\n| Mock | Do not mock |\n|---|---|\n| A failure you cannot trigger (500, timeout) | The main path you want to prove end to end |\n| A slow or paid third party (SMS, email) | Anything where the server logic is the point |\n| Stable data for a visual check | Your own API on a smoke test |\n\nA mocked test proves the front end handles the response. It does not prove the real server sends that response.\n\n**Polling a value**\n\n`expect.poll` retries a function until the value matches, replacing a hand-written wait loop. I used it to poll an HTTP status.",
+      "keyPoints": [
+        "Start `waitForResponse` before the action, and only for a request that really happens.",
+        "`page.route` plus `route.fulfill` replaces a server response; register the route before the call.",
+        "Mock failures and third parties; do not mock the path you are trying to prove.",
+        "A mock proves the front end's handling, not the server's behaviour."
+      ],
+      "interviewAngle": "If asked about mocking, say what you understand and what it can hide. Interviewers like the line \"a mocked test does not prove the integration\". This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u8-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why create the `waitForResponse` promise before the click or navigation?",
+          "choices": [
+            "Playwright needs alphabetical order",
+            "The click would be blocked otherwise",
+            "It makes the request faster",
+            "The response might arrive before listening starts and be missed"
+          ],
+          "answer": 3,
+          "explanation": "A promise created after the action may start listening too late."
+        },
+        {
+          "id": "pw-u8-l1-e2",
+          "type": "mcq",
+          "prompt": "Which is a good reason to mock a response?",
+          "choices": [
+            "To check the app shows a clear error when the server returns 500",
+            "To prove the main shift-request path works end to end",
+            "To avoid writing any assertions",
+            "To skip login"
+          ],
+          "answer": 0,
+          "explanation": "Server errors are hard to trigger for real, and the check is about front-end handling."
+        },
+        {
+          "id": "pw-u8-l1-e3",
+          "type": "short",
+          "prompt": "Which `page` method intercepts requests matching a URL pattern? (Method name only.)",
+          "accept": [
+            "route",
+            "page.route"
+          ],
+          "answer": "route",
+          "explanation": "`page.route(pattern, handler)`; inside the handler `route.fulfill(...)` sends your response."
+        },
+        {
+          "id": "pw-u8-l1-e4",
+          "type": "mcq",
+          "prompt": "A test waits for `waitForResponse` after clicking a link on a site that changes pages in the browser without a request. What happens?",
+          "choices": [
+            "It passes immediately",
+            "It retries the click",
+            "Playwright invents a response",
+            "It waits until the timeout and fails, because no matching response occurs"
+          ],
+          "answer": 3,
+          "explanation": "I hit this on playwright.dev: the wait ran to the 30 second test timeout."
+        },
+        {
+          "id": "pw-u8-l1-e5",
+          "type": "open",
+          "prompt": "A product owner asks whether you can test the screen shown when the dispatch server is down. Explain how you would do it with Playwright, and what the test does and does not prove.",
+          "answer": "I would intercept the call the page makes to the shifts endpoint with page.route, registered before navigation, and fulfil it with a 500 status or abort it. Then I load the page and assert that the user sees a clear error message and a way to retry. It proves the front end handles a failed response sensibly. It does not prove the real server behaves that way, or that monitoring notices, so it complements, not replaces, testing the real integration.",
+          "rubric": [
+            "Uses page.route with fulfill or abort",
+            "Registers the route before the page loads",
+            "Asserts the visible error message",
+            "States what is not proved (real server)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u8-l2",
+      "title": "A first API check with the request fixture",
+      "minutes": 9,
+      "body": "Playwright can call an HTTP API without a browser. The `request` fixture is a client that applies your config's `baseURL` and headers. Playwright's docs list three uses: check endpoints directly, set up server state before a UI test, and confirm server results after browser actions.\n\nI ran these against a public practice API (jsonplaceholder.typicode.com), which fakes writes and does not save them:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('GET returns 200 and expected fields', async ({ request }) => {\n  const res = await request.get('https://jsonplaceholder.typicode.com/posts/1');\n  expect(res.ok()).toBeTruthy();\n  expect(res.status()).toBe(200);\n  const body = await res.json();\n  expect(body).toMatchObject({ id: 1, userId: 1 });\n  expect(typeof body.title).toBe('string');\n});\n\ntest('POST creates a record', async ({ request }) => {\n  const res = await request.post('https://jsonplaceholder.typicode.com/posts', {\n    data: { title: 'Shift 1042', body: 'filled', userId: 1 },\n  });\n  await expect(res).toBeOK();\n  expect(res.status()).toBe(201);\n  expect(await res.json()).toMatchObject({ title: 'Shift 1042' });\n});\n\ntest('missing record returns 404', async ({ request }) => {\n  const res = await request.get('https://jsonplaceholder.typicode.com/posts/99999');\n  expect(res.status()).toBe(404);\n});\n```\n\nAll three passed. Notes:\n\n- `res.ok()` is true for status 200 to 299. Assert the exact status when it matters (201 for create, 404 for missing).\n- `await expect(res).toBeOK()` is the web-first form for a response.\n- `toMatchObject` checks the fields you name and ignores extras, which keeps the test from breaking when a new field is added.\n- `res.json()` is asynchronous; await it.\n\n**For the scheduling product**\n\nTwo uses make sense for a QA analyst. First, **check an endpoint** after a release: `GET /api/shifts/1042` returns 200 and `status: 'filled'`. Second, **create data fast**: instead of clicking through ten screens to make an open shift, POST it, then run a short UI test on it, and delete it afterwards.\n\n**What this is not**\n\nAn API check does not replace UI tests, and it needs the team's API details: authentication, schema, test environment. Ask for those; do not guess endpoints.\n\nAuthentication usually means a header or token in `extraHTTPHeaders` or a login call. The token comes from a secret, as with the UI login.",
+      "keyPoints": [
+        "The `request` fixture sends HTTP calls without a browser and uses your config's baseURL.",
+        "Assert the exact status, then fields with `toMatchObject`; await `res.json()`.",
+        "Use API calls to create test data quickly and to confirm results after a UI action.",
+        "Get real endpoints, auth and a test environment from the team."
+      ],
+      "interviewAngle": "A \"have you tested APIs?\" question deserves an honest scope: you can do a basic status and field check; at work your testing was UI and UAT, with SQL for data checks. Playwright API testing was learned in practice, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u8-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does `res.ok()` check?",
+          "choices": [
+            "That the response was fast",
+            "That the status is exactly 200",
+            "That the status is in the 200 to 299 range",
+            "That the body is valid JSON"
+          ],
+          "answer": 2,
+          "explanation": "For a create call you should also assert the specific status, such as 201."
+        },
+        {
+          "id": "pw-u8-l2-e2",
+          "type": "mcq",
+          "prompt": "Why use `toMatchObject` on a JSON body?",
+          "choices": [
+            "It ignores values",
+            "It makes the request faster",
+            "It checks the named fields and ignores extra ones, so added fields do not break the test",
+            "It checks every field including unknown ones"
+          ],
+          "answer": 2,
+          "explanation": "It keeps the test focused on the contract that matters."
+        },
+        {
+          "id": "pw-u8-l2-e3",
+          "type": "short",
+          "prompt": "Which test argument gives you a browserless HTTP client? (One word.)",
+          "accept": [
+            "request"
+          ],
+          "answer": "request",
+          "explanation": "`async ({ request }) => { ... }`."
+        },
+        {
+          "id": "pw-u8-l2-e4",
+          "type": "mcq",
+          "prompt": "What is a sensible use of an API call in a UI-focused suite?",
+          "choices": [
+            "Skipping assertions",
+            "Guessing endpoints from the browser address bar",
+            "Replacing every UI test",
+            "Creating an open shift quickly so the UI test starts from known data"
+          ],
+          "answer": 3,
+          "explanation": "Setup by API is faster and less fragile than clicking through setup screens."
+        },
+        {
+          "id": "pw-u8-l2-e5",
+          "type": "open",
+          "prompt": "Write a Playwright API test that GETs `/api/shifts/1042` (baseURL is configured) and checks a 200 status, `status` equal to `filled`, and that `pharmacy_id` is a number. Say what you would ask the dev team before running it against a shared environment.",
+          "answer": "```ts\ntest('shift 1042 is filled', async ({ request }) => {\n  const res = await request.get('/api/shifts/1042');\n  expect(res.status()).toBe(200);\n  const body = await res.json();\n  expect(body.status).toBe('filled');\n  expect(typeof body.pharmacy_id).toBe('number');\n});\n```\nI would ask which environment is safe to call, how the API authenticates and where the token comes from, whether shift 1042 is stable test data, and what the response schema is.",
+          "rubric": [
+            "Uses the request fixture with a relative URL",
+            "Asserts the status",
+            "Awaits res.json() and checks fields",
+            "Asks about environment, auth and test data"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u8-l3",
+      "title": "Accessibility and visual checks: what they are",
+      "minutes": 9,
+      "body": "Two automated checks sound impressive and have limits. Know what each does, and say plainly that you saw them in practice.\n\n**Accessibility scanning**\n\nThe `@axe-core/playwright` package runs the axe rules against a loaded page. I ran it on the TodoMVC demo:\n\n```ts\nimport AxeBuilder from '@axe-core/playwright';\n\ntest('axe scan', async ({ page }) => {\n  await page.goto('./');\n  const results = await new AxeBuilder({ page }).analyze();\n  console.log(results.violations.map(v => `${v.id} (${v.impact})`).join(', '));\n  expect(results.violations).toEqual([]);   // fails here: it found 3\n});\n```\n\nIt reported `color-contrast (serious)`, `landmark-one-main (moderate)` and `region (moderate)`. Automated scans find only a share of accessibility problems. They cannot judge whether a label makes sense or whether a screen reader flow works, so they do not replace a manual check. A realistic use is a gate on new, known violations, not a promise of \"accessible\".\n\nRelated and built in: `toMatchAriaSnapshot` compares the accessibility tree of an element:\n\n```ts\nawait expect(page.getByRole('heading', { name: 'todos' })).toMatchAriaSnapshot('- heading \"todos\" [level=1]');\n```\n\nWriting roles and names this way also checks that your `getByRole` locators have something to find.\n\n**Visual comparison**\n\n```ts\nawait expect(page.locator('.header')).toHaveScreenshot('header.png');\n```\n\nThe first run **fails** with \"A snapshot doesn't exist\" and writes the baseline image. The second run compares against it and passes. I ran both. Two cautions:\n\n1. The file name includes the platform and browser, such as `header-chromium-win32.png`. A baseline made on Windows will not match a Linux build agent. Make baselines where they will be compared, for example in the pipeline's own image.\n2. Fonts, animation and dates change pixels. Limit shots to stable elements and mask moving parts.\n\n**Whether to bother**\n\nVisual tests suit a few stable, high-value screens (a printed rota, a brand header). They are poor for pages that change every sprint. For a small team doing mostly manual QA, an exploratory look often costs less than maintaining baselines.",
+      "keyPoints": [
+        "Axe scans catch some accessibility issues (contrast, landmarks); they do not prove a page is accessible.",
+        "`toMatchAriaSnapshot` compares the accessibility tree of an element.",
+        "`toHaveScreenshot` fails on its first run while it writes the baseline; baselines are per platform.",
+        "Use visual tests sparingly, on stable elements."
+      ],
+      "interviewAngle": "If these are mentioned in a job post, say you know what they are and have run them on a demo, not that you run them at work. Offer the limit too: scans are partial and baselines are platform-specific. This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u8-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What happens the first time `toHaveScreenshot('header.png')` runs and no baseline exists?",
+          "choices": [
+            "It deletes the page",
+            "It sends the image to Azure",
+            "It fails and writes the baseline image; the next run compares against it",
+            "It passes and ignores the image"
+          ],
+          "answer": 2,
+          "explanation": "I ran it: 'A snapshot doesn't exist ... writing actual', then a pass on run two."
+        },
+        {
+          "id": "pw-u8-l3-e2",
+          "type": "mcq",
+          "prompt": "Why might a screenshot baseline made on a Windows laptop fail in the Linux pipeline?",
+          "choices": [
+            "Screenshots are not supported in CI",
+            "Playwright blocks images on Linux",
+            "Pipelines delete images",
+            "Baseline names and pixel rendering are per platform, so fonts and rendering differ"
+          ],
+          "answer": 3,
+          "explanation": "The default file name contains the platform, and rendering differs by OS."
+        },
+        {
+          "id": "pw-u8-l3-e3",
+          "type": "mcq",
+          "prompt": "An axe scan returns no violations. What can you say?",
+          "choices": [
+            "The page has no violations that the automated rules detect; manual checks are still needed",
+            "Keyboard users are fully supported",
+            "The page passes WCAG AAA",
+            "The page is fully accessible"
+          ],
+          "answer": 0,
+          "explanation": "Automated rules cover only part of accessibility."
+        },
+        {
+          "id": "pw-u8-l3-e4",
+          "type": "short",
+          "prompt": "Which axe rule id appeared on the TodoMVC demo for text that is hard to read against its background? (id as printed, e.g. color-contrast.)",
+          "accept": [
+            "color-contrast"
+          ],
+          "answer": "color-contrast",
+          "explanation": "The run reported color-contrast (serious)."
+        },
+        {
+          "id": "pw-u8-l3-e5",
+          "type": "open",
+          "prompt": "A hiring manager asks whether you have done accessibility or visual testing. Give an honest answer of about 80 words that states what you have actually done, what you understand, and one limit of each.",
+          "answer": "I haven't used either at work; my automation was basic end-to-end tests. I have run both on a public demo site to learn them. An axe scan flagged colour contrast and landmark problems, which showed me it finds some issues quickly, but it cannot judge whether labels make sense, so manual checks are still needed. A screenshot comparison fails on its first run while it saves the baseline, and baselines differ per operating system, so they need care in a pipeline. I'd happily build on that.",
+          "rubric": [
+            "States clearly it was not used at work",
+            "Describes what axe found or does",
+            "Names a limit of scans",
+            "Names a limit of screenshot baselines"
+          ]
+        }
+      ]
+    }
+  ]
+}

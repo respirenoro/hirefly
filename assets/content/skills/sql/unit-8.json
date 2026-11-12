@@ -1,0 +1,335 @@
+{
+  "id": "sql-u8",
+  "title": "Window functions and trends",
+  "summary": "Rank rows, compare each period with the one before, build running totals and percent of total, and report months with no activity.",
+  "lessons": [
+    {
+      "id": "sql-u8-l1",
+      "title": "RANK, DENSE_RANK, NTILE and top-N per group",
+      "minutes": 11,
+      "body": "Unit 4 introduced `ROW_NUMBER`. Three related functions number or rank rows inside a window, and they differ only in how they treat ties.\n\nCount shifts per pharmacy on the lesson sample and rank the pharmacies:\n\n```sql\nSELECT p.name,\n       COUNT(s.id) AS shifts,\n       ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, p.name) AS row_num,\n       RANK()       OVER (ORDER BY COUNT(s.id) DESC)         AS rnk,\n       DENSE_RANK() OVER (ORDER BY COUNT(s.id) DESC)         AS dense_rnk\nFROM pharmacies p\nLEFT JOIN shifts s ON s.pharmacy_id = p.id\nGROUP BY p.name;\n```\n\n| name | shifts | row_num | rnk | dense_rnk |\n|---|---|---|---|---|\n| Maple Drug | 3 | 1 | 1 | 1 |\n| Riverside Pharmacy | 3 | 2 | 1 | 1 |\n| Harbor Health Rx | 2 | 3 | 3 | 2 |\n| Oak Street Pharmacy | 0 | 4 | 4 | 3 |\n\n- `ROW_NUMBER` never repeats. Tied rows get different numbers in an order you only control by adding tie-breakers to `ORDER BY`.\n- `RANK` gives tied rows the same number and then skips: 1, 1, 3, 4.\n- `DENSE_RANK` gives tied rows the same number and does not skip: 1, 1, 2, 3.\n\nWindow functions are evaluated after `GROUP BY`, which is why a window can rank an aggregate such as `COUNT(s.id)`. They cannot appear in `WHERE`, so to filter on a rank you compute it in a CTE or subquery and filter outside.\n\nThis is the pattern behind the most famous interview puzzle, the second highest value. Take the five filled shifts, whose minutes to fill are 240, 120, 90, 45 and 20:\n\n```sql\nWITH ranked AS (\n  SELECT id,\n         DATEDIFF(MINUTE, requested_at, filled_at) AS minutes_to_fill,\n         DENSE_RANK() OVER (ORDER BY DATEDIFF(MINUTE, requested_at, filled_at) DESC) AS dr\n  FROM shifts\n  WHERE filled_at IS NOT NULL\n)\nSELECT id, minutes_to_fill FROM ranked WHERE dr = 2;\n```\n\nIt returns shift 108 with 120 minutes. `DENSE_RANK` is the right choice because if two shifts tied for the longest time, `ROW_NUMBER` would call one of them second and `RANK` would skip rank 2 entirely.\n\nFor top N per group, partition the window. The slowest fill at each pharmacy uses `ROW_NUMBER() OVER (PARTITION BY pharmacy_id ORDER BY minutes_to_fill DESC)` and keeps `rn = 1`: shift 101 (90 minutes) for pharmacy 1, shift 104 (240) for pharmacy 2 and shift 105 (20) for pharmacy 3. Use `RANK` instead if tied rows should all be kept.\n\n`NTILE(n)` splits the ordered rows into n roughly equal buckets. `NTILE(2)` over the five filled shifts ordered by minutes puts 105, 102 and 101 in bucket 1 and 108 and 104 in bucket 2, because the extra row goes to the first bucket.",
+      "keyPoints": [
+        "ROW_NUMBER never ties; RANK ties then skips; DENSE_RANK ties without skipping.",
+        "Window functions run after GROUP BY, so they can rank aggregates, but they cannot go in WHERE.",
+        "Nth highest: DENSE_RANK in a CTE, then filter on the rank.",
+        "Top N per group: PARTITION BY the group, ORDER BY the measure, keep rn <= N.",
+        "NTILE(n) splits ordered rows into n buckets."
+      ],
+      "interviewAngle": "Second highest and top N per group are among the most reliable intermediate SQL questions. Name the function and say why: DENSE_RANK for Nth highest because it handles ties. Be straight that you use windows for latest-record and ranking questions and are building depth; your day-to-day reporting was filters, joins, grouping and rates.",
+      "exercises": [
+        {
+          "id": "sql-u8-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Three values sorted descending are 10, 10, 8. What does `RANK()` give the third row (the 8)?",
+          "choices": [
+            "2",
+            "3",
+            "1",
+            "NULL"
+          ],
+          "answer": 1,
+          "explanation": "RANK gives both 10s rank 1, then skips to 3. DENSE_RANK would give 2."
+        },
+        {
+          "id": "sql-u8-l1-e2",
+          "type": "short",
+          "prompt": "Which ranking function gives tied rows the same number and does not skip the next number?",
+          "accept": [
+            "dense_rank",
+            "dense_rank()",
+            "dense rank"
+          ],
+          "answer": "DENSE_RANK",
+          "explanation": "DENSE_RANK produces 1, 1, 2. RANK produces 1, 1, 3."
+        },
+        {
+          "id": "sql-u8-l1-e3",
+          "type": "mcq",
+          "prompt": "You want only rows with `rn = 1` from a ROW_NUMBER calculation. Where does the filter go?",
+          "choices": [
+            "In the WHERE clause of the same SELECT",
+            "In HAVING",
+            "In an outer query or after a CTE that computed rn",
+            "In the OVER clause"
+          ],
+          "answer": 2,
+          "explanation": "Window functions are evaluated after WHERE, so you compute the number in a CTE or subquery and filter in the outer query."
+        },
+        {
+          "id": "sql-u8-l1-e4",
+          "type": "open",
+          "prompt": "Write a query that returns the id of the shift with the second-longest time to fill, among shifts that have a fill time (`id`). Use DENSE_RANK so ties are handled. In SQLite, seconds between times are `strftime('%s', filled_at) - strftime('%s', requested_at)`.",
+          "answer": "```sql\nWITH ranked AS (\n  SELECT id,\n         DENSE_RANK() OVER (ORDER BY DATEDIFF(MINUTE, requested_at, filled_at) DESC) AS dr\n  FROM shifts\n  WHERE filled_at IS NOT NULL\n)\nSELECT id FROM ranked WHERE dr = 2;\n```\n\nOn the lesson sample this is shift 108 (120 minutes). Do not use `MAX(x) WHERE x < MAX(x)` if ties could matter for 'Nth' with N above 2; DENSE_RANK generalises.\n\nOn the practice data this returns 1 row (columns: id); the first row is 1207.",
+          "rubric": [
+            "Filters to shifts with filled_at not NULL",
+            "Ranks by time to fill descending with DENSE_RANK",
+            "Computes the rank in a CTE or subquery",
+            "Filters on rank 2 in the outer query"
+          ],
+          "sqlite": "WITH ranked AS (SELECT id, DENSE_RANK() OVER (ORDER BY strftime('%s', filled_at) - strftime('%s', requested_at) DESC) AS dr FROM shifts WHERE filled_at IS NOT NULL) SELECT id FROM ranked WHERE dr = 2"
+        },
+        {
+          "id": "sql-u8-l1-e5",
+          "type": "open",
+          "prompt": "Rank pharmacies by their number of cancelled shifts. Return pharmacy_id, `cancelled` and `rnk` (RANK, highest first) for ranks 1 to 3 only, sorted by rnk then pharmacy_id.",
+          "answer": "```sql\nWITH c AS (\n  SELECT pharmacy_id, COUNT(*) AS cancelled,\n         RANK() OVER (ORDER BY COUNT(*) DESC) AS rnk\n  FROM shifts\n  WHERE status = 'cancelled'\n  GROUP BY pharmacy_id\n)\nSELECT pharmacy_id, cancelled, rnk\nFROM c\nWHERE rnk <= 3\nORDER BY rnk, pharmacy_id;\n```\n\nBecause RANK keeps ties together, more than three pharmacies can appear when they tie for third place.\n\nOn the practice data this returns 6 rows (columns: pharmacy_id, cancelled, rnk); the first row is 21, 8, 1.",
+          "rubric": [
+            "Counts cancelled shifts per pharmacy",
+            "Applies RANK over the count descending",
+            "Filters rnk <= 3 outside the ranking query",
+            "Orders by rnk then pharmacy_id"
+          ],
+          "sqlite": "SELECT pharmacy_id, cancelled, rnk FROM (SELECT pharmacy_id, COUNT(*) AS cancelled, RANK() OVER (ORDER BY COUNT(*) DESC) AS rnk FROM shifts WHERE status = 'cancelled' GROUP BY pharmacy_id) WHERE rnk <= 3 ORDER BY rnk, pharmacy_id",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u8-l2",
+      "title": "LAG, LEAD and period-over-period change",
+      "minutes": 11,
+      "body": "`LAG(column, n)` reads the value from n rows before the current row, and `LEAD(column, n)` reads from n rows after. The default n is 1. They answer \"compared with the previous period\" without a self join.\n\nMonth-over-month change in average time to fill. Build the monthly figure in a CTE, then compare each month with the one before:\n\n```sql\nWITH monthly AS (\n  SELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n         AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0)      AS avg_min\n  FROM shifts\n  GROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\n)\nSELECT month_start,\n       avg_min,\n       LAG(avg_min) OVER (ORDER BY month_start)                          AS prev_avg_min,\n       avg_min - LAG(avg_min) OVER (ORDER BY month_start)                AS change_min,\n       ROUND(100.0 * (avg_min - LAG(avg_min) OVER (ORDER BY month_start))\n             / LAG(avg_min) OVER (ORDER BY month_start), 1)              AS change_pct\nFROM monthly\nORDER BY month_start;\n```\n\n| month_start | avg_min | prev_avg_min | change_min | change_pct |\n|---|---|---|---|---|\n| 2026-03-01 | 125.0 | NULL | NULL | NULL |\n| 2026-04-01 | 70.0 | 125.0 | -55.0 | -44.0 |\n\nThe first month has no previous row, so `LAG` returns NULL and so does the arithmetic. You can supply a default as the third argument, `LAG(avg_min, 1, 0)`, but a NULL is often more honest than a fake zero.\n\n`PARTITION BY` restarts the lookback for each group. The gap in days between consecutive requests at the same pharmacy:\n\n```sql\nSELECT id, pharmacy_id, requested_at,\n       DATEDIFF(DAY,\n                LAG(requested_at) OVER (PARTITION BY pharmacy_id ORDER BY requested_at),\n                requested_at) AS days_since_prev\nFROM shifts\nORDER BY pharmacy_id, requested_at;\n```\n\nPharmacy 1 gives NULL for shift 101, 3 for shift 102 (from 03-02 to 03-05) and 36 for shift 107 (from 03-05 to 04-10). Pharmacy 2 gives NULL, 4 and 34. Pharmacy 3 gives NULL and 3.\n\n`LEAD` looks forward. `LEAD(requested_at) OVER (ORDER BY requested_at)` on the same pharmacy gives the next request, useful for finding the gap before the next event.\n\nTwo cautions. Window functions see only the rows that survive `WHERE`, so filtering rows out first changes what \"previous\" means. And `LAG` goes by the `ORDER BY` inside `OVER`, not by id: if two rows share the same timestamp, add a tiebreaker column so the result is repeatable.\n\nThis is how you would show the June improvement in emergency fill time to a stakeholder: the monthly average, the previous month, and the change, in one table.",
+      "keyPoints": [
+        "LAG reads a previous row; LEAD reads a following row; the default offset is 1.",
+        "The first row has no previous value, so LAG returns NULL unless you give a default.",
+        "PARTITION BY restarts the lookback for each group.",
+        "Percent change is (current - previous) / previous; compute the monthly figure in a CTE first.",
+        "Filter rows before the window if \"previous\" should skip them, and add tiebreakers to ORDER BY."
+      ],
+      "interviewAngle": "Month-over-month change is a standard analyst question, and it is the honest way to tell your emergency-alert story: show the monthly figures, the previous month and the change. Say you built monthly comparisons in SQL and Excel at work, and that LAG is how you now do it in one query.",
+      "exercises": [
+        {
+          "id": "sql-u8-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does `LAG(avg_min) OVER (ORDER BY month_start)` return for the earliest month?",
+          "choices": [
+            "0",
+            "NULL",
+            "The same month's value",
+            "An error"
+          ],
+          "answer": 1,
+          "explanation": "There is no earlier row, so LAG returns NULL unless a default is given as the third argument."
+        },
+        {
+          "id": "sql-u8-l2-e2",
+          "type": "short",
+          "prompt": "Which function reads the value from the NEXT row in the window?",
+          "accept": [
+            "lead",
+            "lead()"
+          ],
+          "answer": "LEAD",
+          "explanation": "LAG looks back, LEAD looks forward."
+        },
+        {
+          "id": "sql-u8-l2-e3",
+          "type": "mcq",
+          "prompt": "The average time to fill went from 125.0 minutes in March to 70.0 in April. What is the percent change, rounded to one decimal?",
+          "choices": [
+            "-55.0",
+            "-44.0",
+            "-78.6",
+            "44.0"
+          ],
+          "answer": 1,
+          "explanation": "(70 - 125) / 125 x 100 = -44.0. The change in minutes is -55.0."
+        },
+        {
+          "id": "sql-u8-l2-e4",
+          "type": "open",
+          "prompt": "Write a query that returns each month of requested_at (`month_start`), the shifts requested (`requested`), the previous month's count (`prev_requested`) and the difference (`change`). Sort by month. In SQLite use `strftime('%Y-%m-01', requested_at)`.",
+          "answer": "```sql\nWITH m AS (\n  SELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n         COUNT(*) AS requested\n  FROM shifts\n  GROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\n)\nSELECT month_start, requested,\n       LAG(requested) OVER (ORDER BY month_start) AS prev_requested,\n       requested - LAG(requested) OVER (ORDER BY month_start) AS change\nFROM m\nORDER BY month_start;\n```\n\nOn the lesson sample the result is March with 4 and April with 4, so change is 0. The first month has NULL for prev_requested and change.\n\nOn the practice data this returns 11 rows (columns: month_start, requested, prev_requested, change); the first row is 2025-12-01, 4, None, None.",
+          "rubric": [
+            "Aggregates to one row per month in a CTE",
+            "Uses LAG over ORDER BY month_start",
+            "Computes the difference from the same LAG expression",
+            "Leaves the first month NULL and sorts by month"
+          ],
+          "sqlite": "WITH m AS (SELECT strftime('%Y-%m-01', requested_at) AS month_start, COUNT(*) AS requested FROM shifts GROUP BY 1) SELECT month_start, requested, LAG(requested) OVER (ORDER BY month_start) AS prev_requested, requested - LAG(requested) OVER (ORDER BY month_start) AS change FROM m ORDER BY month_start",
+          "ordered": true
+        },
+        {
+          "id": "sql-u8-l2-e5",
+          "type": "open",
+          "prompt": "For pharmacy 1 only, list each shift (`id`, `requested_at`) with the number of calendar days since that pharmacy's previous request (`days_since_prev`), oldest first. In SQLite use `CAST(julianday(date(a)) - julianday(date(b)) AS INTEGER)`.",
+          "answer": "```sql\nSELECT id, requested_at,\n       DATEDIFF(DAY,\n                LAG(requested_at) OVER (ORDER BY requested_at),\n                requested_at) AS days_since_prev\nFROM shifts\nWHERE pharmacy_id = 1\nORDER BY requested_at;\n```\n\nOn the lesson sample: shift 101 NULL, 102 is 3, 107 is 36. The WHERE runs before the window, so only pharmacy 1 rows are considered 'previous'. For every pharmacy at once, use PARTITION BY pharmacy_id.\n\nOn the practice data this returns 33 rows (columns: id, requested_at, days_since_prev); the first row is 1072, 2026-01-23 03:34:19, None.",
+          "rubric": [
+            "Uses LAG(requested_at) ordered by requested_at",
+            "Filters pharmacy_id = 1 before the window",
+            "Computes calendar days between the two timestamps",
+            "Returns the first row with NULL and sorts oldest first"
+          ],
+          "sqlite": "SELECT id, requested_at, CAST(julianday(date(requested_at)) - julianday(date(LAG(requested_at) OVER (ORDER BY requested_at))) AS INTEGER) AS days_since_prev FROM shifts WHERE pharmacy_id = 1 ORDER BY requested_at",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u8-l3",
+      "title": "Running totals, moving averages and percent of total",
+      "minutes": 11,
+      "body": "Aggregate functions become window functions when you add `OVER`. The result keeps every row and carries the aggregate alongside it. Three jobs come up constantly: running totals, moving averages and percent of total.\n\nAn empty `OVER ()` means the window is the whole result set. That is the trick for percent of total. Share of shifts by pharmacy on the lesson sample:\n\n```sql\nSELECT pharmacy_id,\n       COUNT(*) AS shifts,\n       SUM(COUNT(*)) OVER (ORDER BY pharmacy_id) AS running_shifts,\n       ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct_of_all\nFROM shifts\nGROUP BY pharmacy_id;\n```\n\n| pharmacy_id | shifts | running_shifts | pct_of_all |\n|---|---|---|---|\n| 1 | 3 | 3 | 37.5 |\n| 2 | 3 | 6 | 37.5 |\n| 3 | 2 | 8 | 25.0 |\n\n`SUM(COUNT(*)) OVER ()` first counts per group, then sums those counts across all groups, which is 8.\n\nA frame tells the window which rows around the current one to include. The two common forms:\n\n- `ROWS UNBOUNDED PRECEDING` (or `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`): everything from the start to here. This is a running total.\n- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`: this row and the two before it, at most 3 rows. This is a 3-row moving average.\n\nThe five filled shifts in request order have minutes to fill of 90, 45, 240, 20 and 120:\n\n```sql\nSELECT id,\n       DATEDIFF(MINUTE, requested_at, filled_at) AS minutes_to_fill,\n       AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0)\n         OVER (ORDER BY requested_at ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS moving_avg\nFROM shifts\nWHERE filled_at IS NOT NULL;\n```\n\nThe moving averages are 90.0, 67.5, 125.0, 101.7 and 126.7. The first rows average fewer values because there are not yet two rows behind them.\n\nWrite the frame explicitly. If you give `ORDER BY` and leave the frame out, the default is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, which treats rows with the same sort value as one group, so a running total over a date column with ties jumps by whole groups. `ROWS` counts physical rows and behaves the way most people expect.\n\nA SQL Server note: window functions are not allowed in `GROUP BY` or `WHERE`. Wrap them in a CTE if you need to filter on the result.\n\nHonest depth: you can read and write these patterns, which are standard in analyst assessments. At work your reporting was mostly filters, grouping and rates; say that, and that you have been building the window function skills on top.",
+      "keyPoints": [
+        "OVER () with nothing inside makes the whole result one window.",
+        "Percent of total: 100.0 * x / SUM(x) OVER ().",
+        "ROWS UNBOUNDED PRECEDING gives a running total; ROWS BETWEEN 2 PRECEDING AND CURRENT ROW gives a 3-row moving average.",
+        "Write the frame explicitly; the default RANGE frame groups tied rows together.",
+        "Window functions cannot go in WHERE or GROUP BY; use a CTE."
+      ],
+      "interviewAngle": "Running totals and percent of total are the other window staples. Describe them as patterns you can write and explain, and give the honest framing: you reported monthly totals and rates at work and are building window depth on top. If asked for a moving average, mention that you state the frame explicitly.",
+      "exercises": [
+        {
+          "id": "sql-u8-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does `SUM(COUNT(*)) OVER ()` give next to each group row in a grouped query?",
+          "choices": [
+            "The count for that group only",
+            "The total of all group counts",
+            "A running total",
+            "An error, because aggregates cannot nest"
+          ],
+          "answer": 1,
+          "explanation": "The empty OVER makes one window of all groups, so each row sees the grand total. That is the denominator for percent of total."
+        },
+        {
+          "id": "sql-u8-l3-e2",
+          "type": "short",
+          "prompt": "What is the largest number of rows included by the frame `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`? Answer with a number.",
+          "accept": [
+            "3",
+            "three"
+          ],
+          "answer": "3",
+          "explanation": "The current row plus up to two before it."
+        },
+        {
+          "id": "sql-u8-l3-e3",
+          "type": "mcq",
+          "prompt": "Three pharmacies have 3, 3 and 2 shifts. A running total in pharmacy order gives which values?",
+          "choices": [
+            "3, 3, 2",
+            "3, 6, 8",
+            "8, 8, 8",
+            "3, 6, 5"
+          ],
+          "answer": 1,
+          "explanation": "Each row adds its count to the total so far: 3, 3+3=6, 6+2=8."
+        },
+        {
+          "id": "sql-u8-l3-e4",
+          "type": "open",
+          "prompt": "Write a query that returns completed assignments per month of completed_at (`month_start`, `completed`) and the running total across months (`running_total`), in month order. In SQLite use `strftime('%Y-%m-01', completed_at)`.",
+          "answer": "```sql\nWITH monthly AS (\n  SELECT DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1) AS month_start,\n         COUNT(*) AS completed\n  FROM assignments\n  WHERE status = 'completed'\n  GROUP BY DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1)\n)\nSELECT month_start, completed,\n       SUM(completed) OVER (ORDER BY month_start ROWS UNBOUNDED PRECEDING) AS running_total\nFROM monthly\nORDER BY month_start;\n```\n\nOn the lesson sample: March 3 (running 3) and April 1 (running 4).\n\nOn the practice data this returns 10 rows (columns: month_start, completed, running_total); the first row is 2026-01-01, 72, 72.",
+          "rubric": [
+            "Filters to completed assignments",
+            "Groups to one row per month in a CTE",
+            "Uses SUM() OVER (ORDER BY month ...) for the running total",
+            "States the ROWS frame or explains the default"
+          ],
+          "sqlite": "WITH monthly AS (SELECT strftime('%Y-%m-01', completed_at) AS month_start, COUNT(*) AS completed FROM assignments WHERE status = 'completed' GROUP BY 1) SELECT month_start, completed, SUM(completed) OVER (ORDER BY month_start ROWS UNBOUNDED PRECEDING) AS running_total FROM monthly ORDER BY month_start",
+          "ordered": true
+        },
+        {
+          "id": "sql-u8-l3-e5",
+          "type": "open",
+          "prompt": "Write a query that returns each shift status with its number of shifts (`shifts`) and its percentage of all shifts rounded to one decimal (`pct`), largest first.",
+          "answer": "```sql\nSELECT status,\n       COUNT(*) AS shifts,\n       ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct\nFROM shifts\nGROUP BY status\nORDER BY shifts DESC;\n```\n\nOn the lesson sample: completed 4 (50.0), cancelled 3 (37.5), open 1 (12.5).\n\nOn the practice data this returns 3 rows (columns: status, shifts, pct); the first row is completed, 828, 81.3.",
+          "rubric": [
+            "Groups by status and counts",
+            "Uses SUM(COUNT(*)) OVER () as the denominator",
+            "Multiplies by 100.0 to avoid integer division",
+            "Rounds to one decimal and sorts by shifts descending"
+          ],
+          "sqlite": "SELECT status, COUNT(*) AS shifts, ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct FROM shifts GROUP BY status ORDER BY shifts DESC",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u8-l4",
+      "title": "Date bucketing and calendars: months and days with no data",
+      "minutes": 11,
+      "body": "Reports bucket timestamps: by month, week, weekday, hour or lead time. The grouping expression is the whole trick.\n\n| Bucket | T-SQL | SQLite |\n|---|---|---|\n| Month start | `DATEFROMPARTS(YEAR(x), MONTH(x), 1)` or `DATETRUNC(MONTH, x)` (SQL Server 2022 and later) | `strftime('%Y-%m-01', x)` |\n| Quarter | `DATEPART(QUARTER, x)` | `(strftime('%m', x) + 2) / 3` |\n| Weekday number | `DATEPART(WEEKDAY, x)`, where 1 is Sunday with default US settings | `strftime('%w', x)`, where 0 is Sunday |\n| Weekday name | `DATENAME(WEEKDAY, x)` | not built in; use CASE |\n| Hour of day | `DATEPART(HOUR, x)` | `strftime('%H', x)` |\n| Last day of month | `EOMONTH(x)` | `date(x, 'start of month', '+1 month', '-1 day')` |\n\n`DATEPART(WEEKDAY, ...)` depends on the session's `DATEFIRST` setting, so say which day you assume.\n\nLead time is a bucket made with `CASE`. Days from request to start on the lesson sample are 1, 1, 1, 3, 1, 1, 2, 1:\n\n```sql\nSELECT CASE WHEN DATEDIFF(DAY, requested_at, starts_at) <= 1 THEN 'next day or sooner'\n            ELSE '2 days or more' END AS lead_time,\n       COUNT(*) AS shifts\nFROM shifts\nGROUP BY CASE WHEN DATEDIFF(DAY, requested_at, starts_at) <= 1 THEN 'next day or sooner'\n              ELSE '2 days or more' END;\n```\n\nThat gives 6 shifts in the first bucket and 2 in the second.\n\nThe harder, more valuable idea is the missing period. A `GROUP BY` can only show months that have rows. To show a month with no shifts as 0, start from a calendar and `LEFT JOIN` the data to it. A recursive CTE generates the calendar. In T-SQL:\n\n```sql\nWITH months AS (\n  SELECT CAST('2026-02-01' AS date) AS month_start\n  UNION ALL\n  SELECT DATEADD(MONTH, 1, month_start) FROM months WHERE month_start < '2026-05-01'\n)\nSELECT m.month_start, COUNT(s.id) AS requested\nFROM months m\nLEFT JOIN shifts s\n       ON s.requested_at >= m.month_start\n      AND s.requested_at <  DATEADD(MONTH, 1, m.month_start)\nGROUP BY m.month_start\nORDER BY m.month_start;\n```\n\nThe result is February 0, March 4, April 4 and May 0. SQLite and PostgreSQL need `WITH RECURSIVE`, and SQLite builds the next month with `date(month_start, '+1 month')`. SQL Server stops a recursive CTE at 100 levels by default, so a daily calendar longer than 100 days needs `OPTION (MAXRECURSION 0)`.\n\nThe same idea finds gaps: days with no emergency request are the calendar days that match nothing, so filter the left join with `WHERE s.id IS NULL`. Apply the half-open range rule from unit 1 in the join.",
+      "keyPoints": [
+        "Group by an expression that buckets the timestamp: month start, quarter, weekday, hour or a CASE lead-time band.",
+        "State your weekday convention; DATEPART(WEEKDAY) depends on DATEFIRST.",
+        "GROUP BY only shows periods that have rows; start from a calendar and LEFT JOIN to show zeros.",
+        "A recursive CTE builds a calendar; SQLite and PostgreSQL write WITH RECURSIVE.",
+        "Calendar days with no match are the gaps; filter the LEFT JOIN for IS NULL."
+      ],
+      "interviewAngle": "Date bucketing is in almost every analyst take-home. Say how you define the period boundaries and why you use a half-open range. The calendar-with-zeros idea is a strong sign of care: a month with no data should appear as 0, not vanish. Be honest that this is a pattern you know and practise, not something you did daily.",
+      "exercises": [
+        {
+          "id": "sql-u8-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why start a monthly report from a generated calendar and LEFT JOIN the shifts to it?",
+          "choices": [
+            "It makes the query run faster.",
+            "Months with no shifts still appear, with a count of 0.",
+            "It removes duplicate shifts.",
+            "It lets you use HAVING."
+          ],
+          "answer": 1,
+          "explanation": "GROUP BY on the shifts alone can only return months that have rows. The calendar supplies every month."
+        },
+        {
+          "id": "sql-u8-l4-e2",
+          "type": "short",
+          "prompt": "In SQLite and PostgreSQL, which keyword must follow WITH to write a recursive CTE?",
+          "accept": [
+            "recursive",
+            "with recursive"
+          ],
+          "answer": "RECURSIVE",
+          "explanation": "WITH RECURSIVE. T-SQL does not use the keyword."
+        },
+        {
+          "id": "sql-u8-l4-e3",
+          "type": "mcq",
+          "prompt": "What does `DATEDIFF(MONTH, '2026-03-31', '2026-04-01')` return in T-SQL?",
+          "choices": [
+            "0",
+            "1",
+            "31",
+            "2"
+          ],
+          "answer": 1,
+          "explanation": "DATEDIFF counts month boundaries crossed, and the two dates sit in different months, so it returns 1 even though one day passed."
+        },
+        {
+          "id": "sql-u8-l4-e4",
+          "type": "open",
+          "prompt": "Write a query that counts shifts requested by day of the week (`weekday_num`, `shifts`), sorted by weekday_num. In SQLite use `CAST(strftime('%w', requested_at) AS INTEGER)`, where 0 is Sunday. Say which convention you used.",
+          "answer": "```sql\nSELECT DATEPART(WEEKDAY, requested_at) AS weekday_num,   -- 1 = Sunday with US defaults\n       COUNT(*) AS shifts\nFROM shifts\nGROUP BY DATEPART(WEEKDAY, requested_at)\nORDER BY weekday_num;\n```\n\nIn SQLite the number is `CAST(strftime('%w', requested_at) AS INTEGER)`, where 0 is Sunday. Naming the convention is part of the answer, because the two systems number the days differently.\n\nOn the practice data this returns 7 rows (columns: weekday_num, shifts); the first row is 0, 161.",
+          "rubric": [
+            "Buckets requested_at to a weekday number",
+            "Groups by the same expression and counts",
+            "States the numbering convention",
+            "Orders by the weekday number"
+          ],
+          "sqlite": "SELECT CAST(strftime('%w', requested_at) AS INTEGER) AS weekday_num, COUNT(*) AS shifts FROM shifts GROUP BY weekday_num ORDER BY weekday_num",
+          "ordered": true
+        },
+        {
+          "id": "sql-u8-l4-e5",
+          "type": "open",
+          "prompt": "Write a query that returns every month of 2026 from January to December (`month_start`) with the number of tickets opened that month (`tickets`), showing 0 for months with no tickets. Build the months with a recursive CTE. In SQLite use `WITH RECURSIVE` and `date(month_start, '+1 month')`.",
+          "answer": "```sql\nWITH months AS (\n  SELECT CAST('2026-01-01' AS date) AS month_start\n  UNION ALL\n  SELECT DATEADD(MONTH, 1, month_start) FROM months WHERE month_start < '2026-12-01'\n)\nSELECT m.month_start, COUNT(t.id) AS tickets\nFROM months m\nLEFT JOIN tickets t\n       ON t.opened_at >= m.month_start\n      AND t.opened_at <  DATEADD(MONTH, 1, m.month_start)\nGROUP BY m.month_start\nORDER BY m.month_start;\n```\n\nThe practice tickets stop in early October, so November and December show 0. In SQLite write `WITH RECURSIVE` and `date(month_start, '+1 month')`.\n\nOn the practice data this returns 12 rows (columns: month_start, tickets); the first row is 2026-01-01, 96.",
+          "rubric": [
+            "Generates twelve months with a recursive CTE",
+            "LEFT JOINs tickets using a half-open range in ON",
+            "Counts t.id so empty months give 0",
+            "Groups and orders by month"
+          ],
+          "sqlite": "WITH RECURSIVE months(month_start) AS (SELECT '2026-01-01' UNION ALL SELECT date(month_start, '+1 month') FROM months WHERE month_start < '2026-12-01') SELECT m.month_start, COUNT(t.id) AS tickets FROM months m LEFT JOIN tickets t ON t.opened_at >= m.month_start AND t.opened_at < date(m.month_start, '+1 month') GROUP BY m.month_start ORDER BY m.month_start",
+          "ordered": true
+        }
+      ]
+    }
+  ]
+}

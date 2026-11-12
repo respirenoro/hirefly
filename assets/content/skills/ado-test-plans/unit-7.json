@@ -1,0 +1,141 @@
+{
+  "id": "tp-u7",
+  "title": "Test strategy, plan and ISTQB vocabulary",
+  "summary": "How a strategy differs from a plan, a one-page release plan, test levels and types, and the Foundation-level terms interviewers use.",
+  "lessons": [
+    {
+      "id": "tp-u7-l1",
+      "title": "Test strategy and test plan: two different documents",
+      "minutes": 10,
+      "body": "Interviewers mix these up, and so do many teams. The ISTQB Foundation syllabus separates them.\n\n**Test strategy.** Long-lived and organisation or product level: the general approach to testing. It answers how we test here. Typical content: test levels used, test types, techniques, tools, environments, defect handling, roles, entry and exit criteria defaults, and the automation approach. It changes rarely. For the scheduling product it might say: manual functional testing in Azure DevOps Test Plans, risk-based prioritisation, Playwright smoke tests in the pipeline, UAT with the customer before each major release.\n\n**Test plan.** Specific to a project, release or sprint: what, when, who, how much. Typical content (ISTQB test plan outline): context and scope, assumptions and constraints, stakeholders and communication, risk register (product and project), test approach and techniques for this release, entry and exit criteria, schedule and effort, environments and data, roles, metrics, and the test items.\n\n| | Strategy | Plan |\n|---|---|---|\n| Scope | Product or organisation | One release |\n| Lifespan | Months to years | Days to weeks |\n| Question | How do we test? | What, when, who for this release? |\n| Where | Wiki page | Wiki one-pager and the Test Plan in Test Plans |\n| Example line | Priority 1 cases always automated where stable | Release 3.2 covers SOS stories 1234 and 1240 |\n\n**Test plan in Azure DevOps is a container.** The Test Plan work item holds area and iteration, dates, a build and suites; it is not a document. Pair it with a short planning page in the wiki so scope, risks and criteria are readable by non-testers.\n\n**A one-page release plan outline.**\n\n1. Release, build, dates\n2. Scope in and out (stories, areas not tested)\n3. Risks and mitigations (SOS alerting high; environment stability medium)\n4. Approach (smoke, story suites, regression, exploratory, UAT)\n5. Environments and data (test environment, seeded pharmacies)\n6. People and access (testers, who needs Basic + Test Plans)\n7. Entry and exit criteria\n8. Schedule and reporting (daily progress report, triage meeting)\n9. Open questions\n\n**Agile twist.** Plans are lighter and updated each sprint; the strategy lives on. Do not write a 40-page plan nobody reads.\n\n**Test process activities (ISTQB v4).** Test planning, monitoring and control, analysis, design, implementation, execution and completion. Completion produces a test completion report and lessons learned, which you used in retrospectives.",
+      "keyPoints": [
+        "The strategy says how we test; the plan says what, when and who for this release.",
+        "Azure DevOps's Test Plan is a container for suites, not a document; add a wiki page for scope, risks and criteria.",
+        "A good plan fits one page: scope, risk, approach, environments, people, criteria, schedule.",
+        "Test process: plan, monitor and control, analyse, design, implement, execute, complete."
+      ],
+      "interviewAngle": "'What goes in a test plan?' is asked often. Give the one-page outline and mention scope out, risks and exit criteria. If asked about a strategy document, say the team had a short one, you applied it, and you updated the plan per release.",
+      "exercises": [
+        {
+          "id": "tp-u7-l1-e1",
+          "type": "mcq",
+          "prompt": "Which statement describes a test strategy rather than a test plan?",
+          "choices": [
+            "Release 3.2 testing starts on 4 March",
+            "All priority 1 flows are covered by smoke tests and risk drives depth",
+            "Tester A runs the SOS suite",
+            "The build is 2041"
+          ],
+          "answer": 1,
+          "explanation": "Strategy states general approach; plans carry release-specific details.",
+          "placement": true
+        },
+        {
+          "id": "tp-u7-l1-e2",
+          "type": "mcq",
+          "prompt": "What is an Azure DevOps Test Plan?",
+          "choices": [
+            "A Word document",
+            "A container of suites and test points with area, iteration and dates",
+            "A pipeline",
+            "A query"
+          ],
+          "answer": 1,
+          "explanation": "It organises suites and results; documentation lives in the wiki."
+        },
+        {
+          "id": "tp-u7-l1-e3",
+          "type": "short",
+          "prompt": "Which part of a plan lists what is deliberately not being tested?",
+          "accept": [
+            "scope out",
+            "out of scope",
+            "out-of-scope",
+            "scope"
+          ],
+          "answer": "out of scope",
+          "explanation": "Naming exclusions prevents false assumptions."
+        },
+        {
+          "id": "tp-u7-l1-e4",
+          "type": "open",
+          "prompt": "Write the one-page plan outline for Release 3.2 with a filled-in scope, risks and exit criteria line.",
+          "answer": "Release 3.2, build 2051 candidate, testing 10 to 21 March. Scope in: stories 1234 SOS radius, 1240 SOS alert content, 1251 cancel reason; regression of scheduling and notifications. Out: reporting export (unchanged), admin screens. Risks: SOS recipient selection (high impact, new code); test environment downtime (project risk); customer UAT staff availability. Approach: smoke each build, requirement-based suites per story, regression, two exploratory sessions on SOS, UAT with the customer. Environments: Test, seeded pharmacies. People: two testers with Basic + Test Plans. Exit: all priority 1 and 2 executed, no open Severity 1 or 2, UAT signed. Reporting: daily progress report, 20-minute triage.",
+          "rubric": [
+            "Scope in and out",
+            "Named risks with levels",
+            "Approach and environments",
+            "Exit criteria",
+            "Fits one page"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u7-l2",
+      "title": "Test levels, test types and ISTQB vocabulary",
+      "minutes": 9,
+      "body": "Interviewers use ISTQB terms. Knowing them lets you answer in their language without overclaiming. Your honest level: you know the vocabulary and applied the ideas; you do not hold the certificate.\n\n**Test levels** (where in the lifecycle):\n\n| Level | Focus | Who | Scheduling example |\n|---|---|---|---|\n| Component (unit) | One piece of code | Developers | Distance function |\n| Integration | Interfaces between components | Developers, testers | Alert service calls the notification provider |\n| System | Whole product against requirements | Testers | SOS flow in the test environment |\n| Acceptance (UAT) | Fit for business use | Customer users | Customer staff fill shifts with SOS |\n\n**Test types** (what aspect):\n\n- **Functional**: what the system does.\n- **Non-functional**: how well it does it (performance, usability, security, reliability, compatibility, accessibility).\n- **Black-box**: from specifications and behaviour; **white-box**: from code structure.\n- **Change-related**: **confirmation testing** (retest a fixed bug) and **regression testing** (check nothing else broke).\n\nSmoke and sanity are common terms rather than formal levels: smoke is a quick check of the build's basic function; sanity a narrow check after a small fix.\n\n**Static testing.** Reviewing work products without running code: requirements reviews, acceptance criteria reviews, test case reviews. Your role writing and reviewing acceptance criteria was static testing, which is cheap defect prevention. Ask: is each criterion testable, unambiguous, complete?\n\n**Seven testing principles** (summarised): testing shows the presence of defects, not their absence; exhaustive testing is impossible; early testing saves time; defects cluster; tests wear out (the pesticide paradox: rerunning identical tests stops finding new bugs, so refresh them); testing is context dependent; absence of defects is a fallacy (a bug-free product can still be wrong for users).\n\n**Error, defect, failure.** A person makes an **error** (mistake), which creates a **defect** (bug) in code or documents, which can cause a **failure** when executed.\n\n**Verification versus validation.** Verification: are we building it right (to spec)? Validation: are we building the right thing (for users)? UAT is mostly validation.\n\n**Quality assurance versus quality control.** QA improves processes to prevent defects; QC (testing) finds defects in products.",
+      "keyPoints": [
+        "Test levels: component, integration, system, acceptance.",
+        "Confirmation testing rechecks a fix; regression testing checks for side effects.",
+        "Reviewing acceptance criteria is static testing.",
+        "Know the seven principles, especially: absence of defects does not mean quality, and tests need refreshing."
+      ],
+      "interviewAngle": "Use the vocabulary lightly: 'I did system and acceptance level testing, with confirmation and regression after fixes, and I reviewed acceptance criteria as a form of static testing.' If asked about certification say you have studied the Foundation syllabus topics but do not hold the certificate.",
+      "exercises": [
+        {
+          "id": "tp-u7-l2-e1",
+          "type": "mcq",
+          "prompt": "A developer fixed a bug. You rerun the failed test case. What is this called?",
+          "choices": [
+            "Regression testing",
+            "Confirmation testing",
+            "Smoke testing",
+            "Static testing"
+          ],
+          "answer": 1,
+          "explanation": "Retesting the specific failure is confirmation testing.",
+          "placement": true
+        },
+        {
+          "id": "tp-u7-l2-e2",
+          "type": "mcq",
+          "prompt": "Reviewing acceptance criteria for ambiguity before development is:",
+          "choices": [
+            "Dynamic testing",
+            "Static testing",
+            "Load testing",
+            "Regression"
+          ],
+          "answer": 1,
+          "explanation": "No code is executed."
+        },
+        {
+          "id": "tp-u7-l2-e3",
+          "type": "short",
+          "prompt": "Which test level does UAT belong to?",
+          "accept": [
+            "acceptance",
+            "acceptance testing",
+            "acceptance level"
+          ],
+          "answer": "acceptance",
+          "explanation": "UAT is acceptance-level testing."
+        },
+        {
+          "id": "tp-u7-l2-e4",
+          "type": "open",
+          "prompt": "Explain the difference between an error, a defect and a failure using the SOS feature.",
+          "answer": "Error: the developer misreads the rule and writes the wrong distance comparison. Defect: the code now uses less-than instead of less-than-or-equal, a flaw in the product. Failure: when a manager sends a 10-mile SOS, a pharmacist at exactly 10 miles is not alerted, a visible wrong behaviour. Testing finds failures; developers find and fix defects; process improvement reduces errors, for example by clearer acceptance criteria.",
+          "rubric": [
+            "Error as human mistake",
+            "Defect in the artefact",
+            "Failure as observable behaviour",
+            "Uses a concrete SOS example"
+          ]
+        }
+      ]
+    }
+  ]
+}

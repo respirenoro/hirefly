@@ -1,0 +1,221 @@
+{
+  "id": "sql-u5",
+  "title": "Reporting and QA work",
+  "summary": "Build the metrics you reported at work, define them precisely, check that data is clean, and use queries as evidence when verifying a bug or a test result.",
+  "lessons": [
+    {
+      "id": "sql-u5-l1",
+      "title": "Building the real metrics",
+      "minutes": 11,
+      "body": "The four reports you can honestly describe are shift fill rate, average time to fill, cancellation rate with reasons, and assignments completed per month. Before any SQL, write the definition. Most disagreements about a number are disagreements about the definition.\n\n- Fill rate: shifts that received a pharmacist (`filled_at` is not NULL) divided by shifts requested.\n- Time to fill: minutes from `requested_at` to `filled_at`, averaged over filled shifts only.\n- Cancellation rate: cancelled shifts divided by requested shifts. Reasons come from `cancel_reason`.\n- Assignments per month: assignments with status 'completed', grouped by the month of `completed_at`.\n\nOne combined monthly report covers the first two:\n\n```sql\nSELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n       COUNT(*)         AS requested,\n       COUNT(filled_at) AS filled,\n       ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) AS fill_rate_pct,\n       AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0) AS avg_min_to_fill\nFROM shifts\nGROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\nORDER BY month_start;\n```\n\n| month_start | requested | filled | fill_rate_pct | avg_min_to_fill |\n|---|---|---|---|---|\n| 2026-03-01 | 4 | 3 | 75.0 | 125.0 |\n| 2026-04-01 | 4 | 2 | 50.0 | 70.0 |\n\nNotice the judgment call: shift 108 in April was filled and then cancelled, and it counts as filled here. If the business wants the share of shifts actually worked, you need a second metric based on `status = 'completed'`: 3 of 4 in March, and 1 of 4 in April (shift 105). Naming both clearly beats picking one silently.\n\nCancellation reasons, as a share of cancelled shifts:\n\n```sql\nSELECT cancel_reason,\n       COUNT(*) AS cancelled,\n       ROUND(100.0 * COUNT(*) /\n             (SELECT COUNT(*) FROM shifts WHERE status = 'cancelled'), 1) AS pct_of_cancelled\nFROM shifts\nWHERE status = 'cancelled'\nGROUP BY cancel_reason\nORDER BY cancelled DESC, cancel_reason;\n```\n\nThere are three reasons, each with 1 cancellation and 33.3 percent of the cancelled shifts: 'no coverage', 'pharmacist cancelled' and 'pharmacy cancelled'. As a share of all 8 shifts, each is 12.5 percent. Always say which denominator you used.\n\nAssignments completed per month:\n\n```sql\nSELECT DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1) AS month_start,\n       COUNT(*) AS completed_assignments\nFROM assignments\nWHERE status = 'completed'\nGROUP BY DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1)\nORDER BY month_start;\n```\n\nThe result is 2026-03-01 with 3 and 2026-04-01 with 1. The cancelled assignment (id 5) is excluded by the WHERE clause.",
+      "keyPoints": [
+        "Write the definition, numerator and denominator before the query.",
+        "Average time to fill is over filled shifts only; say so.",
+        "Filled and completed are different: shift 108 was filled, then cancelled.",
+        "Report reasons as a share of cancelled shifts or of all shifts, and name which.",
+        "Spot-check a result against a few rows by hand."
+      ],
+      "interviewAngle": "These four metrics are the core of your SQL story, so be ready to walk through one end to end: the definition, the query, a sanity check, and who used it. Do not invent numbers or tools you did not use. Say 'retrieval and reporting' and be specific about your definitions. If asked about dashboards, say you reported results from queries.",
+      "exercises": [
+        {
+          "id": "sql-u5-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "April has 4 requested shifts, and 2 of them (105 and 108) have a fill time. What does `ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1)` return for April?",
+          "choices": [
+            "50.0",
+            "75.0",
+            "40.0",
+            "100.0"
+          ],
+          "answer": 0,
+          "explanation": "COUNT(filled_at) is 2 and COUNT(*) is 4, so 100.0 * 2 / 4 = 50.0."
+        },
+        {
+          "id": "sql-u5-l1-e2",
+          "type": "short",
+          "prompt": "What is the average minutes to fill for March on the sample data? (Filled March shifts took 90, 45 and 240 minutes.) Answer with a number.",
+          "accept": [
+            "125",
+            "125.0"
+          ],
+          "answer": "125",
+          "explanation": "(90 + 45 + 240) / 3 = 125. March shift 103 was never filled, so it has no time to fill and is ignored."
+        },
+        {
+          "id": "sql-u5-l1-e3",
+          "type": "mcq",
+          "prompt": "The business asks for the share of requested shifts that were completed (actually worked). Which expression is correct on the sample data, where the answer is 50.0?",
+          "choices": [
+            "100.0 * COUNT(filled_at) / COUNT(*)",
+            "100.0 * SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) / COUNT(*)",
+            "100 * COUNT(*) / COUNT(*)",
+            "COUNT(status) / COUNT(*)"
+          ],
+          "answer": 1,
+          "explanation": "Four of 8 shifts are completed, which is 50.0. The first option counts shift 108 (filled, then cancelled) and gives 62.5. The last option is integer division and returns 1 or 0."
+        },
+        {
+          "id": "sql-u5-l1-e4",
+          "type": "open",
+          "prompt": "Write a query that shows, for cancelled shifts only, each cancel reason, how many shifts it applies to (`cancelled`), and its percentage of all cancelled shifts rounded to one decimal (`pct_of_cancelled`). Sort by count descending, then reason. Give the result on the sample data.",
+          "answer": "```sql\nSELECT cancel_reason,\n       COUNT(*) AS cancelled,\n       ROUND(100.0 * COUNT(*) /\n             (SELECT COUNT(*) FROM shifts WHERE status = 'cancelled'), 1) AS pct_of_cancelled\nFROM shifts\nWHERE status = 'cancelled'\nGROUP BY cancel_reason\nORDER BY cancelled DESC, cancel_reason;\n```\n\nResult: no coverage 1 (33.3), pharmacist cancelled 1 (33.3), pharmacy cancelled 1 (33.3). Each of the three cancelled shifts has a different reason.\n\nOn the practice data this returns 3 rows (columns: cancel_reason, cancelled, pct_of_cancelled); the first row is no coverage, 65, 38.0.",
+          "rubric": [
+            "Filters WHERE status = 'cancelled' so the NULL reason group is excluded",
+            "Groups by cancel_reason and counts rows",
+            "Uses a denominator of all cancelled shifts (a subquery or window) with 100.0 to avoid integer division",
+            "Gives three rows of 1 and 33.3 in alphabetical order"
+          ],
+          "sqlite": "SELECT cancel_reason, COUNT(*) AS cancelled, ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM shifts WHERE status = 'cancelled'), 1) AS pct_of_cancelled FROM shifts WHERE status = 'cancelled' GROUP BY cancel_reason ORDER BY cancelled DESC, cancel_reason",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u5-l2",
+      "title": "Validating data: checks that should return nothing",
+      "minutes": 10,
+      "body": "Before a number goes into a report, check that the data behind it makes sense. A good data-quality check is a query that returns rows only when a rule is broken. An empty result means pass. That makes checks easy to rerun and easy to explain.\n\nOn the sample data, each of these should return zero rows.\n\nCancelled shifts must have a reason:\n\n```sql\nSELECT id FROM shifts\nWHERE status = 'cancelled' AND cancel_reason IS NULL;\n```\n\nA fill time cannot be earlier than the request time:\n\n```sql\nSELECT id FROM shifts\nWHERE filled_at < requested_at;\n```\n\nA filled shift must have a pharmacist:\n\n```sql\nSELECT id FROM shifts\nWHERE filled_at IS NOT NULL AND pharmacist_id IS NULL;\n```\n\nEvery shift must point to a real pharmacy (orphan check, using the LEFT JOIN pattern):\n\n```sql\nSELECT s.id\nFROM shifts s\nLEFT JOIN pharmacies p ON p.id = s.pharmacy_id\nWHERE p.id IS NULL;\n```\n\nA shift should not have two completed assignments. More generally, find duplicates by grouping on the key and using HAVING:\n\n```sql\nSELECT shift_id, COUNT(*) AS assignment_rows\nFROM assignments\nWHERE status = 'completed'\nGROUP BY shift_id\nHAVING COUNT(*) > 1;\n```\n\nIt returns nothing now. Suppose an import bug inserted a second completed assignment row for shift 102. The same check would return one row: shift_id 102 with 2. That is the evidence you would hand to a developer.\n\nReconcile totals between tables that should agree. Completed shifts should match completed assignments:\n\n```sql\nSELECT (SELECT COUNT(*) FROM shifts      WHERE status = 'completed') AS completed_shifts,\n       (SELECT COUNT(*) FROM assignments WHERE status = 'completed') AS completed_assignments;\n```\n\nBoth are 4, so they agree. If they differed, you would investigate before trusting any completion report.\n\nA quick profile of a table also helps. This returns the earliest request, the latest request and the row count, which are 2026-03-02 08:00, 2026-04-15 13:00 and 8:\n\n```sql\nSELECT MIN(requested_at) AS first_request,\n       MAX(requested_at) AS last_request,\n       COUNT(*)          AS shifts\nFROM shifts;\n```\n\nIf the expected range is March to April and you see a request dated 1970, the data has a problem. Checking date ranges, row counts, NULLs where a value is required, duplicates on keys, and orphaned references covers most of what goes wrong. A check passing does not prove the data is right, only that these rules hold.",
+      "keyPoints": [
+        "Write checks so that rows returned mean a rule is broken; empty means pass.",
+        "Typical checks: required values, impossible dates, orphans, duplicate keys, reconciled totals.",
+        "Duplicates: GROUP BY the key with HAVING COUNT(*) > 1.",
+        "Orphans: LEFT JOIN and filter the right key IS NULL.",
+        "Passing checks does not prove correctness; it shows these rules hold."
+      ],
+      "interviewAngle": "This is where your QA instinct meets SQL, and it is a strong answer to 'how do you make sure a report is right?'. Describe the habit: define rules, query for violations, reconcile totals. Keep claims modest: you used queries to check data and test results, not to build data pipelines.",
+      "exercises": [
+        {
+          "id": "sql-u5-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is a good way to write a data-quality check query?",
+          "choices": [
+            "Return a single total so nobody has to read rows.",
+            "Return every row in the table so it can be reviewed by eye.",
+            "Return only the rows that break the rule, so an empty result means pass.",
+            "Update the bad rows so the check passes next time."
+          ],
+          "answer": 2,
+          "explanation": "A violation query is easy to rerun and read: no rows means no problem, and any rows returned are the evidence. Checks should be read-only."
+        },
+        {
+          "id": "sql-u5-l2-e2",
+          "type": "short",
+          "prompt": "After GROUP BY shift_id, which clause keeps only the keys that appear more than once (`COUNT(*) > 1`)?",
+          "accept": [
+            "having",
+            "the having clause"
+          ],
+          "answer": "HAVING",
+          "explanation": "The count exists only after grouping, so the condition belongs in HAVING, not WHERE."
+        },
+        {
+          "id": "sql-u5-l2-e3",
+          "type": "mcq",
+          "prompt": "Which WHERE clause finds shifts whose fill time is earlier than the request time?",
+          "choices": [
+            "WHERE filled_at = NULL",
+            "WHERE filled_at > requested_at",
+            "WHERE requested_at IS NULL",
+            "WHERE filled_at < requested_at"
+          ],
+          "answer": 3,
+          "explanation": "A fill time before the request time is impossible, so the check selects rows where filled_at < requested_at. Rows with a NULL filled_at never match, which is correct because they are simply unfilled."
+        },
+        {
+          "id": "sql-u5-l2-e4",
+          "type": "open",
+          "prompt": "Write two checks: (a) completed shifts that do not have a completed assignment, and (b) shifts that are not cancelled but have a cancel_reason. State what each returns on the sample data, and what a returned row would mean.",
+          "answer": "```sql\n-- (a) completed shifts with no completed assignment\nSELECT s.id\nFROM shifts s\nWHERE s.status = 'completed'\n  AND NOT EXISTS (SELECT 1 FROM assignments a\n                  WHERE a.shift_id = s.id AND a.status = 'completed');\n\n-- (b) a cancel reason on a shift that is not cancelled\nSELECT id\nFROM shifts\nWHERE status <> 'cancelled' AND cancel_reason IS NOT NULL;\n```\n\nBoth return zero rows on the sample data: completed shifts 101, 102, 104 and 105 each have a completed assignment, and the only shifts with a reason (103, 106, 108) are cancelled. A returned row in (a) would mean a shift was marked completed with no completed assignment record; a returned row in (b) would mean a stale or wrongly entered reason.",
+          "rubric": [
+            "Check (a) uses NOT EXISTS, or a LEFT JOIN with IS NULL, against completed assignments",
+            "Check (b) combines status <> 'cancelled' with cancel_reason IS NOT NULL",
+            "States zero rows for both on the sample data",
+            "Explains that a returned row indicates a broken rule"
+          ]
+        },
+        {
+          "id": "sql-u5-l2-e5",
+          "type": "open",
+          "prompt": "Write one query that returns a single row with three reconciliation figures: `completed_shifts` (shifts with status completed), `completed_assignments` (assignments with status completed) and `cancelled_with_fill_time` (cancelled shifts that still have a `filled_at`). Say what you would conclude from the figures on the practice data.",
+          "answer": "```sql\nSELECT (SELECT COUNT(*) FROM shifts      WHERE status = 'completed')                         AS completed_shifts,\n       (SELECT COUNT(*) FROM assignments WHERE status = 'completed')                         AS completed_assignments,\n       (SELECT COUNT(*) FROM shifts      WHERE status = 'cancelled' AND filled_at IS NOT NULL) AS cancelled_with_fill_time;\n```\n\nThe first two figures must agree, and they do. The third is not an error: a shift can be filled and cancelled later, which is why `filled` and `completed` are different measures. It matters for any fill-rate definition.\n\nOn the practice data this returns 1 row (columns: completed_shifts, completed_assignments, cancelled_with_fill_time); the first row is 828, 828, 78.",
+          "rubric": [
+            "Uses three scalar subqueries or equivalent conditional counts in one row",
+            "Counts completed shifts and completed assignments separately",
+            "Filters cancelled shifts with filled_at IS NOT NULL",
+            "Concludes the first two agree and explains why the third is not a defect"
+          ],
+          "sqlite": "SELECT (SELECT COUNT(*) FROM shifts WHERE status = 'completed') AS completed_shifts, (SELECT COUNT(*) FROM assignments WHERE status = 'completed') AS completed_assignments, (SELECT COUNT(*) FROM shifts WHERE status = 'cancelled' AND filled_at IS NOT NULL) AS cancelled_with_fill_time"
+        }
+      ]
+    },
+    {
+      "id": "sql-u5-l3",
+      "title": "Using SQL to verify a bug or a test result",
+      "minutes": 10,
+      "body": "In UAT you test through the interface, but the interface can lie or hide detail. A read-only query shows what was actually stored, and it gives a bug report something solid to point at.\n\nFirst, ground rules. Use a test or staging database, not production, unless you have explicit permission. Use read-only access if you can. Run only `SELECT` statements; an `UPDATE` or `DELETE` without a `WHERE` clause changes every row. Select only the columns you need, because names are personal data. Write down what you ran and when.\n\nScenario 1: verify a test result. The acceptance criterion says: when a pharmacist cancels a shift, its status becomes 'cancelled' and the reason is saved as 'pharmacist cancelled'. In UAT you cancel shift 108 as the pharmacist. Check the record:\n\n```sql\nSELECT id, status, cancel_reason, pharmacist_id\nFROM shifts\nWHERE id = 108;\n```\n\nExpected: 108, cancelled, pharmacist cancelled, 11. If `cancel_reason` comes back NULL, the criterion fails, and the query output is your evidence.\n\nScenario 2: a report disagrees with the data. A ticket says the assignments report shows 9 assignments but the screen shows 5. You count directly:\n\n```sql\nSELECT COUNT(*) FROM assignments;\n```\n\nThe answer is 5. So the stored data agrees with the screen, and the report is wrong. You also know from unit 3 that a join on `pharmacist_id` instead of `shift_id` produces exactly 9. You can say that is a plausible cause worth checking, but not a proven one, since you cannot see the report's code.\n\nScenario 3: a dashboard shows April's average time to fill as 35 minutes. Your query says 70.0:\n\n```sql\nSELECT AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0) AS avg_min\nFROM shifts\nWHERE requested_at >= '2026-04-01' AND requested_at < '2026-05-01';\n```\n\nThe sum of April's fill times is 140 minutes. Divided by the 2 filled shifts it is 70; divided by all 4 requested shifts it is 35. That points to the dashboard dividing by the wrong count.\n\nWrite the bug up with evidence. Include:\n\n- Expected result and actual result, side by side.\n- The exact query, the database and environment, and the time you ran it.\n- The result rows or counts.\n- A suspected cause, clearly labelled as a hypothesis.\n\nA query shows the data, not why the code misbehaves. That distinction keeps you accurate and credible with developers.",
+      "keyPoints": [
+        "Use read-only SELECT queries on a test environment; never change data to check it.",
+        "Query the specific record a test touched and compare to the acceptance criterion.",
+        "Check a reported number against a direct count or sum.",
+        "Put expected vs actual, the query, and the environment in the bug report.",
+        "Label a cause as a hypothesis unless you have proved it."
+      ],
+      "interviewAngle": "For QA and UAT roles, this is the practical link between your testing and your SQL. Say you used queries to confirm what was saved and to cross-check report totals, and that you attached query evidence to bug reports. Be clear that most of your testing was manual, and that SQL was your verification tool rather than a replacement for testing.",
+      "exercises": [
+        {
+          "id": "sql-u5-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "During UAT you want to confirm what was stored after cancelling shift 108 in a test environment. What is the best first step?",
+          "choices": [
+            "Run a read-only SELECT for shift 108 and compare the row to the acceptance criterion.",
+            "Run an UPDATE to set the cancel reason, then check the screen.",
+            "Delete the shift and recreate it.",
+            "Trust the screen; the database will match."
+          ],
+          "answer": 0,
+          "explanation": "A SELECT on the specific record shows what was actually saved without changing anything. Updating or deleting data would destroy the evidence you are trying to collect."
+        },
+        {
+          "id": "sql-u5-l3-e2",
+          "type": "short",
+          "prompt": "What does `SELECT COUNT(*) FROM assignments;` return on the sample data? Answer with a number.",
+          "accept": [
+            "5",
+            "five"
+          ],
+          "answer": "5",
+          "explanation": "The assignments table has five rows (ids 1 to 5), including the cancelled one."
+        },
+        {
+          "id": "sql-u5-l3-e3",
+          "type": "mcq",
+          "prompt": "A report shows 9 assignments, but the table holds 5. Which statement is the most accurate and responsible thing to write in the bug?",
+          "choices": [
+            "The developer used the wrong join. This is proven.",
+            "The stored data has 5 assignments, which disagrees with the report. One possible cause is a join on pharmacist_id instead of shift_id, which gives exactly 9; this is a hypothesis to check.",
+            "The database is corrupt and must be restored.",
+            "The report is probably fine and the table is missing rows."
+          ],
+          "answer": 1,
+          "explanation": "State the verified fact (5 stored rows against 9 reported), and label the join explanation as a hypothesis, because you cannot see the report's code."
+        },
+        {
+          "id": "sql-u5-l3-e4",
+          "type": "open",
+          "prompt": "A UAT test case says: cancel shift 108 as the pharmacist, then confirm the record is saved correctly. Write the verification query, the expected result, and the line items you would put in a bug report if `cancel_reason` came back NULL. (Shift 108 is the lesson sample; on the practice data, use shift 1005, which was cancelled by the pharmacist, so the query returns a row you can check.)",
+          "answer": "```sql\nSELECT id, status, cancel_reason, pharmacist_id\nFROM shifts\nWHERE id = 108;\n```\n\nExpected: id 108, status 'cancelled', cancel_reason 'pharmacist cancelled', pharmacist_id 11.\n\nIf cancel_reason is NULL, the bug report should include: the steps taken, the expected result (reason saved as 'pharmacist cancelled'), the actual result (NULL), the exact query, the environment and time it was run, the returned row, and the impact (cancellation reports would group this shift under no reason). Any suspected cause should be labelled as a hypothesis.\n\nOn the practice data this returns 1 row (columns: id, status, cancel_reason, pharmacist_id); the first row is 1005, cancelled, pharmacist cancelled, 41.",
+          "rubric": [
+            "Uses a read-only SELECT filtered to shift 108",
+            "States the expected values: cancelled and pharmacist cancelled",
+            "Bug report lists expected vs actual, the query and the environment",
+            "Labels any cause as a hypothesis and states impact"
+          ],
+          "sqlite": "SELECT id, status, cancel_reason, pharmacist_id FROM shifts WHERE id = 1005"
+        }
+      ]
+    }
+  ]
+}

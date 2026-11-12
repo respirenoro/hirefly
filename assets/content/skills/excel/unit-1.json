@@ -1,0 +1,151 @@
+{
+  "id": "excel-u1",
+  "title": "Foundations: references, tables and clean data",
+  "summary": "Get references, Tables, sorting, filtering and data cleaning right, because every later formula depends on them.",
+  "lessons": [
+    {
+      "id": "excel-u1-l1",
+      "title": "Relative, absolute and mixed references",
+      "minutes": 8,
+      "body": "A reference tells a formula which cell to read. How that reference behaves when you copy the formula is the most tested basic in Excel, and it causes most \"works in row 2, breaks in row 3\" bugs.\n\nThere are three kinds:\n\n- **Relative** (`C2`): shifts with the formula. Copy it one row down and it becomes `C3`.\n- **Absolute** (`$G$1`): locked. It points at the same cell wherever you copy it.\n- **Mixed** (`B$1` or `$A2`): one part locked, one free. The `$` goes in front of the part that must not move.\n\nHere is a small sheet. Cell G1 holds the bonus paid per filled shift (12).\n\n| Row | A Pharmacy | B Requested | C Filled | D Fill rate | E Bonus |\n|---|---|---|---|---|---|\n| 2 | Eastside | 40 | 36 | 90% | 432 |\n| 3 | Harbor | 25 | 18 | 72% | 216 |\n| 4 | Lakeview | 30 | 27 | 90% | 324 |\n\n```text\nD2: =C2/B2\nE2: =C2*$G$1\n```\n\nFill both down. `D2` uses only relative references, because each row needs its own numerator and denominator. `E2` mixes the two ideas: `C2` must move to `C3` and `C4`, but the rate must stay at `G1`. Without the dollar signs, `E3` would read `G2`, which is empty, and the bonus would be 0.\n\nMixed references shine in grids. Put shift counts 10, 20, 30 in `B1:D1` and bonus rates 12 and 15 in `A2:A3`. One formula fills the whole grid:\n\n```text\nB2: =B$1*$A2\n```\n\nCopied right, `B$1` becomes `C$1` and `D$1` (the row stays on 1) while `$A2` stays in column A. Copied down, `$A2` becomes `$A3` while `B$1` stays in row 1. The result for `B2:D3` is 120, 240, 360 and 150, 300, 450.\n\nPress **F4** with the cursor inside a reference to cycle `C2`, `$C$2`, `C$2`, `$C2`. Before copying any formula, ask which inputs should move and which are fixed assumptions. Put assumptions in their own labelled cell instead of typing 12 inside every formula.",
+      "keyPoints": [
+        "Relative references shift when copied; absolute ($G$1) never move.",
+        "In a mixed reference the $ sits in front of the part that must stay fixed.",
+        "F4 cycles through the four reference styles.",
+        "Put assumptions such as rates in one labelled cell and reference them absolutely."
+      ],
+      "interviewAngle": "Timed tests often include a formula that must be filled across and down, and the check is whether you lock the right cell. Say what you lock and why: \"the rate is an assumption, so it is absolute; the row inputs are relative.\" That shows you understand copying, not just luck. It is a basic skill, so be quick and calm about it.",
+      "exercises": [
+        {
+          "id": "excel-u1-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "The bonus rate is in cell G1 and the filled count is in C2. Which formula in E2, filled down column E, always reads the rate from G1?",
+          "choices": ["=C2*G1", "=$C$2*G1", "=C2*$G$1", "=C2*$G2"],
+          "answer": 2,
+          "explanation": "C2 must be relative so each row uses its own count, and $G$1 must be absolute so the rate never moves. The other options either shift the rate cell or freeze the count."
+        },
+        {
+          "id": "excel-u1-l1-e2",
+          "type": "short",
+          "prompt": "E2 contains =C2*G1 with no dollar signs. You fill it down to E3. Which cell does E3 read for the rate? (Give the cell address.)",
+          "accept": ["g2", "=g2"],
+          "answer": "G2",
+          "explanation": "The relative reference G1 moves down one row with the formula, so E3 reads G2."
+        },
+        {
+          "id": "excel-u1-l1-e3",
+          "type": "open",
+          "prompt": "Shift counts 10, 20, 30, 40 are in B1:E1. Bonus rates 12, 15, 18 are in A2:A4. Write one formula for B2 that you can copy across and down to fill B2:E4 with count times rate, and explain where each dollar sign goes.",
+          "answer": "```text\n=B$1*$A2\n```\n\nB$1 locks the row so every copy still reads the counts in row 1, while the column moves as you copy right. $A2 locks the column so every copy still reads the rates in column A, while the row moves as you copy down.",
+          "rubric": [
+            "Formula is =B$1*$A2 (or an equivalent that gives the same results)",
+            "Row locked on the counts reference",
+            "Column locked on the rates reference",
+            "Explains that one formula is copied in both directions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u1-l2",
+      "title": "Tables, sorting and filtering",
+      "minutes": 8,
+      "body": "Select any cell in your data and press **Ctrl+T** to turn the range into an Excel Table. Tick \"My table has headers\" and give the table a name on the Table Design tab, for example `tblShifts`.\n\nA Table is worth the extra step for four reasons:\n\n- New rows typed under it are included automatically, so formulas, pivots and charts that point at it grow with the data.\n- A formula entered in one cell fills the whole column.\n- Formulas use readable **structured references**, such as `=[@Filled]/[@Requested]` for the current row, or `=SUM(tblShifts[Hours])` for the whole column.\n- Filter buttons and banded rows come built in. Tick \"Total Row\" for a quick sum or count that respects filters.\n\nSample data, one record per row:\n\n| Shift | Pharmacy | Status | Requested | Hours |\n|---|---|---|---|---|\n| S1 | Harbor | Cancelled | 3-Mar | 8 |\n| S2 | Eastside | Filled | 4-Mar | 6 |\n| S3 | Harbor | Filled | 5-Mar | 10 |\n| S4 | Harbor | Cancelled | 9-Mar | 4 |\n| S5 | Lakeview | Filled | 9-Mar | 8 |\n\n**Sorting.** Use Data > Sort for more than one level. Sort by Pharmacy A to Z, then by Requested newest to oldest. A table sorts whole rows together, so records stay intact. In a plain range, select the entire range first. Sorting a single column on its own scrambles records, and a blank row or column inside the data can make Excel sort only part of it.\n\n**Filtering.** Toggle filter buttons with **Ctrl+Shift+L**. Filtering hides rows without deleting them. You can filter by value, by text rules (contains, begins with), by number rules (greater than) and by date rules (this month). To show Harbor's cancelled shifts, filter Pharmacy to Harbor and Status to Cancelled. Filters on different columns combine with AND.\n\nTo clear everything, use Data > Clear. Remember that a filtered view can hide rows from a manual sum: `SUM` still adds hidden rows, while `SUBTOTAL(109, ...)` and the table's total row add only the visible ones.\n\nGood source data has one header row, one record per row, no blank rows or columns, and one kind of value per column. Get that right and every later tool, from pivots to Power Query, works without a fight.",
+      "keyPoints": [
+        "Ctrl+T makes a Table: new rows are included automatically and formulas fill down.",
+        "Structured references like [@Filled] read the current row by column name.",
+        "Sort whole records, never a single column on its own.",
+        "Ctrl+Shift+L toggles filters; filters on different columns combine with AND.",
+        "Good source data: one header row, one record per row, no blank rows or columns."
+      ],
+      "interviewAngle": "Interviewers like to see that you prepare data before analysing it. Mention turning a range into a Table so your pivots and formulas do not break when rows are added. If asked about your level, this is part of a solid moderate answer. Do not oversell: sorting, filtering and Tables are fundamentals, not advanced features.",
+      "exercises": [
+        {
+          "id": "excel-u1-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the main practical advantage of converting a data range to an Excel Table?",
+          "choices": [
+            "Formulas calculate faster than in a normal range",
+            "New rows are included automatically and formulas in a column fill down",
+            "Tables can never contain duplicate rows",
+            "You no longer need to sort the data"
+          ],
+          "answer": 1,
+          "explanation": "A Table expands as you add rows, so formulas, pivots and charts that point at it stay current. It does not change speed, remove duplicates or replace sorting."
+        },
+        {
+          "id": "excel-u1-l2-e2",
+          "type": "short",
+          "prompt": "In a Table with a column named Hours, which structured reference reads the Hours value on the current row? (Do not include the table name.)",
+          "accept": ["[@hours]", "=[@hours]", "tblshifts[@hours]", "=tblshifts[@hours]"],
+          "answer": "[@Hours]",
+          "explanation": "The @ sign means \"this row\", and the name in brackets is the column."
+        },
+        {
+          "id": "excel-u1-l2-e3",
+          "type": "open",
+          "prompt": "Using the sample table, describe the filter and sort steps that show Harbor's cancelled shifts with the most recent request first, and say which shift IDs you end up with, in order.",
+          "answer": "Turn on filters (Ctrl+Shift+L). Filter Pharmacy to Harbor and Status to Cancelled. Then sort the Requested column newest to oldest. The result is S4 (9-Mar), then S1 (3-Mar).",
+          "rubric": [
+            "Filters Pharmacy to Harbor",
+            "Filters Status to Cancelled",
+            "Sorts Requested newest to oldest",
+            "Final order is S4 then S1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u1-l3",
+      "title": "Cleaning data: TRIM, Text to Columns, duplicates, validation",
+      "minutes": 9,
+      "body": "Real exports are messy. Cleaning comes before every formula, because a lookup or pivot treats \"Harbor\" and \"Harbor \" (trailing space) as different values.\n\n**TRIM** removes leading and trailing spaces and collapses repeated inner spaces to one:\n\n| Raw (A2:A3) | =TRIM(A2) |\n|---|---|\n| `  Eastside  Pharmacy ` | Eastside Pharmacy |\n| `Harbor ` | Harbor |\n\nSpaces copied from web pages are often non-breaking (character 160), which TRIM ignores. Replace them first:\n\n```text\n=TRIM(SUBSTITUTE(A2, CHAR(160), \" \"))\n```\n\n`CLEAN` strips non-printing characters such as line breaks. Pair them: `=TRIM(CLEAN(A2))`. Then copy the results and use Paste Special > Values to replace the originals.\n\n**Text to Columns** (Data tab) splits one column into several. Choose Delimited, tick Comma, and `Cole, Dana` becomes `Cole` and ` Dana`. Note the leading space on the second part; wrap it in TRIM. The same tool fixes numbers stored as text: run it and press Finish, or use `=VALUE(A2)`. A green triangle in a cell corner is the warning sign.\n\n**Remove Duplicates** (Data tab) deletes rows where the columns you tick match an earlier row, keeping the first. It changes the data in place and cannot be undone after saving, so work on a copy. Tick only the columns that define a duplicate: if the same shift ID appears twice it is a duplicate, but two rows for the same pharmacy are not.\n\n**Data Validation** (Data tab) stops bad data from being typed in. For a Status column choose Allow: List with source `Open,Filled,Cancelled` and users get a dropdown. You can also restrict to whole numbers, decimals or dates in a range, and write your own error message. Use Circle Invalid Data to audit existing values.\n\nA reliable routine: copy the raw sheet, TRIM and CLEAN text, fix types, remove true duplicates, add validation where people will keep entering data, then do the analysis. Keep the raw sheet untouched so you can always go back.",
+      "keyPoints": [
+        "TRIM fixes extra spaces; SUBSTITUTE(A2,CHAR(160),\" \") handles non-breaking spaces.",
+        "Text to Columns splits text and converts text-numbers; trim the pieces afterwards.",
+        "Remove Duplicates works in place, so copy the data first and tick only the identifying columns.",
+        "Data validation lists give a dropdown and prevent bad entries."
+      ],
+      "interviewAngle": "A data-cleaning task is a favourite in practical tests. Describe your routine in order and mention keeping the raw data untouched. This is solid moderate-level work you can claim. Power Query can record the same steps for repeat jobs, but that is something you are still learning, so say so if it comes up.",
+      "exercises": [
+        {
+          "id": "excel-u1-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A VLOOKUP for \"Harbor\" returns #N/A even though a cell appears to contain Harbor. What is the most likely cause and fix?",
+          "choices": [
+            "The list needs sorting; sort it A to Z",
+            "The workbook needs recalculating; press F9",
+            "VLOOKUP is case sensitive; change the case",
+            "A hidden trailing space; clean the value with TRIM"
+          ],
+          "answer": 3,
+          "explanation": "Hidden spaces make two visually identical values different. VLOOKUP is not case sensitive, and sorting only matters for approximate match."
+        },
+        {
+          "id": "excel-u1-l3-e2",
+          "type": "short",
+          "prompt": "What does =TRIM(\"  Lake  View \") return? (Type the result without quotes.)",
+          "accept": ["lake view"],
+          "answer": "Lake View",
+          "explanation": "TRIM removes leading and trailing spaces and reduces the double space between the words to a single space."
+        },
+        {
+          "id": "excel-u1-l3-e3",
+          "type": "open",
+          "prompt": "You receive a 500-row export of pharmacist names in the form \"Cole, Dana\" with extra spaces, some repeated rows, and a Status column typed freehand. Describe, in order, how you clean it in Excel.",
+          "answer": "1. Copy the raw sheet and work on the copy.\n2. Use TRIM (and CLEAN) on the text columns, then paste back as values.\n3. Use Text to Columns with a comma delimiter to split last and first names, then TRIM the first name.\n4. Use Remove Duplicates, ticking only the columns that identify a repeated record.\n5. Add data validation to Status as a list (Open, Filled, Cancelled) and use Circle Invalid Data to find existing odd values.",
+          "rubric": [
+            "Keeps the raw data untouched or works on a copy",
+            "Uses TRIM (and optionally CLEAN) for spaces",
+            "Uses Text to Columns with a comma delimiter",
+            "Removes duplicates on the identifying columns only",
+            "Adds data validation for the Status column"
+          ]
+        }
+      ]
+    }
+  ]
+}

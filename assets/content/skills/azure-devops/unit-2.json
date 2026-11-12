@@ -1,0 +1,57 @@
+{
+  "id": "ado-u2",
+  "title": "Boards: work items, backlogs and sprints",
+  "summary": "The anatomy of a work item, how backlogs and boards present it, and how a sprint is planned and tracked.",
+  "lessons": [
+    {
+      "id": "ado-u2-l1",
+      "title": "Work items, fields, states and paths",
+      "minutes": 9,
+      "body": "A **work item** is the basic record in Boards: a story, task, bug, epic. Each has **fields** (title, description, state, assigned to, priority, tags and more) plus a discussion thread, history, attachments and **links** to other items.\n\nThe fields that matter most:\n\n- **Title and Description.** One clear sentence for the title; the description holds the context.\n- **Acceptance Criteria.** On a story, a separate field for the conditions that make it done. This is where your testable statements live.\n- **State.** Where the item is in its life, for example New, Active, Resolved, Closed (Agile). Moving a card across the board changes the state.\n- **Reason.** Why the state changed, for example Fixed versus Won't Fix on a bug.\n- **Assigned To.** One person at a time.\n- **Priority and Severity.** Priority is how soon to do it. Severity (on bugs) is how bad the impact is. They are not the same: a typo on the login page is low severity but might be high priority before a demo.\n- **Area Path and Iteration Path.** Covered next.\n\n**Area path** says *what part of the product* the item belongs to, for example `Dispatch\\Notifications` or `Dispatch\\Scheduling`. Teams are usually assigned areas, so a team's backlog shows the items in its area.\n\n**Iteration path** says *when*: which sprint, for example `Dispatch\\Sprint 14`. An item with the iteration path of the project root (no sprint) is in the backlog and unscheduled.\n\n**Links** connect items. Common types: Parent/Child (Epic > Feature > Story > Task), Related, Predecessor/Successor, and Tested By (story to test case). A bug found while testing is linked to its story with Related or Parent, depending on team convention.\n\n**Worked example.** Story: 'SOS request notifies pharmacists within the chosen radius.' Area: `Dispatch\\Notifications`. Iteration: `Sprint 14`. State: Active. Acceptance criteria: radius options of 5, 10 and 25 miles; only pharmacists with the status Available are alerted; the alert includes pharmacy name and shift time. Child tasks: build alert service, write tests, update the help article.\n\nWrite the title as the outcome, put the testable conditions in Acceptance Criteria and keep Area and Iteration correct. Wrong paths are the usual reason an item does not show up where people expect it.",
+      "keyPoints": [
+        "Fields describe an item; state tracks progress; links connect items.",
+        "Area path = which part of the product; iteration path = which sprint.",
+        "Priority is urgency; severity is impact.",
+        "Acceptance Criteria is where testable conditions go.",
+        "Wrong area or iteration path is the classic reason an item is missing from a board."
+      ],
+      "interviewAngle": "Expect 'what makes a good user story or ticket?'. Tie your answer to fields: a clear title, acceptance criteria, correct area and iteration, linked parents and tests. Keep the example real, such as the SOS request. You owned writing these daily, so speak from that habit, and don't imply you configured custom fields.",
+      "exercises": [
+        {"id": "ado-u2-l1-e1", "type": "mcq", "placement": true, "prompt": "A work item does not appear on the team's sprint board even though it was created today. Which field is the most likely cause?",
+         "choices": ["Description is empty", "Iteration Path is not the current sprint", "Priority is 3", "Tags are missing"], "answer": 1, "explanation": "The sprint board shows items whose iteration path is the sprint (and whose area path belongs to the team). The other fields do not control visibility."},
+        {"id": "ado-u2-l1-e2", "type": "short", "prompt": "Which path field says which part of the product a work item belongs to?",
+         "accept": ["area path", "area"], "answer": "Area Path", "explanation": "Area path is the product area; iteration path is the time box."},
+        {"id": "ado-u2-l1-e3", "type": "mcq", "prompt": "A typo on the login page, found the day before a customer demo. Which description fits best?",
+         "choices": ["High severity, high priority", "Low severity, high priority", "High severity, low priority", "Low severity, low priority"], "answer": 1, "explanation": "The impact is small (low severity), but it needs fixing soon (high priority)."},
+        {"id": "ado-u2-l1-e4", "type": "open", "prompt": "Write the key fields for a work item for this request: 'Pharmacists want to mute SOS alerts at night.' Give title, area path, iteration, acceptance criteria (at least 3 testable items) and two child tasks.",
+         "answer": "**Title:** Pharmacist can mute SOS alerts during quiet hours\n\n**Area Path:** Dispatch\\Notifications\n\n**Iteration Path:** Dispatch\\Sprint 15 (or the backlog root if unscheduled)\n\n**Acceptance Criteria:**\n1. A pharmacist can set a quiet-hours start and end time in their profile.\n2. During quiet hours, SOS alerts are not delivered to that pharmacist.\n3. Outside quiet hours, alerts are delivered as before.\n4. The pharmacy sees that the pharmacist was skipped due to quiet hours, not that they ignored the alert.\n\n**Child tasks:** (1) Add quiet-hours settings and storage; (2) Filter alert recipients by quiet hours and write test cases.",
+         "rubric": ["Title states the outcome clearly", "Area path points to notifications or similar", "Acceptance criteria are specific and testable", "Child tasks are concrete units of work", "Iteration path stated or backlog explained"]}
+      ]
+    },
+    {
+      "id": "ado-u2-l2",
+      "title": "Backlogs, the Kanban board and sprint planning",
+      "minutes": 9,
+      "body": "Boards shows the same work items in several views.\n\n**Product backlog.** An ordered list of requirement-level items (stories or PBIs). Order is priority: top is next. You reorder by dragging. Parents (Epics, Features) can be shown to group the list. Grooming (refining) means making top items clear, estimated and small enough for a sprint.\n\n**Kanban board.** Columns for each state (New, Active, Resolved, Closed, or custom ones) and cards you drag across. It is flow-based, not time-boxed. Teams can add columns, split them into Doing and Done, set a WIP (work in progress) limit, and use swimlanes, for example one for urgent items.\n\n**Sprints.** A sprint is an iteration path with start and end dates. In the Sprints area, each team has a **sprint backlog** and a **taskboard**.\n\n**Sprint planning in Azure DevOps**, as you would run it:\n\n1. Groom the top of the backlog so stories have acceptance criteria and estimates.\n2. Open the Planning view for the sprint. Drag stories from the backlog onto the sprint, or assign the iteration path.\n3. Check **capacity**: for each person, set hours per day and days off. Azure DevOps compares the hours of tasks you have estimated against capacity and shows a bar when someone is over.\n4. The team breaks stories into tasks with **Original Estimate** and **Remaining Work** in hours.\n5. Agree on the sprint goal in words; the tool does not store this as a plan, so put it where the team sees it (sprint details or the team's wiki).\n\n**Taskboard.** Columns To Do, In Progress, Done, with a row per story. Developers update Remaining Work as they go. This feeds the burndown chart. In standup you walk the taskboard right to left (closest to done first) and look for blocked items.\n\n**Example.** Sprint 14 has two weeks. Capacity: three developers at 6 productive hours a day, one on holiday for 2 days. Stories: SOS radius selection, SOS alert content, SOS audit log. If the total task hours exceed capacity, you cut or defer a story rather than quietly overload the team.\n\nThe velocity of past sprints (story points completed) helps you judge how much to pull in.",
+      "keyPoints": [
+        "Backlog order is priority; groom the top before planning.",
+        "Kanban board shows flow by state; WIP limits control overload.",
+        "Sprint planning: groom, pull stories in, check capacity, break into tasks with hour estimates.",
+        "Taskboard Remaining Work drives the burndown.",
+        "Use past velocity and capacity to decide what fits."
+      ],
+      "interviewAngle": "You owned the backlog and ran two-week sprint planning. Describe it as a sequence: groom, check capacity and velocity, pull stories, break into tasks, set a goal. Mention one concrete decision, such as deferring a story when capacity was short. Avoid claiming Scrum Master credentials; say you facilitated planning as the product owner and project manager.",
+      "exercises": [
+        {"id": "ado-u2-l2-e1", "type": "mcq", "placement": true, "prompt": "During sprint planning, the capacity view shows one developer over capacity. What is the best response?",
+         "choices": ["Ignore it; developers can work extra", "Delete the estimates", "Rebalance tasks or defer scope", "Move the sprint end date"], "answer": 2, "explanation": "Capacity exists to prevent overcommitment. Rebalance tasks across people or reduce scope. Changing the sprint dates midstream breaks velocity comparisons."},
+        {"id": "ado-u2-l2-e2", "type": "short", "prompt": "What limit on a Kanban column controls how many items can be in progress at once?",
+         "accept": ["wip limit", "wip", "work in progress limit", "work in progress"], "answer": "WIP limit", "explanation": "A work-in-progress limit stops a column from filling with started but unfinished work."},
+        {"id": "ado-u2-l2-e3", "type": "mcq", "prompt": "Which field on tasks feeds the sprint burndown chart?",
+         "choices": ["Story Points", "Remaining Work", "Priority", "Severity"], "answer": 1, "explanation": "The classic sprint burndown plots remaining task hours. Updating Remaining Work keeps it accurate."},
+        {"id": "ado-u2-l2-e4", "type": "open", "prompt": "Describe how you would run sprint planning for a two-week sprint in Azure DevOps, step by step, including how you would respond if the selected stories exceed capacity.",
+         "answer": "1. **Before the meeting:** groom the top of the backlog so each story has acceptance criteria and a point estimate, and order it by priority.\n2. **Set up capacity:** enter each person's hours per day and days off for the sprint.\n3. **Agree a goal** for the sprint, for example 'pharmacists can send and receive SOS alerts within a chosen radius'.\n4. **Pull stories** from the top of the backlog into the sprint (assigning the iteration path), checking recent velocity as a sanity check.\n5. **Break into tasks** with hour estimates and assign owners.\n6. **Check the capacity bars.** If someone or the team is over, rebalance tasks or defer the lowest-priority story back to the backlog instead of overloading the team.\n7. Confirm the commitment with the team and start.",
+         "rubric": ["Mentions grooming or ready stories", "Includes capacity and velocity", "Breaks stories into tasks with hour estimates", "Responds to over-capacity by rebalancing or deferring scope", "Mentions a sprint goal"]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "id": "doc-u6",
+  "title": "In the interview",
+  "summary": "Telling the 35% story honestly, handling writing and editing tests, and answering questions about documenting what you don't yet fully understand.",
+  "lessons": [
+    {
+      "id": "doc-u6-l1",
+      "title": "Telling the 35% story with honest attribution",
+      "minutes": 8,
+      "body": "Your strongest documentation fact is that ticket inflow fell 35% after you reworked the end-user documentation and knowledge base. Interviewers like numbers, and many will probe them. Prepare so that the number holds up.\n\n**What you can say with confidence**\n\n- You rewrote end-user documentation and the knowledge base.\n- Ticket inflow fell by 35% in the period after.\n\n**What you cannot say unless you know it**\n\n- That documentation alone caused the whole 35%. Other things may have changed at the same time: bug fixes, a release that removed a confusing step, a quieter season, customer training, fewer new users. If you do not have evidence separating them, do not claim it.\n\n**A structure for the story**\n\n1. **Situation.** The support queue had many repeat questions; users could not find or follow the guidance.\n2. **Action.** What you did, in specifics: looked at which ticket topics repeated, rewrote the articles in task-based plain language, tested steps against the product, linked articles from support replies. Use only what you actually did.\n3. **Result.** Ticket inflow fell 35%.\n4. **Attribution.** \"I can't isolate documentation from everything else that changed, but the drop was largest in the topics I rewrote\" (say this only if it is true), \"and I treated it as a good sign, not proof.\"\n5. **What you would do next time.** Tag tickets by topic before and after, track article feedback, and compare against a topic you did not touch.\n\n**Example answer**\n\n\"I reworked our end-user documentation and knowledge base, starting with the questions that came up most in tickets. After the changes, ticket inflow dropped 35%. I'd be careful about crediting the documentation alone, since product fixes and release timing also affected volume, but it matched what I expected from removing the repeat questions. If I did it again I'd tag tickets by topic first so I could show which topics fell.\"\n\n**Why modest attribution works**\n\nA confident claim that you cannot defend collapses on the first follow-up (\"how do you know?\"). A clearly bounded claim with a method invites a good discussion and shows analytical thinking. Role-fit hiring managers value that more than a bigger number.\n\n**Know your numbers**\n\nBe ready to say the period, how inflow was measured (tickets per month, per customer?), and what the baseline was. If you do not remember, say what you do remember and how you would reconstruct it from the ticket system.",
+      "keyPoints": [
+        "State the 35% plainly and say what you did to earn it.",
+        "Credit documentation honestly; name other factors that may have contributed.",
+        "Use situation, action, result, attribution, next time.",
+        "Know the period, how it was measured and the baseline."
+      ],
+      "interviewAngle": "Tell the story in about a minute. Lead with the result, then the action, then the honest limit. If you feel tempted to say \"my documentation reduced tickets by 35%\", change it to \"ticket inflow fell 35% after I reworked the documentation\". The second is true and stronger under questioning.",
+      "exercises": [
+        {
+          "id": "doc-u6-l1-e1",
+          "type": "mcq",
+          "prompt": "Which statement about the 35% result is safest and strongest?",
+          "choices": [
+            "My documentation caused a 35% drop in tickets.",
+            "Ticket inflow fell 35% after I reworked the documentation, though other changes may have contributed.",
+            "Tickets fell a lot, I'm not sure by how much.",
+            "Documentation has no effect on tickets."
+          ],
+          "answer": 1,
+          "explanation": "It states the fact, links it to your work and acknowledges uncertainty, which survives follow-up questions.",
+          "placement": true
+        },
+        {
+          "id": "doc-u6-l1-e2",
+          "type": "mcq",
+          "prompt": "An interviewer asks, \"How do you know it was the docs?\" What is the best response?",
+          "choices": [
+            "Insist that it was only the docs",
+            "Explain what else changed, what evidence you have (for example, which topics fell most), and how you'd measure better next time",
+            "Say you don't know and stop",
+            "Change the subject"
+          ],
+          "answer": 1,
+          "explanation": "A reasoned answer with evidence and method shows analytical honesty."
+        },
+        {
+          "id": "doc-u6-l1-e3",
+          "type": "open",
+          "prompt": "Write a spoken one-minute answer (110 to 150 words) to: \"Tell me about a time you improved something measurably.\" Use the 35% result and the documentation rework. Do not invent details beyond what is given.",
+          "answer": "At my last job, a scheduling and dispatch software company, I noticed the support queue had a lot of repeat questions, and our user documentation was hard to follow. I reworked the end-user documentation and the knowledge base, rewriting the articles users needed most in plain, step-by-step language and checking the steps against the product. After that, ticket inflow fell 35%. I wouldn't credit documentation alone, because releases and other fixes also changed things, but it fit what I expected from removing repeat questions. If I did it again, I'd tag tickets by topic before and after so I could show which topics dropped. What I took from it is that clear documentation is part of the product's quality, not an afterthought.",
+          "rubric": [
+            "Gives situation and action in specifics that are true",
+            "States the 35% accurately",
+            "Acknowledges other factors",
+            "Says what they'd do differently",
+            "Within about a minute spoken"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u6-l2",
+      "title": "Writing samples, editing tests and tricky questions",
+      "minutes": 10,
+      "body": "**What a writing test looks like**\n\nFor support, business analyst, product and implementation roles, expect one of:\n\n- **Write a how-to article** from a short description or a demo. 30 to 60 minutes.\n- **Edit a paragraph or article.** Fix clarity, structure, tone.\n- **Write user stories and acceptance criteria** from a one-paragraph request.\n- **Turn tickets into release notes** or a customer reply.\n\nInterviewers read for structure first, then clarity, then correctness.\n\n**How to approach it**\n\n1. Ask or state the audience and goal at the top, in a line.\n2. Plan the structure for a minute before writing (title, prerequisites, steps, result).\n3. Write short, plain sentences. Use consistent labels.\n4. If information is missing, don't invent it: list your assumptions or open questions at the end.\n5. Re-read once as the reader, following the steps literally.\n\n**When you don't fully understand the thing**\n\nYou will often be asked to document something you do not yet fully understand: \"How do you document a feature you do not fully understand yet?\" A good answer:\n\n\"I start by working out what the reader needs to do, then I use the feature myself in a test environment and write down exactly what happens. I draft from that and take it to the person who knows it best, a developer or product owner, with specific questions rather than 'can you explain it?'. I flag what I'm unsure about in the draft so nobody mistakes it for confirmed, and I ask them to review it for accuracy. Then I ask someone unfamiliar to follow it. Writing it down often shows the gaps in the design too, and I raise those.\"\n\n**Other questions to prepare**\n\n- \"How do you handle a subject-matter expert who has no time?\" Prepare a draft so they only need to correct it, ask specific yes/no questions, and use short review slots.\n- \"How do you keep docs current?\" Owners, review dates, updates tied to releases.\n- \"How do you decide how much detail to include?\" By audience and task; link to depth, don't inline it.\n- \"What would you do with a ticket that keeps coming up?\" Check whether it is a missing article or a product issue.\n\n**Honest framing of your experience**\n\nYou wrote and rewrote user documentation and knowledge base articles, requirements, user stories and acceptance criteria. You have not been a full-time technical writer; say that if asked. Bring two or three real samples, with confidential customer details removed, and be ready to say what you would improve about them.",
+      "keyPoints": [
+        "Writing tests assess structure, clarity and correctness; state audience and goal first.",
+        "Do not invent facts; list assumptions and open questions.",
+        "For unfamiliar subjects: use it yourself, draft, ask specific questions, get review, test with a newcomer.",
+        "Bring cleaned-up samples and describe your role accurately."
+      ],
+      "interviewAngle": "Keep a small portfolio: one how-to article, one set of user stories with acceptance criteria, one release note, all stripped of customer data. Say what you would improve in each. That conversation shows more than any claim. You are a person who writes documentation as part of project and support work, not a dedicated technical writer.",
+      "exercises": [
+        {
+          "id": "doc-u6-l2-e1",
+          "type": "mcq",
+          "prompt": "In a writing test, the description is missing a detail you need. What should you do?",
+          "choices": [
+            "Invent a plausible detail",
+            "State the assumption or list an open question in your answer",
+            "Leave that step out silently",
+            "Refuse to continue"
+          ],
+          "answer": 1,
+          "explanation": "Flagging assumptions shows honesty and process; invented facts are a serious mistake in documentation.",
+          "placement": true
+        },
+        {
+          "id": "doc-u6-l2-e2",
+          "type": "mcq",
+          "prompt": "What is the best first move to document a feature you don't fully understand?",
+          "choices": [
+            "Wait until someone explains everything",
+            "Use the feature yourself in a test environment and write down what happens",
+            "Copy the developer's notes",
+            "Skip the hardest part"
+          ],
+          "answer": 1,
+          "explanation": "Direct use gives accurate facts and lets you ask specific questions."
+        },
+        {
+          "id": "doc-u6-l2-e3",
+          "type": "mcq",
+          "prompt": "Which statement describes your background accurately?",
+          "choices": [
+            "Professional technical writer with years of experience",
+            "Wrote and rewrote user documentation, knowledge base articles and requirements as a project manager",
+            "Documentation lead for a large team",
+            "Only edited other people's writing"
+          ],
+          "answer": 1,
+          "explanation": "It matches the real role and does not overclaim a technical writer title."
+        },
+        {
+          "id": "doc-u6-l2-e4",
+          "type": "open",
+          "prompt": "Timed practice (30 minutes). Write a knowledge base article titled \"Why can't I find a pharmacist when assigning a shift?\" using these facts: the list shows only pharmacists who are available during the shift, within the distance set for the pharmacy, and holding the licence required for that state. You can change the distance in the shift's details. Licences are managed by an administrator. Add assumptions you made at the end.",
+          "answer": "**Why can't I find a pharmacist when assigning a shift?**\n\nWhen you assign a shift, the pharmacist list shows only people who can actually work it. If someone you expect is missing, check these in order.\n\n**1. They are not available for the shift times**\nThe list includes only pharmacists who are available for the whole shift. Check the pharmacist's availability on their profile.\n\n**2. They are outside the distance set for the pharmacy**\nOnly pharmacists within the shift's distance appear.\n1. Open the shift and select **Details**.\n2. Increase the **Distance**.\n3. Return to **Assign** and check the list again.\n\n**3. They do not hold the required licence**\nPharmacists must hold the licence required for the pharmacy's state. Licences are managed by an administrator. Ask your administrator to check the pharmacist's licence record.\n\n**Still not working?** Contact support with the shift ID, the pharmacist's name and the times of the shift.\n\n**Assumptions (to confirm with the product owner):** the exact menu labels (**Details**, **Distance**, **Assign**), that availability must cover the whole shift, and that coordinators cannot edit licences themselves.",
+          "rubric": [
+            "Symptom-based title in the user's words",
+            "Three causes in a sensible order with actions",
+            "Numbered steps for the distance fix, labels bold",
+            "Support line asks for useful details",
+            "Lists assumptions rather than inventing facts"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,493 @@
+{
+  "id": "documentation",
+  "title": "Documentation",
+  "tagline": "Write clear guides, articles, requirements and release notes, and explain your results honestly.",
+  "claim": "Resume: rewrote end-user documentation and the knowledge base, and ticket inflow fell 35%; also wrote requirements, user stories and acceptance criteria. To back it, you must be able to write a task-based how-to article, user stories with Given/When/Then criteria, and user-facing release notes on the spot, and describe the 35% result with honest attribution. You were not a dedicated technical writer.",
+  "units": [
+    "unit-1.json",
+    "unit-7.json",
+    "unit-2.json",
+    "unit-8.json",
+    "unit-9.json",
+    "unit-3.json",
+    "unit-4.json",
+    "unit-10.json",
+    "unit-5.json",
+    "unit-11.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "doc-iq-1",
+      "prompt": "Tell me about your documentation experience.",
+      "strongAnswer": "At a scheduling and dispatch software company, writing documentation was part of my project manager role. I rewrote the end-user documentation and the knowledge base, starting with the questions that came up most in support tickets, and ticket inflow fell 35% afterwards. I also wrote requirements, user stories and acceptance criteria for developers and testers, and kept release testing documentation in Azure DevOps. I wasn't a full-time technical writer, but I know how to write for a specific reader, test the steps against the product and keep documents current."
+    },
+    {
+      "id": "doc-iq-2",
+      "prompt": "You said ticket inflow fell 35%. How do you know the documentation was responsible?",
+      "strongAnswer": "I can't say the documentation alone caused all of it, because other things like fixes and releases also change ticket volume. What I can say is that inflow fell 35% after I reworked the documentation, and I chose which articles to rewrite from the most common ticket topics, which is where I expected the effect. If I did it again I would tag tickets by topic before and after and compare against a topic I hadn't touched, so I could show the effect more clearly."
+    },
+    {
+      "id": "doc-iq-3",
+      "prompt": "How do you document something you do not fully understand yet?",
+      "strongAnswer": "I start with what the reader needs to do, then I use the feature myself in a test environment and write down exactly what happens. I take the draft to a developer or the product owner with specific questions instead of asking them to explain everything, and I mark anything I'm unsure of so it isn't taken as confirmed. After they review it for accuracy, I ask someone unfamiliar with the feature to follow it. Writing it down also exposes gaps in the design, and I raise those with the team."
+    },
+    {
+      "id": "doc-iq-4",
+      "prompt": "How do you decide what to document first?",
+      "strongAnswer": "I use the support tickets. I tag them by topic, count them, and rank by volume and how simple the answer is. A topic that is a large share of tickets with a short answer goes first. I read the tickets to pick up the users' own wording for titles. I also check whether the cause is missing documentation or a confusing product, because a document won't fix a bad flow; that goes to the team as a defect or story. Afterwards I compare ticket volume for that topic."
+    },
+    {
+      "id": "doc-iq-5",
+      "prompt": "What makes a good acceptance criterion? Give an example.",
+      "strongAnswer": "It's testable, specific, and describes behaviour rather than implementation. I usually write them as Given, When, Then. For a shift alert feature: given an emergency shift is requested and three pharmacists are available within the agreed distance, when the coordinator submits the request, then all three receive an alert within the agreed time. I also write the unhappy paths, like nobody being available. That way developers know what to build, testers know what to check, and the product owner knows what to accept."
+    },
+    {
+      "id": "doc-iq-6",
+      "prompt": "How do you keep documentation up to date?",
+      "strongAnswer": "I give each article an owner and a last-reviewed date, and I tie updates to releases: when a story changes a screen, the affected articles are part of its definition of done. I review the ticket topics and search terms regularly, because new questions or searches with no results show what's missing or stale. I retire articles that nobody uses or that no longer apply instead of leaving them to mislead people. A short style guide and glossary keep new articles consistent."
+    },
+    {
+      "id": "doc-iq-7",
+      "prompt": "Edit this sentence: \"The user should navigate to the shift in question and perform the cancellation action.\"",
+      "strongAnswer": "I'd ask who the reader is and what the screen says first. Assuming a coordinator and a button named Cancel shift, I'd write: \"Open the shift and select Cancel shift.\" The original is passive, uses vague phrases like 'the shift in question' and 'the cancellation action', and doesn't match the labels on screen. The edit is shorter, active, in the order of actions, and uses the interface's exact words. If I weren't sure of the button's name, I'd check the product before publishing."
+    },
+    {
+      "id": "doc-iq-8",
+      "prompt": "How do you decide what type of document to write?",
+      "strongAnswer": "I start with what the reader is doing. If they are mid-task, like a dispatcher with a pharmacy on the phone, they need a short how-to with numbered steps. If they see a symptom, it is a troubleshooting article. If they need to look up what a status means, it is reference, and if they want to understand why, it is explanation. I learned the Diátaxis names for this later; the habit came from rewriting our knowledge base. I keep each type separate and link between them."
+    },
+    {
+      "id": "doc-iq-9",
+      "prompt": "Edit this: \"In order to be able to cancel a shift, it is necessary that the Cancel button is clicked.\"",
+      "strongAnswer": "I'd write: \"To cancel a shift, select Cancel.\" The original is 17 words and passive, with filler like \"in order to be able to\" and \"it is necessary that\", and it says \"clicked\" without saying who clicks. The rewrite is active and imperative, uses the standard verb for choosing a button, and keeps every fact the reader needs. I'd also bold the label as it appears on screen. If there was a condition, like a time limit, I'd keep it."
+    },
+    {
+      "id": "doc-iq-10",
+      "prompt": "What makes a good error message?",
+      "strongAnswer": "It says what happened, why if we know, and what to do next, in plain words and without blaming the user. For example: \"Couldn't send the alert. No pharmacists are within 25 miles. Widen the distance or call the pharmacy.\" It avoids codes with no explanation and generic buttons like OK. I'd read it aloud as the person seeing it at the worst moment and check they could act. I improved help text from ticket wording; I didn't own the product's interface text."
+    },
+    {
+      "id": "doc-iq-11",
+      "prompt": "How do you make documentation accessible?",
+      "strongAnswer": "I use plain language and short sentences, headings in order, descriptive link text instead of \"click here\", and never rely on colour alone. Images get short alt text describing their purpose, or empty alt if decorative, and the steps must work without the screenshot. I test with images off and by tabbing through the page. This is good practice I apply, not a specialist accessibility role, and I would ask the platform owner how the tool handles alt text."
+    },
+    {
+      "id": "doc-iq-12",
+      "prompt": "What is a style guide and have you used one?",
+      "strongAnswer": "A style guide is a short set of rules that makes different writers sound the same: voice, title format, how steps are written, how interface labels are shown, and which words to use. I'd start from a published one such as the Microsoft Writing Style Guide and note only our differences, plus a term list so one thing has one name. At work I applied simple consistent rules to the knowledge base, like verb-first titles and numbered steps, rather than writing a formal guide."
+    },
+    {
+      "id": "doc-iq-13",
+      "prompt": "What is the difference between a changelog and release notes?",
+      "strongAnswer": "A changelog is the running record of every change, for the team. Release notes are the edited version for users: only what they would notice or must act on, benefit first, fixes described by the symptom, and a clear line if anyone has to do something. For example, a notification service refactor goes in the changelog; \"Pharmacists now get reminders at the right time\" goes in the notes. I drafted release communications during UAT and release testing."
+    },
+    {
+      "id": "doc-iq-14",
+      "prompt": "How would you organise a knowledge base for a new product?",
+      "strongAnswer": "I'd start from the tickets and search terms to see what people ask, then group by the reader's jobs rather than software modules: for example get started, fill a shift, cancel and change, alerts, reports, account. I'd keep it two levels deep, write each topic once and link to it, and use the reader's words in titles. Then I'd test it by asking three users to find an answer and watch where they click. I did this in practice for our knowledge base."
+    },
+    {
+      "id": "doc-iq-15",
+      "prompt": "Have you worked with docs-as-code or Git for documentation?",
+      "strongAnswer": "Not on the job. My documentation lived in a web knowledge base. I understand the idea: Markdown files in a repository, changes through branches and pull requests with review, and docs updated alongside features. I'd be comfortable learning a team's workflow, and I'd start by practising on a sample repository. What I can offer now is the writing side: structure, clarity, and keeping content accurate against the product."
+    },
+    {
+      "id": "doc-iq-16",
+      "prompt": "Write a one-paragraph requirement for an emergency request feature.",
+      "strongAnswer": "When a pharmacy has a shift it cannot fill, a dispatcher needs to alert nearby pharmacists quickly. Given a dispatcher on a shift page, when they select Emergency and send the request, then the system alerts pharmacists within the pharmacy's alert distance and the shift is marked Emergency. The first pharmacist to accept is assigned, and the others are told it is filled. Open questions: the default distance, how long before the request widens, and who is told if nobody accepts. I scoped this feature in my last role."
+    }
+  ],
+  "resources": [
+    {
+      "title": "Technical Writing One",
+      "url": "https://developers.google.com/tech-writing/one",
+      "source": "Google",
+      "kind": "course",
+      "minutes": 180,
+      "free": true,
+      "why": "The standard free course on active voice, clear sentences, lists and paragraphs; it deepens the five rewrite drills.",
+      "units": [
+        "doc-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Take it if you have a week or more, alongside \"Sentence-level clarity drills\".",
+      "versus": "Google's course is a complete, respected treatment with exercises; HireFly's drills are shorter and use your scheduling product and the 35% story."
+    },
+    {
+      "title": "Technical Writing Two: Organizing large documents",
+      "url": "https://developers.google.com/tech-writing/two/large-docs",
+      "source": "Google",
+      "kind": "course",
+      "minutes": 30,
+      "free": true,
+      "why": "Outlining, splitting and navigation of larger document sets, which supports the structure and knowledge base lessons.",
+      "units": [
+        "doc-u7",
+        "doc-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after \"Choosing and structuring a document\" if you will organise a knowledge base.",
+      "versus": "Covers outlines and navigation for big sets; HireFly shows the knowledge-base case."
+    },
+    {
+      "title": "Microsoft Writing Style Guide",
+      "url": "https://learn.microsoft.com/en-us/style-guide/welcome/",
+      "source": "Microsoft Learn",
+      "kind": "reference",
+      "minutes": 60,
+      "free": true,
+      "why": "A full style guide to adopt rather than invent; covers word choice, procedures and tone beyond the one-page version here.",
+      "units": [
+        "doc-u8",
+        "doc-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Keep it as a reference while you do the lab \"Write a one-page style guide and glossary\".",
+      "versus": "A full style guide to adopt; HireFly's one page is faster for a portfolio."
+    },
+    {
+      "title": "Diátaxis",
+      "url": "https://diataxis.fr/",
+      "source": "diataxis.fr",
+      "kind": "reference",
+      "minutes": 40,
+      "free": true,
+      "why": "The framework's own site with the full explanation of the four types and how to apply them.",
+      "units": [
+        "doc-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it after \"Choosing and structuring a document\" and before the lab \"Audit five help pages with Diátaxis\".",
+      "versus": "The framework's own site is the full explanation; HireFly applies it to your help pages."
+    },
+    {
+      "title": "How to write software documentation",
+      "url": "https://writethedocs.org/guide/writing/beginners-guide-to-docs",
+      "source": "Write the Docs",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "A short practical beginner guide from the documentation community.",
+      "units": [
+        "doc-u1",
+        "doc-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Skim it first if the whole field is new.",
+      "versus": "A short community guide; HireFly goes deeper on your how-to and troubleshooting articles."
+    },
+    {
+      "title": "Docs as Code",
+      "url": "https://www.writethedocs.org/guide/docs-as-code/",
+      "source": "Write the Docs",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "Explains the workflow, benefits and trade-offs behind the docs-as-code lesson.",
+      "units": [
+        "doc-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it if a posting mentions docs-as-code, after \"Systems: style, docs-as-code, structure and measurement\".",
+      "versus": "Explains the trade-offs from the community; HireFly keeps it at a reader's level."
+    },
+    {
+      "title": "Use Confluence as a Knowledge Base",
+      "url": "https://confluence.atlassian.com/doc/use-confluence-as-a-knowledge-base-218275154.html",
+      "source": "Atlassian",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "How the how-to and troubleshooting templates and labels work in a real knowledge base tool.",
+      "units": [
+        "doc-u2",
+        "doc-u11"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Open it when you build a sample knowledge base article in the labs.",
+      "versus": "Shows templates and labels in a real tool; HireFly writes the content and grades it."
+    },
+    {
+      "title": "5 knowledge base design best practices",
+      "url": "https://www.zendesk.com/blog/help-center/knowledge-base/knowledge-base/5-knowledge-base-design-best-practices/",
+      "source": "Zendesk",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "Practical guidance on titles, search keywords and article focus for help centres.",
+      "units": [
+        "doc-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it before the lab \"Write a troubleshooting article: A pharmacist is not receiving alerts\".",
+      "versus": "Plain tips from a vendor; HireFly shows them on your examples."
+    },
+    {
+      "title": "Federal Plain Language Guidelines",
+      "url": "https://plainlanguage.gov/guidelines/",
+      "source": "plainlanguage.gov",
+      "kind": "reference",
+      "minutes": 45,
+      "free": true,
+      "why": "Free, concrete rules on short sentences, active voice and common words; check the page, as the site changed in 2025.",
+      "units": [
+        "doc-u1",
+        "doc-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read part of it with \"Sentence-level clarity drills\" and check the page, as the site changed.",
+      "versus": "Concrete rules from an official source; HireFly gives graded rewrites."
+    },
+    {
+      "title": "An alt Decision Tree",
+      "url": "https://w3c.github.io/wai-tutorial-images/tutorials/images/decision-tree/",
+      "source": "W3C WAI",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "A step-by-step way to decide what alt text an image needs, deepening the accessibility lesson.",
+      "units": [
+        "doc-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it during \"Procedures, visuals, reference and release notes\" if alt text is new.",
+      "versus": "A step-by-step authority page; HireFly adds why it matters in help content."
+    },
+    {
+      "title": "Technical writing job interview tips",
+      "url": "https://opensource.com/article/17/5/technical-writing-job-interview-tips",
+      "source": "Opensource.com",
+      "kind": "reference",
+      "minutes": 10,
+      "free": true,
+      "why": "What interviewers ask technical writers and how to prepare a portfolio, which the interview unit only partly covers.",
+      "units": [
+        "doc-u6",
+        "doc-u11"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it the day before a writing-role interview, after \"In the interview\".",
+      "versus": "Covers portfolio and questions for writers; HireFly tells the 35% story honestly for a non-writer."
+    }
+  ],
+  "labs": [
+    {
+      "id": "doc-lab-1",
+      "title": "Write a knowledge-base article: Cancel a shift",
+      "minutes": 45,
+      "goal": "A one-page how-to article that passes a seven-point checklist.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Use the how-to template from the templates lesson.",
+      "steps": [
+        "Write the title (verb first) and a one-sentence purpose.",
+        "List what the reader needs under 'Before you start'.",
+        "Write at most seven numbered steps for cancelling a shift and choosing a reason (no coverage, pharmacy cancelled, pharmacist cancelled). One action per step, bold the labels.",
+        "Add a branch for a shift that already has a pharmacist assigned, and a warning before the step it applies to.",
+        "Add a result line and a link to a troubleshooting article.",
+        "Cut filler: read once for passive voice, once for 'in order to', 'simply' and 'just'.",
+        "Grade yourself: [ ] verb-first title; [ ] purpose line; [ ] before-you-start; [ ] 7 or fewer one-action steps; [ ] branch and warning placed correctly; [ ] result line; [ ] related link.",
+        "Ask one person who has not seen the product to follow it and write down where they hesitated. Fix those steps."
+      ],
+      "check": [
+        "All seven checklist boxes are ticked.",
+        "The article is under 250 words.",
+        "No sentence is passive except where the actor is truly unknown.",
+        "Someone new could follow it without asking you a question."
+      ],
+      "talkTrack": "I wrote and user-tested a task-based how-to article against a checklist, the way I rewrote our knowledge base."
+    },
+    {
+      "id": "doc-lab-2",
+      "title": "Write a troubleshooting article: A pharmacist is not receiving alerts",
+      "minutes": 45,
+      "goal": "A symptom-led article with ordered causes and a good escalation section.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Use the troubleshooting template.",
+      "steps": [
+        "Write the title as the symptom in a dispatcher's words.",
+        "Write a 'Quick check' with the single most common cause and its fix (for example phone notifications turned off or the pharmacist outside the alert distance).",
+        "List three to five other causes in order of likelihood. Give each a heading, how to confirm it, and numbered steps to fix it.",
+        "Add 'Still not working?' with the exact details to send to support (pharmacist name, shift number, time sent, device).",
+        "Rewrite any sentence that blames the user. Replace jargon with plain words.",
+        "Grade yourself: [ ] title is the symptom; [ ] quick check first; [ ] 3 to 5 causes in likelihood order; [ ] each cause has confirm and fix; [ ] no blame, no jargon; [ ] escalation lists what to send.",
+        "Check that each fix could be done by a dispatcher without developer help."
+      ],
+      "check": [
+        "The title is a symptom, not a feature name.",
+        "The quick check appears before the list of causes.",
+        "Every cause has a way to confirm it and a fix.",
+        "The escalation section names at least four details to send."
+      ],
+      "talkTrack": "I structure troubleshooting articles from the symptom, with the most likely cause first and a clear handoff to support."
+    },
+    {
+      "id": "doc-lab-3",
+      "title": "Write release notes for version 2.4",
+      "minutes": 35,
+      "goal": "User-facing release notes in four categories, built from raw tickets.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Tickets to use: ST-501 add SOS request button on the shift page; ST-502 refactor alert queue; ST-503 cancel dialog requires a reason; ST-504 fix reminders one hour late in one region; ST-505 upgrade logging library; ST-506 alerts may arrive up to a minute late on slow networks (known).",
+      "steps": [
+        "Sort the six tickets into: New, Improved, Fixed, Known issues, Action needed, or Leave out.",
+        "Write each user-facing bullet starting with the benefit, one or two lines each.",
+        "Describe the fix by what users saw, not the cause.",
+        "Add an 'Action needed' line naming who must do what.",
+        "Remove ticket codes and internal terms.",
+        "Grade yourself: [ ] two internal tickets left out; [ ] categories in fixed order; [ ] benefit first; [ ] fix described by symptom; [ ] known issue stated honestly; [ ] action needed names the role."
+      ],
+      "check": [
+        "ST-502 and ST-505 do not appear.",
+        "The fix bullet describes the symptom.",
+        "The known issue appears under Known issues.",
+        "No bullet is longer than two lines."
+      ],
+      "talkTrack": "I turn a ticket list into release notes users can act on, leaving out internal work and being honest about known issues."
+    },
+    {
+      "id": "doc-lab-4",
+      "title": "Write a requirements page for the emergency SOS request feature",
+      "minutes": 60,
+      "goal": "A one-page requirements document with testable acceptance criteria.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Use the requirements template. The feature: a dispatcher can send an emergency request that alerts nearby pharmacists, and the first to accept is assigned.",
+      "steps": [
+        "Write the problem in two sentences: who has it and what it costs (a shift unfilled while the pharmacy waits).",
+        "Write the goal with a measure, such as average time to fill an emergency shift. You may reference the practice data's emergency flag.",
+        "State scope: in (send, alert nearby pharmacists, accept, assign) and out (payments, rating pharmacists).",
+        "Write three user stories (dispatcher sends, pharmacist accepts, dispatcher sees status) with Given/When/Then acceptance criteria.",
+        "Add non-functional needs: how fast alerts arrive, reliability and privacy of pharmacist location. Make each measurable.",
+        "List open questions with an owner each, and a four-term glossary.",
+        "Grade yourself: [ ] measurable goal; [ ] scope in and out; [ ] three stories with benefit; [ ] each criterion testable by a tester; [ ] non-functional needs measurable; [ ] open questions owned; [ ] glossary matches product terms."
+      ],
+      "check": [
+        "Every acceptance criterion can pass or fail on a test.",
+        "Each non-functional need has a number.",
+        "Scope names at least two things out.",
+        "A tester could write test cases from the page alone."
+      ],
+      "talkTrack": "I scoped the emergency alert feature and wrote requirements with testable acceptance criteria that developers and testers could use."
+    },
+    {
+      "id": "doc-lab-5",
+      "title": "Rewrite twenty sentences",
+      "minutes": 40,
+      "goal": "A before-and-after set of twenty sentences with each fix named.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Write twenty weak sentences about the product yourself or take them from lesson exercises.",
+      "steps": [
+        "Write five passive sentences, five wordy ones, five with ambiguous pronouns or mixed terms, and five that should be steps or lists.",
+        "Rewrite each, changing one thing at a time.",
+        "Next to each rewrite, name the fix in two or three words (active voice, filler, pronoun, parallel list).",
+        "Count words before and after for the wordy five.",
+        "Swap with a friend, or reread the next day, and fix any rewrite that lost a fact.",
+        "Grade yourself: [ ] facts and conditions preserved; [ ] each fix named; [ ] steps start with verbs; [ ] terms consistent; [ ] average length 25 words or fewer."
+      ],
+      "check": [
+        "Twenty before-and-after pairs exist.",
+        "The wordy five are at least 30 percent shorter.",
+        "No rewrite dropped a number, condition or name."
+      ],
+      "talkTrack": "I can edit rough text quickly and say what I fixed and why."
+    },
+    {
+      "id": "doc-lab-6",
+      "title": "Audit five help pages with Diátaxis",
+      "minutes": 40,
+      "goal": "A classification table showing which pages mix types and how to split them.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Pick any five help-centre pages from a public product you use (a public page, not private content).",
+      "steps": [
+        "For each page, write the title and the reader's likely need.",
+        "Mark each section as tutorial, how-to, reference or explanation.",
+        "Mark pages that mix three or more types.",
+        "For one mixed page, propose a split into separate pages with titles and links.",
+        "Grade yourself: [ ] every section classified; [ ] reader need stated; [ ] one split proposed with titles; [ ] links between the pages named."
+      ],
+      "check": [
+        "A table with five rows exists.",
+        "At least one page is shown to mix types.",
+        "The proposed split has verb-first how-to titles."
+      ],
+      "talkTrack": "I can look at a help page, say what job it is doing, and suggest how to organise it."
+    },
+    {
+      "id": "doc-lab-7",
+      "title": "Write a one-page style guide and glossary",
+      "minutes": 35,
+      "goal": "A half-page style guide and a six-term glossary for the scheduling help centre.",
+      "setup": "Any text editor or word processor, free. No sign-ups needed. Use fictional detail only. The product is scheduling software that assigns contracted pharmacists to pharmacies with urgent staffing gaps. Self-grade by ticking the checklist in the last step, then re-read headings only. Skim the Microsoft Writing Style Guide welcome page first.",
+      "steps": [
+        "Name the published guide you adopt.",
+        "Write five rules on voice, titles, steps, interface text and links.",
+        "Add a 'words to avoid' line.",
+        "Write six glossary terms (shift, request, assignment, dispatcher, pharmacist, emergency shift) with meaning and 'not' names.",
+        "Apply the guide to the article from lab 1 and list any change you had to make.",
+        "Grade yourself: [ ] published base named; [ ] rules are checkable; [ ] six terms with names to avoid; [ ] lab 1 article checked against it."
+      ],
+      "check": [
+        "The guide fits on half a page.",
+        "Each rule can be checked by reading an article.",
+        "The glossary matches the terms used in lab 1."
+      ],
+      "talkTrack": "I can set up simple style rules and a term list so documentation stays consistent."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you far on this skill because it is mostly writing you can practise on your own: a how-to article, user stories, release notes, and the 35% story told with honest attribution. Reading is enough to learn the rules, but only the labs and a portfolio make it real. It cannot give you a recognised course certificate.",
+    "hireflyBetter": [
+      "You need samples written about the scheduling product.",
+      "You need the 35% story told honestly.",
+      "You want rewrite drills with model answers.",
+      "You want templates for how-to, troubleshooting and release notes.",
+      "You have days and need a short route."
+    ],
+    "externalBetter": [
+      "You want a respected free course such as Google's Technical Writing One.",
+      "You want a full style guide to adopt.",
+      "You need the original source for a framework like Diátaxis.",
+      "You want to see articles in a real tool like Confluence.",
+      "You are aiming at a dedicated technical writer job."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for \"Who you are writing for\" and \"Knowledge base articles and user guides\" and study only what you miss (30 minutes).",
+          "Read \"In the interview\" (18 minutes).",
+          "Do the lab \"Write a knowledge-base article: Cancel a shift\" (45 minutes).",
+          "Do the lab \"Write release notes for version 2.4\" (35 minutes).",
+          "Work \"Requirements and user stories\" (19 minutes).",
+          "Do the lab \"Write a requirements page for the emergency SOS request feature\" (60 minutes).",
+          "Practise the 35% story aloud (20 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Work \"Who you are writing for\" and \"Choosing and structuring a document\" (35 minutes).",
+          "Work \"Knowledge base articles and user guides\" (18 minutes) and do the lab \"Write a knowledge-base article: Cancel a shift\" (45 minutes).",
+          "Do the lab \"Write a troubleshooting article: A pharmacist is not receiving alerts\" (45 minutes).",
+          "Work \"Sentence-level clarity drills\" and do the lab \"Rewrite twenty sentences\" (1.5 hours).",
+          "Work \"Procedures, visuals, reference and release notes\" and do the lab \"Write release notes for version 2.4\" (1.2 hours).",
+          "Work \"Requirements and user stories\" and do the lab \"Write a requirements page for the emergency SOS request feature\" (1.3 hours).",
+          "Work \"Process documentation\" and \"Maintaining documentation\" (36 minutes).",
+          "Take \"Technical Writing One\" in parts (3 hours).",
+          "Do the lab \"Audit five help pages with Diátaxis\" after reading \"Diátaxis\" (1 hour 20 minutes).",
+          "Work \"Templates and a writing-sample workshop\" (22 minutes).",
+          "Work \"In the interview\" and read \"Technical writing job interview tips\" (30 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Work every HireFly unit in order and do all seven labs (12 hours).",
+          "Take \"Technical Writing One\" and \"Technical Writing Two: Organizing large documents\" (3.5 hours).",
+          "Read \"Diátaxis\" and \"Federal Plain Language Guidelines\" (1.5 hours).",
+          "Skim \"Microsoft Writing Style Guide\" and write the style guide lab (2 hours).",
+          "Read \"Use Confluence as a Knowledge Base\" and \"5 knowledge base design best practices\" (1 hour).",
+          "Build a three-piece portfolio from \"Templates and a writing-sample workshop\" (8 hours).",
+          "Document one real process each week and measure the change (11 hours).",
+          "Read \"Technical writing job interview tips\" and rehearse \"In the interview\" (1 hour)."
+        ]
+      }
+    ]
+  }
+}

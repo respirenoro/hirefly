@@ -1,0 +1,208 @@
+{
+  "id": "sql-u2",
+  "title": "Aggregation: counting, grouping and rates",
+  "summary": "Summarise many rows into numbers. Count, sum and average with GROUP BY and HAVING, then turn counts into percentages without the classic integer-division mistake.",
+  "lessons": [
+    {
+      "id": "sql-u2-l1",
+      "title": "COUNT, SUM, AVG, MIN, MAX",
+      "minutes": 9,
+      "body": "An aggregate function collapses many rows into one value. The five you will use constantly are `COUNT`, `SUM`, `AVG`, `MIN` and `MAX`.\n\nStart with counting. These three look similar but answer different questions:\n\n```sql\nSELECT COUNT(*)                    AS all_rows,\n       COUNT(filled_at)            AS rows_with_fill_time,\n       COUNT(DISTINCT pharmacy_id) AS pharmacies\nFROM shifts;\n```\n\nOn the sample data this returns 8, 5 and 3.\n\n- `COUNT(*)` counts rows, whatever they contain.\n- `COUNT(column)` counts rows where that column is not NULL. Shifts 103, 106 and 107 have no `filled_at`, so you get 5.\n- `COUNT(DISTINCT column)` counts different non-NULL values. Pharmacy ids 1, 2 and 3 give 3.\n\nAdd a `WHERE` to count a subset. `SELECT COUNT(*) FROM shifts WHERE status = 'cancelled';` returns 3.\n\nFor SUM and AVG you need a number. The time to fill a shift is the gap between `requested_at` and `filled_at`. T-SQL calculates it with `DATEDIFF(MINUTE, requested_at, filled_at)`. Unit 4 covers dates properly; for now, here are the results per shift:\n\n| id | status | minutes_to_fill |\n|---|---|---|\n| 101 | completed | 90 |\n| 102 | completed | 45 |\n| 103 | cancelled | NULL |\n| 104 | completed | 240 |\n| 105 | completed | 20 |\n| 106 | cancelled | NULL |\n| 107 | open | NULL |\n| 108 | cancelled | 120 |\n\n```sql\nSELECT SUM(DATEDIFF(MINUTE, requested_at, filled_at)) AS total_min,\n       AVG(DATEDIFF(MINUTE, requested_at, filled_at)) AS avg_min,\n       MIN(DATEDIFF(MINUTE, requested_at, filled_at)) AS fastest,\n       MAX(DATEDIFF(MINUTE, requested_at, filled_at)) AS slowest\nFROM shifts;\n```\n\nThe result is 515, 103, 20 and 240.\n\nThe key point is that every aggregate except `COUNT(*)` ignores NULL. The average is 515 divided by 5 shifts that have a fill time, which is 103. It is not 515 divided by 8, which would be 64.4. That is usually what you want here, because an unfilled shift has no time to fill, but be sure the question agrees.\n\nOne T-SQL detail: `AVG` of an integer column returns an integer, truncating the decimals. The average of 90 and 45 would show 67, not 67.5. Write `AVG(x * 1.0)` to force decimals. PostgreSQL returns a decimal automatically, but the habit costs nothing.",
+      "keyPoints": [
+        "COUNT(*) counts rows; COUNT(col) skips NULLs; COUNT(DISTINCT col) counts different values.",
+        "SUM, AVG, MIN and MAX ignore NULL values.",
+        "An average over rows with a value is not the same as dividing by all rows.",
+        "In T-SQL, AVG of an integer is truncated; multiply by 1.0 to keep decimals."
+      ],
+      "interviewAngle": "Interviewers like 'what is the difference between COUNT(*) and COUNT(column)?' because it shows whether you think about NULLs. Tie it to your reporting: average time to fill only makes sense over shifts that were actually filled, and you should state that assumption when you present the number.",
+      "exercises": [
+        {
+          "id": "sql-u2-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "On the sample data, what does `SELECT COUNT(filled_at) FROM shifts;` return?",
+          "choices": [
+            "8",
+            "3",
+            "0",
+            "5"
+          ],
+          "answer": 3,
+          "explanation": "COUNT(column) counts non-NULL values. Five shifts (101, 102, 104, 105, 108) have a fill time; 103, 106 and 107 do not."
+        },
+        {
+          "id": "sql-u2-l1-e2",
+          "type": "short",
+          "prompt": "Using the minutes_to_fill table in the lesson, what does SUM(minutes_to_fill) return? Answer with a number.",
+          "accept": [
+            "515"
+          ],
+          "answer": "515",
+          "explanation": "90 + 45 + 240 + 20 + 120 = 515. The NULL rows are ignored."
+        },
+        {
+          "id": "sql-u2-l1-e3",
+          "type": "mcq",
+          "prompt": "What is AVG(minutes_to_fill) on the lesson's sample data?",
+          "choices": [
+            "64.4, because the sum is divided by 8 shifts",
+            "103, because the NULL rows are ignored",
+            "515",
+            "5"
+          ],
+          "answer": 1,
+          "explanation": "AVG skips NULLs, so it divides 515 by the 5 rows that have a value, giving 103."
+        },
+        {
+          "id": "sql-u2-l1-e4",
+          "type": "open",
+          "prompt": "Write one query that returns, in a single row, the total number of shifts (`total_shifts`), the number of shifts with a fill time (`filled_shifts`), and the number of different pharmacies that have shifts (`pharmacies`). Give the values on the sample data.",
+          "answer": "```sql\nSELECT COUNT(*)                    AS total_shifts,\n       COUNT(filled_at)            AS filled_shifts,\n       COUNT(DISTINCT pharmacy_id) AS pharmacies\nFROM shifts;\n```\n\nResult: 8, 5 and 3.\n\nOn the practice data this returns 1 row (columns: total_shifts, filled_shifts, pharmacies); the first row is 1019, 906, 40.",
+          "rubric": [
+            "Uses COUNT(*) for total shifts",
+            "Uses COUNT(filled_at) so NULLs are skipped",
+            "Uses COUNT(DISTINCT pharmacy_id) for pharmacies",
+            "Gives 8, 5 and 3"
+          ],
+          "sqlite": "SELECT COUNT(*) AS total_shifts, COUNT(filled_at) AS filled_shifts, COUNT(DISTINCT pharmacy_id) AS pharmacies FROM shifts"
+        }
+      ]
+    },
+    {
+      "id": "sql-u2-l2",
+      "title": "GROUP BY and HAVING",
+      "minutes": 10,
+      "body": "`GROUP BY` splits rows into groups and runs the aggregate once per group. Count shifts by status:\n\n```sql\nSELECT status, COUNT(*) AS shifts\nFROM shifts\nGROUP BY status;\n```\n\n| status | shifts |\n|---|---|\n| completed | 4 |\n| cancelled | 3 |\n| open | 1 |\n\nThe row order is not guaranteed unless you add `ORDER BY`. Add one whenever order matters.\n\nThe rule: every column in `SELECT` must either be in `GROUP BY` or be inside an aggregate. This fails because `status` is neither:\n\n```sql\nSELECT pharmacy_id, status, COUNT(*)\nFROM shifts\nGROUP BY pharmacy_id;\n```\n\nCount shifts per pharmacy:\n\n```sql\nSELECT pharmacy_id, COUNT(*) AS shifts\nFROM shifts\nGROUP BY pharmacy_id;\n```\n\nThis gives pharmacy 1 with 3, pharmacy 2 with 3 and pharmacy 3 with 2.\n\n`WHERE` and `HAVING` both filter, but at different times. `WHERE` filters rows before grouping. `HAVING` filters groups after the aggregate is calculated. You cannot use an aggregate in `WHERE`.\n\n```sql\nSELECT pharmacy_id, COUNT(*) AS shifts\nFROM shifts\nGROUP BY pharmacy_id\nHAVING COUNT(*) >= 3;\n```\n\nThis returns pharmacies 1 and 2 only. Combine both:\n\n```sql\nSELECT pharmacy_id, COUNT(*) AS cancelled\nFROM shifts\nWHERE status = 'cancelled'\nGROUP BY pharmacy_id\nHAVING COUNT(*) >= 2;\n```\n\nFirst `WHERE` keeps the three cancelled shifts (103 and 108 at pharmacy 2, 106 at pharmacy 3). Then they are grouped: pharmacy 2 has 2, pharmacy 3 has 1. `HAVING` keeps only pharmacy 2.\n\nCancellation reasons are a natural grouping:\n\n```sql\nSELECT cancel_reason, COUNT(*) AS shifts\nFROM shifts\nGROUP BY cancel_reason;\n```\n\nNULL becomes its own group. This returns 4 rows: NULL with 5, and each of 'no coverage', 'pharmacy cancelled' and 'pharmacist cancelled' with 1. For a report of reasons, add `WHERE status = 'cancelled'` so the NULL group disappears.\n\nTo sort by the count, repeat the expression or use the alias in `ORDER BY`: `ORDER BY shifts DESC`. Aliases work in `ORDER BY` but not in `WHERE` or `HAVING`.",
+      "keyPoints": [
+        "GROUP BY makes one output row per group; the aggregate runs per group.",
+        "Every selected column must be grouped or aggregated.",
+        "WHERE filters rows before grouping; HAVING filters groups after.",
+        "NULL forms its own group.",
+        "Aliases work in ORDER BY but not in WHERE or HAVING."
+      ],
+      "interviewAngle": "WHERE versus HAVING is a near-certain question. Give the one-line answer: WHERE filters rows before grouping, HAVING filters groups after. Then give an example from your reporting, such as cancellations grouped by reason, filtered to cancelled shifts first. That shows you have used it, not just memorised it.",
+      "exercises": [
+        {
+          "id": "sql-u2-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You group shifts by pharmacy and want to keep only pharmacies with 3 or more shifts. Which clause holds the `COUNT(*) >= 3` condition?",
+          "choices": [
+            "WHERE",
+            "GROUP BY",
+            "ORDER BY",
+            "HAVING"
+          ],
+          "answer": 3,
+          "explanation": "The count exists only after rows are grouped, so the condition goes in HAVING. WHERE runs before grouping and cannot use aggregates."
+        },
+        {
+          "id": "sql-u2-l2-e2",
+          "type": "short",
+          "prompt": "How many rows does `SELECT cancel_reason, COUNT(*) FROM shifts GROUP BY cancel_reason;` return on the sample data? Answer with a number.",
+          "accept": [
+            "4",
+            "four"
+          ],
+          "answer": "4",
+          "explanation": "There are three distinct reasons plus one group for NULL, which covers the five shifts that were not cancelled."
+        },
+        {
+          "id": "sql-u2-l2-e3",
+          "type": "mcq",
+          "prompt": "Why does this query fail?\n\n```sql\nSELECT pharmacy_id, status, COUNT(*)\nFROM shifts\nGROUP BY pharmacy_id;\n```",
+          "choices": [
+            "COUNT(*) cannot be used with GROUP BY.",
+            "status is neither in GROUP BY nor inside an aggregate function.",
+            "pharmacy_id must be written in uppercase.",
+            "There is no WHERE clause."
+          ],
+          "answer": 1,
+          "explanation": "Each output row represents a pharmacy, so the database cannot choose a single status for it. Add status to GROUP BY or aggregate it."
+        },
+        {
+          "id": "sql-u2-l2-e4",
+          "type": "open",
+          "prompt": "Write a query that returns each pharmacy_id and its number of completed shifts (`completed_shifts`), keeping only pharmacies with at least 20 completed shifts. On the 8-row lesson sample no pharmacy gets near 20, so also say which pharmacy ids it would return there if the cut-off were 2.",
+          "answer": "```sql\nSELECT pharmacy_id, COUNT(*) AS completed_shifts\nFROM shifts\nWHERE status = 'completed'\nGROUP BY pharmacy_id\nHAVING COUNT(*) >= 20;\n```\n\nWith the cut-off at 2 on the lesson sample, completed shifts are 101 and 102 (pharmacy 1), 104 (pharmacy 2) and 105 (pharmacy 3), so only pharmacy 1 is returned, with completed_shifts = 2.\n\nOn the practice data this returns 24 rows (columns: pharmacy_id, completed_shifts); the first row is 1, 29.",
+          "rubric": [
+            "Filters status = 'completed' in WHERE (before grouping)",
+            "Groups by pharmacy_id",
+            "Uses HAVING COUNT(*) >= 2 for the group filter",
+            "Identifies pharmacy 1 as the only result"
+          ],
+          "sqlite": "SELECT pharmacy_id, COUNT(*) AS completed_shifts FROM shifts WHERE status = 'completed' GROUP BY pharmacy_id HAVING COUNT(*) >= 20"
+        }
+      ]
+    },
+    {
+      "id": "sql-u2-l3",
+      "title": "Percentages and rates",
+      "minutes": 10,
+      "body": "Reports are full of rates: fill rate, cancellation rate, completion rate. A rate is a numerator divided by a denominator, and most mistakes come from getting one of them wrong or from integer division.\n\nHere is the trap. In SQL Server and PostgreSQL, dividing two integers gives an integer:\n\n```sql\nSELECT COUNT(filled_at) / COUNT(*) FROM shifts;\n```\n\nThat is 5 divided by 8, and the result is 0, not 0.625. Fix it by making one side a decimal. Multiplying by `100.0` does this and also gives a percentage:\n\n```sql\nSELECT ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) AS fill_rate_pct\nFROM shifts;\n```\n\nThe answer is 62.5. In T-SQL, the displayed value may carry trailing zeros, such as 62.500000, because of how decimal precision works; the value is the same.\n\nSplit the same calculation by pharmacy:\n\n```sql\nSELECT pharmacy_id,\n       COUNT(*)         AS requested,\n       COUNT(filled_at) AS filled,\n       ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) AS fill_rate_pct\nFROM shifts\nGROUP BY pharmacy_id\nORDER BY pharmacy_id;\n```\n\n| pharmacy_id | requested | filled | fill_rate_pct |\n|---|---|---|---|\n| 1 | 3 | 2 | 66.7 |\n| 2 | 3 | 2 | 66.7 |\n| 3 | 2 | 1 | 50.0 |\n\nA rate for a subset, such as cancellations, needs a conditional count. `CASE` works like if/else for each row; unit 4 covers it fully. Here, each cancelled row counts as 1 and every other row as 0, and `SUM` adds them up:\n\n```sql\nSELECT ROUND(100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)\n             / COUNT(*), 1) AS cancel_rate_pct\nFROM shifts;\n```\n\nThree of 8 shifts were cancelled, so the result is 37.5.\n\nTwo habits keep rates honest. First, say what the denominator is: all requested shifts, only shifts that started, or only filled shifts. These give different numbers. Second, guard against dividing by zero, which raises an error. In a grouped report a group could have no rows in the denominator. Use `NULLIF(denominator, 0)`, which returns NULL when the denominator is 0, so the result becomes NULL instead of an error:\n\n```sql\n100.0 * SUM(x) / NULLIF(COUNT(*), 0)\n```",
+      "keyPoints": [
+        "Integer divided by integer gives an integer; use 100.0 * numerator / denominator.",
+        "Write down the numerator and denominator before writing SQL.",
+        "SUM(CASE WHEN condition THEN 1 ELSE 0 END) counts a subset inside one query.",
+        "NULLIF(denominator, 0) prevents divide-by-zero errors.",
+        "ROUND(value, 1) controls displayed decimals."
+      ],
+      "interviewAngle": "Rates are your strongest SQL story: fill rate and cancellation rate are what you actually reported. Describe the definition first ('requested shifts that received a pharmacist'), then the query. Mention integer division as a mistake you know to avoid. This is concrete and honest, and it shows more care than just naming functions.",
+      "exercises": [
+        {
+          "id": "sql-u2-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In T-SQL, what does `SELECT COUNT(filled_at) / COUNT(*) FROM shifts;` return on the sample data, where the counts are 5 and 8?",
+          "choices": [
+            "0.625",
+            "62.5",
+            "5",
+            "0"
+          ],
+          "answer": 3,
+          "explanation": "Both counts are integers, so the division is integer division and 5 / 8 truncates to 0. Multiply by 100.0 first to get a decimal result."
+        },
+        {
+          "id": "sql-u2-l3-e2",
+          "type": "short",
+          "prompt": "What is the overall cancellation rate on the sample data, as a percentage rounded to one decimal place (3 cancelled out of 8 shifts)?",
+          "accept": [
+            "37.5",
+            "37.5%",
+            "37.5 %"
+          ],
+          "answer": "37.5",
+          "explanation": "3 / 8 = 0.375, which is 37.5%."
+        },
+        {
+          "id": "sql-u2-l3-e3",
+          "type": "mcq",
+          "prompt": "What does `NULLIF(COUNT(*), 0)` do when used as the denominator?",
+          "choices": [
+            "It returns 0 when the count is NULL.",
+            "It returns NULL when the count is 0, so the division gives NULL instead of an error.",
+            "It removes all NULL rows from the table.",
+            "It rounds the count to the nearest integer."
+          ],
+          "answer": 1,
+          "explanation": "NULLIF(a, b) returns NULL when a equals b, otherwise a. Dividing by NULL gives NULL, which avoids a divide-by-zero error."
+        },
+        {
+          "id": "sql-u2-l3-e4",
+          "type": "open",
+          "prompt": "Write a T-SQL query that returns each pharmacy_id with its cancellation rate as a percentage rounded to one decimal (`cancel_rate_pct`), highest rate first and ties by pharmacy_id. Give the result on the lesson sample.",
+          "answer": "```sql\nSELECT pharmacy_id,\n       ROUND(100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)\n             / COUNT(*), 1) AS cancel_rate_pct\nFROM shifts\nGROUP BY pharmacy_id\nORDER BY cancel_rate_pct DESC, pharmacy_id;\n```\n\nResult: pharmacy 2 at 66.7 (2 of 3), pharmacy 3 at 50.0 (1 of 2), pharmacy 1 at 0.0 (0 of 3).\n\nOn the practice data this returns 40 rows (columns: pharmacy_id, cancel_rate_pct); the first row is 20, 35.7.",
+          "rubric": [
+            "Groups by pharmacy_id",
+            "Counts cancelled rows with SUM(CASE ...) or an equivalent conditional count",
+            "Divides by COUNT(*) using 100.0 so the result is not integer division",
+            "Sorts descending and gives 66.7, 50.0, 0.0 for pharmacies 2, 3, 1"
+          ],
+          "sqlite": "SELECT pharmacy_id, ROUND(100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*), 1) AS cancel_rate_pct FROM shifts GROUP BY pharmacy_id ORDER BY cancel_rate_pct DESC, pharmacy_id",
+          "ordered": true
+        }
+      ]
+    }
+  ]
+}

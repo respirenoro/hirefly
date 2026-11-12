@@ -1,0 +1,144 @@
+{
+  "id": "doc-u5",
+  "title": "Maintaining documentation",
+  "summary": "Choosing what to write from ticket patterns, review and versioning, style guides, and measuring whether documentation works.",
+  "lessons": [
+    {
+      "id": "doc-u5-l1",
+      "title": "Finding what to write from ticket patterns",
+      "minutes": 9,
+      "body": "The best list of what to document is already in your support queue. Tickets are users telling you, in their own words, where the product or the documentation let them down.\n\n**A method**\n\n1. **Export** a period of tickets (a few months is plenty): title, description, category, date, resolution.\n2. **Tag** each by topic. Use a short list: alerts, cancelling shifts, assigning pharmacists, login, reports, billing.\n3. **Count** per topic. The same count by hand in a spreadsheet works fine; a pivot table makes it quick.\n4. **Rank** by volume and by effort to resolve. A topic that is 20% of tickets and has a one-line answer is the first article to write.\n5. **Read** the actual tickets for the top topics. Copy the users' words into titles and headings.\n6. **Classify the cause.** Is the answer missing, hard to find, wrong, or is the product itself confusing? Only the first three are documentation problems. If the product is confusing, raise it with the team as a defect or a story; a document cannot fix a bad flow for ever.\n\nIf your ticket system supports reporting, SQL can do the count. For example, if tickets are stored in a `tickets(id, created_at, category, subject)` table:\n\n```sql\nSELECT category, COUNT(*) AS ticket_count\nFROM tickets\nWHERE created_at >= DATE '2026-01-01'\nGROUP BY category\nORDER BY ticket_count DESC;\n```\n\n**What this looks like in practice**\n\nSuppose the top topics are \"Why didn't a pharmacist get an alert\", \"How do I cancel a shift\", and \"How do I change a pharmacy's contact\". Each becomes a short article titled in the users' words, linked from the support reply template, so agents point people to it instead of retyping answers. Each new article is also a candidate for a screenshot-free test: can a new colleague follow it?\n\n**Don't write everything**\n\nDocumentation has a maintenance cost. Every article must be reviewed when the product changes. Write what tickets and search terms say people need; retire what nobody opens.\n\n**Close the loop**\n\nAfter publishing, tag future tickets on the same topic. If volume on that topic falls, the article is working. If it does not, either the article cannot be found, does not answer the question, or the problem is in the product.\n\nThis is the approach to describe when you explain how your documentation rework related to the fall in ticket volume, because it shows you chose what to write from evidence rather than guessing.",
+      "keyPoints": [
+        "Tag and count tickets by topic to rank what to document.",
+        "Read the tickets and reuse users' wording in titles.",
+        "Separate documentation problems from product problems.",
+        "Re-measure per topic after publishing to see whether the article works."
+      ],
+      "interviewAngle": "This is the foundation of your 35% story. Describe the method: looked at what tickets were about, wrote or rewrote the articles for the most common questions, and watched volume afterwards. Be careful what you claim about cause; the next unit covers honest attribution.",
+      "exercises": [
+        {
+          "id": "doc-u5-l1-e1",
+          "type": "mcq",
+          "prompt": "Which topic should you document first?",
+          "choices": [
+            "A rare question with a very long answer",
+            "A topic that is a large share of tickets and has a short, clear answer",
+            "The newest feature regardless of tickets",
+            "The topic the writer finds most interesting"
+          ],
+          "answer": 1,
+          "explanation": "High volume with an easy fix gives the biggest reduction for the least effort.",
+          "placement": true
+        },
+        {
+          "id": "doc-u5-l1-e2",
+          "type": "mcq",
+          "prompt": "Tickets for 'cannot find the Cancel button' persist even after you write a clear article. What might it suggest?",
+          "choices": [
+            "Users do not read",
+            "The product flow may be confusing and could need a design change, not only an article",
+            "The article needs more screenshots only",
+            "Nothing"
+          ],
+          "answer": 1,
+          "explanation": "If a clear article does not reduce tickets, the issue may be in the interface; raise it as a product issue."
+        },
+        {
+          "id": "doc-u5-l1-e3",
+          "type": "short",
+          "prompt": "What do you compare before and after publishing an article to see if it works? (Two words: ticket ____.)",
+          "accept": [
+            "volume",
+            "ticket volume",
+            "count",
+            "inflow",
+            "ticket count",
+            "ticket inflow"
+          ],
+          "answer": "volume",
+          "explanation": "Tag tickets by topic and compare volume for that topic over time."
+        },
+        {
+          "id": "doc-u5-l1-e4",
+          "type": "open",
+          "prompt": "You have 400 tickets from the last quarter. Describe step by step how you would decide the first five articles to write, and include one query or spreadsheet approach for counting by topic.",
+          "answer": "1. Export the tickets with date, subject, description, category and resolution.\n2. Tag each ticket with a topic from a short list (alerts, cancelling, assigning, login, reports, other). If the system has categories, start there and fix mismatches by reading subjects.\n3. Count by topic. In SQL: `SELECT category, COUNT(*) FROM tickets GROUP BY category ORDER BY COUNT(*) DESC;` In a spreadsheet, use a pivot table with category as rows and count as values.\n4. Rank by count and by how simple the answer is. Pick the top topics with clear answers first.\n5. Read a sample of tickets in each top topic to copy the users' wording for the titles and see what they tried.\n6. Decide whether each is a documentation gap (missing, hidden, wrong) or a product issue; log product issues separately.\n7. Write the five articles, link them from reply templates, and tag future tickets so the volume per topic can be re-checked next quarter.",
+          "rubric": [
+            "Exports and categorises tickets",
+            "Counts by topic with SQL or pivot",
+            "Ranks by volume and ease",
+            "Reads tickets for wording and separates product issues",
+            "Plans to re-measure afterwards"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u5-l2",
+      "title": "Review, versioning, style guides and measuring results",
+      "minutes": 9,
+      "body": "Documentation that is not maintained is worse than none, because readers trust it.\n\n**Review**\n\nEvery article gets two checks before publishing:\n- **Accuracy review** by someone who knows the product (a developer, tester or product owner): are the steps and facts right?\n- **Usability review** by someone who does not: can they complete the task using only the article?\n\nWriters who test their own steps against the product catch most errors. Do this in a test environment and follow the article literally.\n\n**Versioning and ownership**\n\n- Give each article an **owner** and a **last reviewed** date.\n- Tie review to the release cycle: when a release changes a screen, the story's definition of done includes updating the affected articles. This is easiest if the person who writes the acceptance criteria also lists the docs impacted.\n- Keep the previous version (most knowledge base tools keep history). For software with multiple supported versions, label which version each article applies to.\n- Retire pages that are obsolete rather than leaving them; redirect to the replacement.\n\n**A style guide**\n\nA one- or two-page style guide makes documents consistent without constant discussion:\n\n| Topic | Rule |\n|---|---|\n| Titles | Verb first for tasks: \"Cancel a shift\" |\n| Interface labels | Bold, exactly as shown |\n| Voice | Active, \"you\" |\n| Terms | Use the glossary: \"shift\", \"assignment\" |\n| Steps | One action each, location first |\n| Warnings | Before the step |\n| Dates | Unambiguous format, e.g. 14 November 2026 |\n\n**Measuring whether docs work**\n\n| Measure | What it tells you |\n|---|---|\n| Ticket volume by topic | Whether an article reduces questions |\n| Deflection | Readers who view an article and do not then file a ticket (if your tool reports it) |\n| Search terms | What people look for; no-result searches show missing articles |\n| Feedback (\"Was this helpful?\") | Which articles fail and the comments say why |\n| Page views vs tickets | Many views plus many tickets suggests the article does not answer the question |\n| Time to resolve | Whether agents solve cases faster with linked articles |\n\nNo single measure proves causation. Releases, product fixes and seasonality also change ticket volume. Use several measures and describe what you see, rather than claiming one number as proof.\n\nReview the measures on a schedule, monthly or quarterly. A short list of \"fix these five articles\" is a realistic output.",
+      "keyPoints": [
+        "Review for accuracy (expert) and usability (new reader).",
+        "Give each article an owner and review date; update docs as part of a release.",
+        "A short style guide keeps documents consistent.",
+        "Use several measures: ticket volume, deflection, search terms, feedback."
+      ],
+      "interviewAngle": "Expect \"how do you know your documentation works?\" Offer several measures and admit their limits: ticket volume, feedback, search terms. Say ticket changes can have other causes, which is also the honest frame for your 35% result. Mention that you updated docs as releases changed screens, if that is accurate.",
+      "exercises": [
+        {
+          "id": "doc-u5-l2-e1",
+          "type": "mcq",
+          "prompt": "An article has many views and many tickets on the same topic. What does that most likely suggest?",
+          "choices": [
+            "The article is working well",
+            "The article is found but does not answer the question",
+            "Search is broken",
+            "Nothing can be inferred"
+          ],
+          "answer": 1,
+          "explanation": "Readers arrive and still ask for help, so the article is not solving the problem.",
+          "placement": true
+        },
+        {
+          "id": "doc-u5-l2-e2",
+          "type": "mcq",
+          "prompt": "Why should the person who knows the product not be the only reviewer?",
+          "choices": [
+            "They are too busy",
+            "They may fill in missing steps without noticing; a newcomer tests whether it is usable",
+            "Style guides forbid it",
+            "Newcomers write faster"
+          ],
+          "answer": 1,
+          "explanation": "Experts read what they know; a new reader exposes gaps."
+        },
+        {
+          "id": "doc-u5-l2-e3",
+          "type": "mcq",
+          "prompt": "Which is the strongest reason to track searches that return no results?",
+          "choices": [
+            "To find missing articles or wording gaps",
+            "To measure page speed",
+            "To count visitors",
+            "To remove the search box"
+          ],
+          "answer": 0,
+          "explanation": "Zero-result searches show topics or words readers expect to find but do not."
+        },
+        {
+          "id": "doc-u5-l2-e4",
+          "type": "open",
+          "prompt": "Write a one-page style guide (8 to 10 rules) for the scheduling software's knowledge base, with a short example for at least three of the rules.",
+          "answer": "**Knowledge base style guide**\n\n1. **Titles are tasks or symptoms in the user's words.** Verb first. Example: \"Cancel a shift and record the reason\", \"A pharmacist is not receiving shift alerts\".\n2. **Write to \"you\" in active voice.** \"Select the pharmacy\", not \"The pharmacy should be selected\".\n3. **One action per step, location first.** \"In **Reason**, choose the closest match.\"\n4. **Interface labels in bold, exactly as on screen.** **Cancel shift**, not \"cancel button\".\n5. **Use the glossary.** \"Shift\" and \"assignment\" mean one thing each. Do not use booking or job as synonyms.\n6. **Put warnings before the step.** Mark only things that can lose data or cause a wrong result as Important.\n7. **Say what success looks like.** End each procedure with a Result line.\n8. **Keep sentences short and plain.** Cut \"please note that\" and \"it is important to\".\n9. **Screenshots support, never replace, the text.** Crop, mark the target, add alt text.\n10. **Every article has an owner and a last reviewed date.**",
+          "rubric": [
+            "8 to 10 clear, usable rules",
+            "Includes at least three short examples",
+            "Covers titles, steps, labels, glossary and ownership",
+            "Rules are specific, not vague"
+          ]
+        }
+      ]
+    }
+  ]
+}

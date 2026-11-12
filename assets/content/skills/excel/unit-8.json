@@ -1,0 +1,112 @@
+{
+  "id": "excel-u8",
+  "title": "Dynamic arrays (newly learned)",
+  "summary": "FILTER, UNIQUE, SORT and spilled ranges, with a safe fallback for older Excel.",
+  "lessons": [
+    {
+      "id": "excel-u8-l1",
+      "title": "Dynamic arrays: UNIQUE, SORT and FILTER (newly learned)",
+      "minutes": 9,
+      "body": "Dynamic array functions return several values from one formula, and the result **spills** into the cells below and to the right. This is a skill you are learning now, not one from your job, so practise it next to the older tools.\n\n**Availability.** Microsoft 365, Excel 2021 and later, and Excel for the web have them. Excel 2019 and earlier do not, and a shared file shows `#NAME?`. If you do not know the version, a pivot table or Remove Duplicates is the safe route.\n\n```text\n=UNIQUE(array)                          distinct values\n=SORT(array, [sort_index], [order])     order 1 ascending, -1 descending\n=FILTER(array, include, [if_empty])     rows that meet a condition\n```\n\nUsing the practice shifts loaded as `tblShifts` (id, pharmacy_id, pharmacist_id, requested_at, filled_at, starts_at, status, cancel_reason, is_emergency):\n\n```text\n=UNIQUE(tblShifts[cancel_reason])\n```\n\nThis spills four rows: the three reasons and a blank. A blank source cell comes back as **0**, a classic surprise, so filter blanks out first when it matters.\n\n```text\n=FILTER(tblShifts, tblShifts[status]=\"cancelled\", \"None\")\n```\n\nreturns every column of the 171 cancelled shifts. Combine conditions by multiplying for AND and adding for OR:\n\n```text\n=FILTER(tblShifts, (tblShifts[status]=\"cancelled\")*(tblShifts[is_emergency]=1), \"None\")\n```\n\nThat returns the 33 cancelled emergency shifts. The third argument is shown when nothing matches, which avoids `#CALC!`. Nest them to build a ready report, newest first (requested_at is column 4):\n\n```text\n=SORT(FILTER(tblShifts, tblShifts[status]=\"cancelled\"), 4, -1)\n```\n\n**Spill rules.** Type the formula only in the top-left cell. Refer to the whole result with the spill operator, for example `A2#`. If cells in the way contain data, you get `#SPILL!`; clear them. You cannot put a spilling formula inside a regular Table, so put it on the sheet beside the Table. Count rows with `=ROWS(FILTER(...))`, and the number of distinct pharmacies with shifts is `=COUNTA(UNIQUE(tblShifts[pharmacy_id]))`, which is 40.",
+      "keyPoints": [
+        "UNIQUE, SORT and FILTER return many values that spill from one cell.",
+        "Multiply conditions for AND, add them for OR inside FILTER.",
+        "Blank source cells come back as 0; the if_empty argument avoids #CALC!.",
+        "#SPILL! means something blocks the result; not available in Excel 2019 or earlier."
+      ],
+      "interviewAngle": "Say it plainly: \"I have been learning dynamic arrays like FILTER and UNIQUE on my own; at work I got the same lists with filters and pivot tables.\" Know the version limit and offer a pivot or Remove Duplicates as the fallback. Do not claim long experience.",
+      "exercises": [
+        {
+          "id": "excel-u8-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does `=FILTER(tblShifts, tblShifts[status]=\"cancelled\", \"None\")` return?",
+          "choices": [
+            "All columns for each cancelled shift, spilling down, or \"None\" if there are no matches",
+            "A single count of cancelled shifts",
+            "Only the status column of cancelled shifts, without spilling",
+            "The cancelled shifts hidden inside the Table with a filter button"
+          ],
+          "answer": 0,
+          "explanation": "FILTER returns whole matching rows from the array and spills; the third argument is the empty-result message."
+        },
+        {
+          "id": "excel-u8-l1-e2",
+          "type": "short",
+          "prompt": "Inside FILTER, which operator combines two conditions with AND? (One symbol.)",
+          "accept": [
+            "*",
+            "asterisk",
+            "multiply"
+          ],
+          "answer": "*",
+          "explanation": "Each condition is an array of TRUE/FALSE; multiplying gives 1 only where both are true."
+        },
+        {
+          "id": "excel-u8-l1-e3",
+          "type": "open",
+          "prompt": "Write one formula that lists the cancelled emergency shifts newest request first, and say how many rows you expect from the practice data.",
+          "answer": "```text\n=SORT(FILTER(tblShifts,(tblShifts[status]=\"cancelled\")*(tblShifts[is_emergency]=1),\"None\"),4,-1)\n```\nExpect 33 rows. Column 4 is requested_at and -1 sorts descending. It needs Microsoft 365 or Excel 2021+; otherwise filter the Table by hand.",
+          "rubric": [
+            "Multiplies the two conditions",
+            "Wraps FILTER inside SORT with a column number and -1",
+            "Gives 33 as the expected count",
+            "Mentions the version requirement"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u8-l2",
+      "title": "Summaries with spilled ranges and a safe fallback",
+      "minutes": 9,
+      "body": "Spilled results can feed other formulas, which lets you build a summary that resizes itself. Load `tickets.csv` (734 rows) as `tblTickets` and put this on a new sheet:\n\n```text\nA2: =SORT(UNIQUE(tblTickets[category]))\nB2: =COUNTIFS(tblTickets[category], A2#)\nC2: =B2# / SUM(B2#)\n```\n\n`A2` spills the five categories in alphabetical order. `A2#` means \"the whole spilled range\", so `B2` returns one count per category and spills beside it. `C2` turns the counts into shares:\n\n| Category | Tickets | Share |\n|---|---|---|\n| Access | 123 | 16.8% |\n| Bug | 184 | 25.1% |\n| Data fix | 100 | 13.6% |\n| Feature request | 122 | 16.6% |\n| How do I | 205 | 27.9% |\n\nThe counts add to 734, which is your check against `=ROWS(tblTickets[id])`. If a sixth category appears in next month's data, all three formulas grow by themselves, which a hand-built table would not.\n\n**Looking up with arrays.** `XLOOKUP` can return a whole row: `=XLOOKUP(20001, tblTickets[id], tblTickets)` spills the entire record for ticket 20001. `SORTBY(array, by_array, -1)` sorts by a column that you do not want to display. `SUM(FILTER(...))` replaces a SUMIFS when the condition is awkward.\n\n**Wrap-up habits**\n\n- Put each spilling formula where nothing sits below or to the right of it.\n- Format the spilled range with the `#` reference so new rows inherit it, for example in a chart series or a data validation list (`=A2#`).\n- Reconcile the total after building any summary.\n\n**The safe fallback.** If the file may be opened in Excel 2019 or in a tool without these functions, build the same table with a pivot table: Category in Rows, Count of id in Values, Show Values As % of Column Total. It gives the same 205 and 27.9% for How do I, and it works everywhere. State which route you chose and why in your notes.",
+      "keyPoints": [
+        "A2# refers to a whole spilled range, so dependent formulas resize with it.",
+        "SORT(UNIQUE()) plus COUNTIFS builds a self-growing summary.",
+        "Check that the counts add to the total (734 tickets).",
+        "A pivot table is the version-safe fallback."
+      ],
+      "interviewAngle": "If a test lets you pick the tool, say why: dynamic arrays are fast for a live list, a pivot is safest for sharing. That shows judgement. Keep the honest line that dynamic arrays are newly learned and that pivots are your strong tool.",
+      "exercises": [
+        {
+          "id": "excel-u8-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A2 holds `=SORT(UNIQUE(tblTickets[category]))` and spills five rows. What does `=COUNTIFS(tblTickets[category], A2#)` in B2 do?",
+          "choices": [
+            "Returns five counts, one per category, spilling beside the list",
+            "Returns only the count for the first category",
+            "Returns a #VALUE! error because A2# is not a single value",
+            "Returns the total number of tickets five times"
+          ],
+          "answer": 0,
+          "explanation": "COUNTIFS accepts an array of criteria and returns an array of results."
+        },
+        {
+          "id": "excel-u8-l2-e2",
+          "type": "short",
+          "prompt": "Which operator refers to the entire spilled range that starts in A2?",
+          "accept": [
+            "a2#",
+            "#"
+          ],
+          "answer": "A2#",
+          "explanation": "The # after a cell address means its whole spill range."
+        },
+        {
+          "id": "excel-u8-l2-e3",
+          "type": "open",
+          "prompt": "Build the ticket category summary with counts and shares, say what total you must see, and give a fallback for Excel 2019.",
+          "answer": "A2 `=SORT(UNIQUE(tblTickets[category]))`, B2 `=COUNTIFS(tblTickets[category],A2#)`, C2 `=B2#/SUM(B2#)`. The counts must total 734 (Access 123, Bug 184, Data fix 100, Feature request 122, How do I 205). Fallback for Excel 2019: a pivot table with Category in Rows, Count of id in Values and Show Values As % of Column Total.",
+          "rubric": [
+            "Uses UNIQUE/SORT then COUNTIFS with the # operator",
+            "Shares divide by the total",
+            "States the 734 reconciliation",
+            "Gives a pivot fallback"
+          ]
+        }
+      ]
+    }
+  ]
+}

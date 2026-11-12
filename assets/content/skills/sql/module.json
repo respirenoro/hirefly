@@ -1,0 +1,478 @@
+{
+  "id": "sql",
+  "title": "SQL",
+  "tagline": "From your first SELECT to the joins, rates, window functions and checks that analyst and QA interviews actually test.",
+  "claim": "Resume claim: used SQL for data retrieval and reporting (shift fill rate, average time to fill, cancellation rates and reasons, assignments completed per month). To back it, you must be able to write a filtered, grouped, joined query live, explain it aloud, handle NULLs and duplicate rows, and use a query to check whether a number or a bug report is right. You are self-taught at retrieval and reporting. Do not claim database design, administration or certification.",
+  "units": [
+    "unit-1.json",
+    "unit-2.json",
+    "unit-3.json",
+    "unit-4.json",
+    "unit-5.json",
+    "unit-7.json",
+    "unit-8.json",
+    "unit-9.json",
+    "unit-10.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "sql-iq-1",
+      "prompt": "How would you rate your SQL?",
+      "strongAnswer": "I am comfortable with retrieval and reporting, and I taught myself most of it. I write queries with filters, grouping, joins and date logic, and I know the traps: NULLs, integer division and joins that duplicate rows. At my last job I used SQL to pull shift fill rate, average time to fill, cancellation rates by reason and assignments completed per month. I have not designed or administered databases, so I would not call myself advanced. If you give me a schema, I can usually write a correct query and explain each step as I go."
+    },
+    {
+      "id": "sql-iq-2",
+      "prompt": "Walk me through a report you built with SQL.",
+      "strongAnswer": "I will take shift fill rate. First I agreed on the definition with the people who would read it: the share of requested shifts that got a pharmacist. That told me the denominator was all requested shifts and the numerator was shifts with a fill time recorded. I grouped by month, counted both, and divided using decimal arithmetic so the result was not rounded to zero. Then I spot-checked one month against a handful of rows by hand. I do not trust a number until I have reproduced a small piece of it manually."
+    },
+    {
+      "id": "sql-iq-3",
+      "prompt": "What is the difference between WHERE and HAVING?",
+      "strongAnswer": "WHERE filters individual rows before any grouping happens. HAVING filters groups after the aggregation. So if I want only cancelled shifts, that is a WHERE on status. If I want only pharmacies with at least three shifts, that is a HAVING on the count, because the count does not exist until the rows are grouped. A common mistake is trying to put an aggregate like COUNT in a WHERE clause, which SQL rejects. I usually use both in one query: WHERE to narrow the rows, then GROUP BY, then HAVING on the result."
+    },
+    {
+      "id": "sql-iq-4",
+      "prompt": "When would you use a LEFT JOIN instead of an INNER JOIN?",
+      "strongAnswer": "I use a LEFT JOIN when I want to keep every row from the left table even if there is no match. The classic case is finding things that are missing: pharmacies with no shifts, or shifts with no pharmacist. I LEFT JOIN, then filter where the right-hand key IS NULL. I also use it for reports where a zero should appear instead of the row disappearing. One caution: if I filter on the right table in the WHERE clause, it quietly turns the LEFT JOIN back into an inner join, so I put that condition in the ON clause."
+    },
+    {
+      "id": "sql-iq-5",
+      "prompt": "A query returns more rows than you expected after you add a join. What do you do?",
+      "strongAnswer": "I suspect a one-to-many relationship that multiplied the rows, or a join on the wrong key. I check the row count before and after adding the join, then look at one entity, say one shift, and see how many rows it produces. If I joined on the wrong column, I fix the ON clause. If the join is correct but the table really has several matching rows, I aggregate first or choose one row per key. I avoid hiding the problem with DISTINCT, because that can mask a wrong join and give a wrong total."
+    },
+    {
+      "id": "sql-iq-6",
+      "prompt": "How have you used SQL to check software quality or verify a bug?",
+      "strongAnswer": "In UAT and release testing I mostly tested through the interface, but when a result looked off I used a read-only query to see what was really stored. For example, if a test cancelled a shift, I would query that shift by id and confirm the status and cancel reason were saved as the acceptance criteria said. I also compared report totals against a direct count. When I logged a bug, I attached the query and the result next to the expected value, so the developer could reproduce my evidence quickly."
+    },
+    {
+      "id": "sql-iq-7",
+      "prompt": "How do NULLs affect a query?",
+      "strongAnswer": "NULL means unknown, not zero or empty. Comparing anything to NULL with an equals sign never returns true, so I use IS NULL and IS NOT NULL. Aggregates like AVG and COUNT of a column skip NULLs, while COUNT star counts every row, so the choice changes the answer. A not-equals filter also drops rows where the column is NULL, which can quietly shrink a report. I handle it by deciding what NULL should mean for the question, then using IS NULL or COALESCE on purpose rather than by accident."
+    },
+    {
+      "id": "sql-iq-8",
+      "prompt": "What is the difference between UNION and UNION ALL?",
+      "strongAnswer": "Both stack the results of two queries that have the same number of compatible columns. UNION also removes duplicate rows, which means extra work to compare them. UNION ALL keeps every row, so it is cheaper and it is what I use when the two pieces cannot overlap or when I want every row counted. For example, to build one list of request times and fill times for shifts, I would use UNION ALL. I have used set operators occasionally, mostly for comparing two lists. For anything that needs more columns, I would use a join instead."
+    },
+    {
+      "id": "sql-iq-9",
+      "prompt": "How would you find the second highest value, such as the second most shifts handled by one pharmacist?",
+      "strongAnswer": "I count shifts per pharmacist in a CTE, then rank those counts with DENSE_RANK in descending order and keep rank 2 in an outer query. I use DENSE_RANK because several pharmacists can tie for the top count. ROW_NUMBER or an OFFSET would return the second row, which could equal the highest value. I would also decide what to do with shifts that have no pharmacist, here by excluding them. I have practised this pattern on a dataset rather than needing it at work, but I can explain each step."
+    },
+    {
+      "id": "sql-iq-10",
+      "prompt": "How do you find and remove duplicate rows?",
+      "strongAnswer": "To find them, I group by the columns that should be unique and keep groups with HAVING COUNT(*) greater than one. That also tells me how many copies there are. To remove them, I number the rows with ROW_NUMBER partitioned by the key in a CTE and delete the rows numbered above one, but I first run it as a SELECT to see exactly what would go, and I would do it in a test environment inside a transaction. In my work I used the finding query to check data, not to clean production data."
+    },
+    {
+      "id": "sql-iq-11",
+      "prompt": "Explain ROW_NUMBER, RANK and DENSE_RANK.",
+      "strongAnswer": "All three number rows within a window. ROW_NUMBER gives every row a different number, even when values tie, so I add tie-breakers if the order matters. RANK gives tied rows the same number and then skips, so 1, 1, 3. DENSE_RANK gives tied rows the same number without skipping, so 1, 1, 2. I use ROW_NUMBER for latest row per group, DENSE_RANK for Nth highest, and RANK when ties should all be kept. Since a window result cannot go in WHERE, I compute it in a CTE and filter outside."
+    },
+    {
+      "id": "sql-iq-12",
+      "prompt": "How would you calculate month-over-month change?",
+      "strongAnswer": "First I aggregate to one row per month in a CTE, because the comparison needs a clean monthly series. Then I use LAG over the month to read the previous month's value, and compute the difference and the percent change as current minus previous over previous. The first month has no previous row, so it shows NULL and I leave it that way. I would also check whether a month is missing, since LAG would then compare against the wrong month. I am building my window function skills; at work I did the same comparison in SQL and Excel."
+    },
+    {
+      "id": "sql-iq-13",
+      "prompt": "What is a CTE, and when do you use one instead of a subquery?",
+      "strongAnswer": "A CTE names a query with WITH so the main query can use it like a table, for that one statement. I use one when a query has steps, such as first computing minutes to fill per shift, then averaging by pharmacy, because it reads top to bottom and I can test each piece on its own. A subquery is fine for a short single value. I also need a CTE to filter on a window function result. For my reports, CTEs mainly made longer queries easier to check and explain."
+    },
+    {
+      "id": "sql-iq-14",
+      "prompt": "What happens if you run an UPDATE without a WHERE clause, and how do you protect against it?",
+      "strongAnswer": "Every row in the table changes. To protect against it, I first run a SELECT with the exact WHERE and check the rows. Then I run the UPDATE inside a transaction, check the row count against what I expected, and only then commit, or roll back if the count is wrong. I would only do this in a test environment or through an approved script. My SQL work was mostly reading and verifying data, not changing it, so I describe myself as comfortable with this at a reader's level."
+    },
+    {
+      "id": "sql-iq-15",
+      "prompt": "What do you check before you trust a number in a report?",
+      "strongAnswer": "I start with the definition, so I know the numerator and denominator. Then I run checks that should return nothing, such as required values that are missing, impossible dates, orphaned references and duplicate keys, and I reconcile totals between tables that should agree. I compare the result against a direct count of a few rows by hand. If the figure is far from what people expect, I look for a join that multiplied rows. A passing check does not prove the data is right, so I say which rules I tested."
+    },
+    {
+      "id": "sql-iq-16",
+      "prompt": "Tell me about a time a report and the underlying data disagreed.",
+      "strongAnswer": "The honest structure is: what looked wrong, how I checked, what I found, what I did. In my work a total on screen did not match what I expected from the records, so I counted the rows directly with a read-only query and compared. When they differed, I wrote the bug with the expected figure, the actual figure, the exact query, the environment and a clearly labelled hypothesis, such as a join on the wrong key. I do not claim to know the cause without seeing the code, and I say so."
+    },
+    {
+      "id": "sql-iq-17",
+      "prompt": "Why can't you use a column alias in a WHERE clause?",
+      "strongAnswer": "Because of the order SQL evaluates a query. FROM and joins come first, then WHERE, then GROUP BY, HAVING, SELECT, and finally ORDER BY. The alias is created in SELECT, which happens after WHERE, so WHERE cannot see it, while ORDER BY can. The same reasoning explains why aggregates belong in HAVING rather than WHERE, and why window functions need a CTE to be filtered. When someone hands me a query I did not write, I walk through it in that order."
+    }
+  ],
+  "resources": [
+    {
+      "title": "Get Started Querying with Transact-SQL",
+      "url": "https://learn.microsoft.com/en-us/training/paths/get-started-querying-with-transact-sql",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 480,
+      "free": true,
+      "why": "The official T-SQL path for SELECT, filtering, joins and grouping; use it to practise the T-SQL forms this module teaches.",
+      "units": [
+        "sql-u1",
+        "sql-u2",
+        "sql-u3"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Open it if the job uses SQL Server or Azure SQL and you want the T-SQL forms from a vendor path, after \"Joins\".",
+      "versus": "Microsoft's path is longer and more complete on T-SQL syntax and gives a module-by-module structure; HireFly is shorter, uses shifts and pharmacies you already know, and grades your answers."
+    },
+    {
+      "title": "Write advanced Transact-SQL queries",
+      "url": "https://learn.microsoft.com/en-us/training/paths/write-advanced-transact-sql-queries",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 360,
+      "free": true,
+      "why": "Goes further than this module on views, temporary objects and combining query results.",
+      "units": [
+        "sql-u7"
+      ],
+      "priority": "optional",
+      "useWhen": "Only if a posting asks for views, temporary tables or stored-logic work beyond reporting, after \"Combining and cleaning: sets, self joins and text\".",
+      "versus": "Microsoft covers database objects an analyst rarely writes; HireFly stays on set operations and cleaning, which interviews test far more often."
+    },
+    {
+      "title": "Write advanced T-SQL code",
+      "url": "https://learn.microsoft.com/en-us/training/modules/write-advanced-sql-code",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 60,
+      "free": true,
+      "why": "A short module on CTEs and window functions in T-SQL, matching units 4 and 8.",
+      "units": [
+        "sql-u4",
+        "sql-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Take it after \"Window functions and trends\" for a second explanation of CTEs and window functions in T-SQL.",
+      "versus": "It is only an hour and shows the vendor's wording; HireFly adds trend and top-N examples on your own tables and checked exercises."
+    },
+    {
+      "title": "Transact-SQL Exercises and Demonstrations (DP-080)",
+      "url": "https://microsoftlearning.github.io/dp-080-Transact-SQL",
+      "source": "Microsoft Learning",
+      "kind": "practice",
+      "minutes": 180,
+      "free": true,
+      "why": "Hands-on labs you can run in your own SQL Server or Azure SQL database after finishing units 1 to 3.",
+      "units": [
+        "sql-u1",
+        "sql-u2",
+        "sql-u3",
+        "sql-u4"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Do it after \"Joins\" if you want practice in a real SQL Server or Azure SQL database rather than the sandbox.",
+      "versus": "These labs run in the real server tooling the vendor keeps current; HireFly's labs and sandbox give you the same reps on the shift data that interviews resemble."
+    },
+    {
+      "title": "SQLBolt: Introduction to SQL",
+      "url": "https://sqlbolt.com/",
+      "source": "SQLBolt",
+      "kind": "practice",
+      "minutes": 180,
+      "free": true,
+      "why": "Short browser exercises, no account, with immediate feedback; good reps for units 1 to 3 and a first look at changing data.",
+      "units": [
+        "sql-u1",
+        "sql-u2",
+        "sql-u3",
+        "sql-u9"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it in the first days, before \"Aggregation: counting, grouping and rates\", for quick reps with instant feedback.",
+      "versus": "SQLBolt's browser exercises are fast and need no setup, but they use generic tables; HireFly's exercises use your scheduling domain and explain NULL and rate traps."
+    },
+    {
+      "title": "Mode SQL Tutorial: Intermediate SQL",
+      "url": "https://mode.com/sql-tutorial/intro-to-intermediate-sql",
+      "source": "Mode",
+      "kind": "course",
+      "minutes": 240,
+      "free": true,
+      "why": "Analyst-style lessons on aggregates, CASE, joins and unions with real data; deepens units 2, 3 and 7.",
+      "units": [
+        "sql-u2",
+        "sql-u3",
+        "sql-u7"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it if joins or aggregates still feel shaky after unit 3, or for a second voice on unions.",
+      "versus": "Mode's analyst-style lessons are well written and use real datasets; HireFly is tighter and tied to the questions asked in screening."
+    },
+    {
+      "title": "Mode SQL Tutorial: Window functions",
+      "url": "https://mode.com/sql-tutorial/sql-window-functions",
+      "source": "Mode",
+      "kind": "course",
+      "minutes": 60,
+      "free": true,
+      "why": "Worked ROW_NUMBER, NTILE, LAG and LEAD examples to practise alongside unit 8.",
+      "units": [
+        "sql-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it beside \"Window functions and trends\" if LAG, LEAD or NTILE still confuse you.",
+      "versus": "Mode runs the examples live in a browser editor; HireFly's version is shorter and applies them to fill-time trends."
+    },
+    {
+      "title": "5 SQL Interview Patterns You Need To Know",
+      "url": "https://datalemur.com/blog/sql-interview-patterns",
+      "source": "DataLemur",
+      "kind": "reference",
+      "minutes": 20,
+      "free": true,
+      "why": "Names the recurring interview patterns; compare it with unit 9 and the problem set.",
+      "units": [
+        "sql-u9",
+        "sql-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Skim it the day before a SQL screen, after the \"Interview problem set\".",
+      "versus": "It is a quick outside list of patterns; HireFly's unit 9 and the problem set let you practise each one against data and check the rows."
+    },
+    {
+      "title": "SQL 50 study plan",
+      "url": "https://leetcode.com/studyplan/top-sql-50/",
+      "source": "LeetCode",
+      "kind": "practice",
+      "minutes": 600,
+      "free": true,
+      "why": "Fifty curated SQL problems from basic selects to joins and advanced clauses; use it for volume after the problem set.",
+      "units": [
+        "sql-u10"
+      ],
+      "priority": "core",
+      "useWhen": "Start it in week two, once \"Joins\" and \"Aggregation: counting, grouping and rates\" are done, and keep going on the job.",
+      "versus": "HireFly cannot match fifty fresh problems with hidden test cases and a community of solutions; HireFly is better for explaining queries aloud and for the shift domain."
+    },
+    {
+      "title": "StrataScratch SQL interview question practice",
+      "url": "https://stratascratch.com/",
+      "source": "StrataScratch",
+      "kind": "practice",
+      "minutes": 300,
+      "free": true,
+      "why": "Company-style SQL questions with a free tier; harder, data-science flavoured practice beyond the problem set.",
+      "units": [
+        "sql-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Use it after the \"Interview problem set\" if you are aiming at data-heavy roles.",
+      "versus": "Its questions are company-style and harder than most entry-level tests; HireFly's set matches the likelier level and checks your answer against the practice data."
+    },
+    {
+      "title": "Learn SQL full course",
+      "url": "https://www.freecodecamp.org/news/learn-sql-full-course/",
+      "source": "freeCodeCamp",
+      "kind": "video",
+      "minutes": 330,
+      "free": true,
+      "why": "A full beginner-to-advanced video walkthrough if you prefer watching a query being built to reading.",
+      "units": [
+        "sql-u1",
+        "sql-u2",
+        "sql-u3",
+        "sql-u4"
+      ],
+      "priority": "optional",
+      "useWhen": "Watch parts of it if you learn better by seeing a query built, before units 1 to 4.",
+      "versus": "A long video shows typing and mistakes that text cannot; it is not tied to interviews, and HireFly gets to joins and rates faster."
+    }
+  ],
+  "labs": [
+    {
+      "id": "sql-lab-1",
+      "title": "Load the practice data into DB Browser for SQLite",
+      "minutes": 30,
+      "goal": "Have the practice database running on your own computer and prove it loaded correctly.",
+      "setup": "Install DB Browser for SQLite from https://sqlitebrowser.org (free, open source). In the app folder for HireFly, export the practice data folder; you need `practice.sql` and, for the lessons, `lesson_sample.sql`.",
+      "steps": [
+        "Open DB Browser for SQLite and choose **New Database**. Save it as `hirefly_practice.db`, and close the table-creation dialog without adding a table.",
+        "Open the **Execute SQL** tab, use **Open SQL file**, pick `practice.sql` and run it (the play button, or Ctrl+Return).",
+        "Choose **Write Changes** (Ctrl+S) so the data is saved.",
+        "In **Browse Data**, open each of the five tables and look at the columns and first rows.",
+        "Run `SELECT COUNT(*) FROM shifts;` and the same for the other four tables.",
+        "Run `SELECT MIN(requested_at), MAX(requested_at) FROM shifts;` and note that a few shifts were requested in late December 2025.",
+        "Create a second database, load `lesson_sample.sql` into it, and run the lesson 2.1 query `SELECT COUNT(*), COUNT(filled_at), COUNT(DISTINCT pharmacy_id) FROM shifts;`."
+      ],
+      "check": [
+        "Row counts are 40 pharmacies, 60 pharmacists, 1019 shifts, 906 assignments and 734 tickets.",
+        "The earliest request is 2025-12-27 and the latest is in early October 2026.",
+        "The lesson sample query returns 8, 5 and 3."
+      ],
+      "talkTrack": "I set up a practice database myself, loaded a script, and checked the row counts before I trusted anything I queried."
+    },
+    {
+      "id": "sql-lab-2",
+      "title": "Run the same data in SQL Server Express with SSMS",
+      "minutes": 60,
+      "goal": "Run the practice script on SQL Server, the T-SQL environment this module's model answers use, and re-run three queries in T-SQL.",
+      "setup": "Install SQL Server Express (free) from https://www.microsoft.com/en-us/sql-server/sql-server-downloads and SQL Server Management Studio from https://learn.microsoft.com/ssms/download-sql-server-management-studio-ssms. Use a local instance only, never a shared or production server.",
+      "steps": [
+        "Open SSMS and connect to your local Express instance (server name `.\\SQLEXPRESS` is the usual default, but use the name the installer showed).",
+        "Right-click **Databases**, choose **New Database**, name it `HireFlyPractice` and confirm.",
+        "Open a **New Query** window on that database, open `practice.sql` and execute it. The script is plain `CREATE TABLE` and `INSERT` statements.",
+        "Run `SELECT COUNT(*) FROM shifts;` and confirm the count.",
+        "Run the T-SQL form of the fill-rate query from unit 2: `SELECT ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) FROM shifts;`.",
+        "Run the T-SQL average time to fill with `AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0)` and compare it with the SQLite figure from lab 1.",
+        "Run the monthly report with `DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)`."
+      ],
+      "check": [
+        "The five tables hold 40, 60, 1019, 906 and 734 rows.",
+        "Fill rate is 88.9.",
+        "Average time to fill is about 571 minutes; DATEDIFF counts minute boundaries, so it may differ from SQLite by a small fraction.",
+        "The monthly report has rows from 2025-12-01 to 2026-10-01."
+      ],
+      "talkTrack": "I have run my queries on SQL Server Express in SSMS as well as SQLite, so I know the T-SQL forms and where the dialects differ."
+    },
+    {
+      "id": "sql-lab-3",
+      "title": "Build the four reports you actually wrote",
+      "minutes": 60,
+      "goal": "Reproduce shift fill rate, average time to fill, cancellation rate with reasons and assignments completed per month, each with a written definition and a sanity check.",
+      "setup": "Use the database from lab 1 (SQLite) or lab 2 (SQL Server). The SQLite forms use `strftime('%s', x)` for seconds; the T-SQL forms use DATEDIFF.",
+      "steps": [
+        "Write the definition of each metric in a text file first: numerator, denominator, what counts.",
+        "Fill rate: shifts with a `filled_at` over all shifts, as a percentage to one decimal.",
+        "Average time to fill: minutes between `requested_at` and `filled_at`, over filled shifts only.",
+        "Cancellation rate: cancelled shifts over all shifts. Then break the cancelled shifts down by `cancel_reason` with each reason's share of cancelled shifts.",
+        "Assignments completed per month: assignments with status completed, grouped by the month of `completed_at`.",
+        "Sanity-check each figure: pick one month or one reason and count it by hand from a filtered list.",
+        "Write one sentence per metric you would put in an email, including the denominator.",
+        "Note one judgment call: 78 cancelled shifts still have a fill time, so say how fill rate treats them."
+      ],
+      "check": [
+        "Fill rate is 88.9 percent (906 of 1019 shifts).",
+        "Average time to fill is about 571 minutes (about 9.5 hours).",
+        "Cancellation rate is 16.8 percent (171 of 1019); reasons are no coverage 65, pharmacist cancelled 54 and pharmacy cancelled 52.",
+        "Assignments completed per month run January 72, February 77, March 86, April 91, May 77, June 105, July 109, August 120, September 90 and October 1."
+      ],
+      "talkTrack": "I can walk through any of these four reports: the definition, the query, how I checked it, and the assumption that matters, such as shifts that were filled and later cancelled."
+    },
+    {
+      "id": "sql-lab-4",
+      "title": "Prove the June improvement in emergency fill time",
+      "minutes": 45,
+      "goal": "Show with a monthly query that emergency shifts filled much faster from June, check it against a control group, and write the finding without overclaiming cause.",
+      "setup": "Use the practice database from lab 1 or 2.",
+      "steps": [
+        "Write a query for emergency shifts (`is_emergency = 1`) with a fill time, grouped by month of `requested_at`, showing the number of shifts and the average hours to fill.",
+        "Restrict the range to January through September 2026 with a half-open date range.",
+        "Add a second column or a second query for non-emergency shifts as a comparison.",
+        "Use `LAG` to add the change from the previous month and find the month with the biggest drop.",
+        "Compute one average for January to May and one for June to September for each group.",
+        "Write three sentences: what changed, when, and what else could explain it. Say 'consistent with the alert feature', not 'caused by'."
+      ],
+      "check": [
+        "Emergency fill time is about 1.6 to 1.9 hours per month from January to May, and about 0.6 to 0.7 hours from June to September.",
+        "The January to May emergency average is about 1.7 hours across 94 filled shifts; June to September is about 0.64 hours across 66.",
+        "Non-emergency shifts also improved, from about 13.7 to 9.0 hours, so the emergency drop is larger but not the only change."
+      ],
+      "talkTrack": "I can show with a month-by-month query that emergency shifts filled faster after the release, and I am careful to say it is consistent with the feature rather than proof, because other things also changed."
+    },
+    {
+      "id": "sql-lab-5",
+      "title": "Run a data-quality audit",
+      "minutes": 45,
+      "goal": "Write checks that return rows only when a rule breaks, run them on the practice data, then prove one check works by planting a bad row in a throwaway copy.",
+      "setup": "Use the practice database from lab 1 or 2. For step 6, work on a copy of the database file or a scratch database, never the only copy.",
+      "steps": [
+        "Write five checks: cancelled shifts with no reason, fill time earlier than request time, completed shifts with no completed assignment, assignment pharmacist different from the shift's pharmacist, and shifts pointing to a pharmacy that does not exist.",
+        "Run each one and record the number of rows returned.",
+        "Add a reconciliation: completed shifts compared with completed assignments.",
+        "Add a profile: earliest and latest request and the row count for each table.",
+        "List things that are not errors but need a definition: cancelled shifts that were filled, shifts with no assignment, pharmacists with no shifts.",
+        "In the throwaway copy, insert one cancelled shift with a NULL `cancel_reason` and re-run check one. It should now return that row.",
+        "Combine the checks into one `UNION ALL` query of `check_name` and `violations`, like problem 15."
+      ],
+      "check": [
+        "All five rules return 0 rows on the supplied data.",
+        "Completed shifts and completed assignments are both 828.",
+        "78 cancelled shifts have a fill time, 113 shifts have no assignment (93 cancelled without a pharmacist plus 20 open) and 4 pharmacists have no shifts.",
+        "After the planted row, the first check returns exactly 1."
+      ],
+      "talkTrack": "I check a number before I trust it: I write queries that should return nothing, reconcile totals, and I can show the check catches a broken row."
+    },
+    {
+      "id": "sql-lab-6",
+      "title": "Solve five problems aloud, timed",
+      "minutes": 40,
+      "goal": "Practise the live-test habit: restate, narrate, build in layers and check.",
+      "setup": "Open the Interview problem set unit and a SQL editor with no autocomplete, if you can. Use a timer and a voice recorder or a friend.",
+      "steps": [
+        "Pick one warm-up, two medium and two hard problems from the problem set.",
+        "For each, read the prompt aloud and say what one row of the result is.",
+        "Talk through the tables and columns, then write the query in layers while explaining your choices.",
+        "Run it, check one number by hand and name the trap you avoided (NULL, integer division, ties or a LEFT JOIN condition).",
+        "Compare with the model answer and write down what you missed.",
+        "Repeat the two you found hardest the next day from a blank editor."
+      ],
+      "check": [
+        "You finished each problem or said clearly how you would finish it.",
+        "Your result rows match the runnable check in the app for every problem you completed.",
+        "You can explain each query in under a minute."
+      ],
+      "talkTrack": "I practise SQL out loud on a timer, because explaining the query matters as much as writing it."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly alone gets you to a credible entry-level SQL screen: you can write filtered, grouped and joined queries, explain them aloud and check a number. It cannot give you the volume of unseen problems or a vendor-kept T-SQL reference, and you stay a self-taught retrieval and reporting user, not a database designer.",
+    "hireflyBetter": [
+      "You have a few days and need the rates, joins and NULL traps that screens actually ask, on tables you recognise.",
+      "You need to explain a query aloud and say honestly what you did at work.",
+      "You want your query run and compared against the practice data in the sandbox.",
+      "You want the four real reports you wrote at work rebuilt and checked.",
+      "You want a data-quality or bug-verification story you can tell."
+    ],
+    "externalBetter": [
+      "You need many unseen problems to build speed; LeetCode and similar sites have far more.",
+      "You will work in SQL Server or Azure SQL and want the vendor's current T-SQL reference and labs.",
+      "You prefer watching someone build a query on video.",
+      "You want a certificate or badge, which HireFly cannot issue.",
+      "You are aiming at data-science style questions that go past entry-level reporting."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for each of \"Aggregation: counting, grouping and rates\" and \"Joins\" and study only what you miss (about 40 minutes).",
+          "Read \"In the interview\" and rehearse the answers aloud (30 minutes).",
+          "Do the lab \"Build the four reports you actually wrote\" (60 minutes).",
+          "Do the lab \"Solve five problems aloud, timed\" (40 minutes).",
+          "Skim \"5 SQL Interview Patterns You Need To Know\" the evening before (20 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Work \"Tables, SELECT, WHERE and NULL\" and \"Aggregation: counting, grouping and rates\" in order, using \"SQLBolt: Introduction to SQL\" for extra reps (3 hours).",
+          "Work \"Joins\" and \"Dates, CASE, subqueries, CTEs and window functions\" (1.5 hours).",
+          "Do the lab \"Load the practice data into DB Browser for SQLite\" and the lab \"Build the four reports you actually wrote\" (1.5 hours).",
+          "Work \"Reporting and QA work\" and the lab \"Run a data-quality audit\" (1.5 hours).",
+          "Work \"Window functions and trends\" and the \"Interview problem set\" (2.5 hours).",
+          "Start the \"SQL 50 study plan\" and do a few problems each day (3 hours).",
+          "Finish with \"In the interview\" and the lab \"Solve five problems aloud, timed\" (1.5 hours)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Work every HireFly unit in order through \"Reporting and QA work\", then \"Combining and cleaning: sets, self joins and text\" and \"Window functions and trends\" (8 hours).",
+          "Do labs 1 to 5, including \"Run the same data in SQL Server Express with SSMS\" and \"Prove the June improvement in emergency fill time\" (4.5 hours).",
+          "Take \"Get Started Querying with Transact-SQL\" and the \"Transact-SQL Exercises and Demonstrations (DP-080)\" labs for the vendor's T-SQL view (10 hours).",
+          "Work through the \"SQL 50 study plan\" steadily (10 hours).",
+          "Read \"How queries run, changing data and classic patterns\" and the \"Interview problem set\" again, then \"In the interview\" and the lab \"Solve five problems aloud, timed\" (4 hours).",
+          "On the job, rebuild one real report each week and check it with the data-quality queries (3.5 hours)."
+        ]
+      }
+    ]
+  }
+}

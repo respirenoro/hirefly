@@ -1,0 +1,520 @@
+{
+  "id": "ado-test-plans",
+  "title": "Azure DevOps Test Plans",
+  "tagline": "Design, run and report on manual tests, and explain your test management like the owner you were.",
+  "claim": "Resume: wrote and managed test cases in Azure DevOps Test Plans, ran UAT and release testing (mostly manual). To back it you must be able to design cases from acceptance criteria, build plans and suites, run tests and file bugs from failures, report progress and judge release readiness. You used this tool, not TestRail or Zephyr, and your automation is basic Playwright in Pipelines.",
+  "units": [
+    "unit-1.json",
+    "unit-8.json",
+    "unit-9.json",
+    "unit-2.json",
+    "unit-3.json",
+    "unit-10.json",
+    "unit-11.json",
+    "unit-4.json",
+    "unit-12.json",
+    "unit-7.json",
+    "unit-5.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "tp-iq-1",
+      "prompt": "Tell me about how you tested a release.",
+      "strongAnswer": "For each release I started from the stories in the sprint and their acceptance criteria. I wrote test cases in Azure DevOps Test Plans, grouped them in requirement-based suites, and added a regression suite for areas the release could affect. When the build reached the test environment I ran a smoke suite first, then the story suites, and logged bugs from failed steps so repro steps were captured. Before sign-off I checked the progress report and open bugs against our exit criteria and told the customer's team what passed, what failed and what risk remained."
+    },
+    {
+      "id": "tp-iq-2",
+      "prompt": "How do you decide what to test when you have limited time?",
+      "strongAnswer": "I prioritize by risk: how likely something is to break and how bad it is if it does. For our software, anything involving sending an emergency request or assigning a pharmacist is high impact, so it always gets tested first. Then I look at what changed in the release and what depends on it. I run a smoke test first so I don't waste time on a broken build. Lower-risk areas get lighter or exploratory coverage, and I tell stakeholders clearly what I did not test."
+    },
+    {
+      "id": "tp-iq-3",
+      "prompt": "What is the difference between smoke, regression and UAT testing?",
+      "strongAnswer": "Smoke testing is a quick check that the build is basically working, such as signing in and sending a request, so we know it is worth testing further. Regression testing re-checks existing features to make sure the new changes did not break them. UAT is done by the customer's users, who check that the software supports their real work and sign off. In my team I wrote the smoke and regression cases, and I organized UAT sessions with the customer's staff and tracked the results in Test Plans."
+    },
+    {
+      "id": "tp-iq-4",
+      "prompt": "What test management tools have you used?",
+      "strongAnswer": "Azure DevOps Test Plans is the one I used day to day, where I owned the test cases, suites and test runs. I haven't used TestRail or Zephyr professionally. The concepts are the same across them: test cases with steps and expected results, suites, runs with outcomes, and traceability to requirements and defects. I would expect to learn another tool's interface within a week or two, and I'd rely on the same test design habits."
+    },
+    {
+      "id": "tp-iq-5",
+      "prompt": "What would you automate and what would you keep manual?",
+      "strongAnswer": "I would automate checks that are stable, repetitive and high value, like signing in and sending an SOS request, because they run on every build. I did this in a basic way with Playwright running in our pipeline. I'd keep manual anything needing judgement or changing often: new features still taking shape, usability, wording, and exploratory testing. Most of my testing was manual, and I treat automation as a way to free up time for the manual work that finds the odd problems."
+    },
+    {
+      "id": "tp-iq-6",
+      "prompt": "How do you know when testing is done and a release is ready?",
+      "strongAnswer": "I agree exit criteria before testing starts, for example all planned high-priority cases run, no open Severity 1 or 2 bugs, and the pass rate above an agreed level, with any known issues accepted by the product owner. At the end I check the progress report and the bug list against those criteria. Testing is never finished in an absolute sense, so I present what was covered, what failed, what remains risky and my recommendation, and the stakeholder makes the final decision."
+    },
+    {
+      "id": "tp-iq-7",
+      "prompt": "Describe a good bug report.",
+      "strongAnswer": "A good bug report lets someone else reproduce the issue without asking me anything. It has a specific title, the environment and build, numbered steps, the expected result, the actual result, and evidence like a screenshot. I add severity and priority and link it to the story and the failing test case. In Test Plans, failing a step and creating a bug fills in the steps automatically, which I then tidied. I try to keep one problem per bug."
+    },
+    {
+      "id": "tp-iq-8",
+      "prompt": "How do you write a test case from acceptance criteria?",
+      "strongAnswer": "I restate each criterion, find the inputs, states and actors, then apply a technique: partitions and boundaries for fields, a decision table for combined rules, a state model for lifecycles. Each case gets a behaviour-based title, steps with an expected result, and a priority. I add negative, permission and concurrency cases the criteria do not mention. For the SOS radius I wrote cases for each option, edges at the radius, an invalid value through the API, and no pharmacist nearby."
+    },
+    {
+      "id": "tp-iq-9",
+      "prompt": "Explain equivalence partitioning and boundary value analysis with an example.",
+      "strongAnswer": "Equivalence partitioning splits inputs into groups the system should treat the same and tests one value from each group. Boundary value analysis adds the edges, where off-by-one bugs live. For a rule that an SOS can be sent 1 to 72 hours before the shift, partitions are under 1 hour, 1 to 72 and over 72. Boundaries are 59 minutes, 1 hour, 72 hours and 73 hours. That gives a few cases instead of dozens and catches the usual comparison mistakes."
+    },
+    {
+      "id": "tp-iq-10",
+      "prompt": "What is a decision table and when would you use one?",
+      "strongAnswer": "A decision table lists every combination of conditions and the expected action. I use it when the outcome depends on several rules together. For SOS alerts, a pharmacist is alerted only if their licence is valid for the state, they are Available, and they are inside the radius. Three conditions give eight combinations and only one sends an alert. The table also shows combinations the requirement never mentions, which I take back to the product owner as questions."
+    },
+    {
+      "id": "tp-iq-11",
+      "prompt": "Describe the three kinds of test suite in Azure DevOps and when you use each.",
+      "strongAnswer": "A static suite is a manual list of cases, good for smoke, regression and UAT. A requirement-based suite is created from a work item such as a story, and holds the cases linked to it, so I can see test status per story. A query-based suite is defined by a work item query, for example all priority 1 cases in an area, and updates itself. I used requirement-based suites for traceability and static suites for the sets I ran every build."
+    },
+    {
+      "id": "tp-iq-12",
+      "prompt": "What is exploratory testing and how did you keep it accountable?",
+      "strongAnswer": "Exploratory testing is learning, designing and running tests at the same time, guided by a charter and a time box. A charter names the area, how I will explore and what I hope to discover. I took notes on what I tried, raised bugs with evidence, listed what I did not cover and turned useful findings into scripted cases. The Test & Feedback browser extension captures screenshots and recordings and links bugs to the story, so sessions leave a trail."
+    },
+    {
+      "id": "tp-iq-13",
+      "prompt": "How would you test a feature with no written requirements?",
+      "strongAnswer": "I would first get whatever exists: a conversation with the product owner, the ticket, competitor behaviour, and the users' real workflow. I write down my understanding as acceptance criteria and have the owner confirm it. Then I explore with charters, noting questions and assumptions as I go, and turn confirmed behaviour into cases. I tell stakeholders the baseline was inferred, so the results carry less certainty until the criteria are agreed."
+    },
+    {
+      "id": "tp-iq-14",
+      "prompt": "What are entry and exit criteria for testing? Give examples.",
+      "strongAnswer": "Entry criteria say when testing can start: the build is deployed, the environment is verified, smoke passed and test data is loaded. Exit criteria say when testing can end for a release: all priority 1 and 2 cases run, an agreed pass rate, no open Severity 1 or 2 bugs, remaining issues accepted by the product owner and UAT signed off. I agree them before testing so the release decision rests on facts, not the calendar."
+    },
+    {
+      "id": "tp-iq-15",
+      "prompt": "What is the difference between severity and priority, and who sets each?",
+      "strongAnswer": "Severity is the impact of the defect on the product; in Azure DevOps it runs from 1 - Critical to 4 - Low. Priority is how urgently it should be fixed. I propose both when I file a bug, because I know the impact, but priority is a business call made with the product owner at triage. A typo on the login page is low severity but may be high priority before a customer demo."
+    },
+    {
+      "id": "tp-iq-16",
+      "prompt": "How do you handle a developer who says it is not a bug?",
+      "strongAnswer": "I go back to the agreed acceptance criteria and show the evidence: steps, expected versus actual, screenshot. If the criteria do not cover it, we may have a requirements gap, so I take it to the product owner to decide whether it is a defect, a change request or acceptable. I stay factual and keep the discussion on the user impact. Either way I record the decision on the bug so it is not argued again."
+    },
+    {
+      "id": "tp-iq-17",
+      "prompt": "Which test metrics would you report and which would you avoid?",
+      "strongAnswer": "I report execution progress, pass rate of executed tests, blocked count, open bugs by severity and area, and requirements without tests. I read them together, because a high pass rate with half the tests unrun means little. I avoid vanity measures like test cases written per day or bugs found per person, which reward the wrong behaviour. Every number comes with a sentence of interpretation and a recommendation."
+    },
+    {
+      "id": "tp-iq-18",
+      "prompt": "What access levels do testers need in Azure DevOps Test Plans?",
+      "strongAnswer": "Running tests and marking outcomes needs Basic. Creating test plans and suites, configurations and parameters, or preparing UAT needs Basic plus Test Plans. Stakeholder access cannot open the Test Plans portal but can give feedback with the Test & Feedback extension. Area-path permissions such as managing test suites apply on top. I asked an administrator to set these up; I did not manage billing or security groups."
+    },
+    {
+      "id": "tp-iq-19",
+      "prompt": "How do you plan and run UAT with a customer?",
+      "strongAnswer": "I define scope as business scenarios, agree named testers and check their access, freeze a build in a stable environment with realistic fake data, and write short scripts in their words with expected outcomes. I brief them on how to run cases and raise bugs, triage findings daily into defects, new ideas and misunderstandings, and finish with a sign-off record showing build, scope, results, accepted issues, signer and date."
+    },
+    {
+      "id": "tp-iq-20",
+      "prompt": "What would you do if you found a serious bug the day before release?",
+      "strongAnswer": "I confirm it is reproducible and capture evidence, then tell the product owner and developer straight away with severity, user impact and the steps. I check what else it touches and whether a workaround or rollback exists. The decision to delay or ship with the risk is the owner's. I give a recommendation and the options: fix and retest the affected suites, or ship with a documented known issue. Then I record the outcome and add a regression case."
+    }
+  ],
+  "resources": [
+    {
+      "title": "What is Azure Test Plans? Manual and automated testing",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/overview?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 30,
+      "free": true,
+      "why": "Microsoft's map of every Test Plans feature, the access table and the reporting tools.",
+      "units": [
+        "tp-u2",
+        "tp-u12"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it before \"The Test Plans model\" to see the whole feature map.",
+      "versus": "Microsoft's page is exact about features and access, kept current; HireFly teaches how you used them and what to say."
+    },
+    {
+      "title": "Test objects and terms overview",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/test-objects-overview?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "Official definitions of plans, suites, cases, points, runs and results.",
+      "units": [
+        "tp-u2",
+        "tp-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Keep it beside \"The Test Plans model\" for official definitions of plans, suites, points and runs.",
+      "versus": "The vendor's definitions are exact; HireFly shows them in use on the scheduling product."
+    },
+    {
+      "title": "Create and manage test plans",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/create-a-test-plan?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "Creating plans and the three suite types, step by step, for labs 1 and 6.",
+      "units": [
+        "tp-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Follow it for the lab \"Create a test plan with requirement-based suites\".",
+      "versus": "Step by step in the live interface; HireFly gives the test cases to put in and what to say."
+    },
+    {
+      "title": "Create and manage manual test cases",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/create-test-cases?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "Grid and form authoring, links to requirements, for lab 2.",
+      "units": [
+        "tp-u9",
+        "tp-u2"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it during the lab \"Write test cases from acceptance criteria\".",
+      "versus": "Shows grid and form authoring that text cannot; HireFly teaches what makes a case good."
+    },
+    {
+      "title": "Share steps between test cases",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/share-steps-between-test-cases?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 10,
+      "free": true,
+      "why": "How shared steps are created and edited once for all cases.",
+      "units": [
+        "tp-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it during the lab \"Add shared steps and configurations\".",
+      "versus": "A ten-minute vendor how-to; HireFly picks when shared steps are worth it."
+    },
+    {
+      "title": "Repeat a test with different data",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/repeat-test-with-different-data?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "Parameters and shared parameter sets, deeper than the lessons.",
+      "units": [
+        "tp-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it for parameters after \"Suites, configurations, runs and exploratory sessions in practice\".",
+      "versus": "Deeper on shared parameter sets; HireFly gives the scheduling example."
+    },
+    {
+      "title": "Run manual tests with Azure Test Plans",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/run-manual-tests?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "The Test Runner, Run with options, diagnostic data and creating bugs from steps.",
+      "units": [
+        "tp-u3",
+        "tp-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it before the lab \"Run tests, fail a step and file a bug\".",
+      "versus": "The vendor shows the Test Runner and diagnostic data; HireFly adds a failure to log and a bug to write."
+    },
+    {
+      "title": "Give feedback with Test & Feedback extension",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/provide-stakeholder-feedback?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "Using the extension as a stakeholder, including connected and standalone modes.",
+      "units": [
+        "tp-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Follow it during the lab \"Run an exploratory session with Test & Feedback\".",
+      "versus": "The extension's screens are best learned from the vendor; HireFly supplies the charter."
+    },
+    {
+      "title": "Get insights across exploratory test sessions",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/insights-exploratory-testing?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "How a lead reads exploratory session results across a team.",
+      "units": [
+        "tp-u8",
+        "tp-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it if a lead role asks about exploratory reporting.",
+      "versus": "A short vendor page on a lead's view; HireFly covers what a tester says."
+    },
+    {
+      "title": "Permissions, licensing, and access for manual testing",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/test/manual-test-permissions?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "The authoritative table of access levels and permissions used in unit 12.",
+      "units": [
+        "tp-u12"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Check it when you cannot see Test Plans, or read it after \"Traceability, reporting, automation and metrics\".",
+      "versus": "The authoritative access table; HireFly explains why it matters."
+    },
+    {
+      "title": "Try Azure Test Plans for free",
+      "url": "https://learn.microsoft.com/azure/devops/organizations/billing/try-additional-features-vs",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 10,
+      "free": true,
+      "why": "How the 30-day trial works, so the labs can use Basic + Test Plans.",
+      "units": [
+        "tp-u12"
+      ],
+      "priority": "core",
+      "useWhen": "Read it before the first lab, because the labs need the 30-day trial of Basic + Test Plans.",
+      "versus": "Only the vendor can give you the live tool; HireFly cannot host it, but its labs then tell you what to build."
+    },
+    {
+      "title": "Certified Tester Foundation Level (CTFL) v4.0",
+      "url": "https://istqb.org/certifications/certified-tester-foundation-level-ctfl-v4-0/",
+      "source": "ISTQB",
+      "kind": "certification",
+      "minutes": 600,
+      "free": true,
+      "why": "The official syllabus download for test techniques, test management and vocabulary; read for terms, no certificate needed.",
+      "units": [
+        "tp-u7",
+        "tp-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read the vocabulary sections after \"Test strategy, plan and ISTQB vocabulary\", or if you want to pursue the certificate later.",
+      "versus": "The syllabus is long and exam-oriented and certification is not claimed here; HireFly gives the shorter interview version."
+    }
+  ],
+  "labs": [
+    {
+      "id": "tp-lab-1",
+      "title": "Create a test plan with requirement-based suites",
+      "minutes": 30,
+      "goal": "A plan for Release 3.2 with a static smoke suite and a requirement-based suite per SOS story.",
+      "setup": "Free Azure DevOps organization with the `Pharmacy Scheduling Lab` project on the Agile process from the Azure DevOps module (lab 1), with the SOS stories from its lab 2. Test Plans authoring needs the Basic + Test Plans access level: in Organization settings open Billing, start the 30-day Test Plans trial and assign Basic + Test Plans to your own user (running tests only needs Basic). If the trial ends without billing you drop to Stakeholder access, so finish within 30 days. Do not enter payment details.",
+      "steps": [
+        "Open Test Plans and choose New Test Plan. Name it `Release 3.2`, set area and iteration to your project and Sprint 1.",
+        "Add a static suite named `Smoke`.",
+        "Add a requirement-based suite from your story `Manager chooses radius 5, 10 or 25 miles`; repeat for the accept story and the alert-content story.",
+        "Add a static suite `Regression: Scheduling` and a static suite `UAT`.",
+        "Add a query-based suite `Priority 1 cases` whose query selects Test Cases with Priority = 1.",
+        "Open the plan's Define view and confirm the suite tree."
+      ],
+      "check": [
+        "Suite tree shows Smoke, three story suites, Regression, UAT and the query suite",
+        "Each requirement-based suite is named for its story"
+      ],
+      "talkTrack": "I can structure a plan with static, requirement-based and query-based suites and explain why each exists."
+    },
+    {
+      "id": "tp-lab-2",
+      "title": "Write test cases from acceptance criteria",
+      "minutes": 45,
+      "goal": "At least ten cases in the radius suite, with steps, expected results, priorities and a parameter table.",
+      "setup": "Lab 1 plan.",
+      "steps": [
+        "In the radius story suite choose New test case. Title `Radius 10 alerts only pharmacists within 10 miles`.",
+        "Enter steps with an action and an expected result for each, and set Priority 1 and State Ready.",
+        "Use the parameters feature: write `@radius` and `@expected_count` in a case and fill a table with rows 5, 10, 25 plus an invalid 15.",
+        "Create cases for the boundary: pharmacist at 9.9 and 10.1 miles when radius is 10.",
+        "Add cases for default radius, API-edited invalid radius, and no pharmacist nearby.",
+        "Use the grid view to paste in three more cases quickly from exercises 1 to 4 of the module.",
+        "Open one case, Links, and confirm it is linked to the story with Tests / Tested By."
+      ],
+      "check": [
+        "Suite shows at least 10 cases",
+        "The parameterised case shows 4 iterations",
+        "Case links to the story"
+      ],
+      "talkTrack": "I turn acceptance criteria into prioritised cases using partitions and boundaries, with parameters for the data variations."
+    },
+    {
+      "id": "tp-lab-3",
+      "title": "Add shared steps and configurations",
+      "minutes": 30,
+      "goal": "A reusable Sign in step in five cases and two configurations producing extra test points.",
+      "setup": "Labs 1 and 2.",
+      "steps": [
+        "Open a case, select its first two steps (open the app, sign in) and choose the create shared steps action. Name it `Sign in as manager`.",
+        "Insert the shared steps into four other cases in place of their sign-in steps.",
+        "Edit the shared steps once (for example add 'verify the dashboard loads') and open another case to see the change.",
+        "Open the Configurations hub and add `Chrome on Windows` and `Safari on iPhone`.",
+        "Assign both configurations to the radius suite.",
+        "Open the suite's Execute view and count test points."
+      ],
+      "check": [
+        "Shared steps appear in five cases",
+        "Edit to the shared steps shows in all of them",
+        "10 cases with 2 configurations show 20 test points"
+      ],
+      "talkTrack": "I use shared steps and configurations so one change updates every case and platform coverage is explicit."
+    },
+    {
+      "id": "tp-lab-4",
+      "title": "Run tests, fail a step and file a bug",
+      "minutes": 40,
+      "goal": "A run with passes, a failure, a bug filed from the step and a retest.",
+      "setup": "Labs 1 to 3. You need something to test: use any simple web page or a practice site; the SOS app is fictional, so treat a public demo site's login or form as the application and adapt step wording.",
+      "steps": [
+        "In the Execute view select five points and choose Run for web application.",
+        "Follow the steps; mark steps Pass, and deliberately fail one with a comment.",
+        "Capture a screenshot and a short screen recording on the failing step.",
+        "Create a bug from the failed step. Check the Repro Steps were prefilled, then add title, severity 2 - High, priority 1 and expected versus actual.",
+        "Mark one other point Blocked and give a comment.",
+        "Resolve the bug yourself, rerun the failed point and mark Passed, then close the bug.",
+        "Open the Runs view and find your run."
+      ],
+      "check": [
+        "Run shows passed, failed and blocked outcomes",
+        "Bug is linked to the test case and has the screenshot",
+        "Failed history remains after the retest passes"
+      ],
+      "talkTrack": "I run cases in the runner, file bugs straight from failed steps with evidence, and retest on the fix."
+    },
+    {
+      "id": "tp-lab-5",
+      "title": "Run an exploratory session with Test & Feedback",
+      "minutes": 35,
+      "goal": "A saved exploratory session with notes, a screenshot and a linked bug.",
+      "setup": "Lab 1 project. Install the free Test & Feedback extension in Chrome or Edge from the browser's extension store.",
+      "steps": [
+        "Open the extension and choose Connected mode. Enter your organization URL and project and sign in.",
+        "Choose the story `Manager chooses radius` so its acceptance criteria show.",
+        "Write a charter in the notes: Explore the radius selector with unusual inputs to discover validation gaps.",
+        "Start the session and explore a practice web form for 20 minutes; add notes and one annotated screenshot.",
+        "Create a bug from the extension and a test case from something you tried.",
+        "End the session and open the story to see the links."
+      ],
+      "check": [
+        "Session is saved with notes",
+        "Bug and test case are linked to the story",
+        "Charter appears in the notes"
+      ],
+      "talkTrack": "I run time-boxed exploratory sessions from a charter and turn findings into linked bugs and test cases."
+    },
+    {
+      "id": "tp-lab-6",
+      "title": "Read the progress report and find coverage gaps",
+      "minutes": 30,
+      "goal": "A progress report with mixed outcomes, a chart on a dashboard and a query that lists untested stories.",
+      "setup": "Labs 1 to 4.",
+      "steps": [
+        "Mark about 20 test points with a spread of outcomes (most passed, a few failed or blocked, the rest not run).",
+        "Open the Progress report for the plan and read the outcome counts and the trend.",
+        "From the plan's chart view create a column chart of outcomes by suite and pin it to the Release readiness dashboard from the Azure DevOps module.",
+        "Calculate execution progress and pass rate by hand and compare with the report.",
+        "Run the `Stories with no tests` query from the Azure DevOps lab 4 and add a test case for any story it returns.",
+        "Write a four-line status with a recommendation."
+      ],
+      "check": [
+        "Report totals match your hand calculation",
+        "Chart appears on the dashboard",
+        "Query returns fewer stories after you add cases"
+      ],
+      "talkTrack": "I read the progress report, separate execution progress from pass rate, and recommend go or hold with the facts."
+    },
+    {
+      "id": "tp-lab-7",
+      "title": "See automated results next to manual ones",
+      "minutes": 35,
+      "goal": "A pipeline run whose published results show in the Runs view beside your manual runs.",
+      "setup": "Azure DevOps lab 6 pipeline (sample JUnit file).",
+      "steps": [
+        "Open the pipeline run from Azure DevOps lab 6 and note the Tests tab.",
+        "In Test Plans open the Runs view and find the automated run next to your manual runs.",
+        "Open the failed test and read its error message.",
+        "Edit results.xml so the failing test passes and commit the change to trigger a new run.",
+        "Compare the two runs on the Tests tab trend.",
+        "Rename a test to `[#<story id>] radius 10 alerts nearby` to practise a traceability convention and run again."
+      ],
+      "check": [
+        "Automated run appears in Runs",
+        "Trend shows a failure then a pass",
+        "Story ID appears in the test name"
+      ],
+      "talkTrack": "I know how automated pipeline results and manual runs show side by side, and how I would keep them traceable to stories."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you to talk about test design, plans, runs, bugs and release readiness in Azure DevOps Test Plans as you used them. Test Plans only exists in the real tool, so the labs on a free trial are what make the skill real. You used this tool, not TestRail or Zephyr, and your automation is basic.",
+    "hireflyBetter": [
+      "You need test cases written from acceptance criteria in your own domain.",
+      "You want the test design techniques as graded exercises.",
+      "You want the release story and readiness decision rehearsed.",
+      "You need ISTQB vocabulary without reading a syllabus.",
+      "You have days and want the shortest route."
+    ],
+    "externalBetter": [
+      "You need the live interface; only the vendor's trial offers it.",
+      "You need exact permissions and access levels, which Microsoft keeps current.",
+      "You want a certificate; ISTQB offers one and HireFly does not.",
+      "You want to practise on a tool you did not use, such as TestRail.",
+      "You want to watch a runner in action rather than read."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for \"Test design basics\" and \"The Test Plans model\" and study only what you miss (30 minutes).",
+          "Read \"In the interview\" and rehearse the release walkthrough (30 minutes).",
+          "Work \"Writing test cases from acceptance criteria\" first four exercises (40 minutes).",
+          "Do the lab \"Write test cases from acceptance criteria\" (45 minutes).",
+          "Do the lab \"Run tests, fail a step and file a bug\" (40 minutes).",
+          "Read \"UAT and traceability\" (20 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Read \"Try Azure Test Plans for free\" and \"What is Azure Test Plans? Manual and automated testing\" (40 minutes).",
+          "Work \"Test design basics\" and \"The Test Plans model\" (35 minutes).",
+          "Do the lab \"Create a test plan with requirement-based suites\" and the lab \"Write test cases from acceptance criteria\" (1 hour 15 minutes).",
+          "Work \"Test design techniques\" and \"Writing test cases from acceptance criteria\" (1.8 hours).",
+          "Work \"Running tests\" and do the lab \"Run tests, fail a step and file a bug\" (1 hour).",
+          "Do the labs \"Add shared steps and configurations\" and \"Run an exploratory session with Test & Feedback\" (1 hour 5 minutes).",
+          "Work \"Risk, regression and UAT\" and \"UAT and traceability\" (40 minutes).",
+          "Do the lab \"Read the progress report and find coverage gaps\" (30 minutes).",
+          "Work \"Traceability, reporting, automation and metrics\" and do the lab \"See automated results next to manual ones\" (1 hour 10 minutes).",
+          "Work \"Test management as a job\" and \"In the interview\" (35 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Read \"Try Azure Test Plans for free\" and \"Test objects and terms overview\" (30 minutes).",
+          "Work every HireFly unit in order and do all seven labs (14 hours).",
+          "Read \"Create and manage test plans\" and \"Run manual tests with Azure Test Plans\" and repeat the labs on your own project (4 hours).",
+          "Read \"Certified Tester Foundation Level (CTFL) v4.0\" for vocabulary after \"Test strategy, plan and ISTQB vocabulary\" (6 hours).",
+          "Read \"Permissions, licensing, and access for manual testing\" and \"Get insights across exploratory test sessions\" (1 hour).",
+          "Use Test Plans on real releases, write cases and log defects (13 hours).",
+          "Reread \"In the interview\" (30 minutes)."
+        ]
+      }
+    ]
+  }
+}

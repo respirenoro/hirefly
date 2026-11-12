@@ -1,0 +1,141 @@
+{
+  "id": "doc-u1",
+  "title": "Who you are writing for",
+  "summary": "Audience analysis, task-based and plain-language writing, and choosing between guides, articles, FAQs, release notes, SOPs, requirements and runbooks.",
+  "lessons": [
+    {
+      "id": "doc-u1-l1",
+      "title": "Know your reader: audience, tasks and plain language",
+      "minutes": 8,
+      "body": "Documentation fails most often because it was written for the author, not the reader. Before writing anything, answer three questions.\n\n1. **Who will read this?** Be specific. For the scheduling software there are at least three groups: staffing-firm coordinators who fill shifts all day, pharmacists who receive shift alerts on their phones, and pharmacy managers who request cover once in a while. A coordinator knows the product's vocabulary. A pharmacy manager may have used it twice.\n2. **What are they trying to do?** People rarely read documentation for fun. They arrive with a job: \"cancel a shift\", \"find out why I did not get an alert\". Write for that job.\n3. **What state are they in?** Someone searching the knowledge base at 6 a.m. because a pharmacy has no cover is stressed and wants the answer in the first screen.\n\n**Task-based writing**\n\nOrganise by what people do, not by how the software is built. Menu-by-menu documentation (\"The Shifts tab\") makes readers work out which menu holds their task. Task titles (\"Cancel a shift and record the reason\") match how they think.\n\n**Plain language**\n\n- Use the words your readers use. If coordinators say \"fill a shift\", do not write \"complete a staffing assignment\".\n- Short sentences. One idea each.\n- Active voice, addressed to \"you\": \"Select the pharmacy\" rather than \"The pharmacy should be selected\".\n- Put the condition before the action: \"If the shift is already filled, cancel the assignment first.\"\n- Define a term once, or avoid it.\n- Cut filler such as \"please note that\" and \"it is important to\".\n\n**A short before and after**\n\nBefore: *\"Shift cancellation functionality is accessible via the Actions menu, whereupon the user is prompted to select an appropriate cancellation rationale.\"*\n\nAfter: *\"To cancel a shift, open it, select Cancel shift, then choose a reason.\"*\n\nThe second is shorter, in order, and names the buttons exactly as they appear on screen.\n\n**Test it on a real person**\n\nHand a draft to someone who has not seen the feature and watch them try the task. Where they hesitate, the document is unclear. This is the cheapest quality check there is.",
+      "keyPoints": [
+        "Write for a specific reader doing a specific task.",
+        "Organise by tasks, not by menus or internal architecture.",
+        "Use the reader's words, short sentences, active voice and conditions before actions.",
+        "Test a draft by watching someone follow it."
+      ],
+      "interviewAngle": "In interviews for support, BA or product roles, \"who is your audience?\" shows you think beyond writing correctly. Mention that you wrote for different groups (coordinators, pharmacists, managers) and adjusted vocabulary and depth for each. Be ready to name one concrete change you made because a user struggled with the old wording.",
+      "exercises": [
+        {
+          "id": "doc-u1-l1-e1",
+          "type": "mcq",
+          "prompt": "Which title best follows task-based writing?",
+          "choices": [
+            "The Shifts Tab",
+            "Cancellation Module Overview",
+            "Cancel a shift and record the reason",
+            "Shift Management Functionality"
+          ],
+          "answer": 2,
+          "explanation": "A task title uses a verb and matches what the reader is trying to do, so it is easy to find and recognise.",
+          "placement": true
+        },
+        {
+          "id": "doc-u1-l1-e2",
+          "type": "mcq",
+          "prompt": "Which sentence is in plain language?",
+          "choices": [
+            "The assignment should be removed by the user prior to the cancellation of the shift.",
+            "Remove the pharmacist first, then cancel the shift.",
+            "Assignment removal is a prerequisite of shift cancellation.",
+            "It is recommended that assignments be removed."
+          ],
+          "answer": 1,
+          "explanation": "It is active, short, in order, and addressed to the reader."
+        },
+        {
+          "id": "doc-u1-l1-e3",
+          "type": "mcq",
+          "prompt": "A pharmacy manager has used the software twice. What should a guide for them avoid?",
+          "choices": [
+            "Screenshots",
+            "Internal terms such as 'dispatch queue' or 'fill rate' without explanation",
+            "Numbered steps",
+            "Short sentences"
+          ],
+          "answer": 1,
+          "explanation": "Insider vocabulary is a barrier for occasional users; use their words or explain each term once."
+        },
+        {
+          "id": "doc-u1-l1-e4",
+          "type": "open",
+          "prompt": "Rewrite this for a pharmacist reading on a phone: \"Notification preferences can be modified by navigating to the Settings module and thereafter toggling the relevant alert categories as appropriate.\" Then name the audience and the task you assumed.",
+          "answer": "**Rewrite:** \"To change which shift alerts you get, open Settings, then turn each alert type on or off.\"\n\n**Audience and task:** A contracted pharmacist, on a phone, who wants to control which alerts arrive. The rewrite uses the pharmacist's words (\"shift alerts\"), puts the goal first, uses the imperative, and has short steps in order.",
+          "rubric": [
+            "Rewrite is shorter, active and in the order of actions",
+            "Uses reader vocabulary (alerts) and names the goal first",
+            "Names audience and task explicitly",
+            "No filler words like 'thereafter' or 'as appropriate'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u1-l2",
+      "title": "Types of document and when each fits",
+      "minutes": 9,
+      "body": "Different readers and moments need different documents. Choosing the right one is half the job.\n\n| Type | Reader and moment | Fits when |\n|---|---|---|\n| **User guide** | New or returning user learning a feature end to end | A feature has several related tasks to understand in order |\n| **Knowledge base article** | Someone with one specific question or problem, usually arriving from search | A single task or problem recurs in tickets |\n| **FAQ** | Someone scanning for a quick answer | Short, independent questions; not for step-by-step processes |\n| **Release notes** | Existing users learning what changed | Every release; written about user effects, not code |\n| **SOP (standard operating procedure)** | Staff who must do a process the same way each time | An internal process with consistency or compliance needs |\n| **Requirements document** | Developers, testers, stakeholders agreeing what to build | Before building; the \"what\" and \"why\", not the \"how\" |\n| **Runbook** | Someone on call fixing a known incident | An operational problem needs a repeatable response, often under stress |\n\n**Examples in the scheduling product**\n\n- *User guide:* \"Getting started for coordinators\" walks through logging in, requesting a shift, assigning a pharmacist and closing a shift.\n- *Knowledge base article:* \"Why did a pharmacist not receive a shift alert?\" answers one problem.\n- *FAQ:* \"Can I assign two pharmacists to one shift?\" \"How far ahead can I request cover?\"\n- *Release notes:* \"You can now see the reason a shift was cancelled in the shift list.\"\n- *SOP:* How the support team handles an urgent shortage request outside business hours.\n- *Requirements:* The SOS alert feature: who is alerted, when, and what counts as done.\n- *Runbook:* If alerts stop sending, how support checks the queue and escalates.\n\n**Choosing between them**\n\nAsk: does the reader need to *learn* or to *look up*? Learning suits guides; lookup suits articles and FAQs. Is the reader *internal* or *external*? SOPs and runbooks are internal. Do they need *steps in a fixed order*? Use numbered procedures, not a FAQ paragraph.\n\n**A common mistake**\n\nPutting a long procedure into an FAQ answer, or burying a quick answer in a 20-page guide. A reader should reach the answer by the shortest path for their situation.\n\nKeep one source of truth. If the same steps exist in a guide, an article and an FAQ, they drift apart. Write the procedure once and link to it.",
+      "keyPoints": [
+        "Match the document type to the reader's moment: learn, look up, follow a process, or agree what to build.",
+        "Knowledge base articles and FAQs serve lookup; guides serve learning.",
+        "SOPs and runbooks are internal and procedural; release notes explain user-visible change.",
+        "Write a procedure once and link to it."
+      ],
+      "interviewAngle": "You may be asked what documents you have written. List real ones by type: user documentation and knowledge base, requirements, user stories with acceptance criteria, test cases, release communications. Do not claim runbooks or SOPs if you did not write them; you can describe how you would approach one.",
+      "exercises": [
+        {
+          "id": "doc-u1-l2-e1",
+          "type": "mcq",
+          "prompt": "A coordinator searches at 6 a.m.: \"alert not received pharmacist\". Which document type serves them best?",
+          "choices": [
+            "A requirements document",
+            "A 40-page user guide",
+            "A knowledge base article that answers that one problem",
+            "Release notes"
+          ],
+          "answer": 2,
+          "explanation": "A focused article, found by search, solves a single problem fastest.",
+          "placement": true
+        },
+        {
+          "id": "doc-u1-l2-e2",
+          "type": "mcq",
+          "prompt": "Which document describes what users will notice after an update?",
+          "choices": [
+            "SOP",
+            "Runbook",
+            "Release notes",
+            "Requirements"
+          ],
+          "answer": 2,
+          "explanation": "Release notes tell existing users what changed and what it means for them."
+        },
+        {
+          "id": "doc-u1-l2-e3",
+          "type": "mcq",
+          "prompt": "Where should a 10-step procedure for requesting cover on a public holiday go?",
+          "choices": [
+            "Inside an FAQ answer",
+            "In a numbered knowledge base article or guide, linked from the FAQ",
+            "In release notes",
+            "In a meeting note"
+          ],
+          "answer": 1,
+          "explanation": "Procedures need numbered steps in a fixed order; an FAQ can link to them."
+        },
+        {
+          "id": "doc-u1-l2-e4",
+          "type": "open",
+          "prompt": "For each of these five readers, name the best document type and give a title: (a) a new coordinator on day one, (b) a developer about to build the SOS alert, (c) a support agent handling an after-hours shortage, (d) a pharmacist asking why alerts stopped, (e) existing users after the next release.",
+          "answer": "(a) User guide: \"Getting started for coordinators\". They need to learn the main tasks in order.\n(b) Requirements document: \"SOS emergency alert: requirements\". It states who is alerted, when, constraints and acceptance criteria.\n(c) SOP (or runbook if it is incident-style): \"Handling an urgent shortage request after hours\". Internal, step-by-step, consistent.\n(d) Knowledge base article: \"Why am I not getting shift alerts?\" A single problem found by search.\n(e) Release notes: \"What's new in [version/date]\". Describes user-visible changes in plain language.",
+          "rubric": [
+            "Five correct pairings with reasons tied to the reader",
+            "Titles are task or problem based",
+            "Distinguishes internal (SOP/runbook) from external documents",
+            "Does not use a FAQ for step-by-step work"
+          ]
+        }
+      ]
+    }
+  ]
+}

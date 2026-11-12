@@ -1,0 +1,324 @@
+{
+  "id": "doc-u9",
+  "title": "Procedures, visuals, reference and release notes",
+  "summary": "Write procedures with branches and warnings, use screenshots and alt text well, build a product reference page, and turn tickets into release notes.",
+  "lessons": [
+    {
+      "id": "doc-u9-l1",
+      "title": "Procedures with prerequisites, branches and warnings",
+      "minutes": 9,
+      "body": "Simple steps are covered earlier. Real procedures also have things the reader must have, places where the path splits, and steps that can do harm. Handle each in a fixed spot.\n\n**Prerequisites go first**\n\nState what the reader needs before step 1, in a short list: access, role, information.\n\n> **Before you start**\n> - You need the Dispatcher role.\n> - Have the pharmacy name and the start time ready.\n\n**Branches: use the \"if\" first, in its own step or sub-list**\n\nAvoid burying a split in a sentence. Make the condition the lead of the step.\n\n> 4. Check the shift status.\n>    - If the status is **Open**, go to step 5.\n>    - If the status is **Filled**, select **Reassign** and go to step 6.\n\nFor long branches, write two procedures and link: \"To cancel a shift that has already started, see Cancel a shift in progress.\"\n\n**Warnings and cautions**\n\nUse at most three levels and reserve them:\n\n| Label | Meaning | Example |\n|---|---|---|\n| Note | Helpful extra | \"Pharmacists see the change within a minute.\" |\n| Important | Reader may miss the goal | \"You must enter a reason or the shift stays open.\" |\n| Warning | Data loss or harm | \"Deleting a pharmacy removes its shift history.\" |\n\nPut the warning **before** the step. Too many warnings teach readers to ignore them.\n\n**State results and recovery**\n\nAfter a step that changes the screen, say what the reader should now see: \"The shift shows Cancelled.\" Add a short \"If it did not work\" line pointing to the troubleshooting article.\n\n**Length**\n\nAim for 7 or fewer steps. If you have 15, group them under subheadings (\"Choose the pharmacy\", \"Choose the time\") or split the task.\n\n**Test it**\n\nFollow your own procedure on a clean account, with a colleague who has not seen the product watching. Where they hesitate, a step is unclear.\n\n**Example of a short procedure with a branch**\n\n```text\nReassign a shift\nBefore you start: you need the Dispatcher role.\n\n1. Open the shift from the Shifts list.\n2. Check the status.\n   - If Open, select Assign and go to step 4.\n   - If Filled, select Reassign.\n3. Choose the new pharmacist.\n4. Select Save.\n   The shift list shows the new pharmacist's name.\n```",
+      "keyPoints": [
+        "List prerequisites before step 1.",
+        "Write branches as 'If X, do Y' with the condition first; link long alternatives.",
+        "Place warnings before the step; use Note, Important and Warning sparingly.",
+        "State the result after changing steps and test with someone new."
+      ],
+      "interviewAngle": "A writing exercise may include a procedure with a decision point. Show prerequisites, a clear branch and a result line. This extends the how-to and troubleshooting articles you wrote. This goes beyond your day-to-day work: say it was learned and practised, not a formal part of your job.",
+      "exercises": [
+        {
+          "id": "doc-u9-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A step permanently deletes data. Where should the warning be placed?",
+          "choices": [
+            "At the end of the article",
+            "After the step",
+            "Before the step",
+            "In a footnote"
+          ],
+          "answer": 2,
+          "explanation": "Readers must see it before they act."
+        },
+        {
+          "id": "doc-u9-l1-e2",
+          "type": "mcq",
+          "prompt": "Which is the clearest way to write a branch?",
+          "choices": [
+            "\"If the status is Open, go to step 5. If it is Filled, select Reassign.\" as sub-bullets under the step",
+            "\"Depending on the status, you might want to do something different.\"",
+            "A long paragraph describing both paths",
+            "A screenshot with no text"
+          ],
+          "answer": 0,
+          "explanation": "The condition comes first and each path is separate."
+        },
+        {
+          "id": "doc-u9-l1-e3",
+          "type": "short",
+          "prompt": "What heading usually holds the things a reader needs before step 1? (e.g. 'Before you ...')",
+          "accept": [
+            "before you start",
+            "before you begin",
+            "prerequisites"
+          ],
+          "answer": "Before you start",
+          "explanation": "It sets expectations and saves a wasted attempt."
+        },
+        {
+          "id": "doc-u9-l1-e4",
+          "type": "mcq",
+          "prompt": "A procedure has 18 steps. What is the best fix?",
+          "choices": [
+            "Add warnings to every step",
+            "Group into subheadings or split it into two tasks",
+            "Remove the numbers",
+            "Merge steps into longer sentences"
+          ],
+          "answer": 1,
+          "explanation": "Shorter procedures are easier to follow and test."
+        },
+        {
+          "id": "doc-u9-l1-e5",
+          "type": "open",
+          "prompt": "Write the procedure \"Cancel a shift\" with a prerequisite, a branch for a shift that already has a pharmacist assigned, a warning in the right place, and a result line. Use no more than 7 steps.",
+          "answer": "Cancel a shift\n\nBefore you start: you need the Dispatcher role.\n\n1. Open **Shifts** and select the shift.\n2. Check whether a pharmacist is assigned.\n   - If no pharmacist is assigned, go to step 4.\n   - If a pharmacist is assigned, they will be notified; go to step 3.\n3. **Warning:** The assigned pharmacist is sent a cancellation message as soon as you confirm.\n4. Select **Cancel shift**.\n5. Choose a reason: no coverage, pharmacy cancelled or pharmacist cancelled.\n6. Select **Confirm**.\n\nThe shift list shows the status Cancelled.",
+          "rubric": [
+            "Prerequisite stated before step 1",
+            "Branch with condition first",
+            "Warning before the step it applies to",
+            "Result line",
+            "Seven steps or fewer, one action each"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u9-l2",
+      "title": "Screenshots, alt text and accessible documents",
+      "minutes": 9,
+      "body": "Accessible documentation is not an extra. Many readers use screen readers, keyboards only, small screens or bad light. Most accessibility is writing well, and it also helps everyone.\n\n**When to use a screenshot**\n\nA screenshot helps with finding a spot on a busy screen. It does not replace the words. A step must make sense without the image. Use a screenshot when the layout is the problem; skip it when the label says it all. Crop to the relevant area, mark one thing, and re-take it when the screen changes, because out-of-date images are worse than none.\n\n**Alt text**\n\nAlt text is a short description that a screen reader speaks in place of the image. The W3C's alt decision tree starts with: does the image contain text? Then it asks what the image's purpose is.\n\n| Image | Alt text |\n|---|---|\n| Screenshot with the Cancel shift button circled | \"Shift page with the Cancel shift button at the top right\" |\n| A decorative divider line | Empty alt (`alt=\"\"`), so screen readers skip it |\n| A chart of fill rate by month | A short summary of the point, with the data in a table nearby |\n| An icon button with no text | Its function: \"Send alert\" |\n\nRules: describe the purpose, not \"image of\"; keep it short; do not repeat the caption; put important text from the image into the page text too.\n\n**Other accessibility habits**\n\n- **Descriptive links.** \"See Cancel a shift\" not \"click here\". Screen reader users often list links out of context.\n- **Heading levels in order**, so the outline works.\n- **Do not use colour alone.** \"The red button\" fails for colour-blind readers; say \"the **Cancel** button\".\n- **Plain language and short sentences** help readers with cognitive load, second-language readers and everyone in a hurry.\n- **Tables** for data only, with header cells; not for layout.\n- **Contrast.** Use your platform's default styles; do not set pale grey text.\n\n**Test**\n\nRead the page with images turned off. Do the steps still work? Tab through the page with a keyboard. Check that links make sense in a list.\n\n**Where this appears in work**\n\nIn a knowledge base, screenshots usually come from the tool; ask the platform owner how alt text is added, because some editors hide the field.",
+      "keyPoints": [
+        "A step must make sense without its screenshot; crop and mark one thing.",
+        "Alt text describes purpose briefly; decorative images get empty alt.",
+        "Use descriptive link text, ordered headings and never rely on colour alone.",
+        "Test with images off and with the keyboard."
+      ],
+      "interviewAngle": "Mention accessibility as part of quality, with one concrete habit such as descriptive links or alt text. Be honest that it was good practice you applied, not a certified accessibility role. This goes beyond your day-to-day work: say it was learned and practised, not a formal part of your job.",
+      "exercises": [
+        {
+          "id": "doc-u9-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What alt text suits a purely decorative divider line?",
+          "choices": [
+            "The file name",
+            "\"line\"",
+            "\"decorative image of a line\"",
+            "Empty alt text so screen readers skip it"
+          ],
+          "answer": 3,
+          "explanation": "Decorative images add noise for screen reader users."
+        },
+        {
+          "id": "doc-u9-l2-e2",
+          "type": "mcq",
+          "prompt": "Which link text is best?",
+          "choices": [
+            "See Cancel a shift",
+            "Click here",
+            "Read more",
+            "This link"
+          ],
+          "answer": 0,
+          "explanation": "Descriptive text works when links are listed out of context."
+        },
+        {
+          "id": "doc-u9-l2-e3",
+          "type": "mcq",
+          "prompt": "Why is \"Select the red button\" a problem?",
+          "choices": [
+            "Red is too bright",
+            "Buttons have no colour",
+            "Colour-blind readers and screen readers cannot rely on colour; name the button",
+            "It is too long"
+          ],
+          "answer": 2,
+          "explanation": "Say \"Select **Cancel shift**\" instead."
+        },
+        {
+          "id": "doc-u9-l2-e4",
+          "type": "short",
+          "prompt": "What attribute holds an image's alternative text in HTML? (Three letters.)",
+          "accept": [
+            "alt"
+          ],
+          "answer": "alt",
+          "explanation": "`<img alt=\"...\">`."
+        },
+        {
+          "id": "doc-u9-l2-e5",
+          "type": "open",
+          "prompt": "Write alt text for: (1) a screenshot of the shift page with a red box around the Assign button; (2) a bar chart showing emergency shifts filled faster after June; (3) a small paperclip icon that attaches a file to a ticket. Then give two other habits that make a help article more accessible.",
+          "answer": "(1) \"Shift page with the Assign button highlighted at the top right.\" (2) \"Bar chart: average time to fill emergency shifts drops after June.\" with the figures in a nearby table. (3) \"Attach file\". Other habits: descriptive link text, headings in order, not using colour alone, plain short sentences.",
+          "rubric": [
+            "Describes purpose, not 'image of'",
+            "Chart text carries the point and mentions data nearby",
+            "Icon alt describes function",
+            "Two valid accessibility habits"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u9-l3",
+      "title": "Reference pages for a product (no API needed)",
+      "minutes": 9,
+      "body": "A reference page answers \"what does this field, status or setting mean?\" It is for lookup, not reading start to end. Reference for a product's users needs no code: it covers screens, fields, statuses, permissions and limits.\n\n**Principles**\n\n1. **Complete and accurate.** Every option, every value. A reader who finds an option missing stops trusting the page.\n2. **Consistent structure.** The same fields in the same order for every entry.\n3. **Neutral voice.** Describe what is, not how to do a task. Link to the how-to for that.\n4. **Organised like the product** or alphabetically, so lookup is fast.\n5. **Verified.** Compare with the actual product.\n\n**Example: shift statuses**\n\n| Status | Meaning | Who sets it | Next possible statuses |\n|---|---|---|---|\n| Open | A pharmacy has asked for cover and no pharmacist is assigned. | System, when a request is created | Completed, Cancelled |\n| Completed | The shift took place and a pharmacist worked it. | System, after the shift | None |\n| Cancelled | The shift will not happen. A reason is recorded. | Dispatcher, pharmacy or pharmacist | None |\n\nThese three match the status values in the practice data (open, completed, cancelled). The \"who sets it\" and \"next\" columns are illustrative; check them against the product before you publish.\n\n**Example: a field entry**\n\n```text\nCancellation reason\nWhat it is: Why a shift was cancelled.\nWhere: Cancel shift dialog.\nRequired: Yes.\nValues: No coverage, Pharmacy cancelled, Pharmacist cancelled.\nUsed in: Cancellation reports. See \"Understand cancellation reports\".\n```\n\n**Settings and limits**\n\nGive the default and the allowed range: \"Alert distance: default 25 miles, range 5 to 100.\"\n\n**Keep it current**\n\nReference pages go stale fastest, because every release changes a value. Give each page an owner and a \"Applies to version\" line, and review it with release notes.\n\n**Reference versus how-to**\n\nIf you are writing \"To do X, select...\", it is a how-to. Link to it from the field entry.",
+      "keyPoints": [
+        "Reference is complete, consistently structured, neutral and verified against the product.",
+        "Use tables for statuses and fields; give defaults and ranges for settings.",
+        "Organise like the product or alphabetically; link to how-tos, do not embed them.",
+        "Reference goes stale quickly: assign an owner and a version line."
+      ],
+      "interviewAngle": "A \"write reference documentation\" task may appear in implementation or support roles. Show a table with fixed columns and note that you checked it against the product. You wrote status and field explanations inside help articles; a standalone reference section was a gap you can describe plainly.",
+      "exercises": [
+        {
+          "id": "doc-u9-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which statement best describes a reference page?",
+          "choices": [
+            "A guided lesson for beginners",
+            "A story about why the feature exists",
+            "A set of steps for one task",
+            "A complete, consistently structured lookup of facts such as fields and statuses"
+          ],
+          "answer": 3,
+          "explanation": "Reference is for lookup, not narrative or tasks."
+        },
+        {
+          "id": "doc-u9-l3-e2",
+          "type": "mcq",
+          "prompt": "What is the best way to present shift statuses with their meaning, who sets them and what comes next?",
+          "choices": [
+            "A table with fixed columns",
+            "A screenshot without text",
+            "A numbered procedure",
+            "A long paragraph"
+          ],
+          "answer": 0,
+          "explanation": "Fixed columns make comparing and lookup fast."
+        },
+        {
+          "id": "doc-u9-l3-e3",
+          "type": "short",
+          "prompt": "Besides a description, which two values should a setting entry list so readers know the limits? (default and ...)",
+          "accept": [
+            "range",
+            "default and range",
+            "allowed range",
+            "allowed values"
+          ],
+          "answer": "range",
+          "explanation": "For example: default 25 miles, range 5 to 100."
+        },
+        {
+          "id": "doc-u9-l3-e4",
+          "type": "mcq",
+          "prompt": "A reference page contains \"To cancel a shift, select Cancel...\". What is wrong?",
+          "choices": [
+            "It uses a verb",
+            "Nothing; steps always belong in reference",
+            "It is too short",
+            "It mixes a task into reference; link to the how-to instead"
+          ],
+          "answer": 3,
+          "explanation": "Mixed types make both harder to use."
+        },
+        {
+          "id": "doc-u9-l3-e5",
+          "type": "open",
+          "prompt": "Draft a reference entry for the setting \"Alert distance\" for the SOS alert feature: what it is, where it is set, default, range, what happens at the minimum and maximum, and a link line to a how-to. Invent plausible values and mark them as examples.",
+          "answer": "Alert distance (example values)\nWhat it is: How far from a pharmacy the system looks for pharmacists to alert.\nWhere: Pharmacy settings, Emergency requests.\nDefault: 25 miles. Range: 5 to 100 miles.\nAt 5 miles few pharmacists may be alerted; at 100 miles the alert reaches pharmacists who may be too far to arrive in time.\nRelated: See \"Send an emergency request\".",
+          "rubric": [
+            "Plain description of the setting",
+            "Default and range given",
+            "Effect of extremes",
+            "Link to a how-to rather than steps",
+            "Example values marked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u9-l4",
+      "title": "Release notes that people read",
+      "minutes": 9,
+      "body": "Release notes tell users what changed and what it means for them. They are not a ticket export. The same release can produce two documents: the changelog (every change, for the team) and the release note (the edited, user-facing version).\n\n**Choose and filter**\n\nStart from the list of tickets in the release. Keep only what a user would notice or must act on. Internal refactors, dependency updates and test changes go in the changelog.\n\n**Structure**\n\n```text\nVersion 2.4 (released 12 November)\n\nNew\n- Send an emergency request to nearby pharmacists from the shift page.\n  Pharmacists see it as an alert on their phone. See \"Send an emergency request\".\n\nImproved\n- Cancelled shifts now ask for a reason, which appears in reports.\n\nFixed\n- Pharmacists did not always get a reminder two hours before a shift. They now do.\n\nKnown issues\n- Alerts can arrive up to one minute late on slow networks. We are working on it.\n\nAction needed\n- Dispatchers: review your default alert distance in Pharmacy settings.\n```\n\n**Rules**\n\n1. **Start with the user's benefit.** \"You can now...\" or the thing that works now.\n2. **Fixes describe the symptom,** not the root cause. Say \"Pharmacists did not always get a reminder\", not \"Fixed cron job timezone bug\".\n3. **One change per bullet, one or two lines.** Link to the article for more.\n4. **Say when action is needed,** and who must do it.\n5. **Be honest about known issues.** It builds trust and reduces tickets.\n6. **Consistent categories** in the same order every time.\n7. **No internal ticket codes** unless users reference them.\n\n**Before and after**\n\n| Developer note | Release note |\n|---|---|\n| ST-482 refactor notification service | (leave out) |\n| Fix tz offset in reminder scheduler | Pharmacists now get reminders at the right time. |\n| Add radius param to alert endpoint | You can set how far an emergency alert reaches. |\n\n**Who writes it**\n\nYou wrote release communications during UAT. A good method: the product owner supplies the ticket list, you draft, a developer checks accuracy, support reads it for clarity.",
+      "keyPoints": [
+        "Release notes are the edited, user-facing version of the changelog.",
+        "Keep what users notice or must act on; describe fixes by symptom and benefit.",
+        "Use consistent categories, short bullets, and say who must act.",
+        "Include known issues honestly."
+      ],
+      "interviewAngle": "Turning tickets into release notes is a common test. Lead with benefit, drop internal items, describe fixes by symptom, say what to do. You drafted release communications as part of release testing and UAT, so you can tell that as fact.",
+      "exercises": [
+        {
+          "id": "doc-u9-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is the best release note for a fix?",
+          "choices": [
+            "Pharmacists now get reminders two hours before a shift, as intended.",
+            "Fixed cron job timezone bug in reminder scheduler (ST-482)",
+            "Refactored the notification service",
+            "Minor improvements"
+          ],
+          "answer": 0,
+          "explanation": "It states the symptom and the user-visible result without internal detail."
+        },
+        {
+          "id": "doc-u9-l4-e2",
+          "type": "mcq",
+          "prompt": "Which change should usually stay out of user-facing release notes?",
+          "choices": [
+            "A new emergency request button",
+            "A change that requires dispatchers to review settings",
+            "A fix for missing reminders",
+            "An internal dependency update with no user-visible effect"
+          ],
+          "answer": 3,
+          "explanation": "Internal changes go in the changelog."
+        },
+        {
+          "id": "doc-u9-l4-e3",
+          "type": "short",
+          "prompt": "What do you call the running log of every change, as opposed to the edited release note? (One word.)",
+          "accept": [
+            "changelog",
+            "change log"
+          ],
+          "answer": "changelog",
+          "explanation": "The changelog is for the team; the release note is for users."
+        },
+        {
+          "id": "doc-u9-l4-e4",
+          "type": "mcq",
+          "prompt": "What should a note do when users must act?",
+          "choices": [
+            "Leave it for the help article",
+            "Assume they will notice",
+            "Say clearly who must do what",
+            "Hide it in the middle of the notes"
+          ],
+          "answer": 2,
+          "explanation": "An 'Action needed' line prevents surprises."
+        },
+        {
+          "id": "doc-u9-l4-e5",
+          "type": "open",
+          "prompt": "Turn these tickets into release notes (New, Improved, Fixed, Action needed): ST-501 add SOS request button on shift page; ST-502 refactor alert queue; ST-503 cancel dialog now requires reason; ST-504 fix: pharmacists in Arizona got reminders an hour late; ST-505 upgrade logging library.",
+          "answer": "New\n- You can send an emergency request to nearby pharmacists from the shift page.\n\nImproved\n- Cancelling a shift now asks for a reason, which appears in cancellation reports.\n\nFixed\n- Pharmacists in Arizona received reminders an hour late. Reminders now arrive at the correct time.\n\nAction needed\n- Dispatchers: tell your team that a cancellation reason is now required.\n\n(ST-502 and ST-505 are internal and left out.)",
+          "rubric": [
+            "Uses the four categories",
+            "Drops the two internal tickets",
+            "Fix described by symptom",
+            "Benefit-first wording",
+            "Action needed named"
+          ]
+        }
+      ]
+    }
+  ]
+}

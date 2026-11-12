@@ -1,0 +1,221 @@
+{
+  "id": "pw-u3",
+  "title": "Assertions",
+  "summary": "Web-first assertions that retry, why fixed sleeps cause flaky tests, and soft assertions for independent checks.",
+  "lessons": [
+    {
+      "id": "pw-u3-l1",
+      "title": "Web-first assertions and why they retry",
+      "minutes": 8,
+      "body": "An assertion states what must be true. In Playwright you write them with `expect`. The ones you should use for page content are **web-first assertions**: they take a locator or page, and they keep re-checking until the condition is true or a timeout (5 seconds by default) runs out.\n\n```ts\nawait expect(page.getByText('Shift requested')).toBeVisible();\nawait expect(page.getByRole('status')).toHaveText('Assigned to R. Rivera');\nawait expect(page).toHaveURL(/\\/shifts\\/\\d+/);\nawait expect(page.getByRole('row')).toHaveCount(5);\nawait expect(page.getByRole('button', { name: 'Assign' })).toBeEnabled();\n```\n\nNote the `await` in front of `expect`. Web-first assertions are asynchronous.\n\n**Why retrying matters**\n\nReal pages update after a delay: a request goes to the server, the list re-renders. If you check the text once, at the wrong instant, the test fails although the app works. A web-first assertion polls until the page catches up. That removes a whole class of false failures.\n\nCompare:\n\n```ts\n// Weak: reads the value once, right now\nconst text = await page.getByRole('status').textContent();\nexpect(text).toBe('Assigned to R. Rivera');\n\n// Strong: retries until true or timeout\nawait expect(page.getByRole('status')).toHaveText('Assigned to R. Rivera');\n```\n\nThe first can fail simply because the status has not updated yet. The second cannot, unless the status really never appears.\n\n**Useful assertions**\n\n| Assertion | Checks |\n|---|---|\n| `toBeVisible()` / `toBeHidden()` | Element shown or not |\n| `toHaveText()` / `toContainText()` | Exact or partial text |\n| `toHaveValue()` | Value of an input |\n| `toHaveCount(n)` | Number of matches |\n| `toHaveURL()` / `toHaveTitle()` | Page URL or title |\n| `not.` prefix | Negation, also retried: `await expect(loc).not.toBeVisible()` |\n\n**Make assertions mean something**\n\nAssert the outcome a user cares about. \"The Save button was clicked\" is not an outcome. \"The shift appears in the list with status Filled\" is. A test that ends without any `expect` can only fail if something throws, so it proves little.",
+      "keyPoints": [
+        "Web-first assertions (`await expect(locator)...`) retry until true or timeout.",
+        "Reading a value once with `textContent()` and then asserting is fragile.",
+        "Assert user-visible outcomes, not that an action was performed.",
+        "Always `await` web-first assertions."
+      ],
+      "interviewAngle": "A good interview line: \"I use web-first assertions so a slow render does not cause a false failure.\" It shows you understand why Playwright tests are less flaky than naive scripts. If asked for an example, describe checking that an assigned pharmacist's name appears after a shift is filled.",
+      "exercises": [
+        {
+          "id": "pw-u3-l1-e1",
+          "type": "mcq",
+          "prompt": "Why is `await expect(locator).toHaveText('Filled')` more reliable than reading `textContent()` and asserting on the string?",
+          "choices": [
+            "It runs faster",
+            "It retries until the text matches or the timeout ends",
+            "It ignores case",
+            "It does not need a browser"
+          ],
+          "answer": 1,
+          "explanation": "Web-first assertions poll the page; a one-time read can catch the page mid-update.",
+          "placement": true
+        },
+        {
+          "id": "pw-u3-l1-e2",
+          "type": "mcq",
+          "prompt": "Which assertion checks that exactly four shift rows are listed?",
+          "choices": [
+            "await expect(page.getByTestId('shift-row')).toHaveCount(4);",
+            "await expect(page.getByTestId('shift-row')).toBe(4);",
+            "expect(page.getByTestId('shift-row').length).toEqual(4);",
+            "await page.getByTestId('shift-row').count(4);"
+          ],
+          "answer": 0,
+          "explanation": "`toHaveCount` is the web-first assertion for the number of matching elements, and it retries."
+        },
+        {
+          "id": "pw-u3-l1-e3",
+          "type": "short",
+          "prompt": "What is the default timeout, in seconds, for a Playwright `expect` assertion?",
+          "accept": [
+            "5",
+            "5 seconds",
+            "5s",
+            "five"
+          ],
+          "answer": "5",
+          "explanation": "The default `expect` timeout is 5 seconds; it can be changed in config."
+        },
+        {
+          "id": "pw-u3-l1-e4",
+          "type": "open",
+          "prompt": "A shift is assigned in the UI; the list then shows the pharmacist's name in the row for shift 1042 (row has `data-testid=\"shift-1042\"`) and a status badge reading \"Filled\". Write the assertions, and explain in two sentences why you wrote them as web-first assertions.",
+          "answer": "```ts\nconst row = page.getByTestId('shift-1042');\nawait expect(row).toContainText('Rivera');\nawait expect(row.getByText('Filled')).toBeVisible();\n```\n\nThese are web-first assertions: they retry until the row updates or the timeout is reached. The list refreshes after a server response, so a single immediate check could fail even though the app is working.",
+          "rubric": [
+            "Locates the row by test id",
+            "Uses await expect with toContainText/toHaveText and toBeVisible",
+            "Explains retrying and delayed updates",
+            "Asserts user-visible outcomes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u3-l2",
+      "title": "No fixed sleeps, soft assertions and polling",
+      "minutes": 8,
+      "body": "**The fixed sleep problem**\n\n```ts\nawait page.getByRole('button', { name: 'Assign' }).click();\nawait page.waitForTimeout(3000);   // avoid\nawait expect(page.getByText('Filled')).toBeVisible();\n```\n\n`waitForTimeout` pauses for a set time. Too short and the test fails on a slow machine; too long and the suite crawls. It also hides the real question: what are we waiting for? Playwright's documentation discourages it for tests. Waiting for the condition itself is both faster and safer:\n\n```ts\nawait page.getByRole('button', { name: 'Assign' }).click();\nawait expect(page.getByText('Filled')).toBeVisible();\n```\n\nIf the app really is slow for a legitimate reason, raise the timeout for that one assertion instead:\n\n```ts\nawait expect(page.getByText('Filled')).toBeVisible({ timeout: 15_000 });\n```\n\n**Waiting on the network**\n\nSometimes the right signal is a server response. You can wait for it directly:\n\n```ts\nconst responsePromise = page.waitForResponse(\n  r => r.url().includes('/api/assignments') && r.status() === 201\n);\nawait page.getByRole('button', { name: 'Assign' }).click();\nawait responsePromise;\n```\n\nStart waiting before the click, so you cannot miss the response. Wait only for a request that really happens: on a site that changes pages inside the browser, no matching response may fire and the wait runs to the timeout (I hit this on playwright.dev). Use this when the UI gives no visible signal; prefer a visible assertion otherwise.\n\n**Soft assertions**\n\nA normal `expect` stops the test at the first failure. A soft assertion records the failure and continues, then fails the test at the end. It suits checking several independent facts on one page:\n\n```ts\nawait expect.soft(page.getByRole('heading', { name: 'Shift 1042' })).toBeVisible();\nawait expect.soft(page.getByText('Maple Street Pharmacy')).toBeVisible();\nawait expect.soft(page.getByText('Filled')).toBeVisible();\n```\n\nYou then see all three problems in one run. Do not use soft assertions where later steps depend on the earlier one passing.\n\n**Polling a value**\n\nFor something that is not an element (an API result, a computed value), `expect.poll` retries a function:\n\n```ts\nawait expect.poll(async () => {\n  const res = await page.request.get('/api/shifts/1042');\n  return (await res.json()).status;\n}).toBe('filled');\n```\n\nThis keeps you from writing your own sleep loop.",
+      "keyPoints": [
+        "Replace `waitForTimeout` with an assertion on the real condition.",
+        "Raise a timeout on one assertion if the app is legitimately slow.",
+        "Soft assertions collect several failures in one run; use them for independent checks only.",
+        "`expect.poll` retries non-element values; `waitForResponse` waits on the network, started before the action."
+      ],
+      "interviewAngle": "\"How do you avoid flaky tests?\" starts here. Say you wait on conditions, not time, and use retrying assertions. Be honest that you know `waitForTimeout` exists and why you avoid it, rather than claiming you never saw one. If you inherited a test with a sleep, say you replaced it with an assertion.",
+      "exercises": [
+        {
+          "id": "pw-u3-l2-e1",
+          "type": "mcq",
+          "prompt": "What is the best replacement for `await page.waitForTimeout(3000)` before checking that a status shows \"Filled\"?",
+          "choices": [
+            "await page.waitForTimeout(10000)",
+            "await expect(page.getByText('Filled')).toBeVisible()",
+            "Run the test twice",
+            "Put the check inside a try/catch and ignore failures"
+          ],
+          "answer": 1,
+          "explanation": "Assert on the condition itself; it waits only as long as needed and fails clearly if it never happens.",
+          "placement": true
+        },
+        {
+          "id": "pw-u3-l2-e2",
+          "type": "mcq",
+          "prompt": "When is `expect.soft` a good choice?",
+          "choices": [
+            "When later steps need the earlier check to pass",
+            "When you want the test to never fail",
+            "When checking several independent facts on a page and you want all failures reported",
+            "When you need to wait for an element"
+          ],
+          "answer": 2,
+          "explanation": "Soft assertions record failures and continue, then fail the test at the end, which shows every problem in one run."
+        },
+        {
+          "id": "pw-u3-l2-e3",
+          "type": "mcq",
+          "prompt": "Why start `waitForResponse` before the click rather than after?",
+          "choices": [
+            "The click would be ignored otherwise",
+            "The response might arrive before you start listening and be missed",
+            "Playwright requires alphabetical order",
+            "It makes the response faster"
+          ],
+          "answer": 1,
+          "explanation": "If the response comes back before the listener exists, the wait would hang. Create the promise first, act, then await it."
+        },
+        {
+          "id": "pw-u3-l2-e4",
+          "type": "open",
+          "prompt": "This test is flaky. Rewrite it without a fixed sleep and add a soft assertion for the pharmacy name:\n\n```ts\nawait page.getByRole('button', { name: 'Cancel shift' }).click();\nawait page.waitForTimeout(2000);\nawait expect(page.getByText('Cancelled')).toBeVisible();\n```",
+          "answer": "```ts\nawait page.getByRole('button', { name: 'Cancel shift' }).click();\nawait expect(page.getByText('Cancelled')).toBeVisible();\nawait expect.soft(page.getByText('Maple Street Pharmacy')).toBeVisible();\n```\n\nThe sleep is gone: the assertion retries until \"Cancelled\" appears, which is as fast as the app allows and fails with a clear message if it never does. The soft assertion records a missing pharmacy name without hiding the status check.",
+          "rubric": [
+            "Removes waitForTimeout",
+            "Keeps a retrying expect on the Cancelled text",
+            "Uses expect.soft for the pharmacy name",
+            "Explains why the sleep is a problem"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u3-l3",
+      "title": "Assertions drill: pick the right one",
+      "minutes": 10,
+      "body": "Playwright has dozens of web-first assertions. A handful cover most tests. This drill uses the TodoMVC demo (https://demo.playwright.dev/todomvc/) with two todos, Buy milk and Book a flight. Every line below was run.\n\n**Text**\n\n```ts\nawait expect(page.getByTestId('todo-title')).toHaveText(['Buy milk', 'Book a flight']);  // exact, in order\nawait expect(page.getByTestId('todo-title')).toContainText(['milk', 'flight']);          // partial, in order\nawait expect(page.getByTestId('todo-count')).toHaveText('2 items left');\nawait expect(page.getByTestId('todo-count')).toHaveText(/2 items? left/);              // regex for 1 item / 2 items\n```\n\n`toHaveText` is a full match (after whitespace is normalised). With one todo \"Book a flight\", `toHaveText('Book')` fails, and the report shows `Expected: \"Book\"  Received: \"Book a flight\"`. Use `toContainText` when part of the text is the point.\n\n**State of a control**\n\n```ts\nawait expect(input).toBeEmpty();\nawait expect(input).toBeFocused();\nawait expect(checkbox).toBeChecked();\nawait expect(checkbox).not.toBeChecked();\nawait expect(page.getByRole('button', { name: 'Clear completed' })).toBeHidden();\n```\n\n`toBeHidden` passes when the element is missing or not visible. `not.toBeVisible()` behaves the same way; pick one style and keep it.\n\n**Count, attribute, class, page**\n\n```ts\nawait expect(page.getByTestId('todo-item')).toHaveCount(2);\nawait expect(page.getByRole('link', { name: 'All' })).toHaveAttribute('href', '#/');\nawait expect(page.getByRole('link', { name: 'All' })).toHaveClass('selected');   // whole class string\nawait expect(page).toHaveTitle('React • TodoMVC');\nawait expect(page).toHaveURL(/#\\/active/);\n```\n\n`toHaveClass('selected')` needs the whole class attribute to equal the string. When other classes may be present, use a regex: `toHaveClass(/completed/)`.\n\n**Assertion hygiene**\n\n- One reason to fail per assertion; name the test for the behaviour.\n- Assert what the user sees, not that you clicked.\n- A generic `expect(x).toBe(y)` (not web-first) does not retry. Use it for plain values only, like a status code.",
+      "keyPoints": [
+        "`toHaveText` is a full match; `toContainText` is partial; both accept an array for lists.",
+        "Use `toBeChecked`, `toBeHidden`, `toBeEmpty`, `toBeFocused` for control state.",
+        "`toHaveClass('x')` is a full match; use a regex when other classes may exist.",
+        "Plain `expect(value).toBe()` does not retry; use it for non-page values."
+      ],
+      "interviewAngle": "A typical question: \"what assertions do you use most?\" Name five: toBeVisible, toHaveText, toHaveCount, toHaveURL, toBeChecked, and say they retry. Honest framing: you used a small set in basic tests; this drill widened it on a demo site. This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u3-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "The list shows exactly \"Buy milk\" then \"Book a flight\". Which assertion checks both titles in order?",
+          "choices": [
+            "await expect(page.getByTestId('todo-title')).toHaveText(['Buy milk', 'Book a flight']);",
+            "expect(page.getByTestId('todo-title')).toBe('Buy milk, Book a flight');",
+            "await expect(page.getByTestId('todo-title')).toHaveCount(2);",
+            "await expect(page.getByText('Buy milk')).toBeVisible();"
+          ],
+          "answer": 0,
+          "explanation": "An array form of toHaveText checks each matched element in order. Count alone would pass with any two titles."
+        },
+        {
+          "id": "pw-u3-l3-e2",
+          "type": "mcq",
+          "prompt": "An element's text is \"Book a flight\". What does `toHaveText('Book')` do?",
+          "choices": [
+            "Passes, because the text starts with Book",
+            "Passes only with exact: true",
+            "Throws a syntax error",
+            "Fails, because toHaveText is a full match; use toContainText for part of it"
+          ],
+          "answer": 3,
+          "explanation": "I ran it: Expected \"Book\", Received \"Book a flight\"."
+        },
+        {
+          "id": "pw-u3-l3-e3",
+          "type": "short",
+          "prompt": "Which assertion checks that a checkbox is ticked? (Name only, for example toBeVisible.)",
+          "accept": [
+            "tobechecked",
+            "toBeChecked",
+            "toBeChecked()"
+          ],
+          "answer": "toBeChecked",
+          "explanation": "`await expect(checkbox).toBeChecked()`; its opposite is `.not.toBeChecked()`."
+        },
+        {
+          "id": "pw-u3-l3-e4",
+          "type": "mcq",
+          "prompt": "Which line is **not** a retrying web-first assertion?",
+          "choices": [
+            "await expect(page).toHaveURL(/active/)",
+            "await expect(locator).toBeHidden()",
+            "expect(await locator.count()).toBe(2)",
+            "await expect(locator).toHaveCount(2)"
+          ],
+          "answer": 2,
+          "explanation": "It reads the count once, then does a plain comparison. If the page is still updating it can fail wrongly."
+        },
+        {
+          "id": "pw-u3-l3-e5",
+          "type": "open",
+          "prompt": "A user adds two todos, ticks the first and opens the Active filter. Write the assertions for: the URL; exactly one visible todo; the count text; that the Clear completed button still exists. State which you used toHaveText or toContainText for, and why.",
+          "answer": "```ts\nawait expect(page).toHaveURL(/#\\/active/);\nawait expect(page.getByTestId('todo-item')).toHaveCount(1);\nawait expect(page.getByTestId('todo-count')).toHaveText('1 item left');\nawait expect(page.getByRole('button', { name: 'Clear completed' })).toBeVisible();\n```\nI used toHaveText for the count because the whole string is the requirement; toContainText would also pass for '11 items left'.",
+          "rubric": [
+            "URL assertion with a regex or full URL",
+            "toHaveCount(1) for rows",
+            "Count text asserted with toHaveText or toContainText with a reason",
+            "Clear completed asserted visible",
+            "All assertions awaited and web-first"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,514 @@
+{
+  "id": "power-bi",
+  "title": "Power BI",
+  "tagline": "Learn Power BI from zero and build a shift fill-rate dashboard you can show and honestly explain.",
+  "claim": "Power BI is new and being learned now. The resume must not claim on-the-job use. To back an honest statement you must be able to explain the Desktop workflow, a star schema, the difference between a measure and a calculated column, and show a small practice dashboard, while saying that at work you did the equivalent reporting in SQL and Excel.",
+  "units": [
+    "unit-1.json",
+    "unit-2.json",
+    "unit-3.json",
+    "unit-4.json",
+    "unit-5.json",
+    "unit-7.json",
+    "unit-8.json",
+    "unit-9.json",
+    "unit-10.json",
+    "unit-11.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "power-bi-iq-1",
+      "prompt": "What is your experience with Power BI?",
+      "strongAnswer": "I am new to Power BI and learning it now, so I want to be clear that I have not used it on the job. At work I did the same kind of reporting in SQL and Excel: shift fill rate, time to fill and cancellation reasons. To build the skill I am working through a practice project, a shift fill-rate dashboard, where I import data, clean it in Power Query, model it as a star schema and write a few DAX measures. I can walk you through that, and I pick up new tools quickly."
+    },
+    {
+      "id": "power-bi-iq-2",
+      "prompt": "Explain the Power BI workflow from raw data to a shared report.",
+      "strongAnswer": "In Power BI Desktop I get data from a source, then transform it in Power Query: fix types, trim text, remove duplicates. Next I model it, usually as a star schema with a fact table of events and dimension tables like pharmacies and dates, connected by relationships. I write DAX measures, then build visuals and slicers on a report page. Finally I publish to the Power BI service, to a workspace, set up scheduled refresh, and share it with the right audience. I have practised this end to end on a sample project."
+    },
+    {
+      "id": "power-bi-iq-3",
+      "prompt": "What is the difference between a measure and a calculated column in DAX?",
+      "strongAnswer": "A calculated column is computed row by row when the data refreshes and stored in the table, like adding a column in Excel. A measure is calculated on the fly for whatever filters the visual applies, such as a pharmacy or month. Things like totals and ratios should be measures. For example, a fill rate has to be filled shifts divided by total shifts for the current selection, so a column would be wrong at any total level. I use columns for row-level labels and measures for aggregates."
+    },
+    {
+      "id": "power-bi-iq-4",
+      "prompt": "What is a star schema and why does it matter?",
+      "strongAnswer": "A star schema has one central fact table, which records events, surrounded by dimension tables that describe them, joined by one-to-many relationships. For my scheduling practice data the fact table is shifts, one row per request, and the dimensions are pharmacies, pharmacists and dates. It matters because filters flow from the dimension to the fact table cleanly, DAX is simpler, results are correct, and the model is fast. It is similar to how I thought about joins when writing SQL for reports."
+    },
+    {
+      "id": "power-bi-iq-5",
+      "prompt": "How would your SQL and Excel experience help you learn Power BI?",
+      "strongAnswer": "Quite directly. In SQL I wrote joins, grouping and filtering for shift fill rate and cancellation reports, which map to relationships, visuals and filter context in Power BI. Power Query steps resemble cleaning I did by hand in Excel, and pivot tables are close to a matrix visual. SUMIFS-style thinking carries into CALCULATE. The new parts are DAX syntax and modelling, which is where I am spending my practice time, and I check my measures against SQL results to make sure the numbers agree."
+    },
+    {
+      "id": "power-bi-iq-6",
+      "prompt": "How would you design a dashboard for a manager who cares about shift fill rate?",
+      "strongAnswer": "I would start by asking what decision they make with it. Then I would put the headline numbers at the top as cards: fill rate, shifts requested and average time to fill. Below, a line chart of fill rate by month to show the trend, and a bar chart by pharmacy to show where the problems are. I would add slicers for date and region, and a drill-through page for one pharmacy. I would use few colours, clear titles, and one page, then test it with the manager."
+    },
+    {
+      "id": "power-bi-iq-7",
+      "prompt": "How do you keep a published report up to date and make sure people only see their own data?",
+      "strongAnswer": "In the Power BI service I would set scheduled refresh on the dataset, and use an on-premises data gateway if the source is not in the cloud. For access, I would put the report in a workspace and share it as an app or with specific people. If different people should see different rows, such as regional managers, I would use row-level security: define roles with a filter on a table, then assign users. I understand this at a concept level and I have not set it up in production."
+    },
+    {
+      "id": "power-bi-iq-8",
+      "prompt": "How would you calculate month-over-month change in Power BI?",
+      "strongAnswer": "I need a proper date table marked as a date table and related to the fact table. Then I write a measure for the previous month with CALCULATE and DATEADD by minus one month, and a second measure that divides the difference by the previous value with DIVIDE, using variables for readability. I put the month from the date table on the axis. I would check two months by hand and watch for partial months at the edges of the data. I have built this on practice data, not at work."
+    },
+    {
+      "id": "power-bi-iq-9",
+      "prompt": "Explain filter context and CALCULATE.",
+      "strongAnswer": "Filter context is the set of filters in effect when a measure is evaluated: the row or column of the visual, the slicers and the page filters. CALCULATE evaluates an expression after changing that context, for example adding a filter on status or removing one with ALL. It is like SUMIFS in Excel or a WHERE clause in SQL. In my practice model, one average-hours measure shows 1.26 hours for emergency shifts and 11.29 for others by changing only the filter. I am still building depth in the advanced cases."
+    },
+    {
+      "id": "power-bi-iq-10",
+      "prompt": "A report is slow. What do you do?",
+      "strongAnswer": "I measure before I change anything, using Performance analyzer to see which visuals and queries are slow. Then I look at the model: remove unused columns and rows, use a star schema, reduce high-cardinality columns such as datetimes, and prefer measures to calculated columns. I also simplify heavy DAX and cut the number of visuals or slicers on the page. If the source is a database, I check that Power Query steps fold. I know these steps well in concept and have applied the basics on a small practice model."
+    },
+    {
+      "id": "power-bi-iq-11",
+      "prompt": "What is the difference between Import and DirectQuery?",
+      "strongAnswer": "Import loads a compressed copy of the data into the model. It is fast and supports all of DAX, but it only changes when the data refreshes, so I schedule refresh. DirectQuery leaves the data in the source and sends a query each time a visual loads, so numbers are current, but it is slower and has some limits. For a small project like my practice dashboard I would choose Import. For very large or near-real-time needs I would discuss DirectQuery with the data owner."
+    },
+    {
+      "id": "power-bi-iq-12",
+      "prompt": "Explain row-level security with an example.",
+      "strongAnswer": "Row-level security limits which rows each person sees in the same report. In my practice model I created a role on the Pharmacies table with a filter of state equals FL. Through the relationship it filters shifts too, so that role sees 537 shifts instead of 1019. I test with View as, then in the Service I assign people to the role. For many users I would use a mapping table and USERPRINCIPALNAME. I understand this conceptually and have not set it up in production."
+    },
+    {
+      "id": "power-bi-iq-13",
+      "prompt": "What is the difference between a report and a dashboard in the Power BI service?",
+      "strongAnswer": "A report is the interactive, multi-page output built in Desktop, with slicers, filters and drill-through. A dashboard exists only in the Service and is a single page of tiles pinned from reports, which is useful as a summary and for data alerts. A tile opens its source report when clicked. For most work I would share a report or an app, and use a dashboard when someone wants a one-page overview with alerts. I know this from my learning, not from administering a tenant."
+    },
+    {
+      "id": "power-bi-iq-14",
+      "prompt": "Two stakeholders define fill rate differently. What do you do?",
+      "strongAnswer": "I would not choose silently. I would show them how each definition changes the number: in my practice data 906 of 1019 shifts got a filled time, which is 88.9%, but only 828 were completed, 81.3%, because 78 filled shifts were later cancelled. Then I would ask who uses the number and for what decision, agree one definition or show both with clear names, and print the definition on the report. This is similar to clarifying requirements, which I did often as a project manager."
+    },
+    {
+      "id": "power-bi-iq-15",
+      "prompt": "Tell me about a dashboard you have built.",
+      "strongAnswer": "I want to be clear that it is a practice project, not something from my last job. I built a shift fill-rate dashboard on fictional scheduling data. I cleaned the data in Power Query, built a star schema with a date table, and wrote measures for fill rate, cancellation rate and average hours to fill, then checked each against numbers I computed in Python and SQL. The page has cards, a monthly trend, a state breakdown and cancel reasons, with drill-through. I can walk you through any part of it."
+    },
+    {
+      "id": "power-bi-iq-16",
+      "prompt": "The totals in your report do not match another team's. How do you investigate?",
+      "strongAnswer": "I start by comparing definitions, because most gaps come from different filters or metrics, such as filled versus completed shifts. Then I check my model: relationships, whether the measure is a measure and not an averaged column, any blank rows from unmatched keys, and date ranges including partial months. I reconcile to an independent count, like a SQL query on the same data, and note any differences I cannot explain. Then I document the agreed definition so the question does not come back."
+    }
+  ],
+  "resources": [
+    {
+      "title": "Study guide for Exam PL-300: Microsoft Power BI Data Analyst",
+      "url": "https://learn.microsoft.com/en-us/certifications/resources/study-guides/PL-300",
+      "source": "Microsoft Learn",
+      "kind": "certification",
+      "minutes": 30,
+      "free": true,
+      "why": "The official skills outline (prepare, model, visualize, manage and secure) and the free practice assessment; use it as the topic checklist.",
+      "units": [
+        "power-bi-u11"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read the outline early to see what a Power BI analyst is expected to know, and again if you decide to sit the exam.",
+      "versus": "It is the vendor's skills list and free practice assessment, and the only route to a certificate; HireFly cannot certify you but gives a shorter drill and honest talk about learning the tool."
+    },
+    {
+      "title": "Get started with Power BI",
+      "url": "https://learn.microsoft.com/en-us/training/paths/get-started-power-bi/",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 120,
+      "free": true,
+      "why": "Microsoft's beginner path on reports and the Power BI service, no prerequisites.",
+      "units": [
+        "power-bi-u1",
+        "power-bi-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Do it first if you have never opened Power BI, before \"Getting started: Power BI and Power Query\".",
+      "versus": "Microsoft shows the current service and Desktop screens; HireFly's lessons tie the workflow to your shift data and your SQL and Excel background."
+    },
+    {
+      "title": "Prepare data for analysis with Power BI",
+      "url": "https://learn.microsoft.com/en-us/training/paths/prepare-data-power-bi",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 240,
+      "free": true,
+      "why": "A full path on Power Query: profiling, cleaning, shaping and loading, matching the first PL-300 area.",
+      "units": [
+        "power-bi-u1",
+        "power-bi-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Take it when Power Query steps feel unclear, after the lab \"Shape the shift data in Power Query\".",
+      "versus": "The path is long and complete and its exercises run in the real tool; HireFly is shorter and uses the practice CSVs."
+    },
+    {
+      "title": "Model data with Power BI",
+      "url": "https://learn.microsoft.com/training/paths/model-power-bi",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 240,
+      "free": true,
+      "why": "Relationships, star schema, DAX and performance, with exercises in Desktop.",
+      "units": [
+        "power-bi-u2",
+        "power-bi-u3",
+        "power-bi-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Do it after \"Data modelling\" and \"DAX basics\" if you have a week or more.",
+      "versus": "The path is the vendor's full treatment with Desktop exercises; HireFly gives expected values for your own measures and a quick test-out."
+    },
+    {
+      "title": "Dashboard in a Day - Online workshop",
+      "url": "https://learn.microsoft.com/training/paths/dashboard-in-a-day/",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 360,
+      "free": true,
+      "why": "Microsoft's hands-on workshop material that builds a report and dashboard end to end.",
+      "units": [
+        "power-bi-u4",
+        "power-bi-u9",
+        "power-bi-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it once you have done the HireFly dashboard lab, for a second end-to-end build.",
+      "versus": "It is a long guided build in Microsoft's own datasets; HireFly's dashboard uses your scheduling story and prepares what to say about it."
+    },
+    {
+      "title": "Understand star schema and the importance for Power BI",
+      "url": "https://learn.microsoft.com/power-bi/guidance/star-schema",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "Microsoft's modelling guidance on fact and dimension tables and why they matter.",
+      "units": [
+        "power-bi-u2",
+        "power-bi-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it right after \"Data modelling\" for the vendor's wording.",
+      "versus": "A short authoritative page without exercises; HireFly adds a built-and-checked schema from the practice tables."
+    },
+    {
+      "title": "Row-level security (RLS) with Power BI Desktop",
+      "url": "https://learn.microsoft.com/power-bi/create-reports/desktop-rls",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "The step-by-step for defining roles, testing with View as, and assigning members.",
+      "units": [
+        "power-bi-u5",
+        "power-bi-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it while doing the lab \"Row-level security and a sharing plan\".",
+      "versus": "The vendor lists the exact steps for the current interface; HireFly explains the idea and what to say about it."
+    },
+    {
+      "title": "Row-level security (RLS) guidance in Power BI Desktop",
+      "url": "https://learn.microsoft.com/power-bi/guidance/rls-guidance",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "Design advice and pitfalls for RLS, such as performance and who bypasses it.",
+      "units": [
+        "power-bi-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it only if you meet a posting that asks about securing reports.",
+      "versus": "Design advice and pitfalls with little hands-on; HireFly stays at the concept level."
+    },
+    {
+      "title": "Get Power BI Desktop",
+      "url": "https://learn.microsoft.com/power-bi/fundamentals/desktop-get-the-desktop",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 10,
+      "free": true,
+      "why": "How to install Desktop for free from the Microsoft Store or as a download; needed for every lab.",
+      "units": [
+        "power-bi-u7"
+      ],
+      "priority": "core",
+      "useWhen": "Do it before the first lab: every lab needs Desktop installed on a Windows PC.",
+      "versus": "HireFly has no hosted copy of the tool, so only the vendor's install page gets you the real thing."
+    },
+    {
+      "title": "Start learning DAX for free (Introducing DAX)",
+      "url": "https://www.sqlbi.com/articles/start-learning-dax-for-free/",
+      "source": "SQLBI",
+      "kind": "course",
+      "minutes": 150,
+      "free": true,
+      "why": "A free video course of about 150 minutes that teaches DAX and filter context using Power BI examples.",
+      "units": [
+        "power-bi-u3",
+        "power-bi-u8"
+      ],
+      "priority": "core",
+      "useWhen": "Watch it after \"DAX basics\", because filter context is easier to see on screen than to read.",
+      "versus": "SQLBI's video course explains DAX in more depth with the real interface; HireFly is shorter and gives expected numbers on your shift data."
+    },
+    {
+      "title": "Start learning data modeling for free",
+      "url": "https://www.sqlbi.com/articles/start-learning-data-modeling-for-free/",
+      "source": "SQLBI",
+      "kind": "course",
+      "minutes": 120,
+      "free": true,
+      "why": "A free introduction to data modelling for Power BI, about two hours.",
+      "units": [
+        "power-bi-u2",
+        "power-bi-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Watch it after \"Data modelling\" if the star schema still feels abstract.",
+      "versus": "Video from a specialist shows the modelling choices in the tool; HireFly links the same ideas to the shifts and pharmacies tables."
+    },
+    {
+      "title": "Guy in a Cube (YouTube channel)",
+      "url": "https://www.youtube.com/@GuyInACube",
+      "source": "Guy in a Cube",
+      "kind": "video",
+      "minutes": 120,
+      "free": true,
+      "why": "Long-running free Power BI tips and walkthroughs from Microsoft staff; search the channel for beginner tutorials and DAX topics.",
+      "units": [
+        "power-bi-u4",
+        "power-bi-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Search it when a visual, bookmark or refresh question stalls you.",
+      "versus": "Free, current tips from Microsoft staff but unstructured; HireFly gives an ordered path and interview wording."
+    }
+  ],
+  "labs": [
+    {
+      "id": "power-bi-lab-1",
+      "title": "Import and profile the practice CSVs",
+      "minutes": 25,
+      "goal": "Load all five practice files into Power BI Desktop and prove the row counts and empty values.",
+      "setup": "Install Power BI Desktop free from the Microsoft Store (no sign-in needed to build locally). Export the datasets folder from the app.",
+      "steps": [
+        "Home > Get data > Text/CSV, choose `pharmacies.csv`, then Transform Data.",
+        "Repeat for `pharmacists.csv`, `shifts.csv`, `assignments.csv` and `tickets.csv`.",
+        "In each query turn on View > Column quality, Column distribution and Column profile.",
+        "In the status bar switch column profiling to the entire data set.",
+        "Read the row count and empty values for each table.",
+        "Confirm the three datetime columns in Shifts are Date/Time and `is_emergency` is a whole number.",
+        "Rename queries to Pharmacies, Pharmacists, Shifts, Assignments and Tickets, then Close & Apply."
+      ],
+      "check": [
+        "Rows: Pharmacies 40, Pharmacists 60, Shifts 1019, Assignments 906, Tickets 734.",
+        "Shifts `filled_at` has 113 empty values and `cancel_reason` 848.",
+        "Shifts `status`: completed 828, cancelled 171, open 20."
+      ],
+      "talkTrack": "I imported sample scheduling data into Power BI Desktop and checked row counts and empty values against known figures before modelling."
+    },
+    {
+      "id": "power-bi-lab-2",
+      "title": "Shape the shift data in Power Query",
+      "minutes": 30,
+      "goal": "Add the columns the model needs and prove they are right with column statistics.",
+      "setup": "The queries from lab 1, open in the Power Query Editor (Home > Transform data).",
+      "steps": [
+        "In Shifts add `request_date` (Add Column > Date > Date Only on `requested_at`).",
+        "Add `start_date` the same way from `starts_at`.",
+        "Add a custom column `hours_to_fill` = `Duration.TotalHours([filled_at] - [requested_at])`.",
+        "Add a conditional column `is_filled` (1 if `filled_at` is not null, else 0).",
+        "Rename steps so they read clearly (for example Added hours to fill).",
+        "Check Column statistics for `hours_to_fill` and `is_filled`.",
+        "Close & Apply and refresh once."
+      ],
+      "check": [
+        "`hours_to_fill` has 906 values and averages 9.52.",
+        "Its minimum is not below 0 and its maximum is about 34.68.",
+        "`is_filled` sums to 906."
+      ],
+      "talkTrack": "I shaped sample shift data in Power Query and checked my new hours-to-fill column against a known average of 9.52."
+    },
+    {
+      "id": "power-bi-lab-3",
+      "title": "Build the star schema and date table",
+      "minutes": 30,
+      "goal": "Create a checked star schema with relationships and a marked date table.",
+      "setup": "The loaded model from lab 2, in Model view.",
+      "steps": [
+        "Modeling > New table and enter the Dates DAX table from the lessons (December 2025 to December 2026).",
+        "Add Year, MonthNum, Month and YearMonth, sort Month by MonthNum, and Mark as date table.",
+        "Relate Pharmacies[id] to Shifts[pharmacy_id] and Pharmacists[id] to Shifts[pharmacist_id] (one-to-many, single direction).",
+        "Relate Dates[Date] to Shifts[request_date] (active) and to Shifts[start_date] (inactive).",
+        "Relate Shifts[id] to Assignments[shift_id] and Pharmacies[id] to Tickets[pharmacy_id].",
+        "Build a table visual with Pharmacies[state] and the count of rows in Shifts (add a Total Shifts measure).",
+        "Hide key and datetime columns from Report view."
+      ],
+      "check": [
+        "Dates has 396 rows.",
+        "Shifts by state: FL 537, GA 340, SC 85, AL 57; total 1019.",
+        "A Pharmacist blank group shows 113 shifts."
+      ],
+      "talkTrack": "I built a star schema from sample scheduling tables, with a date table, and checked it by confirming shift counts by state."
+    },
+    {
+      "id": "power-bi-lab-4",
+      "title": "Write and check the dashboard measures",
+      "minutes": 40,
+      "goal": "Create the measure set, including CALCULATE and month-over-month, and check every value.",
+      "setup": "The model from lab 3. Create a measures table or keep measures on Shifts.",
+      "steps": [
+        "Create Total Shifts, Filled Shifts, Completed Shifts, Cancelled Shifts, Fill Rate, Completion Rate, Cancel Rate and Avg Hours to Fill.",
+        "Show them in cards and compare to the expected values.",
+        "Create Emergency Avg Hours and Standard Avg Hours with CALCULATE.",
+        "Create Emergency Before June and From June using a Dates[Date] filter.",
+        "Create State Share with ALL(Pharmacies).",
+        "Create Shifts Prev Month and Shifts MoM % with VAR and RETURN.",
+        "Put Dates[Month] and the MoM measure in a table and test two months by hand."
+      ],
+      "check": [
+        "Total 1019, Filled 906, Completed 828, Cancelled 171; Fill Rate 88.9%, Completion 81.3%, Cancel Rate 16.8%; Avg Hours to Fill 9.52.",
+        "Emergency 1.26 hours, standard 11.29; emergency before June 1.70 and from June 0.64.",
+        "State share: FL 52.7%, GA 33.4%, SC 8.3%, AL 5.6%.",
+        "MoM: June +26.2%, July +1.5%, August +7.6%, September -23.9%."
+      ],
+      "talkTrack": "I wrote the core measures for a shift dashboard in DAX on practice data and verified each against numbers I computed separately."
+    },
+    {
+      "id": "power-bi-lab-5",
+      "title": "Build the shift fill-rate dashboard end to end",
+      "minutes": 60,
+      "goal": "Finish a one-page dashboard with cards, a trend, a state breakdown, cancellation reasons and slicers, then save it as a .pbix file.",
+      "setup": "The model and measures from labs 1 to 4. Sketch the page first on paper.",
+      "steps": [
+        "Apply a theme (View > Themes) with one main and one highlight colour.",
+        "Add four cards: Fill Rate, Total Shifts, Cancel Rate and Avg Hours to Fill.",
+        "Add a line chart of Fill Rate by Dates[YearMonth]; limit it to 2026-01 to 2026-09 with a visual filter.",
+        "Add a bar chart of Fill Rate by Pharmacies[state], sorted ascending.",
+        "Add a bar chart of Cancelled Shifts by cancel_reason.",
+        "Add a column chart comparing Emergency Avg Hours and Standard Avg Hours.",
+        "Add slicers for month and state, and align everything to a grid.",
+        "Write titles that state findings, add alt text, and a text box with source, range and definitions.",
+        "Save the file as a .pbix."
+      ],
+      "check": [
+        "Cards read 88.9%, 1,019, 16.8% and 9.52.",
+        "Cancel reasons: no coverage 65, pharmacist cancelled 54, pharmacy cancelled 52.",
+        "Monthly fill rate: June 93.1%, July 93.2%, August 88.0%, September 71.3%.",
+        "Selecting FL in the slicer changes the cards to 89.6% fill rate and 537 shifts."
+      ],
+      "talkTrack": "I built a shift fill-rate dashboard in Power BI Desktop on practice data, with the metric definitions on the page and the cards checked against numbers I computed separately."
+    },
+    {
+      "id": "power-bi-lab-6",
+      "title": "Add drill-through, a bookmark toggle and a tooltip",
+      "minutes": 40,
+      "goal": "Make the dashboard interactive and test every interaction.",
+      "setup": "The finished dashboard from lab 5.",
+      "steps": [
+        "Add a page called Pharmacy detail and drag Pharmacies[name] into its Drill-through well.",
+        "On that page add fill rate by month, cancel reasons and a table of shifts, plus a back button.",
+        "On the main page right-click a state or pharmacy and test Drill through.",
+        "Stack an Emergency Avg Hours card over a Standard Avg Hours card and name them in the Selection pane.",
+        "Create two bookmarks and two buttons that toggle the cards.",
+        "Create a tooltip page showing cancel reasons and assign it to the state bar chart.",
+        "Click through every interaction and reset to the default view."
+      ],
+      "check": [
+        "The Emergency view shows 1.26 and the Standard view 11.29.",
+        "The drill-through page shows only the chosen pharmacy.",
+        "Hovering the FL bar shows FL's cancel reasons."
+      ],
+      "talkTrack": "I added drill-through, a bookmark toggle and a custom tooltip to my practice dashboard and tested each interaction."
+    },
+    {
+      "id": "power-bi-lab-7",
+      "title": "Row-level security and a sharing plan",
+      "minutes": 30,
+      "goal": "Define state roles, test them with View as, and write a sharing plan.",
+      "setup": "The dashboard from lab 5. Publishing to the Power BI service needs a work or school account; if you do not have one, do everything in Desktop and note what you would do in the Service.",
+      "steps": [
+        "Modeling > Manage roles, create role FL with the filter `[state] = \"FL\"` on Pharmacies.",
+        "Create roles GA, AL and SC the same way.",
+        "Use View as to test each role and read the cards.",
+        "Try View as with two roles together.",
+        "Write a short plan: workspace, app audience, refresh schedule, and who gets which role.",
+        "If you have a work or school account and permission, publish and add a test member to a role."
+      ],
+      "check": [
+        "Role FL: 537 shifts, 481 filled, 89.6%, 22 pharmacies.",
+        "Role GA: 340 shifts, 301 filled; AL: 57 and 50; SC: 85 and 74.",
+        "State Share shows 100% inside a role because the security filter cannot be removed."
+      ],
+      "talkTrack": "I tested row-level security on a practice model by defining state roles and checking each with View as, so I understand how it works even though I have not set it up in production."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you to an honest conversation about a skill you are still learning: the workflow, a star schema, measures versus calculated columns and a small dashboard you built. Reading alone is not enough: the labs in real Power BI Desktop and the vendor's hands-on material are what make the skill real. It cannot give you on-the-job use or a certificate.",
+    "hireflyBetter": [
+      "You need a truthful talk track that bridges from your SQL and Excel reporting.",
+      "You have days and want the key ideas and expected measure values, not hours of video.",
+      "You want the dashboard built on the shift data you already know.",
+      "You want a quick test-out to skip what you know.",
+      "You want the exam-style drill without needing the whole course."
+    ],
+    "externalBetter": [
+      "You need to see the real interface; Microsoft Learn and video do this.",
+      "You want hands-on practice in Microsoft's current screens, which the vendor keeps updated.",
+      "You want a certificate, which only PL-300 gives.",
+      "You need deeper DAX, where the SQLBI course goes further.",
+      "You want a second dashboard build on a different dataset."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Install Desktop from \"Get Power BI Desktop\" (10 minutes).",
+          "Do the test-out for \"Data modelling\" and \"DAX basics\" and study only what you miss (40 minutes).",
+          "Read \"In the interview\" and rehearse the honest talk track (25 minutes).",
+          "Do the lab \"Import and profile the practice CSVs\" (25 minutes).",
+          "Do the lab \"Build the shift fill-rate dashboard end to end\" (60 minutes).",
+          "Rehearse the bridge from SQL and Excel aloud (30 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Install Desktop from \"Get Power BI Desktop\" and read \"Getting started: Power BI and Power Query\" (45 minutes).",
+          "Do the labs \"Import and profile the practice CSVs\" and \"Shape the shift data in Power Query\" (55 minutes).",
+          "Work \"Data modelling\" and the lab \"Build the star schema and date table\" (1 hour).",
+          "Work \"DAX basics\" and \"Measures and filter context with real numbers\" (1 hour).",
+          "Watch \"Start learning DAX for free (Introducing DAX)\" (2.5 hours).",
+          "Do the lab \"Write and check the dashboard measures\" (40 minutes).",
+          "Work \"Building a report\" and the lab \"Build the shift fill-rate dashboard end to end\" (1.5 hours).",
+          "Do the lab \"Add drill-through, a bookmark toggle and a tooltip\" (40 minutes).",
+          "Work \"Sharing your work\" and the lab \"Row-level security and a sharing plan\" (45 minutes).",
+          "Do \"Dashboard in a Day - Online workshop\" for a second build (4 hours).",
+          "Finish with \"In the interview\" (25 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Work every HireFly unit in order and do all seven labs (9 hours).",
+          "Take \"Get started with Power BI\" and \"Prepare data for analysis with Power BI\" (6 hours).",
+          "Take \"Model data with Power BI\" and \"Start learning data modeling for free\" (6 hours).",
+          "Watch \"Start learning DAX for free (Introducing DAX)\" and write ten measures on the practice data (4 hours).",
+          "Do \"Dashboard in a Day - Online workshop\" (6 hours).",
+          "Read \"Study guide for Exam PL-300: Microsoft Power BI Data Analyst\" and work \"PL-300-style question drill\" (3 hours).",
+          "Build a dashboard from your own non-sensitive data and rehearse \"In the interview\" (6 hours)."
+        ]
+      }
+    ]
+  }
+}

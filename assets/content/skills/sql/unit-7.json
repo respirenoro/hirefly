@@ -1,0 +1,253 @@
+{
+  "id": "sql-u7",
+  "title": "Combining and cleaning: sets, self joins and text",
+  "summary": "Stack and compare result sets, join a table to itself, build zero-filled grids, and clean text and NULLs before you report on them.",
+  "lessons": [
+    {
+      "id": "sql-u7-l1",
+      "title": "UNION, INTERSECT and EXCEPT",
+      "minutes": 9,
+      "body": "Joins add columns side by side. Set operators stack rows: they combine the results of two queries into one list. They show up in \"who is in A but not B\" questions and in reports that merge several sources.\n\nFour operators do the work. Each query must return the same number of columns, with compatible types, and the column names come from the first query.\n\n| Operator | Result |\n|---|---|\n| `UNION` | Rows from either query, duplicates removed |\n| `UNION ALL` | Rows from either query, every row kept |\n| `INTERSECT` | Rows that appear in both |\n| `EXCEPT` | Rows in the first that are not in the second (Oracle calls this `MINUS`) |\n\nUse the lesson sample. Pharmacies with completed shifts are 1, 2 and 3. Pharmacies with cancelled shifts are 2 and 3 (shift 103 and 108 at pharmacy 2, shift 106 at pharmacy 3).\n\n```sql\nSELECT pharmacy_id FROM shifts WHERE status = 'completed'\nUNION\nSELECT pharmacy_id FROM shifts WHERE status = 'cancelled';\n```\n\nThat returns 3 rows: 1, 2 and 3. Change `UNION` to `UNION ALL` and it returns 7 rows, because the four completed rows and three cancelled rows are simply stacked. `UNION` has to compare rows to remove duplicates, so it does more work. Use `UNION ALL` when you know the pieces cannot overlap, or when you want to count every row.\n\n```sql\n-- Pharmacies with both completed and cancelled shifts\nSELECT pharmacy_id FROM shifts WHERE status = 'completed'\nINTERSECT\nSELECT pharmacy_id FROM shifts WHERE status = 'cancelled';\n```\n\nThis returns pharmacies 2 and 3. With `EXCEPT` instead, you get pharmacy 1 only: it has completed shifts and no cancelled ones.\n\nA very common reporting use of `UNION ALL` is turning two timestamp columns into one event list:\n\n```sql\nSELECT id AS shift_id, requested_at AS event_time, 'requested' AS event\nFROM shifts\nUNION ALL\nSELECT id, filled_at, 'filled'\nFROM shifts\nWHERE filled_at IS NOT NULL\nORDER BY event_time;\n```\n\nThat gives 13 rows: 8 requests and 5 fills. Note that `ORDER BY` goes once, at the very end, and applies to the whole combined result.\n\nTwo details matter. Set operators treat NULL values as equal to each other when they compare rows, unlike `=`, so two NULLs count as a duplicate. And the same job can often be done with a join or `NOT EXISTS`; `EXCEPT` is shorter when you only need the key column, but a join lets you bring along other columns.",
+      "keyPoints": [
+        "UNION stacks and removes duplicates; UNION ALL stacks and keeps every row.",
+        "INTERSECT keeps rows in both queries; EXCEPT keeps rows only in the first.",
+        "Both queries need the same number of compatible columns; ORDER BY goes once, at the end.",
+        "Set operators treat NULLs as equal when comparing rows.",
+        "A join, NOT EXISTS or an anti-join can often do the same job and bring extra columns."
+      ],
+      "interviewAngle": "Expect \"combine these two lists\" and \"in A but not B\" questions. Say which operator you would use and why UNION ALL is cheaper when duplicates cannot occur. At work you mostly joined tables; be honest that set operators are a tool you know and use occasionally, and that you would choose a join when you need more than the key.",
+      "exercises": [
+        {
+          "id": "sql-u7-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "On the lesson sample, pharmacies with completed shifts are 1, 2 and 3, and pharmacies with cancelled shifts are 2 and 3. How many rows does `SELECT pharmacy_id ... completed UNION ALL SELECT pharmacy_id ... cancelled` return?",
+          "choices": [
+            "3",
+            "2",
+            "7",
+            "5"
+          ],
+          "answer": 2,
+          "explanation": "UNION ALL keeps every row: 4 completed shifts plus 3 cancelled shifts is 7. UNION would remove duplicates and return 3."
+        },
+        {
+          "id": "sql-u7-l1-e2",
+          "type": "short",
+          "prompt": "Which T-SQL operator returns the rows of the first query that are not in the second?",
+          "accept": [
+            "except",
+            "the except operator"
+          ],
+          "answer": "EXCEPT",
+          "explanation": "EXCEPT is the T-SQL and PostgreSQL name. Oracle calls it MINUS."
+        },
+        {
+          "id": "sql-u7-l1-e3",
+          "type": "mcq",
+          "prompt": "Which statement about combining two queries with UNION is true?",
+          "choices": [
+            "The queries must return the same number of columns with compatible types.",
+            "Each query needs its own ORDER BY.",
+            "UNION keeps duplicates by default.",
+            "The column names come from the second query."
+          ],
+          "answer": 0,
+          "explanation": "Column count and types must line up. Names come from the first query and ORDER BY goes once at the end."
+        },
+        {
+          "id": "sql-u7-l1-e4",
+          "type": "open",
+          "prompt": "Write a query that returns the ids of pharmacists who have at least one completed shift and at least one cancelled shift, using INTERSECT. Sort by pharmacist_id. Say which operator you would swap in to get pharmacists with completed shifts but no cancelled ones.",
+          "answer": "```sql\nSELECT pharmacist_id FROM shifts WHERE status = 'completed'\nINTERSECT\nSELECT pharmacist_id FROM shifts WHERE status = 'cancelled'\nORDER BY pharmacist_id;\n```\n\nSwap `INTERSECT` for `EXCEPT` to get pharmacists with completed shifts and no cancelled ones. A cancelled shift with no pharmacist has a NULL pharmacist_id, which never matches a completed one, so it does not leak into the result.\n\nOn the practice data this returns 40 rows (columns: pharmacist_id); the first row is 10.",
+          "rubric": [
+            "Uses INTERSECT between a completed query and a cancelled query",
+            "Selects the same single column from both queries",
+            "Puts ORDER BY once, at the end",
+            "Names EXCEPT for the completed-but-not-cancelled variant"
+          ],
+          "sqlite": "SELECT pharmacist_id FROM shifts WHERE status = 'completed' INTERSECT SELECT pharmacist_id FROM shifts WHERE status = 'cancelled' ORDER BY pharmacist_id",
+          "ordered": true
+        },
+        {
+          "id": "sql-u7-l1-e5",
+          "type": "open",
+          "prompt": "Write a query that returns the pharmacy ids that have shifts but have never opened a ticket in the `Feature request` category. Sort by pharmacy_id.",
+          "answer": "```sql\nSELECT pharmacy_id FROM shifts\nEXCEPT\nSELECT pharmacy_id FROM tickets WHERE category = 'Feature request'\nORDER BY pharmacy_id;\n```\n\nAn anti-join (`LEFT JOIN ... IS NULL`) or `NOT EXISTS` gives the same ids. EXCEPT also removes duplicate pharmacy ids from the shifts side for you.\n\nOn the practice data this returns 4 rows (columns: pharmacy_id); the first row is 5.",
+          "rubric": [
+            "Uses EXCEPT with shifts first and the ticket query second",
+            "Filters tickets to category Feature request",
+            "Returns one column, pharmacy_id, without duplicates",
+            "Sorts at the end"
+          ],
+          "sqlite": "SELECT pharmacy_id FROM shifts EXCEPT SELECT pharmacy_id FROM tickets WHERE category = 'Feature request' ORDER BY pharmacy_id",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u7-l2",
+      "title": "Self joins, CROSS JOIN and FULL OUTER JOIN",
+      "minutes": 10,
+      "body": "A self join joins a table to itself. You give the table two aliases and treat them as two copies. It answers questions about pairs of rows from the same table.\n\nWhich pairs of pharmacists are licensed in the same state? On the lesson sample, Dana Ortiz, Sam Lee and Chris Boyd are licensed in TX, and Priya Nair in OK.\n\n```sql\nSELECT a.name AS pharmacist_a, b.name AS pharmacist_b\nFROM pharmacists a\nJOIN pharmacists b\n  ON a.license_state = b.license_state\n AND a.id < b.id;\n```\n\nThe result has 3 rows: Dana with Sam, Dana with Chris, and Sam with Chris. The `a.id < b.id` condition matters. Without it, every pharmacist pairs with themselves and each pair appears twice: matching on state alone returns 10 rows. Using `a.id <> b.id` removes the self-pairs but keeps the mirrored duplicates, giving 6.\n\nThe same idea compares a row with another row in the same table, such as two shifts at one pharmacy within seven days of each other. In modern SQL, `LAG` (unit 8) is often simpler for \"previous row\" questions.\n\nA `CROSS JOIN` pairs every row with every row, with no `ON`. By itself it is rarely what you want, but it is how you build a complete grid so a report shows zeros. Here are all pharmacies by all statuses:\n\n```sql\nSELECT p.name, st.status, COUNT(s.id) AS shifts\nFROM pharmacies p\nCROSS JOIN (SELECT 'completed' AS status\n            UNION ALL SELECT 'cancelled'\n            UNION ALL SELECT 'open') st\nLEFT JOIN shifts s\n       ON s.pharmacy_id = p.id AND s.status = st.status\nGROUP BY p.name, st.status\nORDER BY p.name, st.status;\n```\n\nThat is 4 pharmacies times 3 statuses, so 12 rows. Oak Street Pharmacy shows 0 for all three, and Riverside Pharmacy shows 2 completed, 0 cancelled and 1 open. A plain `GROUP BY` would have left the empty combinations out.\n\nA `FULL OUTER JOIN` keeps unmatched rows from both sides. Joining pharmacists to shifts on `pharmacist_id` this way returns 9 rows: 5 matches, Chris Boyd with no shift, and the 3 shifts that have no pharmacist. It is used to compare two lists and see what is only in one. `RIGHT JOIN` is a `LEFT JOIN` with the tables swapped.\n\nAlways check the row count after a join like this. A self join or cross join can multiply rows quickly: 60 pharmacists cross joined to 1,019 shifts would give 61,140 rows.",
+      "keyPoints": [
+        "A self join uses two aliases of one table to compare rows with each other.",
+        "Add a.id < b.id to drop self-pairs and mirrored duplicates.",
+        "CROSS JOIN builds every combination; pair it with a LEFT JOIN to show zeros.",
+        "FULL OUTER JOIN keeps unmatched rows from both sides.",
+        "Check the row count after any join that can multiply rows."
+      ],
+      "interviewAngle": "Self joins are a classic screening question (\"employees earning more than their manager\" in other schemas). Talk through the two aliases and the a.id < b.id trick. For your background, say you mostly used inner and left joins for reports, and that you understand the others and would check row counts as you go.",
+      "exercises": [
+        {
+          "id": "sql-u7-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "On the lesson sample, three pharmacists are licensed in TX. A self join on license_state with `a.id < b.id` returns how many TX pairs?",
+          "choices": [
+            "6",
+            "3",
+            "9",
+            "1"
+          ],
+          "answer": 1,
+          "explanation": "Three people give three unordered pairs: Dana-Sam, Dana-Chris and Sam-Chris. The condition a.id < b.id keeps each pair once and drops self-pairs."
+        },
+        {
+          "id": "sql-u7-l2-e2",
+          "type": "short",
+          "prompt": "On the lesson sample, how many rows does a pharmacists self join on matching license_state return with `a.id <> b.id` (both orders counted)? Answer with a number.",
+          "accept": [
+            "6",
+            "six"
+          ],
+          "answer": "6",
+          "explanation": "TX gives 3 x 2 = 6 ordered pairs, and Priya in OK has no partner."
+        },
+        {
+          "id": "sql-u7-l2-e3",
+          "type": "mcq",
+          "prompt": "On the lesson sample, how many rows does `pharmacists FULL OUTER JOIN shifts ON pharmacist_id` return?",
+          "choices": [
+            "5",
+            "8",
+            "9",
+            "12"
+          ],
+          "answer": 2,
+          "explanation": "5 matched rows, plus Chris Boyd with no shift, plus the 3 shifts with no pharmacist: 9."
+        },
+        {
+          "id": "sql-u7-l2-e4",
+          "type": "open",
+          "prompt": "Write a query that returns how many pairs of pharmacists share the same license state (`pairs`), counting each pair once and never pairing a person with themselves.",
+          "answer": "```sql\nSELECT COUNT(*) AS pairs\nFROM pharmacists a\nJOIN pharmacists b\n  ON a.license_state = b.license_state\n AND a.id < b.id;\n```\n\nOn the lesson sample this is 3 TX pairs. `a.id < b.id` is what stops self-pairs and counting each pair twice.\n\nOn the practice data this returns 1 row (columns: pairs); the first row is 807.",
+          "rubric": [
+            "Joins pharmacists to itself with two aliases",
+            "Matches on license_state",
+            "Uses a.id < b.id (not <>) so each pair counts once",
+            "Returns one count named pairs"
+          ],
+          "sqlite": "SELECT COUNT(*) AS pairs FROM pharmacists a JOIN pharmacists b ON a.license_state = b.license_state AND a.id < b.id"
+        },
+        {
+          "id": "sql-u7-l2-e5",
+          "type": "open",
+          "prompt": "Write a query that returns every combination of ticket category and severity (low, medium, high, critical) with the number of tickets (`tickets`), showing 0 where none exist. Sort by category, then severity. The five categories are Access, Bug, Data fix, Feature request and How do I.",
+          "answer": "```sql\nSELECT c.category, sv.severity, COUNT(t.id) AS tickets\nFROM (SELECT 'Access' AS category UNION ALL SELECT 'Bug' UNION ALL SELECT 'Data fix'\n      UNION ALL SELECT 'Feature request' UNION ALL SELECT 'How do I') c\nCROSS JOIN (SELECT 'low' AS severity UNION ALL SELECT 'medium'\n            UNION ALL SELECT 'high' UNION ALL SELECT 'critical') sv\nLEFT JOIN tickets t ON t.category = c.category AND t.severity = sv.severity\nGROUP BY c.category, sv.severity\nORDER BY c.category, sv.severity;\n```\n\nCROSS JOIN builds the 20-row grid, the LEFT JOIN fills the counts, and COUNT(t.id) turns missing combinations into 0.\n\nOn the practice data this returns 20 rows (columns: category, severity, tickets); the first row is Access, critical, 0.",
+          "rubric": [
+            "Builds the category list and severity list as derived tables",
+            "Uses CROSS JOIN to create all 20 combinations",
+            "LEFT JOINs tickets with both conditions in ON",
+            "Uses COUNT(t.id), not COUNT(*), to get zeros",
+            "Sorts by category then severity"
+          ],
+          "sqlite": "SELECT c.category, sv.severity, COUNT(t.id) AS tickets FROM (SELECT 'Access' AS category UNION ALL SELECT 'Bug' UNION ALL SELECT 'Data fix' UNION ALL SELECT 'Feature request' UNION ALL SELECT 'How do I') c CROSS JOIN (SELECT 'low' AS severity UNION ALL SELECT 'medium' UNION ALL SELECT 'high' UNION ALL SELECT 'critical') sv LEFT JOIN tickets t ON t.category = c.category AND t.severity = sv.severity GROUP BY c.category, sv.severity ORDER BY c.category, sv.severity",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u7-l3",
+      "title": "Text functions, COALESCE and NULLIF",
+      "minutes": 10,
+      "body": "Real data is messy. A few text functions and the NULL helpers cover most clean-up work in a report. This lesson uses T-SQL names and gives the SQLite or PostgreSQL equivalents where they differ.\n\nOn the lesson sample, the pharmacy names are Riverside Pharmacy, Maple Drug, Harbor Health Rx and Oak Street Pharmacy.\n\n```sql\nSELECT name,\n       LEN(name)                          AS name_length,\n       UPPER(name)                        AS shouted,\n       LEFT(name, CHARINDEX(' ', name) - 1) AS first_word\nFROM pharmacies;\n```\n\n| name | name_length | first_word |\n|---|---|---|\n| Riverside Pharmacy | 18 | Riverside |\n| Maple Drug | 10 | Maple |\n| Harbor Health Rx | 16 | Harbor |\n| Oak Street Pharmacy | 19 | Oak |\n\n`CHARINDEX(' ', name)` finds the position of the first space, and `LEFT` takes everything before it. Other functions you will meet:\n\n| Task | T-SQL | SQLite / PostgreSQL |\n|---|---|---|\n| Length | `LEN(x)` | `LENGTH(x)` |\n| Part of a string | `SUBSTRING(x, start, len)` | `SUBSTR(x, start, len)` |\n| Find position | `CHARINDEX(find, x)` | `INSTR(x, find)` / `POSITION(find IN x)` |\n| Join text | `CONCAT(a, b)` or `a + b` | `a \\|\\| b` |\n| Remove spaces | `TRIM(x)`, `LTRIM`, `RTRIM` | `TRIM(x)` |\n| Replace | `REPLACE(x, old, new)` | `REPLACE(x, old, new)` |\n\nTwo T-SQL details catch people. `LEN` ignores trailing spaces, so `LEN('abc  ')` is 3; and a `+` that joins text returns NULL if either side is NULL, while `CONCAT` treats NULL as empty.\n\n`LIKE` is the pattern tool: `%` is any run of characters and `_` is one character. `WHERE name LIKE '%Pharmacy'` returns Riverside Pharmacy and Oak Street Pharmacy. Searching for text inside a value cannot use an index well, so keep it to small jobs.\n\nNow the NULL helpers. `COALESCE(a, b, c)` returns the first value that is not NULL, so `COALESCE(NULL, NULL, 'x', 'y')` is `'x'`. `NULLIF(a, b)` does the opposite job: it returns NULL when the two values are equal, otherwise `a`. That makes `NULLIF(5, 5)` NULL. Its main uses are dividing safely (`x / NULLIF(y, 0)`, from unit 2) and turning empty strings into real NULLs: `NULLIF(TRIM(cancel_reason), '')`.\n\nCombine them to label a report: `COALESCE(cancel_reason, 'not cancelled')` turns the NULL group in a cancel-reason breakdown into a readable row.\n\nClean data before you group it. If one pharmacy name is stored as `'Maple Drug '` and another as `'maple drug'`, they may count as different groups in a case-sensitive database. Normalising with `TRIM` and `UPPER` first is a quick, honest fix, and worth flagging to whoever owns the data.",
+      "keyPoints": [
+        "LEFT, SUBSTRING, CHARINDEX, UPPER, TRIM, REPLACE and CONCAT cover most clean-up; SQLite uses SUBSTR, INSTR and ||.",
+        "LEN ignores trailing spaces in T-SQL; + with a NULL gives NULL, CONCAT does not.",
+        "COALESCE returns the first non-NULL value; NULLIF returns NULL when two values are equal.",
+        "NULLIF(x, 0) prevents divide-by-zero; NULLIF(TRIM(x), '') turns blanks into NULL.",
+        "Clean and normalise text before grouping or joining on it."
+      ],
+      "interviewAngle": "Text clean-up questions are common in data-operations and analyst screens. Show the pattern: find the space with CHARINDEX, take the part with LEFT, handle NULL with COALESCE. Be honest that you used these for tidy-up and reporting, not for building pipelines, and that you would check the exact function names in the target dialect.",
+      "exercises": [
+        {
+          "id": "sql-u7-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does `NULLIF(5, 5)` return?",
+          "choices": [
+            "0",
+            "5",
+            "NULL",
+            "An error"
+          ],
+          "answer": 2,
+          "explanation": "NULLIF returns NULL when its two arguments are equal. That is why NULLIF(x, 0) is a safe divisor."
+        },
+        {
+          "id": "sql-u7-l3-e2",
+          "type": "short",
+          "prompt": "In T-SQL, what does `LEN('abc  ')` return (three letters and two trailing spaces)? Answer with a number.",
+          "accept": [
+            "3",
+            "three"
+          ],
+          "answer": "3",
+          "explanation": "LEN ignores trailing spaces in T-SQL. DATALENGTH would count them."
+        },
+        {
+          "id": "sql-u7-l3-e3",
+          "type": "mcq",
+          "prompt": "What does `COALESCE(NULL, NULL, 'x', 'y')` return?",
+          "choices": [
+            "NULL",
+            "'y'",
+            "'x'",
+            "'xy'"
+          ],
+          "answer": 2,
+          "explanation": "COALESCE returns the first argument that is not NULL, which is x."
+        },
+        {
+          "id": "sql-u7-l3-e4",
+          "type": "open",
+          "prompt": "Write a query that groups pharmacies by the first word of their name (`brand`) and counts them (`pharmacies`). Sort by count descending, then brand. In T-SQL you would use LEFT and CHARINDEX; in the SQLite sandbox use `SUBSTR(name, 1, INSTR(name, ' ') - 1)`.",
+          "answer": "```sql\nSELECT LEFT(name, CHARINDEX(' ', name) - 1) AS brand,\n       COUNT(*) AS pharmacies\nFROM pharmacies\nGROUP BY LEFT(name, CHARINDEX(' ', name) - 1)\nORDER BY pharmacies DESC, brand;\n```\n\nIn SQLite: `SUBSTR(name, 1, INSTR(name, ' ') - 1)`. On the lesson sample this gives four brands with one pharmacy each.\n\nOn the practice data this returns 10 rows (columns: brand, pharmacies); the first row is Bayview, 11.",
+          "rubric": [
+            "Extracts the text before the first space",
+            "Groups by the extracted expression (or its alias in SQLite)",
+            "Counts pharmacies per brand",
+            "Orders by count descending then brand"
+          ],
+          "sqlite": "SELECT SUBSTR(name, 1, INSTR(name, ' ') - 1) AS brand, COUNT(*) AS pharmacies FROM pharmacies GROUP BY brand ORDER BY pharmacies DESC, brand",
+          "ordered": true
+        },
+        {
+          "id": "sql-u7-l3-e5",
+          "type": "open",
+          "prompt": "Write a query that counts shifts by cancel reason (`reason`, `shifts`), labelling the shifts with no cancel reason as `not cancelled`. Sort by shifts descending, then reason.",
+          "answer": "```sql\nSELECT COALESCE(cancel_reason, 'not cancelled') AS reason,\n       COUNT(*) AS shifts\nFROM shifts\nGROUP BY COALESCE(cancel_reason, 'not cancelled')\nORDER BY shifts DESC, reason;\n```\n\nCOALESCE replaces the NULL group with a readable label. On the lesson sample it gives not cancelled 5 and one row per reason with 1 each.\n\nOn the practice data this returns 4 rows (columns: reason, shifts); the first row is not cancelled, 848.",
+          "rubric": [
+            "Uses COALESCE(cancel_reason, label)",
+            "Groups by the same expression",
+            "Counts rows with COUNT(*)",
+            "Sorts by shifts descending then reason"
+          ],
+          "sqlite": "SELECT COALESCE(cancel_reason, 'not cancelled') AS reason, COUNT(*) AS shifts FROM shifts GROUP BY reason ORDER BY shifts DESC, reason",
+          "ordered": true
+        }
+      ]
+    }
+  ]
+}

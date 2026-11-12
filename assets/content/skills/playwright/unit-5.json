@@ -1,0 +1,284 @@
+{
+  "id": "pw-u5",
+  "title": "In a pipeline",
+  "summary": "Running tests in Azure Pipelines, publishing results, handling flaky tests and choosing smoke paths to automate first.",
+  "lessons": [
+    {
+      "id": "pw-u5-l1",
+      "title": "Running Playwright in an Azure Pipelines job",
+      "minutes": 10,
+      "body": "In a pipeline, tests run on a fresh build agent with nothing installed but what you set up. A CI run needs to: get the code, install Node packages, install the browsers (and their system libraries), run the tests, then publish the results even when tests fail.\n\nHere is a complete job in Azure Pipelines YAML. It follows the sample on Playwright's CI page. I parsed it as YAML and ran the same commands locally with `CI=true` (install, test, JUnit file and report written); I could not run it on a real Azure agent.\n\n```yaml\ntrigger:\n  - main\n\npool:\n  vmImage: ubuntu-latest\n\nvariables:\n  BASE_URL: 'https://demo.playwright.dev/todomvc/'\n\nsteps:\n  - task: UseNode@1\n    inputs:\n      version: '22.x'\n    displayName: Install Node\n\n  - script: npm ci\n    displayName: Install dependencies\n\n  - script: npx playwright install --with-deps chromium\n    displayName: Install browser\n\n  - script: npx playwright test\n    displayName: Run Playwright tests\n    env:\n      CI: 'true'\n      BASE_URL: $(BASE_URL)\n      TEST_PASSWORD: $(TEST_PASSWORD)\n\n  - task: PublishTestResults@2\n    displayName: Publish test results\n    condition: succeededOrFailed()\n    inputs:\n      testResultsFormat: JUnit\n      testResultsFiles: results/junit.xml\n      testRunTitle: Playwright\n      failTaskOnFailedTests: true\n\n  - task: PublishPipelineArtifact@1\n    displayName: Publish HTML report\n    condition: succeededOrFailed()\n    inputs:\n      targetPath: playwright-report\n      artifact: playwright-report\n```\n\n**Reading it**\n\n- `UseNode@1` installs Node (the older `NodeTool@0` also works). Pinning a version keeps runs the same.\n- `npm ci` installs exactly what the lock file says, which is the right choice for CI.\n- `playwright install --with-deps` downloads browsers and installs the Linux libraries they need. Without it, a fresh agent often fails at launch.\n- Setting `CI: 'true'` activates the `process.env.CI` branches in the config (retries, `forbidOnly`). Many CI systems set it already; setting it explicitly avoids surprises.\n- Secrets such as `TEST_PASSWORD` belong in pipeline variables marked secret, or a variable group. Secret variables are not exposed to scripts automatically, which is why the `env:` mapping is there.\n- `failTaskOnFailedTests: true` makes the Tests step mark the run failed when results contain failures.\n- `condition: succeededOrFailed()` is essential. By default a step is skipped after a failure, so without it a red run would publish nothing, exactly when you need it.\n- `PublishTestResults@2` feeds the JUnit file into the Tests tab; `PublishPipelineArtifact@1` stores the HTML report (and traces, which live inside it or in `test-results`) so you can download it.\n\n**Where the app runs**\n\nTests need a running application. Either point `BASE_URL` at a deployed test environment, or start the app earlier in the pipeline (or use the `webServer` option in the Playwright config). Pointing at a shared environment is simplest but means data left by one run can affect the next, so use dedicated test data.\n\n**Not the same as local**\n\nWith `retries` on, a test that fails and then passes leaves the run green, but the report lists it as flaky. Check the flaky count.\n\nCI machines are slower, headless and Linux. A test that passes on your laptop can fail there because of timing, fonts or screen size. That is a reason to keep assertions retrying and the viewport explicit, not a reason to add sleeps.",
+      "keyPoints": [
+        "A CI job: install Node, `npm ci`, install browsers with deps, run tests, publish results.",
+        "`condition: succeededOrFailed()` makes sure reports publish when tests fail.",
+        "JUnit goes to PublishTestResults; the HTML report goes up as a pipeline artifact.",
+        "Keep credentials in secret pipeline variables, mapped to env in the step."
+      ],
+      "interviewAngle": "You can truthfully say you ran basic Playwright tests in Azure DevOps Pipelines. Be ready to describe the stages in plain words: install, run, publish. If asked who wrote the YAML, answer honestly, for example \"I adapted a template and edited the steps; I understand each one\". Do not claim to run pipeline infrastructure.",
+      "exercises": [
+        {
+          "id": "pw-u5-l1-e1",
+          "type": "mcq",
+          "prompt": "Why do the publish steps use `condition: succeededOrFailed()`?",
+          "choices": [
+            "To make the pipeline always pass",
+            "So results and the report are published even when the test step fails",
+            "To skip the tests",
+            "To run the steps twice"
+          ],
+          "answer": 1,
+          "explanation": "By default a step is skipped when an earlier one failed. Without the condition, failed runs would have no results to read.",
+          "placement": true
+        },
+        {
+          "id": "pw-u5-l1-e2",
+          "type": "mcq",
+          "prompt": "What does `npx playwright install --with-deps` do on a fresh Linux build agent?",
+          "choices": [
+            "Installs only Node",
+            "Downloads the browsers and installs the system libraries they need",
+            "Runs the tests",
+            "Uploads the report"
+          ],
+          "answer": 1,
+          "explanation": "Fresh agents lack browsers and system dependencies; this command fetches both."
+        },
+        {
+          "id": "pw-u5-l1-e3",
+          "type": "short",
+          "prompt": "Which file format does `PublishTestResults@2` need so results appear in the Tests tab? (One word.)",
+          "accept": [
+            "junit",
+            "junit xml"
+          ],
+          "answer": "JUnit",
+          "explanation": "Playwright's `junit` reporter writes XML that the task reads with `testResultsFormat: JUnit`."
+        },
+        {
+          "id": "pw-u5-l1-e4",
+          "type": "open",
+          "prompt": "Write the Azure Pipelines YAML steps (not the whole file) that install dependencies, install browsers, run tests with `CI=true` and a secret `TEST_PASSWORD`, then publish JUnit results from `results/junit.xml` and the `playwright-report` folder, even if tests fail.",
+          "answer": "```yaml\nsteps:\n  - script: npm ci\n    displayName: Install dependencies\n\n  - script: npx playwright install --with-deps\n    displayName: Install browsers\n\n  - script: npx playwright test\n    displayName: Run Playwright tests\n    env:\n      CI: 'true'\n      TEST_PASSWORD: $(TEST_PASSWORD)\n\n  - task: PublishTestResults@2\n    condition: succeededOrFailed()\n    inputs:\n      testResultsFormat: JUnit\n      testResultsFiles: results/junit.xml\n\n  - task: PublishPipelineArtifact@1\n    condition: succeededOrFailed()\n    inputs:\n      targetPath: playwright-report\n      artifact: playwright-report\n```",
+          "rubric": [
+            "npm ci, browser install and test run in order",
+            "Secret mapped through env, CI set to true",
+            "PublishTestResults@2 with JUnit and the correct file",
+            "Both publish steps use succeededOrFailed and the artifact step has targetPath and artifact"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u5-l2",
+      "title": "Flaky tests and deciding what to automate first",
+      "minutes": 9,
+      "body": "A flaky test passes and fails on the same code. Playwright reports a test that failed and then passed on retry as \"flaky\". Flakiness destroys trust: once people shrug off red runs, real failures get ignored.\n\n**Common causes and fixes**\n\n| Cause | Typical fix |\n|---|---|\n| Fixed sleeps and timing assumptions | Assert on the real condition; web-first assertions |\n| Shared or leftover test data (shift already filled by an earlier run) | Create unique data per test; clean up or use a reset |\n| Tests depending on each other's order | Make each test self-contained |\n| Real slowness or an unstable test environment | Report to the team; raise a timeout only with a reason |\n| A genuine intermittent app bug (a race condition) | File a bug; this is the test doing its job |\n| Fragile locators | Role, label or test id locators |\n\n**What to do when one appears**\n\n1. Do not just re-run until green, and do not just add retries.\n2. Open the trace from the failed attempt and find the cause.\n3. If you cannot fix it today, quarantine it so it stops blocking others, and record why: `test.fixme('request with two pharmacies', ...)` skips the test and marks it as needing a fix. Create a ticket for it, with the trace attached.\n4. Track it. A quarantined test with no owner is a deleted test with extra steps.\n\nRetries are a safety net for rare infrastructure noise, not a cure. If a test needs retries most days, it is broken.\n\n**Deciding what to automate first**\n\nStart with **smoke paths**: the few journeys that, if broken, mean the build is not worth testing further. For the scheduling product:\n\n1. Log in as a dispatcher.\n2. Request an emergency shift for a pharmacy.\n3. Assign a pharmacist and see the shift marked filled.\n4. Cancel a shift with a reason.\n\nFour tests that run in minutes and are trusted beat sixty that fail at random. Pick by risk and frequency: what hurts most if it breaks, and what is exercised on every release. Skip what changes weekly, what needs email or SMS delivery you cannot observe, and anything that exists to be judged by eye.\n\nGrow the suite from real bugs: when a defect escapes to a customer, ask whether a cheap automated check would have caught it.",
+      "keyPoints": [
+        "Flaky means pass and fail on the same code; treat it as a bug in the test or the app.",
+        "Investigate with the trace; do not just retry or sleep.",
+        "Quarantine with `test.fixme` plus a ticket if you cannot fix it now.",
+        "Automate a small smoke set of high-risk, frequent paths first."
+      ],
+      "interviewAngle": "\"What do you do about a flaky test?\" is a staple. Give the sequence: reproduce, read the trace, find the cause (timing, data, order, real bug), fix or quarantine with a ticket. Be honest that the suites you worked with were small. Add the product-owner angle: you chose what to automate by risk and release frequency.",
+      "exercises": [
+        {
+          "id": "pw-u5-l2-e1",
+          "type": "mcq",
+          "prompt": "A test fails once, then passes on retry. What is the best next step?",
+          "choices": [
+            "Ignore it, since it passed",
+            "Increase retries to 5",
+            "Open the trace from the failed attempt and find the cause",
+            "Delete the test"
+          ],
+          "answer": 2,
+          "explanation": "A pass on retry hides a real cause; the failed attempt's trace usually shows whether it was timing, data or a genuine bug.",
+          "placement": true
+        },
+        {
+          "id": "pw-u5-l2-e2",
+          "type": "mcq",
+          "prompt": "Which set is the best first group of automated tests for the scheduling app?",
+          "choices": [
+            "Wording of every error message",
+            "Login, request a shift, assign a pharmacist, cancel a shift",
+            "Every field validation on every form",
+            "Pixel-by-pixel layout of the dashboard"
+          ],
+          "answer": 1,
+          "explanation": "Smoke paths covering the core journey give the most value for the least maintenance."
+        },
+        {
+          "id": "pw-u5-l2-e3",
+          "type": "mcq",
+          "prompt": "What does `test.fixme` do?",
+          "choices": [
+            "Runs the test twice",
+            "Marks the test as needing a fix and skips it",
+            "Makes the test pass",
+            "Runs only that test"
+          ],
+          "answer": 1,
+          "explanation": "`test.fixme` skips the test and flags it as broken and to be fixed, which is useful for quarantining with a ticket."
+        },
+        {
+          "id": "pw-u5-l2-e4",
+          "type": "open",
+          "prompt": "A test \"assign pharmacist to open shift\" passes locally and fails about one run in five in the pipeline with \"expected 'Filled' but got 'Open'\". Describe how you would investigate, list three likely causes, and say what you would do if you could not fix it that day.",
+          "answer": "Investigation: pull the trace and report from a failed run and compare to a passing one. Check the step before the failure, the network calls in the trace (did the assign request finish, and with what status?) and the data used.\n\nLikely causes:\n- Timing: the assertion was checked before the list refreshed; I would check that it uses a retrying `expect` and no sleep, and that it waits on the right element.\n- Shared data: another test or earlier run already used or changed that shift or pharmacist; the fix is unique data per test.\n- A real intermittent bug, such as a race when two assignments are made at once; then it is a defect to report with the trace attached.\n\nIf I could not fix it that day, I would mark it `test.fixme` with a comment, create a ticket with the trace and the failure rate, tell the team, and keep it from blocking releases while it stays tracked.",
+          "rubric": [
+            "Uses trace/report and compares failing with passing runs",
+            "Names three plausible causes including data and timing",
+            "Distinguishes test problem from real app bug",
+            "Quarantines with a ticket rather than ignoring or just adding retries"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u5-l3",
+      "title": "What to automate, what to keep manual",
+      "minutes": 9,
+      "body": "This is a judgement skill, and your project history gives you honest material. Use three questions on any candidate check.\n\n1. **How often will it run?** Every release beats once.\n2. **How stable is the feature?** If the screen changes every sprint, maintenance will eat the saving.\n3. **What does a miss cost?** A broken shift request in a dispatch product costs far more than a misaligned icon.\n\nAdd a fourth: **can a script observe the result?** An SMS or push alert on a pharmacist's phone cannot be seen by a browser test.\n\n**Worked table for the scheduling product**\n\n| Check | Decision | Why |\n|---|---|---|\n| Dispatcher logs in and sees open shifts | Automate | Every release, stable, high cost |\n| Request an emergency shift; it appears in the open list | Automate | Core path |\n| Assign a pharmacist; shift shows Filled | Automate | Core path |\n| Cancel a shift with a reason | Automate | Stable, money and trust affected |\n| New SOS alert wording reads clearly | Manual | Judgement |\n| SOS feature still changing each sprint | Manual, then automate once stable | Churn |\n| Pharmacist receives the SOS text message | Manual, or an API-level check | Browser cannot see a phone |\n| Every field validation message on every form | Mostly manual or unit tests | Low value per E2E minute |\n| Layout on a new report screen | Manual | Visual judgement |\n| Data migration run once | Manual with SQL | Never repeats |\n\n**Cost of an automated test**\n\nWriting time, run time on every build, and maintenance when the UI changes. A test earns its place by running often and catching things that matter. A useful rule: if you would not stop a release for its failure, it probably should not be an E2E test.\n\n**What a strong answer sounds like**\n\nGive criteria, then an example on each side, then a limit. \"I automate stable, repeated, high-risk paths and keep new or judgement-based testing manual. At work I did mostly manual UAT and release testing and automated a few core paths.\" That matches the facts.\n\n**Grow from bugs**\n\nWhen a defect escapes, ask whether a cheap automated check would have caught it. Add that one. This grows a suite from evidence, not from a wish list.",
+      "keyPoints": [
+        "Decide by frequency, stability, cost of a miss, and whether a script can observe the result.",
+        "Automate stable, repeated, high-risk paths; keep new, changing and judgement-based work manual.",
+        "Each automated test has a maintenance cost; a small trusted suite beats a large flaky one.",
+        "Add tests from real escaped bugs."
+      ],
+      "interviewAngle": "\"What would you automate?\" is certain to come up. Give the criteria and the four smoke paths, and say the rest of your QA was manual. This lesson is judgement you used as the person who planned releases; the tool detail stays basic.",
+      "exercises": [
+        {
+          "id": "pw-u5-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which check is the weakest candidate for an automated browser test?",
+          "choices": [
+            "Login and open shifts list on every release",
+            "Cancelling a shift with a reason",
+            "Assigning a pharmacist to an open shift",
+            "Whether a pharmacist's phone receives the SOS text message"
+          ],
+          "answer": 3,
+          "explanation": "A browser test cannot see a phone. Check it manually or at the API or provider-log level."
+        },
+        {
+          "id": "pw-u5-l3-e2",
+          "type": "mcq",
+          "prompt": "A screen is redesigned every sprint. What is the best approach to testing it?",
+          "choices": [
+            "Automate everything on it now",
+            "Test it manually until it settles, then automate the stable core",
+            "Use visual snapshots on every pixel",
+            "Never test it"
+          ],
+          "answer": 1,
+          "explanation": "High churn makes automated tests expensive to maintain."
+        },
+        {
+          "id": "pw-u5-l3-e3",
+          "type": "mcq",
+          "prompt": "Which pair of criteria best supports automating a check?",
+          "choices": [
+            "Rarely run and often changing",
+            "One-off and easy",
+            "Subjective and new",
+            "Run every release and costly if it breaks"
+          ],
+          "answer": 3,
+          "explanation": "Frequency and cost of failure create value; stability keeps maintenance low."
+        },
+        {
+          "id": "pw-u5-l3-e4",
+          "type": "open",
+          "prompt": "Pick any four checks for the SOS emergency request feature (for example sending the request, nearby pharmacist list, accept/decline, timeout). For each, say automate or manual, with a one-line reason. End with the first one you would automate.",
+          "answer": "1. Dispatcher sends an SOS request from the shift screen and sees it listed as Open: automate once stable, because it is the core path and repeats every release. 2. Nearby pharmacists receive the alert on their phone: manual (or an API-level check of the notification record), since a browser cannot see a phone. 3. A pharmacist accepts and the shift shows Filled: automate, stable and high value. 4. Alert wording and sound: manual, it needs human judgement. First to automate: the send and accept flow, because it is the end-to-end path that must never break.",
+          "rubric": [
+            "Four checks with clear decisions",
+            "Reasons tied to frequency, stability, cost or observability",
+            "Phone/SMS check handled as manual or API-level",
+            "Names a first automation target"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u5-l4",
+      "title": "Read and fix five failing tests",
+      "minutes": 14,
+      "body": "A practical test often hands you failing tests. Work the same way each time: read the error, say what kind of failure it is, change one thing, run again. These five failed against the TodoMVC demo (https://demo.playwright.dev/todomvc/); I ran the broken and fixed versions.\n\n**Test 1: adds a todo**\n\n```ts\nawait page.getByPlaceholder('What needs doing?').fill('Call pharmacy');\n```\n```text\nError: locator.fill: Test timeout of 8000ms exceeded.\n  - waiting for getByPlaceholder('What needs doing?')\n```\nNothing matched. The real placeholder is \"What needs to be done?\". Fix the string.\n\n**Test 2: completes a todo**\n\n```ts\nawait page.getByRole('checkbox', { name: 'Toggle Todo' }).check();\nexpect(page.getByText('9 items left')).toBeVisible();\n```\n```text\nError: expect(locator).toBeVisible() failed ... Test ended.\n```\nThe assertion has no `await`, so the test ended while it was checking. The value is also wrong: after ticking the only todo, the page says \"0 items left\". Fix: `await expect(page.getByText('0 items left')).toBeVisible();`.\n\n**Test 3: counts checkboxes**\n\n```ts\nawait page.getByRole('checkbox').check();\n```\n```text\nstrict mode violation: getByRole('checkbox') resolved to 2 elements\n```\nThe select-all box and the row box. Fix: `page.getByTestId('todo-item').getByRole('checkbox').check()`.\n\n**Test 4: shows the count**\n\n```text\nExpected: \"2 items left\"\nReceived: \"1 item left\"\n```\nOne todo was added. The expectation was wrong (and the wording is singular). Fix the expected text after checking the requirement.\n\n**Test 5: filters active**\n\n```ts\nconst n = await page.getByTestId('todo-item').count();\nexpect(n).toBe(1);\nawait page.waitForTimeout(100);\n```\n```text\nExpected: 1\nReceived: 2\n```\nThe count was read once, before the filter had applied, and a sleep came after it. Fix: `await expect(page.getByTestId('todo-item')).toHaveCount(1);` and delete the sleep.\n\nAll five failed in the broken file (test 2 failed with \"Test ended\" in the version I ran) and all five passed after the fixes.\n\n**What the five have in common**\n\nA wrong string, a missing await, an ambiguous locator, a wrong expectation, a one-time read. These cover most beginner failures.",
+      "keyPoints": [
+        "Classify the failure first: nothing found, too many found, wrong value, or timing.",
+        "Missing `await` on an assertion makes the test end before the check finishes.",
+        "Replace one-time reads and sleeps with a retrying assertion.",
+        "Change one thing at a time and rerun."
+      ],
+      "interviewAngle": "This is the shape of a take-home or live fix-it task. Narrate: what is it meant to check, what does the error say, what did I change. You did read and fix failures of this kind in your basic tests; the specific five are practice on a demo site.",
+      "exercises": [
+        {
+          "id": "pw-u5-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "`expect(page.getByText('9 items left')).toBeVisible();` has no `await`. What happened in the run?",
+          "choices": [
+            "Playwright added the await",
+            "The test failed, with the message showing 'Test ended'",
+            "The browser crashed",
+            "It silently passed"
+          ],
+          "answer": 1,
+          "explanation": "In Playwright 1.65, an unawaited assertion was cut off when the test ended and failed. Behaviour can differ by version, so always await."
+        },
+        {
+          "id": "pw-u5-l4-e2",
+          "type": "mcq",
+          "prompt": "`strict mode violation: getByRole('checkbox') resolved to 2 elements`. Which fix is best?",
+          "choices": [
+            "Increase the timeout",
+            "Scope the locator to the todo row before choosing the checkbox",
+            "Use XPath",
+            "Add .first()"
+          ],
+          "answer": 1,
+          "explanation": "Scoping states which checkbox you mean."
+        },
+        {
+          "id": "pw-u5-l4-e3",
+          "type": "mcq",
+          "prompt": "`const n = await locator.count(); expect(n).toBe(1);` returned 2 though the UI later shows 1. What is the problem?",
+          "choices": [
+            "The locator needs a role",
+            "The count was read once, before the page finished updating; use `toHaveCount(1)`",
+            "toBe is not allowed",
+            "count() is broken"
+          ],
+          "answer": 1,
+          "explanation": "Web-first assertions retry; one-time reads do not."
+        },
+        {
+          "id": "pw-u5-l4-e4",
+          "type": "short",
+          "prompt": "What is the singular form shown by the app when one todo is left? (Exact text, e.g. '3 items left'.)",
+          "accept": [
+            "1 item left"
+          ],
+          "answer": "1 item left",
+          "explanation": "The expected value '2 items left' failed with Received '1 item left'."
+        },
+        {
+          "id": "pw-u5-l4-e5",
+          "type": "open",
+          "prompt": "You are given this test and told it fails. Fix it and list each change with a reason:\n```ts\ntest('add and filter', async ({ page }) => {\n  page.goto('https://demo.playwright.dev/todomvc/');\n  await page.locator('.new-todo').fill('Buy milk');\n  await page.locator('.new-todo').press('Enter');\n  await page.waitForTimeout(2000);\n  expect(page.getByTestId('todo-title')).toHaveText('Buy milk');\n});\n```",
+          "answer": "```ts\ntest('adds a todo and shows it in the list', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc/');\n  const input = page.getByPlaceholder('What needs to be done?');\n  await input.fill('Buy milk');\n  await input.press('Enter');\n  await expect(page.getByTestId('todo-title')).toHaveText('Buy milk');\n});\n```\nChanges: awaited goto so the page loads before use; replaced the class locator with a placeholder locator; removed the fixed sleep because the assertion retries; awaited the assertion so it gates the test; named the test for the behaviour; moved the URL toward baseURL when configured.",
+          "rubric": [
+            "Awaits goto",
+            "Replaces the class locator with a user-facing one",
+            "Removes waitForTimeout",
+            "Awaits the web-first assertion",
+            "Explains each change"
+          ]
+        }
+      ]
+    }
+  ]
+}

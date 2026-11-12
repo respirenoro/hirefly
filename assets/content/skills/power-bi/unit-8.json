@@ -1,0 +1,164 @@
+{
+  "id": "power-bi-u8",
+  "title": "Measures and filter context with real numbers",
+  "summary": "Dashboard measures with expected values, CALCULATE worked on the practice data, and month-over-month change.",
+  "lessons": [
+    {
+      "id": "power-bi-u8-l1",
+      "title": "Measures for the shift dashboard, with expected values",
+      "minutes": 9,
+      "body": "Create a table called `_Measures` (Home > Enter data, then delete the dummy column) or keep measures on `Shifts`. Write each measure, put it in a card with no filters, and compare with the expected value. A measure you have not checked is a guess.\n\n```text\nTotal Shifts = COUNTROWS(Shifts)\nFilled Shifts = CALCULATE([Total Shifts], Shifts[is_filled] = 1)\nCompleted Shifts = CALCULATE([Total Shifts], Shifts[status] = \"completed\")\nCancelled Shifts = CALCULATE([Total Shifts], Shifts[status] = \"cancelled\")\nFill Rate = DIVIDE([Filled Shifts], [Total Shifts])\nCompletion Rate = DIVIDE([Completed Shifts], [Total Shifts])\nCancel Rate = DIVIDE([Cancelled Shifts], [Total Shifts])\nAvg Hours to Fill = AVERAGE(Shifts[hours_to_fill])\n```\n\n| Measure | Expected value |\n|---|---|\n| Total Shifts | 1019 |\n| Filled Shifts | 906 |\n| Completed Shifts | 828 |\n| Cancelled Shifts | 171 |\n| Fill Rate | 88.9% |\n| Completion Rate | 81.3% |\n| Cancel Rate | 16.8% |\n| Avg Hours to Fill | 9.52 |\n\n**Two definitions of \"filled\".** The data has 906 shifts with a filled time but only 828 completed, because 78 shifts were filled and then cancelled (54 by the pharmacist, 24 by the pharmacy). A fill rate that means \"got a pharmacist at some point\" is 88.9%. A rate that means \"the shift actually happened\" is the completion rate, 81.3%. Neither is wrong; stakeholders must agree which one \"fill rate\" means, and the report should print the definition. This is the kind of clarifying question that interviewers like.\n\n**Why DIVIDE.** It returns blank instead of an error when the denominator is zero, which happens when a slicer leaves no shifts.\n\n**Formatting.** Select a measure, then Measure tools: percentage with one decimal for rates, decimal places 2 for hours. Use a display folder to group measures. Name measures like business terms, because they appear in the report.\n\n**Cancel reasons.** Put `cancel_reason` on a bar chart with `Cancelled Shifts`: no coverage 65, pharmacist cancelled 54, pharmacy cancelled 52. Shares of all cancellations are 38.0%, 31.6% and 30.4%, which a measure can compute with `DIVIDE([Cancelled Shifts], CALCULATE([Cancelled Shifts], ALL(Shifts[cancel_reason])))`.\n\nQuick measures (right-click a table > New quick measure) generate DAX for you; read what they produce before you trust it.",
+      "keyPoints": [
+        "Check every measure against a known number before drawing visuals.",
+        "Fill rate 88.9% (filled time present) differs from completion 81.3%; state the definition.",
+        "DIVIDE avoids errors when the denominator is zero.",
+        "Rates are measures; never average row-level rates."
+      ],
+      "interviewAngle": "Interviewers like a defined metric: \"fill rate means shifts that got a pharmacist divided by shifts requested; I also show completion because 78 filled shifts were later cancelled.\" That is in the practice data, so present it as the practice project.",
+      "exercises": [
+        {
+          "id": "power-bi-u8-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In the practice data 906 shifts have a filled time and 828 were completed. Which statement is correct?",
+          "choices": [
+            "Both rates are valid but mean different things, so the report must define which one it shows",
+            "906 is wrong; use 828 everywhere",
+            "The difference is a data error to be deleted",
+            "Completion rate is always larger than fill rate"
+          ],
+          "answer": 0,
+          "explanation": "78 shifts were filled and then cancelled. Fill rate counts the filled time; completion counts shifts that happened."
+        },
+        {
+          "id": "power-bi-u8-l1-e2",
+          "type": "short",
+          "prompt": "What is the overall Cancel Rate in the practice data, as a percentage to one decimal?",
+          "accept": [
+            "16.8%",
+            "16.8",
+            "16.8 %"
+          ],
+          "answer": "16.8%",
+          "explanation": "171 / 1019 = 0.1678."
+        },
+        {
+          "id": "power-bi-u8-l1-e3",
+          "type": "open",
+          "prompt": "Write the DAX for Fill Rate and Avg Hours to Fill, and give the values you should see for the whole dataset.",
+          "answer": "```text\nFilled Shifts = CALCULATE([Total Shifts], Shifts[is_filled] = 1)\nFill Rate = DIVIDE([Filled Shifts], [Total Shifts])\nAvg Hours to Fill = AVERAGE(Shifts[hours_to_fill])\n```\nTotal Shifts is 1019 and Filled Shifts 906, so Fill Rate is 88.9%. Avg Hours to Fill is 9.52 because AVERAGE ignores the 113 empty values.",
+          "rubric": [
+            "Uses DIVIDE",
+            "Fill Rate built from a filled-shifts measure",
+            "88.9%",
+            "9.52 with the null explanation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u8-l2",
+      "title": "CALCULATE and filter context: worked numbers",
+      "minutes": 10,
+      "body": "A measure runs once per cell of a visual, with the filters of that cell. CALCULATE edits those filters. Work through the practice data to see it.\n\n**Rows supply filters.** Put `Pharmacies[state]` on rows with the measures:\n\n| State | Total Shifts | Filled Shifts | Fill Rate |\n|---|---|---|---|\n| AL | 57 | 50 | 87.7% |\n| FL | 537 | 481 | 89.6% |\n| GA | 340 | 301 | 88.5% |\n| SC | 85 | 74 | 87.1% |\n| **Total** | 1019 | 906 | 88.9% |\n\nThe total row is recalculated with no state filter, 906 / 1019. Averaging the four rates would give 88.2%, which is wrong.\n\n**CALCULATE adds or replaces a filter.**\n\n```text\nEmergency Avg Hours = CALCULATE([Avg Hours to Fill], Shifts[is_emergency] = 1)\nStandard Avg Hours = CALCULATE([Avg Hours to Fill], Shifts[is_emergency] = 0)\n```\n\nOverall the average is 9.52 hours. The emergency measure returns 1.26 and the standard one 11.29. A slicer on `is_emergency` would be replaced inside these measures, which is why they ignore it.\n\n**Time filters inside CALCULATE.** The alert feature went live in June:\n\n```text\nEmergency Hours Before June =\nCALCULATE([Avg Hours to Fill], Shifts[is_emergency] = 1, Dates[Date] < DATE(2026,6,1))\n```\n\nThis returns 1.70 hours. Use `>=` for 0.64 hours from June onwards. That is a fall of about 62%.\n\n**Removing filters with ALL.** Share of all shifts by state:\n\n```text\nState Share = DIVIDE([Total Shifts], CALCULATE([Total Shifts], ALL(Pharmacies)))\n```\n\nFL is 537 / 1019 = 52.7%, GA 33.4%, SC 8.3%, AL 5.6%. `ALL(Pharmacies)` clears the filter from the table that supplies it. If the reader should be able to narrow with a slicer, use `ALLSELECTED(Pharmacies)`, which keeps slicer choices but ignores the row. `KEEPFILTERS` keeps the existing filter and intersects with the new one, which matters when the existing filter should survive.\n\n**Reading any measure.** Ask: what filters exist, and what does CALCULATE change? Test it in a table visual next to a plain count and compare with SQL.",
+      "keyPoints": [
+        "A total row is recalculated with no filter, not averaged.",
+        "CALCULATE with a boolean column filter replaces the existing filter on that column.",
+        "ALL removes filters from the table; ALLSELECTED respects slicers.",
+        "Emergency shifts average 1.26 hours; standard 11.29; overall 9.52."
+      ],
+      "interviewAngle": "Explain filter context in plain words and use the emergency example: \"CALCULATE changes the filter so the same Avg Hours measure can show emergency and standard shifts side by side.\" Say you have worked through it on practice data and checked against SQL; do not claim you wrote DAX at work.",
+      "exercises": [
+        {
+          "id": "power-bi-u8-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A state slicer is set to FL. Which measure returns each row's share of the *FL* total rather than of all states?",
+          "choices": [
+            "DIVIDE([Total Shifts], CALCULATE([Total Shifts], ALLSELECTED(Pharmacies)))",
+            "DIVIDE([Total Shifts], CALCULATE([Total Shifts], ALL(Pharmacies)))",
+            "DIVIDE([Total Shifts], [Total Shifts])",
+            "AVERAGE(Pharmacies[state])"
+          ],
+          "answer": 0,
+          "explanation": "ALLSELECTED removes the row filter but keeps the slicer, so the denominator is the FL total. ALL would divide by all 1019."
+        },
+        {
+          "id": "power-bi-u8-l2-e2",
+          "type": "short",
+          "prompt": "What is the average hours to fill for emergency shifts overall? (Two decimals.)",
+          "accept": [
+            "1.26"
+          ],
+          "answer": "1.26",
+          "explanation": "Emergency shifts average 1.26 hours; standard shifts 11.29."
+        },
+        {
+          "id": "power-bi-u8-l2-e3",
+          "type": "open",
+          "prompt": "Write measures for emergency average hours before and from June 2026, and say what values and conclusion you expect, with one caution.",
+          "answer": "```text\nEmergency Before = CALCULATE([Avg Hours to Fill], Shifts[is_emergency] = 1, Dates[Date] < DATE(2026,6,1))\nEmergency From June = CALCULATE([Avg Hours to Fill], Shifts[is_emergency] = 1, Dates[Date] >= DATE(2026,6,1))\n```\nExpected 1.70 hours before and 0.64 from June, about 62% faster. Caution: it shows timing next to the alert feature, not proof of cause; I would check volume and other changes. The data is fictional.",
+          "rubric": [
+            "Two CALCULATE measures with date filters",
+            "1.70 and 0.64",
+            "Notes correlation versus cause"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u8-l3",
+      "title": "Month-over-month change with variables",
+      "minutes": 9,
+      "body": "Time intelligence compares a month with the previous one. It needs the marked `Dates` table and the month on the axis from `Dates`, not from the fact table.\n\n```text\nShifts Prev Month = CALCULATE([Total Shifts], DATEADD(Dates[Date], -1, MONTH))\n\nShifts MoM % =\nVAR Cur  = [Total Shifts]\nVAR Prev = [Shifts Prev Month]\nRETURN DIVIDE(Cur - Prev, Prev)\n```\n\n`VAR` stores a value once, `RETURN` gives the result. Variables make long formulas readable and avoid repeating a calculation.\n\nWith `Dates[Month]` on rows, requests by request month:\n\n| Month | Shifts | Previous | MoM % |\n|---|---|---|---|\n| Jun | 130 | 103 | +26.2% |\n| Jul | 132 | 130 | +1.5% |\n| Aug | 142 | 132 | +7.6% |\n| Sep | 108 | 142 | -23.9% |\n\n**Watch the edges.** The data begins with only 4 shifts requested in December 2025, so January shows +2,400% (100 against 4). That is arithmetic on a partial month, not a trend. October has a single shift. Filter the visual to complete months (January to September) or add a note. Also compare rates sensibly: Fill Rate by month is 93.1% in June, 93.2% in July, 88.0% in August and 71.3% in September. The fall is mostly the 20 shifts still open in the extract, so it is wrong to report it as a sudden collapse. For a rate, describe the change in percentage points (August to September is about -16.7 points), not a percentage of a percentage.\n\n**Related functions.**\n\n- `TOTALYTD([Total Shifts], Dates[Date])` for year to date.\n- `SAMEPERIODLASTYEAR(Dates[Date])`, which needs a prior year; the practice data has none.\n- `PREVIOUSMONTH(Dates[Date])` is an alternative to `DATEADD` for months.\n\n**Blank versus zero.** DIVIDE returns blank when the previous period is blank, so the first month shows nothing. Resist turning blanks into zero; it implies there were no shifts.\n\nFormat the measure as a percentage with a sign, and put it on a card or a small table beside the fill rate. Verify two months by hand before publishing.",
+      "keyPoints": [
+        "DATEADD(Dates[Date], -1, MONTH) shifts the filter back one month.",
+        "VAR/RETURN stores a value once and keeps the measure readable.",
+        "Partial months (December 2025, October) distort MoM; filter or annotate.",
+        "Describe rate changes in percentage points."
+      ],
+      "interviewAngle": "A MoM measure is a standard question. Say the date table and month axis requirement, show VAR/RETURN, and mention the partial-month trap. You can say you built and hand-checked this on practice data.",
+      "exercises": [
+        {
+          "id": "power-bi-u8-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "The January MoM % in the practice data shows +2,400%. What is the right response?",
+          "choices": [
+            "Recognise December 2025 is a partial month (4 shifts), exclude it or annotate the figure",
+            "Report that demand grew 24-fold",
+            "Replace the blank with zero",
+            "Change DATEADD to DATESYTD"
+          ],
+          "answer": 0,
+          "explanation": "A tiny base inflates percentages. Compare complete months or explain the edge."
+        },
+        {
+          "id": "power-bi-u8-l3-e2",
+          "type": "short",
+          "prompt": "Requests were 132 in July and 142 in August. What is the MoM % for August, one decimal?",
+          "accept": [
+            "+7.6%",
+            "7.6%",
+            "7.6",
+            "+7.6"
+          ],
+          "answer": "+7.6%",
+          "explanation": "(142 - 132) / 132 = 0.0758."
+        },
+        {
+          "id": "power-bi-u8-l3-e3",
+          "type": "open",
+          "prompt": "Write a MoM measure for total shifts using variables and explain two reasons the result could mislead.",
+          "answer": "```text\nShifts MoM % =\nVAR Cur = [Total Shifts]\nVAR Prev = CALCULATE([Total Shifts], DATEADD(Dates[Date], -1, MONTH))\nRETURN DIVIDE(Cur - Prev, Prev)\n```\nIt can mislead because partial months (December 2025 has 4 shifts, so January reads +2,400%) inflate percentages, and because a date from the fact table instead of the marked Dates table breaks DATEADD. Also, rate measures should be compared in percentage points.",
+          "rubric": [
+            "Uses VAR and RETURN with DATEADD",
+            "DIVIDE for safety",
+            "Partial month issue",
+            "Date table requirement or percentage points"
+          ]
+        }
+      ]
+    }
+  ]
+}

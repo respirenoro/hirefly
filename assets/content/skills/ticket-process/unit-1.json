@@ -1,0 +1,116 @@
+{
+  "id": "ticket-u1",
+  "title": "The ticket lifecycle",
+  "summary": "What happens to a ticket from the first message to closure, and who does what along the way.",
+  "lessons": [
+    {
+      "id": "ticket-u1-l1",
+      "title": "From intake to closure",
+      "minutes": 7,
+      "body": "A ticket is a record of one request or problem, with a history. The same stages show up in almost every tool and company, whether the tool is Jira, Azure DevOps, Salesforce or a help desk.\n\n```text\nIntake -> Triage -> Investigation -> Fix or answer -> Verification -> Closure\n                         \\-> Waiting on customer\n                         \\-> Escalated to engineering\n```\n\n| Stage | What happens | Typical output |\n|---|---|---|\n| Intake | A customer, tester or colleague reports something through email, a form, chat or a call | A new ticket with the original wording preserved |\n| Triage | Someone checks it, adds missing details, sets severity and priority, checks for duplicates, assigns an owner | A ticket ready to be worked |\n| Investigation | Reproduce the problem, find the cause or confirm the question | Steps to reproduce, logs, notes |\n| Fix or answer | A support answer, a configuration change, a code fix or a documented workaround | A resolution |\n| Verification | Someone confirms the fix works for the original case, on a real build | Test notes |\n| Closure | The customer is told, the resolution is recorded, the ticket is closed | A closed ticket with a reason |\n\nTwo things people forget. First, **waiting** is a real state. A ticket stalled on the customer should say so, because otherwise it looks like the team is slow. Second, **verification** is a separate step from fixing. A developer saying 'done' is not the same as the customer's original problem being solved.\n\nHere is a dispatch-software example. A pharmacy staffing firm emails: 'Shifts for Tuesday are missing.' At intake the ticket holds that sentence. At triage you learn that one pharmacist cannot see three shifts, you check for duplicates, and you set it as high because Tuesday is tomorrow. Investigation finds the shifts were created with a time zone that put them on Monday night for that pharmacist. The fix corrects the display, QA verifies using a pharmacist in that time zone, and you tell the firm, who confirm it looks right. Then the ticket is closed with the cause recorded.\n\nEvery stage should leave a trace, so someone reading the ticket later can tell what was tried and why it ended as it did.",
+      "keyPoints": [
+        "Stages: intake, triage, investigation, fix or answer, verification, closure.",
+        "Waiting on the customer is a legitimate state and should be visible.",
+        "A fix is not finished until verified for the original case.",
+        "Each stage should leave a record in the ticket."
+      ],
+      "interviewAngle": "Interviewers often ask you to walk through a ticket from start to finish. Use the stages in order, then give one real example from the pharmacy scheduling software. You acted as liaison between customers and developers, so emphasize triage, clear writing and following up with the customer.",
+      "exercises": [
+        {
+          "id": "ticket-u1-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A developer marks a missing-shift bug as fixed. What should happen before the ticket is closed?",
+          "choices": [
+            "Nothing, close it immediately",
+            "Verify the fix against the original case on a real build, then tell the customer",
+            "Wait 30 days in case it returns",
+            "Ask the customer to file a new ticket"
+          ],
+          "answer": 1,
+          "explanation": "Verification confirms the original problem is gone. Telling the customer closes the loop."
+        },
+        {
+          "id": "ticket-u1-l1-e2",
+          "type": "mcq",
+          "prompt": "Why should a ticket waiting for customer information have a visible waiting status?",
+          "choices": [
+            "It hides the ticket from reports",
+            "It shows the delay is not the team's, and prompts a follow-up",
+            "It is required by law",
+            "It lowers the priority automatically"
+          ],
+          "answer": 1,
+          "explanation": "A visible waiting state keeps metrics honest and reminds someone to follow up."
+        },
+        {
+          "id": "ticket-u1-l1-e3",
+          "type": "open",
+          "prompt": "A pharmacy manager calls to say the notification for a newly assigned shift did not reach the pharmacist. Describe, stage by stage, what happens to the ticket from intake to closure. Two or three sentences per stage is enough; include at least one place the ticket might wait.",
+          "answer": "**Intake:** I log the call as a ticket in the manager's words: shift id if known, pharmacist, time of assignment, and that no notification arrived.\n\n**Triage:** I check for similar open tickets, ask whether other pharmacists are affected, and set severity and priority. A missed notification for an urgent shift is high because the shift may go unfilled.\n\n**Investigation:** I try to reproduce with a test pharmacist. I check the notification log for the shift id and whether the device token or notification settings are the cause. If the logs are not accessible to me, I escalate to a developer. If I need the pharmacist's phone details, the ticket waits on the customer.\n\n**Fix or answer:** Either a configuration fix (for example, the pharmacist had alerts off) or a code fix.\n\n**Verification:** I repeat the original case on the fixed build and confirm the notification arrives.\n\n**Closure:** I tell the manager what was found, record the cause, and close the ticket.",
+          "rubric": [
+            "Covers all six stages in order",
+            "Triage includes impact and a priority decision",
+            "Identifies a waiting or escalation point",
+            "Verification repeats the original case",
+            "Mentions informing the customer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u1-l2",
+      "title": "Roles in the ticket process",
+      "minutes": 6,
+      "body": "Titles differ between companies, but the same jobs have to be done. In a small company one person may do several.\n\n| Role | Job in the ticket process |\n|---|---|\n| Reporter or requester | Raises the issue, provides details, confirms the fix |\n| Support or intake agent | First contact, gathers information, answers known questions, creates the ticket |\n| Triage owner | Decides severity, priority and who works it, spots duplicates |\n| Product owner or manager | Decides what is worth building, orders the backlog, accepts or rejects feature requests |\n| Developer | Investigates causes, fixes, explains what changed |\n| QA or tester | Reproduces, writes test cases, verifies fixes, checks for regressions |\n| Project or program manager | Keeps work moving, manages expectations, removes blockers, reports status |\n| Customer success or account manager | Owns the relationship, relays business impact |\n\nPeople in the middle have the hardest job: they translate between customers who describe symptoms and developers who need steps and evidence. That was your position as the liaison between a pharmacy staffing firm and the development team.\n\nGood practice for each handoff:\n\n- **Customer to support:** repeat back what you understood. 'So the shift is missing for the pharmacist but visible to you, correct?'\n- **Support to developer:** give the evidence, not just the complaint. Steps, environment, screenshots, how many affected.\n- **Developer to QA:** say what changed and what to test, including edge cases.\n- **QA to customer or manager:** report the result in plain language: fixed, not fixed, fixed with a caveat.\n\nA few common failures:\n\n1. Nobody owns the ticket, so it sits.\n2. Two people both think the other is following up with the customer.\n3. Developers receive raw customer emails pasted into the ticket, with no summary.\n4. The customer hears nothing until the fix.\n\nThe cure is simple: every ticket has exactly one owner at a time, and the owner writes the next step in the ticket.\n\nWhen unsure who should handle something, ask in the ticket or team channel and assign it as you ask. An unowned question stalls.",
+      "keyPoints": [
+        "The same jobs exist in every company even if titles differ.",
+        "Liaison roles translate between symptoms and reproducible evidence.",
+        "Every ticket needs exactly one owner and a stated next step.",
+        "Handoffs should carry evidence and context, not just forwarded messages."
+      ],
+      "interviewAngle": "Say which of these roles you filled: liaison between customers and developers, backlog owner, UAT and release tester. Avoid saying you were the developer or a scrum master. If asked about escalation, describe your handoff to developers with the evidence attached and the impact stated, so they could act without coming back to you with questions.",
+      "exercises": [
+        {
+          "id": "ticket-u1-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A ticket has been open for a week and two colleagues each assume the other is replying to the customer. What process failure is this?",
+          "choices": [
+            "Missing severity",
+            "No single owner",
+            "Duplicate ticket",
+            "Wrong issue type"
+          ],
+          "answer": 1,
+          "explanation": "Each ticket should have one owner at a time so nothing is assumed."
+        },
+        {
+          "id": "ticket-u1-l2-e2",
+          "type": "mcq",
+          "prompt": "What should a support person give a developer when escalating a bug?",
+          "choices": [
+            "The customer's raw email only",
+            "Steps, environment, evidence and the number of users affected",
+            "A request to call the customer directly",
+            "Only the ticket number"
+          ],
+          "answer": 1,
+          "explanation": "Developers need reproducible evidence and a sense of impact to act efficiently."
+        },
+        {
+          "id": "ticket-u1-l2-e3",
+          "type": "open",
+          "prompt": "Pick three roles from the table and describe, for each, one thing they need from you as the liaison and how you would provide it. Use the pharmacy shift-scheduling product for examples.",
+          "answer": "**Developer:** needs steps to reproduce, the build and environment, and evidence such as a screenshot or log excerpt. I would put a short summary at the top of the ticket and attach the data, including a sample shift id.\n\n**QA tester:** needs to know what changed and what to test, including edge cases like pharmacists in different time zones. I would write acceptance criteria and list affected areas so they can plan test cases.\n\n**Customer (pharmacy staffing firm):** needs honest updates and a clear next step. I would confirm I understood the problem, give a realistic expected timeline, and report back when it is fixed, in plain language, not ticket jargon.",
+          "rubric": [
+            "Three distinct roles chosen",
+            "Each need is specific to that role",
+            "Each states how the liaison provides it",
+            "Examples fit the scheduling product"
+          ]
+        }
+      ]
+    }
+  ]
+}

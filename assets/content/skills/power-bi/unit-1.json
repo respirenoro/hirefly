@@ -1,0 +1,151 @@
+{
+  "id": "power-bi-u1",
+  "title": "Getting started: Power BI and Power Query",
+  "summary": "Learn what Power BI is, how Desktop and the Service differ, the end-to-end workflow, and how Power Query connects, cleans and shapes data.",
+  "lessons": [
+    {
+      "id": "power-bi-u1-l1",
+      "title": "What Power BI is and the workflow",
+      "minutes": 8,
+      "body": "Power BI is Microsoft's business intelligence tool. It connects to data, cleans and models it, and turns it into interactive reports that people can filter and explore. If you have built pivot tables in Excel, think of Power BI as pivots plus a proper data model, many chart types, and a way to share and refresh the results.\n\nYou will meet three pieces:\n\n| Piece | What it is | Used for |\n|---|---|---|\n| **Power BI Desktop** | Free Windows application | Building: get data, transform, model, write measures, design the report |\n| **Power BI Service** | The cloud site opened in a browser | Sharing: publish, refresh on a schedule, view, set access |\n| **Power BI Mobile** | Phone and tablet app | Viewing reports on the move |\n\nYou build in Desktop, then **publish** to the Service. Viewing and sharing in the Service generally needs a licence (Pro or Premium Per User, or content in dedicated capacity), so check what an employer provides. Microsoft has folded Power BI into its wider Fabric platform, but the Desktop workflow below is unchanged.\n\n**The workflow**\n\n1. **Get data**: connect to Excel, CSV, SQL databases and many others.\n2. **Transform**: clean and shape the data in Power Query.\n3. **Model**: relate tables and write DAX measures.\n4. **Visualize**: build charts, cards and slicers on report pages.\n5. **Publish**: send to the Service, share with an audience, and schedule refresh.\n\nInside Desktop, the left edge switches between three views: **Report** (design pages), **Data** (see tables, add columns) and **Model** (see and edit relationships). Newer versions also add a DAX query view. A Fields pane on the right lists tables and columns, and a Visualizations pane lets you choose a chart and drop fields into its wells.\n\n**Your example.** The shift-fill-rate project follows this path: load `shifts.csv` and `pharmacies.csv`, trim and type the columns, relate pharmacies to shifts, write a Fill Rate measure, draw a column chart by pharmacy and a card showing the overall rate, then publish. In SQL you would write `SELECT pharmacy_id, COUNT(*) ... GROUP BY`. In Power BI the chart does the grouping and the measure does the counting.\n\nThe key habit is to resist jumping to charts. Most report problems start in the data and model steps.",
+      "keyPoints": [
+        "Desktop (free, Windows) builds reports; the Service (browser) shares, refreshes and secures them.",
+        "Workflow: get data, transform, model, visualize, publish.",
+        "Desktop has Report, Data and Model views.",
+        "Sharing in the Service usually needs a licence.",
+        "Most report problems start in the data and model steps, not the charts."
+      ],
+      "interviewAngle": "Because Power BI is new for you, show you understand the whole workflow rather than claiming depth. Say: \"I am learning Power BI. I know the path from Desktop to Service, and I have been building a practice dashboard.\" Do not say you used it at work. The honest bridge is that you did equivalent reporting in SQL and Excel.",
+      "exercises": [
+        {
+          "id": "power-bi-u1-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Where do you build a report's data model and visuals, and where do you publish it to share and schedule refresh?",
+          "choices": [
+            "Build in the Power BI Service, publish to Desktop",
+            "Build in Power BI Desktop, publish to the Power BI Service",
+            "Build and share both in Power BI Mobile",
+            "Build in Excel, publish to Desktop"
+          ],
+          "answer": 1,
+          "explanation": "Desktop is the authoring application; the Service is the cloud site for sharing, refresh and access."
+        },
+        {
+          "id": "power-bi-u1-l1-e2",
+          "type": "short",
+          "prompt": "In the five-step workflow get data, transform, ___, visualize, publish, what is the missing step? (One word.)",
+          "accept": ["model", "modeling", "modelling"],
+          "answer": "Model",
+          "explanation": "After cleaning data you build relationships and measures, then visualize."
+        },
+        {
+          "id": "power-bi-u1-l1-e3",
+          "type": "open",
+          "prompt": "Explain the Power BI workflow to a manager who has only used Excel, using the shift fill-rate project as the example.",
+          "answer": "In Power BI Desktop I connect to the shifts and pharmacies files (get data). I clean them in Power Query, fixing types and trimming text (transform). Then I relate the pharmacies table to the shifts table and write a Fill Rate measure (model). I build a card for the overall rate and a chart by pharmacy (visualize). Finally I publish to the Power BI Service so the team can open it in a browser, and set it to refresh on a schedule (publish). It is like a pivot table, but with a reusable model and scheduled refresh.",
+          "rubric": [
+            "Mentions the five stages in order",
+            "Applies them to shifts and pharmacies data",
+            "Names Desktop for building and the Service for sharing",
+            "Explains in language an Excel user understands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u1-l2",
+      "title": "Power Query: connecting and cleaning",
+      "minutes": 9,
+      "body": "Power Query is the data preparation tool inside Power BI Desktop. It is the same technology you met in Excel. Open it from Home > Get Data, choose a source (for example Text/CSV), and click **Transform Data** instead of Load.\n\nThe Power Query Editor shows a preview of the table. Each action you take is recorded as a step. Imagine a raw `shifts.csv`:\n\n| shift_id | pharmacy | status | requested_at | cancel_reason |\n|---|---|---|---|---|\n| 1 | `Harbor ` | Filled | 3/3/2026 08:00 | |\n| 2 | Eastside | cancelled | 3/3/2026 09:15 | No pharmacist |\n| 2 | Eastside | cancelled | 3/3/2026 09:15 | No pharmacist |\n| 3 | Lakeview | Filled | 3/4/2026 | |\n\nThe problems: a trailing space in `Harbor `, inconsistent case in `cancelled`, a duplicated row for shift 2, an empty cancel reason (which is normal for filled shifts) and a missing time in the last row.\n\n**Common cleaning actions** (all on the Transform or Home tab, or by right-clicking a column):\n\n- **Use First Row as Headers** if the file has a header row Power BI missed.\n- **Change Type** on each column. Dates should be Date/Time, counts should be Whole Number. This step matters because later features depend on it.\n- **Transform > Format > Trim** and **Capitalize Each Word** (or lowercase) to standardise text.\n- **Remove Duplicates** on `shift_id`.\n- **Replace Values**, for example turn an empty reason into \"None\" if a report needs a label.\n- **Remove Columns** you do not need. Fewer columns means a smaller, faster model.\n- **Filter Rows** to drop test records.\n- **Split Column** by a delimiter, such as \"Cole, Dana\" by comma.\n\nThe duplicate row, trailing space and mixed case disappear after Trim, Capitalize and Remove Duplicates. Empty values appear as `null`, not as blank text, which matters when filtering.\n\nWhen the data looks right, choose **Close & Apply**. Power BI loads the result into the model. Every time you refresh, the recorded steps run again on the new data, so the cleanup is repeatable, unlike hand-editing in a spreadsheet.\n\nYour SQL habit helps: filter early, keep only needed columns, and name things clearly. Rename the query from `shifts` to `Shifts` and keep column names plain, because they appear in the report.",
+      "keyPoints": [
+        "Choose Transform Data (not Load) to clean first in the Power Query Editor.",
+        "Set the data type of every column; it controls how fields behave later.",
+        "Trim, standardise case, remove duplicates and unneeded columns.",
+        "Empty cells are null in Power Query.",
+        "Close & Apply loads the cleaned result into the model; refresh re-runs the steps."
+      ],
+      "interviewAngle": "Power Query is a good place to connect to your existing experience: you cleaned data by hand in Excel and filtered and shaped it in SQL. Say that you now understand why recorded, repeatable steps matter. Be honest that this is learning-stage work on practice data and not something you did in your last role.",
+      "exercises": [
+        {
+          "id": "power-bi-u1-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You connect to shifts.csv and want to clean it before loading. Which button do you click?",
+          "choices": ["Load", "Transform Data", "Publish", "Refresh"],
+          "answer": 1,
+          "explanation": "Transform Data opens the Power Query Editor. Load goes straight into the model, skipping cleaning."
+        },
+        {
+          "id": "power-bi-u1-l2-e2",
+          "type": "mcq",
+          "prompt": "After cleaning a shifts table in Power Query, new data arrives next week. What happens when you refresh?",
+          "choices": [
+            "You must repeat each cleaning action by hand",
+            "The recorded steps run again on the new data",
+            "The report is deleted",
+            "Only the visuals refresh; the cleaning steps are ignored"
+          ],
+          "answer": 1,
+          "explanation": "Power Query stores its steps and replays them on every refresh, which is the main reason to clean there."
+        },
+        {
+          "id": "power-bi-u1-l2-e3",
+          "type": "open",
+          "prompt": "Given a shifts file with trailing spaces in pharmacy names, mixed-case status values, duplicated shift IDs, and a requested_at column loaded as text, list the Power Query actions you would apply.",
+          "answer": "Trim the pharmacy column and apply a consistent case (for example Capitalize Each Word) to status. Use Remove Duplicates on shift_id. Change the type of requested_at to Date/Time (and set other columns' types, such as shift_id to Whole Number). Remove any columns not needed. Then Close & Apply.",
+          "rubric": [
+            "Trims text",
+            "Standardises the case of status",
+            "Removes duplicates on shift_id",
+            "Changes requested_at to a date/time type"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u1-l3",
+      "title": "Shaping data and applied steps",
+      "minutes": 9,
+      "body": "Cleaning fixes errors. **Shaping** changes the structure of tables so they suit analysis. Both are recorded in the **Applied Steps** pane on the right side of the Power Query Editor.\n\n**Applied Steps** is a list of everything you have done, in order. Click a step to see the table as it was then; right-click to rename, delete, insert a step after or move it. If a step errors, click the earlier step to find the last good state. Order matters: removing a column and then trying to filter on it breaks the later step.\n\n**Shaping tools and their SQL cousins**\n\n| Power Query | What it does | SQL equivalent |\n|---|---|---|\n| Filter Rows | keep rows that match | `WHERE` |\n| Choose / Remove Columns | keep selected columns | `SELECT` list |\n| Group By | summarise by a column | `GROUP BY` |\n| Merge Queries | join two tables on a key | `JOIN` |\n| Append Queries | stack tables with the same columns | `UNION ALL` |\n| Add Custom Column | new column from a formula | calculated expression |\n| Unpivot Columns | turn columns into rows | `UNPIVOT` / `UNION` |\n| Duplicate or Reference | copy a query | CTE or view |\n\n**Example: unpivot.** A sheet arrives with one column per month:\n\n| pharmacy | Jan | Feb | Mar |\n|---|---|---|---|\n| Eastside | 20 | 24 | 18 |\n\nSelect the `pharmacy` column, choose **Unpivot Other Columns**, and rename the new columns to `month` and `shifts`. The result has one row per pharmacy and month, which is the shape reports need:\n\n| pharmacy | month | shifts |\n|---|---|---|\n| Eastside | Jan | 20 |\n| Eastside | Feb | 24 |\n| Eastside | Mar | 18 |\n\n**Example: merge.** To bring the region into the shifts table, merge `Shifts` with `Pharmacies` on `pharmacy_id` using a Left Outer join, then expand only the `region` column. In a star schema you will often skip this and use a relationship instead (next unit), keeping merges for when you really need one flat table.\n\n**Query folding.** When the source is a database, Power Query tries to turn your steps into one SQL query that runs on the server, which is faster. A step that cannot be translated breaks folding. You do not need to manage this now, but it is why you do filters and column removal early.\n\nName your queries and steps clearly. A reader should be able to follow Applied Steps like a recipe.",
+      "keyPoints": [
+        "Applied Steps record every transformation in order; click, rename, reorder or delete them.",
+        "Merge Queries is a join; Append Queries is a UNION ALL; Group By is GROUP BY.",
+        "Unpivot turns repeated columns (months) into rows.",
+        "Filter and remove columns early; for databases this lets steps fold into SQL.",
+        "Name queries and steps so they read like a recipe."
+      ],
+      "interviewAngle": "This is where your SQL knowledge helps most. Explain Merge as a join, Group By as GROUP BY, and Filter Rows as WHERE, so the interviewer sees that you map new tools onto skills you have. Keep it honest: you are learning these in Power Query, not describing earlier work.",
+      "exercises": [
+        {
+          "id": "power-bi-u1-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which Power Query action is most like a SQL JOIN?",
+          "choices": ["Append Queries", "Group By", "Merge Queries", "Remove Duplicates"],
+          "answer": 2,
+          "explanation": "Merge Queries joins two tables on key columns. Append stacks tables like UNION ALL, and Group By is GROUP BY."
+        },
+        {
+          "id": "power-bi-u1-l3-e2",
+          "type": "short",
+          "prompt": "Which Power Query action stacks two tables with the same columns, like SQL UNION ALL? (Give the command name.)",
+          "accept": ["append", "append queries", "append query"],
+          "answer": "Append Queries",
+          "explanation": "Append Queries adds the rows of one table below another."
+        },
+        {
+          "id": "power-bi-u1-l3-e3",
+          "type": "open",
+          "prompt": "A file has columns pharmacy, Jan, Feb and Mar holding monthly shift counts. Describe how you would reshape it in Power Query for reporting, and show the resulting columns.",
+          "answer": "Select the pharmacy column, then use Unpivot Other Columns. Rename the generated Attribute column to month and Value column to shifts. The result has three columns, pharmacy, month and shifts, with one row per pharmacy and month. Then set the data types and Close & Apply.",
+          "rubric": [
+            "Uses Unpivot (Other) Columns with pharmacy kept",
+            "Names the resulting columns month and shifts",
+            "States the result has one row per pharmacy per month"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "id": "ticket-u5",
+  "title": "Keeping tickets moving",
+  "summary": "Communicate with customers while work is open, understand SLAs, verify and close properly, find root causes, and read ticket metrics.",
+  "lessons": [
+    {
+      "id": "ticket-u5-l1",
+      "title": "Customer updates and SLAs",
+      "minutes": 8,
+      "body": "Most customer frustration comes from silence, not from the bug. A clear update rhythm lowers the temperature even when the news is bad.\n\n**A good update has four parts:**\n\n1. **Where we are:** what we have found or done.\n2. **What it means for you:** impact and any workaround.\n3. **What happens next:** the next step and who is doing it.\n4. **When you will hear from us:** a specific time, even if the news is 'still investigating'.\n\nExample:\n\n> Hi Dana, an update on the missing Tuesday shifts. We reproduced the problem: shifts for pharmacists in Arizona display one hour off. Until the fix is released, please check Arizona pharmacists' shift times against the dispatcher view. A developer is working on the fix today, and I will confirm by 3 PM Eastern whether it will be in tomorrow's release.\n\nTone rules: plain language, no blame, no jargon the customer would not use, no promises you do not control. 'I expect' and 'we are aiming for' are honest. 'It will be fixed tomorrow' is a promise.\n\n**SLAs.** A service level agreement is a commitment about response and resolution times, often depending on priority. Two measures to keep apart:\n\n| Measure | Definition | Example target for a P1 |\n|---|---|---|\n| **Response time** (first response) | From ticket creation until a human first replies with something useful | 30 minutes |\n| **Resolution time** | From creation until the problem is resolved (or a workaround is in place) | 4 hours |\n\nResponse is about acknowledgement, resolution is about the fix. A team can hit response targets and still fail on resolution. Auto-replies usually do not count as a real response.\n\nMany SLAs count business hours only, and the clock can pause while waiting on the customer. Check how your tool and contract define it. When a target is at risk, warn early: tell the customer before the deadline, not after.\n\nSet expectations at intake. 'Because this affects emergency shifts I have marked it urgent, and you will get an update within an hour' is better than silence followed by a late apology.\n\nWhen the news is bad, say it directly: 'The fix will not make tomorrow's release. Here is the workaround, and here is the earliest date I can honestly give you.' Customers can plan around bad news. They cannot plan around silence.",
+      "keyPoints": [
+        "Updates state where we are, what it means, what is next, and when the next update will come.",
+        "Do not promise what you do not control; give expectations, not guarantees.",
+        "Response time is about the first useful reply; resolution time is about the fix.",
+        "Warn customers before an SLA is missed."
+      ],
+      "interviewAngle": "Describe your update habit with a concrete example, such as telling a pharmacy staffing firm when a fix would ship and what to do in the meantime. If asked about SLAs, say you worked to response and resolution expectations and understand how clocks and business hours work, and do not claim to have designed an SLA policy.",
+      "exercises": [
+        {
+          "id": "ticket-u5-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the difference between response time and resolution time?",
+          "choices": [
+            "They are identical",
+            "Response is the time to the first useful reply; resolution is the time until the problem is solved",
+            "Response is for bugs and resolution for features",
+            "Response is measured in days and resolution in hours"
+          ],
+          "answer": 1,
+          "explanation": "Response measures acknowledgement. Resolution measures how long until the issue is resolved."
+        },
+        {
+          "id": "ticket-u5-l1-e2",
+          "type": "mcq",
+          "prompt": "Which closing line of an update is best?",
+          "choices": [
+            "We will get back to you.",
+            "It will definitely be fixed tomorrow.",
+            "I will update you by 3 PM Eastern today, even if there is no change.",
+            "Please stop emailing us."
+          ],
+          "answer": 2,
+          "explanation": "A specific time for the next update keeps the customer informed and is a promise you control."
+        },
+        {
+          "id": "ticket-u5-l1-e3",
+          "type": "open",
+          "prompt": "A fix for a wrong-time-zone bug will not make tomorrow's release as promised. Write the update email to the customer (under 130 words): say it directly, give the workaround, an honest new target and when you will update again.",
+          "answer": "Hi Dana,\n\nI need to update you on the Arizona shift times. The fix did not pass testing today, so it will not be in tomorrow's release. I'm sorry for the change, I know you were planning around it.\n\nUntil it is released, please check Arizona pharmacists' shift times in the dispatcher view, which shows them correctly. If it helps, I can send you a list each morning of Arizona shifts for the next two days.\n\nThe earliest I now expect the fix is the release on Thursday, and I'll confirm that once the retest is done. I'll email you by noon tomorrow with the status either way.\n\nThanks for your patience.",
+          "rubric": [
+            "States the bad news directly in the first lines",
+            "Gives a concrete workaround",
+            "Gives an honest earliest date framed as expectation",
+            "Commits to a specific time for the next update",
+            "Plain language and no blame"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u5-l2",
+      "title": "Verification, closure and root cause",
+      "minutes": 9,
+      "body": "A ticket is not finished when code is merged. It is finished when the problem is gone and the customer knows.\n\n**Verification.** Repeat the original steps from the ticket on the build that contains the fix. Then:\n\n1. Check the exact original case (Arizona pharmacist, 9:00 AM Eastern shift).\n2. Check nearby cases that could have been broken by the change (other time zones, daylight saving transitions, shifts already assigned).\n3. Record what you tested and the result in the ticket. 'Verified on build 2.3.2 in staging: Arizona, Mountain, Pacific all show correct times' is useful. 'Looks good' is not.\n4. If it fails, reopen with the details of what still happens.\n\nIf you can, have the reporter confirm. They know the real case better than any test does.\n\n**Closing well.** A closed ticket should carry:\n\n- The **resolution** (fixed, workaround, not a bug, duplicate, won't fix) and the version.\n- A short **customer-facing message** that says what changed.\n- The **root cause** in one or two lines.\n- Any follow-up tickets (a regression test, a documentation update).\n\nSome teams auto-close tickets after the customer is silent for a set time, such as seven days after a final message. If so, say so in your last message: 'If I don't hear back by Friday I'll close this, and you can reopen it any time.'\n\n**Root cause and fewer repeat tickets.** Fixing a single instance is the start. Ask why the problem happened, and why it reached the customer:\n\n| Layer | Question | Example |\n|---|---|---|\n| Cause | What actually went wrong? | Time conversion ignored zones without daylight saving |\n| Escape | Why did we not catch it? | No test for Arizona |\n| Pattern | Does it happen elsewhere? | Other time features use the same function |\n| Prevention | What stops it recurring? | Add a regression test and a UAT case |\n\nMany tickets are not bugs at all. They are questions the product or documentation failed to answer. At your last job, rewriting the end-user documentation and the knowledge base around those tasks cut ticket inflow by 35%. That is root-cause thinking applied to support: the root cause was unclear documentation, not misbehaving customers.\n\nTo reproduce the approach: group closed tickets by topic, find the top five, check whether each is a bug, a gap in documentation, or a confusing screen, and fix the cause that is cheapest and removes the most tickets. Check the numbers again a month later.",
+      "keyPoints": [
+        "Verify the original case plus neighboring cases on a real build, and record what you tested.",
+        "Close with a resolution, a customer-facing message, a root cause and follow-ups.",
+        "Ask about cause, escape, pattern and prevention.",
+        "Many tickets come from documentation gaps; fixing those reduces inflow, as your 35% reduction did."
+      ],
+      "interviewAngle": "Tie this directly to your documentation work: you noticed repeating questions, rewrote the end-user documentation and knowledge base, and ticket inflow fell 35 percent. Say the fall followed the change and do not overclaim precision or sole causation. For verification, mention your manual UAT and release testing.",
+      "exercises": [
+        {
+          "id": "ticket-u5-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which verification note is most useful in a ticket?",
+          "choices": [
+            "Looks good",
+            "Fixed",
+            "Verified on build 2.3.2 in staging: Arizona, Mountain and Pacific pharmacists see correct times for the original shift",
+            "Developer says it works"
+          ],
+          "answer": 2,
+          "explanation": "It names the build, environment, cases tested and the result, so anyone can trust and repeat it."
+        },
+        {
+          "id": "ticket-u5-l2-e2",
+          "type": "mcq",
+          "prompt": "Many tickets ask how to set a pharmacist's travel radius, though the setting exists. What is the best root-cause response?",
+          "choices": [
+            "Answer each ticket quickly and move on",
+            "Improve the documentation or screen so users can find the setting, then check whether inflow drops",
+            "Tell users to read the manual",
+            "Close the tickets as invalid"
+          ],
+          "answer": 1,
+          "explanation": "Fixing the source of repeated questions reduces tickets over time, as the rewrite of end-user documentation did."
+        },
+        {
+          "id": "ticket-u5-l2-e3",
+          "type": "open",
+          "prompt": "You notice that 'where do I change my travel radius' appears in 12 tickets this month. Describe how you would find the root cause, what you would change, and how you would measure whether it worked. Use the documentation rewrite approach.",
+          "answer": "**Find the cause:** Group the month's tickets by topic and confirm travel radius is a top five topic. Read ten of them: do users say they cannot find the setting, or do they not know it exists? Check the knowledge base for an article, its title, and whether it uses the words customers use ('distance', 'how far I travel') instead of internal terms. Check where the setting sits in the app.\n\n**Change:** Rewrite or add a short how-to article with numbered steps and a screenshot, titled in the customers' language, and link it from the app's help and from our reply template. If many people still miss the setting, raise a ticket for a small UI change to surface it.\n\n**Measure:** Record the monthly count of travel radius tickets before the change, then compare after one and two months. Also check overall ticket inflow and article views. Report it as a drop in tickets after the change, and do not claim it was the only cause.",
+          "rubric": [
+            "Groups tickets by topic and checks the actual wording",
+            "Proposes a documentation or UI fix that matches the cause",
+            "Defines a before and after measure over time",
+            "Avoids overclaiming causation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u5-l3",
+      "title": "Ticket metrics",
+      "minutes": 7,
+      "body": "Metrics tell you whether the process works. Used well, they point to problems. Used badly, they turn into targets people game.\n\n| Metric | What it measures | What to watch for |\n|---|---|---|\n| Ticket volume (inflow) | New tickets per week or month | Spikes after a release; recurring topics |\n| Backlog size and age | Open tickets, and how old | A growing backlog means inflow exceeds outflow |\n| First response time | Creation to first useful reply | Misses show intake problems |\n| Time to resolution | Creation to resolved | Look at the median and the long tail, not only the average |\n| Reopen rate | Share of closed tickets reopened | High means fixes or verification are weak |\n| Escalation rate | Share passed to engineering | High may mean support lacks knowledge or tools |\n| First-contact resolution | Resolved without handoff | Higher usually means better documentation |\n| Customer satisfaction | Ratings after closure | Read the comments, not just the score |\n| Bugs by component or release | Where defects cluster | Guides testing effort |\n\n**Averages can mislead.** Suppose ten tickets resolve in 1 hour and one takes 5 days. The average looks bad and hides the fact that most are fast. The median and a count of tickets over SLA tell the real story.\n\nThe metrics you saw at work come straight from your SQL skills. With a tickets table you could report inflow by topic:\n\n```sql\nSELECT topic, COUNT(*) AS tickets\nFROM tickets\nWHERE created_at >= '2026-09-01' AND created_at < '2026-10-01'\nGROUP BY topic\nORDER BY tickets DESC;\n```\n\nYour real reporting at the dispatch company was about shifts: fill rate, average time to fill, cancellations and reasons. Ticket metrics use the same habits: define the measure, pick the period, and explain the number.\n\n**Using metrics well:**\n\n1. Choose two or three that answer a question you actually have.\n2. Compare against a baseline: last month, or before the change.\n3. Look at the list behind the number.\n4. Share the story with the cause and the action.\n5. Do not reward raw speed. A team measured only on closing time will close tickets too early.\n\nThat is why reopen rate sits next to resolution time: fast and wrong shows up as reopened.",
+      "keyPoints": [
+        "Core metrics: volume, backlog age, first response, resolution time, reopen rate, escalations, satisfaction.",
+        "Use medians and counts over SLA, not only averages.",
+        "Pair speed metrics with quality metrics such as reopen rate.",
+        "Compare against a baseline and read the tickets behind the number."
+      ],
+      "interviewAngle": "If asked what you measured, name your real numbers: ticket inflow before and after the documentation rewrite, and SQL reports on shift fill rate and time to fill. Say you can build ticket reports with SQL or Excel. Do not claim formal use of a BI dashboard for tickets.",
+      "exercises": [
+        {
+          "id": "ticket-u5-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Ten tickets are resolved in 1 hour and one takes 5 days. Which view gives the fairest picture?",
+          "choices": [
+            "The average alone",
+            "The median resolution time plus the count of tickets over the SLA",
+            "The slowest ticket only",
+            "The total number of tickets"
+          ],
+          "answer": 1,
+          "explanation": "The median shows the typical case and the count shows the exceptions. The average blends them."
+        },
+        {
+          "id": "ticket-u5-l3-e2",
+          "type": "mcq",
+          "prompt": "Why pair resolution time with reopen rate?",
+          "choices": [
+            "To make reports longer",
+            "Because a team rewarded only for speed may close tickets too early, and reopens expose that",
+            "Because reopen rate is always zero",
+            "Because customers ask for both"
+          ],
+          "answer": 1,
+          "explanation": "Speed alone can be gamed. Reopens show quality."
+        },
+        {
+          "id": "ticket-u5-l3-e3",
+          "type": "open",
+          "prompt": "Pick three ticket metrics for a monthly review of a small support team for scheduling software. For each say what question it answers and what action a bad number would trigger. Then write the SQL to count tickets per topic last month, given tickets(id, created_at, topic, status).",
+          "answer": "**1. Ticket volume by topic.** Question: what are customers asking about most? Action: look at the top topics; if how-to topics lead, improve documentation.\n\n**2. Median time to resolution and count over SLA.** Question: are we fixing things fast enough? Action: if the tail is long, review the slow tickets for common causes such as waiting on engineering.\n\n**3. Reopen rate.** Question: are our fixes and verification solid? Action: if high, review verification steps and add regression tests.\n\n```sql\nSELECT topic, COUNT(*) AS tickets\nFROM tickets\nWHERE created_at >= '2026-10-01' AND created_at < '2026-11-01'\nGROUP BY topic\nORDER BY tickets DESC;\n```",
+          "rubric": [
+            "Three metrics with a question each",
+            "Each tied to a concrete action",
+            "Mixes speed and quality measures",
+            "SQL filters by month range, groups by topic, orders descending"
+          ]
+        }
+      ]
+    }
+  ]
+}

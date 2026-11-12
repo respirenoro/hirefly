@@ -1,0 +1,320 @@
+{
+  "id": "doc-u10",
+  "title": "Systems: style, docs-as-code, structure and measurement",
+  "summary": "Keep documentation consistent and findable: style guides and terms, docs-as-code at a reader's level, knowledge base structure, and measuring results.",
+  "lessons": [
+    {
+      "id": "doc-u10-l1",
+      "title": "Style guides and terminology",
+      "minutes": 8,
+      "body": "A style guide makes many writers sound like one and saves repeated arguments. You do not have to write a big one. A one-page guide plus a term list covers most needs.\n\n**Adopt, then adapt**\n\nStart with a published guide (the Microsoft Writing Style Guide is free and aimed at anyone writing about technology) and record only your differences. This is faster and more defensible than inventing rules.\n\n**What a one-page guide holds**\n\n| Section | Example entry |\n|---|---|\n| Voice | Plain, direct, second person (\"you\") |\n| Titles | Sentence case; how-tos start with a verb |\n| Steps | Numbered, one action each, imperative |\n| Interface text | Bold the label exactly; use \"select\" for choosing |\n| Numbers and dates | 12 November 2026; numerals for counts |\n| Links | Descriptive text; never \"click here\" |\n| Warnings | Note, Important, Warning; before the step |\n| Words to avoid | utilize, simply, just, easy |\n\n\"Simply\" and \"just\" can insult a reader who is struggling. Avoid them.\n\n**The term list (glossary)**\n\nFor each important term record: the term, a one-line meaning, what not to call it, and where it appears. For the scheduling product:\n\n| Term | Meaning | Not |\n|---|---|---|\n| shift | A block of work at a pharmacy | booking, slot |\n| request | A pharmacy asking for cover | order |\n| assignment | A pharmacist matched to a shift | placement |\n| dispatcher | Staff who fill shifts at the staffing firm | scheduler (unless that is the real job title) |\n\nGet terms from product screens, tickets and the people who use them. If the interface says *Roster* and the docs say *Schedule*, raise it with the product owner; one of them should change.\n\n**Enforcing it**\n\nPut it where writers will see it. Check new articles against it during review. Search the knowledge base for the old words after a rename.\n\n**Keep it living**\n\nAdd a term when two people disagree, not in advance. Review the guide when the product changes language.",
+      "keyPoints": [
+        "Adopt a published style guide and record only your differences.",
+        "A one-page guide covers voice, titles, steps, interface text, dates and links.",
+        "A term list fixes one name per thing and lists names to avoid.",
+        "Check articles against it during review and update it when the product changes."
+      ],
+      "interviewAngle": "You can describe the small style rules you used: verb-first titles, numbered steps, consistent product terms. Do not claim to have written an enterprise style guide unless you did. This goes beyond your day-to-day work: say it was learned and practised, not a formal part of your job.",
+      "exercises": [
+        {
+          "id": "doc-u10-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the most efficient way to create a style guide for a small team?",
+          "choices": [
+            "Have no guide and decide case by case",
+            "Copy a competitor's guide word for word",
+            "Adopt a published guide and note only your differences",
+            "Write a 60-page guide from scratch"
+          ],
+          "answer": 2,
+          "explanation": "A published base saves time and gives authority."
+        },
+        {
+          "id": "doc-u10-l1-e2",
+          "type": "mcq",
+          "prompt": "The interface says \"Roster\" but help articles say \"Schedule\". What do you do?",
+          "choices": [
+            "Ignore it",
+            "Change only the screenshots",
+            "Use both to vary the writing",
+            "Raise it with the product owner and align the words"
+          ],
+          "answer": 3,
+          "explanation": "A mismatch creates doubt and support tickets."
+        },
+        {
+          "id": "doc-u10-l1-e3",
+          "type": "short",
+          "prompt": "What is a list of important terms with their meanings and the names to avoid called? (One word.)",
+          "accept": [
+            "glossary",
+            "term list",
+            "termbase"
+          ],
+          "answer": "glossary",
+          "explanation": "It fixes one name per concept."
+        },
+        {
+          "id": "doc-u10-l1-e4",
+          "type": "mcq",
+          "prompt": "Why avoid words like \"simply\" and \"just\" in instructions?",
+          "choices": [
+            "They are legal terms",
+            "They break links",
+            "They can make a struggling reader feel foolish and add nothing",
+            "They are too long"
+          ],
+          "answer": 2,
+          "explanation": "If the task were simple, they would not need instructions."
+        },
+        {
+          "id": "doc-u10-l1-e5",
+          "type": "open",
+          "prompt": "Draft a half-page style guide for the scheduling product's help centre: five rules and a four-term glossary. Base it on a published guide and say which.",
+          "answer": "Based on the Microsoft Writing Style Guide, with these differences. 1. Titles: sentence case; how-tos start with a verb. 2. Steps: numbered, one action each, imperative. 3. Interface: bold labels exactly; use 'select'. 4. Avoid 'simply' and 'just'. 5. Dates: 12 November 2026. Glossary: shift (block of work at a pharmacy; not booking); request (pharmacy asks for cover); assignment (pharmacist matched to a shift); dispatcher (staff who fill shifts).",
+          "rubric": [
+            "Names the published guide it builds on",
+            "Five clear rules",
+            "Four terms with meanings and names to avoid",
+            "Matches the product's vocabulary"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u10-l2",
+      "title": "Docs-as-code and versioning at a reader's level",
+      "minutes": 8,
+      "body": "\"Docs as code\" means writing and managing documentation with the same tools developers use: plain-text files such as Markdown, version control with Git, review by pull request, and automated checks. Write the Docs, the documentation community, describes it that way.\n\n**What it gives you**\n\n- **History.** Every change is recorded: who, when, why.\n- **Review.** Others can comment on a change before it goes live.\n- **Branches.** Draft documentation for a feature without touching live pages.\n- **Close to the code.** A developer can update docs in the same change as the feature.\n- **Checks.** Tools can test for broken links or style problems.\n\n**The trade-off**\n\nNon-developers may find repositories and pull requests a barrier. Write the Docs notes this. Many knowledge bases are web editors (Confluence, Zendesk) with no Git. Docs-as-code suits product documentation written near engineers; a support help centre may not need it.\n\n**Version control in plain words**\n\n| Term | Meaning |\n|---|---|\n| Repository | The project folder with its history |\n| Commit | A saved set of changes with a message |\n| Branch | A separate line of work |\n| Pull request | A request to merge your branch, with review |\n\nA good commit message says what changed and why: \"Update cancel-shift article for required reason (ST-503)\".\n\n**Versioning documentation**\n\n- If the product has versions that customers keep using, keep a version for each and mark \"Applies to version 2.4\".\n- If there is one live version, version by date: \"Last updated 12 November 2026.\"\n- Archive, do not delete, old articles that still apply.\n- Tie updates to releases: each release note triggers a check of affected articles.\n\n**Where you can talk about it**\n\nYou managed the knowledge base in a web tool, not as code. Say that plainly. The honest statement is that you understand the idea and the vocabulary and have used a version control basic (commit, branch) if you have; otherwise say you are learning it.\n\n**Try**\n\nMake a free account on a code host, create a repository with a Markdown file, and edit it through a branch and a pull request, to see the flow once.",
+      "keyPoints": [
+        "Docs as code uses Markdown, Git, review and automated checks, the same way developers manage code.",
+        "Benefits: history, review, branches and docs updated with features.",
+        "Trade-off: non-developers may find it a barrier; web-based tools may fit support teams better.",
+        "Version by product version if customers keep old ones; otherwise by date."
+      ],
+      "interviewAngle": "If a job mentions docs-as-code or Git, be honest: you managed documentation in a web tool and understand the concepts. If you have done the practice exercise, say you tried it on a sample repository. This goes beyond your day-to-day work: say it was learned and practised, not a formal part of your job.",
+      "exercises": [
+        {
+          "id": "doc-u10-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does \"docs as code\" mean?",
+          "choices": [
+            "Writing documentation in a programming language",
+            "Only documenting APIs",
+            "Putting screenshots in source code",
+            "Managing documentation with developer tools such as Git, plain text, review and automated checks"
+          ],
+          "answer": 3,
+          "explanation": "It is about tools and workflow, not about code content."
+        },
+        {
+          "id": "doc-u10-l2-e2",
+          "type": "mcq",
+          "prompt": "What is a good use of a branch for docs?",
+          "choices": [
+            "Drafting documentation for an unreleased feature without changing live pages",
+            "Hiding review comments",
+            "Making screenshots",
+            "Deleting old pages"
+          ],
+          "answer": 0,
+          "explanation": "A branch separates work in progress."
+        },
+        {
+          "id": "doc-u10-l2-e3",
+          "type": "short",
+          "prompt": "In version control, what is a saved set of changes with a message called? (One word.)",
+          "accept": [
+            "commit",
+            "a commit"
+          ],
+          "answer": "commit",
+          "explanation": "A commit records changes and the reason."
+        },
+        {
+          "id": "doc-u10-l2-e4",
+          "type": "mcq",
+          "prompt": "Which is the best commit message?",
+          "choices": [
+            "fix",
+            "changes",
+            "asdf",
+            "Update cancel-shift article for required reason"
+          ],
+          "answer": 3,
+          "explanation": "It says what changed and why."
+        },
+        {
+          "id": "doc-u10-l2-e5",
+          "type": "open",
+          "prompt": "A hiring manager asks, \"Have you worked with docs-as-code?\" Give an honest answer of about 80 words that states what you did (a web knowledge base), what you understand (Git, review, branches) and one way you would learn the rest.",
+          "answer": "My documentation work was in a web-based knowledge base rather than in a repository, so I haven't used docs-as-code on the job. I understand the idea: Markdown files in Git, changes reviewed through pull requests, and docs updated alongside features. I'd be comfortable learning a team's workflow, and to start I'd practise by editing a Markdown file through a branch and pull request on a sample repository, so I know the steps before I need them.",
+          "rubric": [
+            "Clear about what was done",
+            "Shows understanding of Git, review, branches",
+            "Names a concrete way to learn",
+            "No overclaiming"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u10-l3",
+      "title": "Information architecture of a knowledge base",
+      "minutes": 8,
+      "body": "Information architecture (IA) is how a body of articles is organised so readers find what they need. Your rewrite of the knowledge base was partly IA work: choosing titles, grouping and linking.\n\n**Readers find things three ways**\n\n1. **Search.** Most visitors type a question. Titles, first sentences and keywords decide whether the right article appears. Zendesk advises using the words customers search for and keeping one question per article.\n2. **Browse.** Categories and sections for people who do not know the word to search.\n3. **Links.** From related articles, release notes and in-product help.\n\n**Structure**\n\nKeep it shallow: category, section, article (two levels of navigation). Deep trees hide content.\n\nFor the scheduling product, categories could follow the reader's jobs, not the product's internal modules:\n\n| Category | Example articles |\n|---|---|\n| Get started | Sign in; Set up a pharmacy |\n| Fill a shift | Send an emergency request; Reassign a shift |\n| Cancel and change | Cancel a shift; Change the start time |\n| Alerts and notifications | A pharmacist is not receiving alerts |\n| Reports | Understand cancellation reports |\n| Account and access | Reset a password; Add a user |\n\n**Naming**\n\nUse the reader's words and a pattern: task titles start with a verb, problems state the symptom, reference nouns. Do not name a category \"Miscellaneous\" or \"General\"; they collect clutter.\n\n**Labels and search terms**\n\nAdd a few labels per article (sparingly, as Zendesk suggests). Check the knowledge base's search report for queries with no results and add synonyms or articles.\n\n**One home per topic**\n\nDuplicate content drifts apart. Write once; link elsewhere. Archive duplicates and redirect.\n\n**Test the structure**\n\nAsk three real users to find an answer (\"How do I cancel a shift that already has a pharmacist?\") and note where they click. This is a simple tree test.\n\n**Governance**\n\nGive each category an owner and a review date. Atlassian's knowledge base guidance describes templates and labels so support staff can publish consistently; a template is the cheapest form of governance.",
+      "keyPoints": [
+        "Readers find answers by search, browse and links; design for all three.",
+        "Keep navigation shallow and category names in the reader's jobs and words.",
+        "Write each topic once, link to it, and archive duplicates.",
+        "Test with a few users and review search terms that find nothing."
+      ],
+      "interviewAngle": "You can describe how you grouped and titled articles after studying ticket wording. Information architecture is the formal name for it. Say you did the practical work, not that you held an information architect role. This goes beyond your day-to-day work: say it was learned and practised, not a formal part of your job.",
+      "exercises": [
+        {
+          "id": "doc-u10-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which set of categories is best for a help centre?",
+          "choices": [
+            "General, Misc, Other, Things",
+            "Get started, Fill a shift, Cancel and change, Alerts, Reports, Account and access",
+            "Database tables, Services, Endpoints",
+            "Module A, Module B, Module C"
+          ],
+          "answer": 1,
+          "explanation": "Categories follow the reader's jobs, in their words."
+        },
+        {
+          "id": "doc-u10-l3-e2",
+          "type": "mcq",
+          "prompt": "Why is duplicating an instruction in three articles risky?",
+          "choices": [
+            "Search stops working",
+            "It breaks accessibility rules",
+            "Readers prefer one article",
+            "The copies drift apart when the product changes"
+          ],
+          "answer": 3,
+          "explanation": "Write once and link."
+        },
+        {
+          "id": "doc-u10-l3-e3",
+          "type": "short",
+          "prompt": "What simple method asks users to find an answer so you can see where they click? (Two words: tree ...)",
+          "accept": [
+            "tree test",
+            "tree testing"
+          ],
+          "answer": "tree test",
+          "explanation": "It tests whether the structure helps people find content."
+        },
+        {
+          "id": "doc-u10-l3-e4",
+          "type": "mcq",
+          "prompt": "A search report shows many searches for \"reassign\" with no results, though an article says \"Change the pharmacist\". What is the best fix?",
+          "choices": [
+            "Delete the article",
+            "Add \"reassign\" to the title or text and as a synonym",
+            "Rename the category General",
+            "Ignore it"
+          ],
+          "answer": 1,
+          "explanation": "Use the reader's words."
+        },
+        {
+          "id": "doc-u10-l3-e5",
+          "type": "open",
+          "prompt": "Design a two-level structure for a knowledge base of 24 articles for the scheduling product: five categories with four or five example article titles in total each, using verb-first task titles and one symptom title. Explain one choice in two sentences.",
+          "answer": "Get started: Sign in; Set up a pharmacy; Add a user. Fill a shift: Send an emergency request; Assign a pharmacist; Reassign a shift. Cancel and change: Cancel a shift; Change the start time; Shift statuses. Alerts: Turn on alerts; A pharmacist is not receiving alerts. Reports: View cancellation reports; Export a report. I grouped by the dispatcher's job, not by software modules, because tickets show people ask 'how do I fill/cancel a shift', not 'where is the assignment module'.",
+          "rubric": [
+            "Five categories shallow structure",
+            "Verb-first task titles",
+            "At least one symptom-style title",
+            "Justified by reader's jobs or tickets"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u10-l4",
+      "title": "Measuring documentation: search, deflection and feedback",
+      "minutes": 9,
+      "body": "Measurement shows whether documentation works and where to improve it. No single number is proof, so use several and be honest about their limits.\n\n**Signals**\n\n| Signal | What it tells you | Limit |\n|---|---|---|\n| Ticket volume by category | Whether \"How do I\" questions fall | Other changes (training, product) move it too |\n| Search terms, and searches with no results | What readers want and cannot find | Not every search is a real need |\n| Article views | What is popular | Views do not mean it helped |\n| \"Was this helpful?\" votes | Quick quality sense | Few people vote; bias to extremes |\n| Time on page, bounce | Weak signals | Fast can mean solved or gave up |\n| Ticket \"deflection\" | Visits to an article that did not lead to a ticket | Hard to prove cause |\n| Feedback comments | Specific problems | Small numbers |\n\n**Deflection, carefully**\n\nDeflection is the idea that a reader who finds an article does not need to contact support. A rough rate compares article views with tickets on the same topic. It shows a pattern, not proof.\n\n**Tag tickets**\n\nAdd a category and, where possible, a tag \"article existed / did not exist\" to tickets. Then you can see which topics need new articles and which have articles readers did not find.\n\n**The 35% claim**\n\nThe built-in practice data shows \"How do I\" tickets dropping from May. That is a strong signal. An honest statement says what you changed (rewrote end-user documentation and the knowledge base), what happened (inflow fell 35%) and what else might have contributed (other releases, customer training). You find out by checking the same period for other categories: if Bug and Access tickets stayed flat while \"How do I\" fell, the pattern supports documentation as a cause.\n\n**A simple review loop**\n\nMonthly: top searches with no results, top tickets by category, lowest-rated articles. Choose three fixes. Do them. Check again next month.\n\n**Report it**\n\nOne page: what you measured, the change, the likely reason, the limit, the next action.",
+      "keyPoints": [
+        "Use several signals: tickets by category, searches with no results, votes, comments.",
+        "Deflection is a pattern, not proof; other changes can move ticket numbers.",
+        "Compare categories over the same period to support or weaken a documentation claim.",
+        "Run a monthly loop: find gaps, fix three, measure again."
+      ],
+      "interviewAngle": "\"How do you know documentation works?\" is a favourite. Give two or three signals and name the limits. For your 35%, say what you changed, what moved, and what else could have contributed. The search-term and deflection ideas here go beyond the figures you actually tracked. This goes beyond your day-to-day work: say it was learned and practised, not a formal part of your job.",
+      "exercises": [
+        {
+          "id": "doc-u10-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which comparison best supports the claim that documentation reduced \"How do I\" tickets?",
+          "choices": [
+            "The knowledge base has more articles",
+            "\"How do I\" fell while other ticket categories stayed flat over the same period",
+            "Support staff felt less busy",
+            "Page views went up"
+          ],
+          "answer": 1,
+          "explanation": "A category-specific change with other categories steady points to documentation as a cause."
+        },
+        {
+          "id": "doc-u10-l4-e2",
+          "type": "mcq",
+          "prompt": "What does a search that returns no results tell you?",
+          "choices": [
+            "Nothing useful",
+            "Readers want something they cannot find under their wording",
+            "Readers dislike the articles",
+            "The search engine is broken"
+          ],
+          "answer": 1,
+          "explanation": "It is a direct list of missing articles or missing synonyms."
+        },
+        {
+          "id": "doc-u10-l4-e3",
+          "type": "short",
+          "prompt": "What is the idea that reading an article means a reader does not need to contact support called? (One word.)",
+          "accept": [
+            "deflection",
+            "ticket deflection"
+          ],
+          "answer": "deflection",
+          "explanation": "A pattern that is hard to prove as a cause."
+        },
+        {
+          "id": "doc-u10-l4-e4",
+          "type": "mcq",
+          "prompt": "Why are helpfulness votes limited?",
+          "choices": [
+            "They cannot be counted",
+            "Few readers vote and results skew to extremes",
+            "They apply to images only",
+            "They only appear in Excel"
+          ],
+          "answer": 1,
+          "explanation": "Treat them as one quick signal."
+        },
+        {
+          "id": "doc-u10-l4-e5",
+          "type": "open",
+          "prompt": "Write four sentences for an interviewer explaining how you would measure whether a rewritten article on cancelling shifts is working, including one number you would look at and one limit of it.",
+          "answer": "I'd look at tickets about cancelling shifts before and after the rewrite, using the same length of period, and check whether other ticket categories stayed steady. I'd also check searches for 'cancel shift' that returned no results, and the helpful votes and comments on the article. The ticket count is the main number, but its limit is that other changes, like a product update or training, could also move it. If it stalled, I'd read the comments and watch someone try the steps.",
+          "rubric": [
+            "Before/after on tickets over a comparable period",
+            "Other categories as a control",
+            "Mentions search terms or feedback",
+            "States a limit honestly"
+          ]
+        }
+      ]
+    }
+  ]
+}

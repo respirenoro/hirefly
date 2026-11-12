@@ -1,0 +1,146 @@
+{
+  "id": "power-bi-u3",
+  "title": "DAX basics",
+  "summary": "Write measures with SUM, COUNTROWS, DIVIDE and CALCULATE, understand filter context, and use simple time intelligence.",
+  "lessons": [
+    {
+      "id": "power-bi-u3-l1",
+      "title": "Measures versus calculated columns",
+      "minutes": 9,
+      "body": "**DAX** (Data Analysis Expressions) is the formula language of Power BI. You use it in two ways.\n\nA **calculated column** is computed for every row of a table when the data refreshes, and the results are stored in the model. It behaves like adding a column in Excel. It sees one row at a time.\n\nA **measure** is not stored. It is a formula that Power BI evaluates each time a visual needs it, using whatever filters apply to that visual: the row of the matrix, the slicer selection, the page filter. That is why a measure can show different values for Eastside, Harbor and the grand total from one definition.\n\nRule of thumb: use a **column** for row-level labels or banding you want to filter by; use a **measure** for anything you add up, count or divide.\n\nSample `Shifts` table:\n\n| shift_id | pharmacy | status | minutes_to_fill |\n|---|---|---|---|\n| 1 | Eastside | Filled | 45 |\n| 2 | Eastside | Cancelled | |\n| 3 | Harbor | Filled | 90 |\n| 4 | Harbor | Filled | 30 |\n| 5 | Harbor | Cancelled | |\n| 6 | Lakeview | Filled | 60 |\n\nThree starter measures (Home > New Measure):\n\n```text\nTotal Shifts = COUNTROWS(Shifts)\nTotal Minutes = SUM(Shifts[minutes_to_fill])\nAvg Minutes to Fill = AVERAGE(Shifts[minutes_to_fill])\n```\n\nResults on the whole table: `Total Shifts` is 6, `Total Minutes` is 225, and `Avg Minutes to Fill` is 56.25, because `AVERAGE` ignores the two blank values (225 divided by 4).\n\n**Syntax notes**\n\n- Columns are written `Table[column]`; measures are written `[Measure Name]` without a table.\n- `COUNTROWS(table)` counts rows in the current filter context. `SUM`, `AVERAGE`, `MIN`, `MAX` take a column.\n- `DIVIDE(numerator, denominator)` is the safe way to divide: it returns a blank (or an optional third argument) instead of an error when the denominator is zero.\n- Measures can use other measures, which keeps formulas short.\n\nA **calculated column** example: `Long Wait = IF(Shifts[minutes_to_fill] > 60, \"Yes\", \"No\")`. This is row-level and fine as a column. A column `Fill Rate = ...` would be wrong, since the rate for a group is not the average of row values; a measure recalculates properly for every group and for the total.\n\nCalculated columns use memory, because the values are stored, so do not add them when a measure will do.",
+      "keyPoints": [
+        "A calculated column is computed per row on refresh and stored; a measure is computed on demand for the current filters.",
+        "Use measures for sums, counts and ratios; columns for row-level labels.",
+        "COUNTROWS counts rows; SUM and AVERAGE take a column; AVERAGE ignores blanks.",
+        "DIVIDE avoids divide-by-zero errors.",
+        "Reference columns as Table[col] and measures as [Measure]."
+      ],
+      "interviewAngle": "\"Measure versus calculated column\" is one of the most common Power BI questions. Answer in one sentence, then give the fill-rate example: it must be a measure because a rate is not additive. You are learning this now, so say you have applied it in a practice project and checked the results against SQL.",
+      "exercises": [
+        {
+          "id": "power-bi-u3-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why should a Fill Rate (filled shifts divided by total shifts) be a measure rather than a calculated column?",
+          "choices": [
+            "Measures are always faster to type",
+            "A column cannot contain decimals",
+            "A measure recalculates for whatever filters the visual applies, including totals, whereas a column stores one value per row",
+            "Calculated columns cannot use the Shifts table"
+          ],
+          "answer": 2,
+          "explanation": "A rate depends on the group of rows being shown. A measure computes it per row of the visual and for the total. A stored per-row value cannot."
+        },
+        {
+          "id": "power-bi-u3-l1-e2",
+          "type": "short",
+          "prompt": "Using the sample Shifts table, what does AVERAGE(Shifts[minutes_to_fill]) return?",
+          "accept": ["56.25"],
+          "answer": "56.25",
+          "explanation": "The four non-blank values 45, 90, 30 and 60 total 225; divided by 4 gives 56.25."
+        },
+        {
+          "id": "power-bi-u3-l1-e3",
+          "type": "open",
+          "prompt": "Write two DAX measures for the Shifts table: Total Shifts (count of rows) and Avg Minutes to Fill. Then explain in a sentence why you would not make Avg Minutes to Fill a calculated column.",
+          "answer": "```text\nTotal Shifts = COUNTROWS(Shifts)\nAvg Minutes to Fill = AVERAGE(Shifts[minutes_to_fill])\n```\n\nA calculated column is stored per row and does not change with filters. The average must be recalculated for each pharmacy, month or slicer selection, and for the grand total, so it belongs in a measure.",
+          "rubric": [
+            "Total Shifts uses COUNTROWS(Shifts)",
+            "Avg Minutes to Fill uses AVERAGE on minutes_to_fill",
+            "Explains the measure responds to filters and the column does not"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u3-l2",
+      "title": "Filter context and CALCULATE",
+      "minutes": 10,
+      "body": "**Filter context** is the set of filters in effect when a measure is evaluated. It is the idea that makes DAX click, and it is easier than it sounds.\n\nWhen a matrix has pharmacies on its rows, each row applies a filter. In the Harbor row, only Harbor shifts are visible to the measure. A slicer set to March adds another filter. The measure `COUNTROWS(Shifts)` just counts whatever rows are left. You never write the grouping, as you would in SQL with `GROUP BY`; the visual supplies it.\n\n**CALCULATE** evaluates an expression after **changing** the filter context:\n\n```text\nFilled Shifts = CALCULATE([Total Shifts], Shifts[status] = \"Filled\")\nFill Rate = DIVIDE([Filled Shifts], [Total Shifts])\n```\n\n`Total Shifts = COUNTROWS(Shifts)` as before. `CALCULATE` takes an expression and then one or more filters. Here the filter replaces any filter on `status` with Filled. It is the DAX version of `SUMIFS`, or `COUNT(*) ... WHERE status = 'Filled'` in SQL.\n\nUsing the six-row sample:\n\n| Pharmacy | Total Shifts | Filled Shifts | Fill Rate |\n|---|---|---|---|\n| Eastside | 2 | 1 | 50.0% |\n| Harbor | 3 | 2 | 66.7% |\n| Lakeview | 1 | 1 | 100.0% |\n| **Total** | 6 | 4 | 66.7% |\n\nThe total row is not the average of the row rates (that would be 72.2%). It is recalculated: 4 filled divided by 6 total. This is the benefit of measures.\n\nBecause the `status` filter inside `CALCULATE` replaces the existing status filter, `Filled Shifts` still counts filled shifts even if a slicer is set to Cancelled; it simply ignores that slicer for status.\n\n**Removing filters with ALL.** To show each pharmacy's share of all shifts, you need a denominator that ignores the pharmacy filter:\n\n```text\nShare of All Shifts =\nDIVIDE([Total Shifts], CALCULATE([Total Shifts], ALL(Pharmacies)))\n```\n\nIn the table above, Eastside is 2 / 6 = 33.3%. `ALL(Pharmacies)` clears filters from the `Pharmacies` table, which is where the pharmacy filter on the row originates. Remove filters from the table that supplies the filter, not from the fact table.\n\nHow to read any measure: ask \"what filters exist when this runs, and what does CALCULATE change?\" Test with a table visual and compare to a SQL count.",
+      "keyPoints": [
+        "Filter context is the set of filters (rows, slicers, page filters) applied when a measure runs.",
+        "The visual supplies the grouping; you write the aggregation.",
+        "CALCULATE(expression, filter) changes the filter context before evaluating.",
+        "A filter on a column inside CALCULATE replaces existing filters on that column.",
+        "ALL(table) removes filters, useful for share-of-total denominators."
+      ],
+      "interviewAngle": "Be ready to explain filter context in plain language: \"it is the filters on the current cell of the report, from the row, the slicers and the page.\" Compare CALCULATE to SUMIFS or a SQL WHERE. As a learner, be candid that you are comfortable with these basics and still building depth, for example with more advanced context transition.",
+      "exercises": [
+        {
+          "id": "power-bi-u3-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Using the matrix above, what does [Filled Shifts] show in the Harbor row?",
+          "choices": ["1", "2", "3", "4"],
+          "answer": 1,
+          "explanation": "The Harbor row filters Shifts to Harbor, where three shifts exist and two are Filled."
+        },
+        {
+          "id": "power-bi-u3-l2-e2",
+          "type": "short",
+          "prompt": "In the matrix's Total row, what is Fill Rate to one decimal place, as a percentage?",
+          "accept": ["66.7%", "66.7", "0.667", "66.67%"],
+          "answer": "66.7%",
+          "explanation": "The measure divides 4 filled shifts by 6 total shifts."
+        },
+        {
+          "id": "power-bi-u3-l2-e3",
+          "type": "open",
+          "prompt": "In your own words, explain filter context and CALCULATE to a hiring manager, using the Filled Shifts measure as the example.",
+          "answer": "Filter context is the set of filters in place when a number is calculated, for example the pharmacy on this row of a table, plus any slicers. A measure like Total Shifts just counts the rows left after those filters. CALCULATE lets me change the filters first. Filled Shifts = CALCULATE([Total Shifts], Shifts[status] = \"Filled\") counts shifts in whatever context applies, but only the Filled ones, so I get a different value for each pharmacy and a correct overall total. It is similar to a SUMIFS or a COUNT with a WHERE in SQL.",
+          "rubric": [
+            "Defines filter context as the filters in effect for a cell, from rows, slicers or pages",
+            "Explains that CALCULATE modifies the filters before evaluating",
+            "Uses Filled Shifts correctly as an example",
+            "Links to a familiar idea such as SUMIFS or SQL WHERE"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u3-l3",
+      "title": "Simple time intelligence",
+      "minutes": 9,
+      "body": "Time intelligence functions let a measure look at periods other than the current one: month to date, year to date, last month. They need the **date table** from the modelling unit, marked as a date table and related to the fact table.\n\nSuppose `Total Shifts` gives these monthly figures (visual: a table with `Dates[Month]` on rows):\n\n| Month | Total Shifts |\n|---|---|\n| Jan | 20 |\n| Feb | 24 |\n| Mar | 18 |\n\n**Year to date**\n\n```text\nShifts YTD = TOTALYTD([Total Shifts], Dates[Date])\n```\n\nIt accumulates from 1 January: Jan 20, Feb 44, Mar 62. `TOTALMTD` and `TOTALQTD` do the same for month and quarter.\n\n**Previous month**\n\n```text\nShifts Prev Month =\nCALCULATE([Total Shifts], DATEADD(Dates[Date], -1, MONTH))\n```\n\n`DATEADD` shifts the dates in the current filter context back by one month, so each row sees the month before. The first month has nothing before it and shows blank.\n\n**Change from last month**\n\n```text\nShifts MoM % =\nDIVIDE([Total Shifts] - [Shifts Prev Month], [Shifts Prev Month])\n```\n\n| Month | Total Shifts | Shifts Prev Month | Shifts MoM % |\n|---|---|---|---|\n| Jan | 20 | | |\n| Feb | 24 | 20 | +20.0% |\n| Mar | 18 | 24 | -25.0% |\n\nMarch is (18 - 24) / 24 = -0.25. `DIVIDE` returns blank for January instead of an error.\n\n**Same period last year** uses `SAMEPERIODLASTYEAR(Dates[Date])` in the same way: `CALCULATE([Total Shifts], SAMEPERIODLASTYEAR(Dates[Date]))`.\n\n**Common problems**\n\n- Using the date column from the fact table instead of from the date table makes these functions misbehave.\n- A date table with missing days gives wrong results.\n- If there is no previous period in the data, the measure is blank, which is correct.\n- Time intelligence works only when the visual is sliced by the date table (months on rows). Put `Shifts[request_date]` on the axis and it will not.\n\nFor the dashboard, a month-over-month change next to the fill rate card is a typical, valuable use. Format the measure as a percentage in Measure tools.",
+      "keyPoints": [
+        "Time intelligence needs a marked, gap-free date table related to the fact table.",
+        "TOTALYTD, TOTALMTD and TOTALQTD accumulate within the period.",
+        "DATEADD inside CALCULATE shifts the period, for example to the previous month.",
+        "Percentage change is DIVIDE(current - previous, previous).",
+        "Use the date table's fields on the axis, never the fact table's date."
+      ],
+      "interviewAngle": "You may be asked how to compare to last month. Naming the date table requirement and DATEADD or SAMEPERIODLASTYEAR shows you understand the pattern. As a learner, say you have practised these on sample data and check results by hand, as in the monthly example, rather than claiming wide production experience.",
+      "exercises": [
+        {
+          "id": "power-bi-u3-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Monthly shifts are Jan 20, Feb 24 and Mar 18. What does Shifts MoM % (current minus previous, divided by previous) show for March?",
+          "choices": ["+33.3%", "-6.0%", "-25.0%", "-33.3%"],
+          "answer": 2,
+          "explanation": "(18 - 24) / 24 = -0.25, which is -25.0%. 33.3% would result from dividing by the wrong month."
+        },
+        {
+          "id": "power-bi-u3-l3-e2",
+          "type": "short",
+          "prompt": "Which DAX function returns a running year-to-date total of a measure over a date column?",
+          "accept": ["totalytd", "totalytd()"],
+          "answer": "TOTALYTD",
+          "explanation": "TOTALYTD(expression, dates) accumulates from the start of the year."
+        },
+        {
+          "id": "power-bi-u3-l3-e3",
+          "type": "open",
+          "prompt": "Write a measure for the previous month's Total Shifts and list two prerequisites in the model that must be true for it to work.",
+          "answer": "```text\nShifts Prev Month =\nCALCULATE([Total Shifts], DATEADD(Dates[Date], -1, MONTH))\n```\n\nPrerequisites: a date table with one row per day and no gaps, marked as the date table; and a relationship from Dates[Date] to the fact table's date column. The visual must also use fields from the date table (for example Dates[Month]).",
+          "rubric": [
+            "Uses CALCULATE with DATEADD and -1 MONTH on the date table's Date column",
+            "States a complete, gap-free date table is needed",
+            "States the date table must be related to the fact table",
+            "Optionally notes visuals must use date table fields"
+          ]
+        }
+      ]
+    }
+  ]
+}

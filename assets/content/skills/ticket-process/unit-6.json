@@ -1,0 +1,117 @@
+{
+  "id": "ticket-u6",
+  "title": "In the interview",
+  "summary": "Handle the scenario questions interviewers use to test ticket judgment, and prepare for a practical bug-report exercise.",
+  "lessons": [
+    {
+      "id": "ticket-u6-l1",
+      "title": "Scenario questions",
+      "minutes": 9,
+      "body": "Interviewers for QA, support, BA and coordinator roles often give a scenario and ask what you would do. They are checking judgment, calm and structure, not a single right answer. Use a short framework: **understand, act, communicate, prevent.** Say your assumptions out loud.\n\n**Scenario 1: An angry customer with a vague bug.** 'The system is useless, it lost our shifts, fix it now!'\n\n- *Understand:* Stay calm and acknowledge the impact. 'I understand shifts disappearing is serious, and I want to get this fixed.' Then ask two or three focused questions: which shifts, which pharmacists, when did you last see them correctly?\n- *Act:* Check for known issues and duplicates, try to reproduce, and assess severity. If emergency shifts are at risk, escalate to a developer at once.\n- *Communicate:* Give a time for the next update, a workaround, and who owns it.\n- *Prevent:* After the fix, record the root cause and add a regression test.\n\n**Scenario 2: Two urgent tickets at once.** Compare impact, number of users, safety or revenue risk, deadlines and workarounds. Pick an order, then tell both requesters the order and honest timing. If the call is above your authority, ask your manager or the product owner, bringing a recommendation. Do not hide the trade-off.\n\n**Scenario 3: A developer says 'cannot reproduce'.**\n\n- Do not argue. Ask what they tried, and compare environment, build, role, data and time zone.\n- Re-test yourself and capture a screen recording or logs.\n- If it is intermittent, record the frequency and conditions.\n- Agree on a next step, for example extra logging, then park the ticket in a waiting status with a date to review.\n\n**Scenario 4: The customer wants a feature now and calls it a bug.** Check the intended behavior. If it is a feature request, say so kindly, capture the problem and who has it, and explain how requests are reviewed. Do not promise a date.\n\n**Scenario 5: You made a mistake, such as closing a ticket before verification.** Own it quickly: reopen it, tell the customer and the team what happened, and add a check so it does not recur.\n\n**Habits that score well:** name the people you would involve, mention writing it down in the ticket, give a specific time for the next update, and finish with how you would prevent repeats. Link to real experience: 'At my last company, when pharmacy staff reported shifts missing, I...' and use the STAR shape if asked for a past example.",
+      "keyPoints": [
+        "Use understand, act, communicate, prevent and say your assumptions.",
+        "With an angry customer, acknowledge impact, ask few focused questions and commit to a time for the next update.",
+        "With two urgent tickets, compare impact and workarounds, then tell both requesters the order.",
+        "With 'cannot reproduce', cooperate: compare environment, retest and agree next steps."
+      ],
+      "interviewAngle": "Back each scenario with a real example when you have one, and say plainly when you are describing what you would do instead. You worked between a pharmacy staffing firm and developers, so you have genuine material on urgent shift problems. Do not invent a dramatic story; a modest true one is stronger.",
+      "exercises": [
+        {
+          "id": "ticket-u6-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A developer says they cannot reproduce your bug. What is the best first move?",
+          "choices": [
+            "Insist they are wrong",
+            "Ask what they tried, compare environment, build, role, data and time zone, and re-test with evidence",
+            "Close the ticket",
+            "Go to the developer's manager"
+          ],
+          "answer": 1,
+          "explanation": "Most 'cannot reproduce' cases are caused by differences in environment or data. Collaboration is faster than conflict."
+        },
+        {
+          "id": "ticket-u6-l1-e2",
+          "type": "mcq",
+          "prompt": "Two urgent tickets arrive. One blocks emergency shifts for several pharmacies; the other is a report error for one customer. What should you do?",
+          "choices": [
+            "Work them in the order received",
+            "Handle the emergency shifts first, then tell both requesters the order and honest timing",
+            "Ask the report customer to wait without saying why",
+            "Handle the easiest one first"
+          ],
+          "answer": 1,
+          "explanation": "Impact decides the order, and both requesters should be told so no one is left guessing."
+        },
+        {
+          "id": "ticket-u6-l1-e3",
+          "type": "open",
+          "prompt": "Answer in spoken form (about 120 to 160 words): 'A customer calls angry and says your system lost their shifts. They cannot say which ones. What do you do?' Use understand, act, communicate, prevent.",
+          "answer": "I'd start by acknowledging it. Something like, 'I understand shifts going missing is serious, and I want to get this sorted.' Then I'd ask two or three focused questions: which pharmacy, roughly which dates, and who saw it. Even a pharmacist's name gives me a way to look.\n\nNext I'd check for known issues and similar tickets, and try to find the shifts or reproduce it myself. If emergency shifts could go unfilled, I'd escalate to a developer straight away with what I have, rather than waiting for perfect details.\n\nI'd tell the customer what I'm doing and give a specific time for my next update, plus a workaround if there is one, like a list of upcoming shifts to check.\n\nAfterward I'd record the cause in the ticket, tell the customer what changed, and ask whether a test or a documentation fix would stop it happening again.",
+          "rubric": [
+            "Acknowledges feelings and impact first",
+            "Asks few, focused questions",
+            "Checks duplicates, reproduces and escalates if urgent",
+            "Gives a specific next-update time and a workaround",
+            "Mentions root cause or prevention"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u6-l2",
+      "title": "The practical exercise and common questions",
+      "minutes": 8,
+      "body": "Many entry-level QA, support and BA interviews include a short written task. Knowing the usual formats removes most of the fear.\n\n**Common formats:**\n\n| Format | What you get | What they look for |\n|---|---|---|\n| Write a bug report | A paragraph describing a problem, or a screenshot | Structure, clarity, no invented facts |\n| Improve a bad ticket | A poor ticket | You find what is missing and ask questions |\n| Write a user story and criteria | A short feature idea | Role, benefit, testable criteria, edge cases |\n| Triage a list | Five or six tickets | Severity, priority, duplicates, reasoning |\n| Reply to a customer | An angry or vague email | Tone, questions, next step |\n| Write test cases | A small feature description | Normal, edge and negative cases |\n\n**A method for the bug report exercise (10 to 15 minutes):**\n\n1. Read the description twice. Underline facts, and mark guesses.\n2. Write a title: area, symptom, condition.\n3. List environment details given, and mark the rest as 'to confirm'.\n4. Write numbered steps from a known starting state.\n5. Write expected versus actual separately.\n6. Add frequency, evidence and impact, with a workaround if known.\n7. List open questions for the reporter. Do not make up what you do not know.\n8. Reread as a developer who has never seen the product.\n\n**Example prompt:** 'A dispatcher says she assigns a shift to a pharmacist, the screen says Assigned, but the pharmacist does not get a notification. It happened twice today, both after lunch. Earlier shifts were fine. Write the bug report.'\n\nA strong response has a title such as 'No notification after shift assignment (afternoon assignments, 2 of 2 today)', numbered steps from the dispatcher's point of view, expected and actual results, the observation that earlier assignments worked, and questions: shift ids, assignment times with time zone, the app version, and whether the pharmacist has notifications enabled. It labels 'after lunch' as a clue, not a cause.\n\n**Common questions you should be ready for:**\n\n- What goes in a good bug report?\n- Severity versus priority?\n- How do you handle a ticket without enough information?\n- What is a user story and what are acceptance criteria?\n- How do you decide when a ticket is done?\n- Tell me about reducing ticket volume. (Your 35% documentation story.)\n- What tools have you used? (Jira and Azure DevOps daily, Salesforce for support cases in 2021; Azure DevOps Test Plans for test cases.)\n\nIf a tool in the exercise is unfamiliar, say so, and show the structure on paper or in a plain text editor. The thinking matters more than the tool.",
+      "keyPoints": [
+        "Expect to write a bug report, improve a bad ticket, write a story, triage a list or reply to a customer.",
+        "Mark facts versus guesses and never invent details; list open questions instead.",
+        "Use a repeatable method: title, environment, steps, expected, actual, frequency, evidence, impact, questions.",
+        "Reread your work as a developer who has never seen the product."
+      ],
+      "interviewAngle": "Say aloud what you are doing as you write: 'I'm marking this as to confirm because the description doesn't say.' That shows judgment. Be honest about tools: you used Azure DevOps Test Plans for test cases and basic Playwright end-to-end tests, but most testing was manual.",
+      "exercises": [
+        {
+          "id": "ticket-u6-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In a bug report exercise the description does not mention the app version. What should you do?",
+          "choices": [
+            "Invent a plausible version number",
+            "Leave environment out entirely",
+            "Write 'to confirm' for the version and list it among the questions for the reporter",
+            "Refuse to write the report"
+          ],
+          "answer": 2,
+          "explanation": "Marking unknowns shows honesty and good judgment. Inventing facts is worse than leaving a gap."
+        },
+        {
+          "id": "ticket-u6-l2-e2",
+          "type": "mcq",
+          "prompt": "In the prompt 'both failures happened after lunch', how should 'after lunch' be treated?",
+          "choices": [
+            "As the confirmed cause",
+            "As a clue worth recording and checking, not a conclusion",
+            "As irrelevant and removed",
+            "As proof of a time zone bug"
+          ],
+          "answer": 1,
+          "explanation": "It is an observation. Record it, ask for exact times, and let the investigation decide whether it matters."
+        },
+        {
+          "id": "ticket-u6-l2-e3",
+          "type": "open",
+          "prompt": "Practice exercise. Write a bug report from this description, in a format you could hand to a developer: 'A dispatcher says she assigns a shift to a pharmacist, the screen says Assigned, but the pharmacist does not get a notification. It happened twice today, both after lunch. Earlier shifts were fine.' Mark anything not given as to confirm and finish with questions for the reporter.",
+          "answer": "**Title:** No notification after shift assignment (afternoon assignments, 2 of 2 today)\n\n**Environment:** Web dispatcher app, version to confirm, browser to confirm, production (assumed), dispatcher role. Pharmacist app version and platform to confirm.\n\n**Steps:**\n1. Log in as a dispatcher.\n2. Open an open shift in the afternoon of today.\n3. Assign it to a pharmacist and save.\n4. Observe the pharmacist's device for a notification.\n\n**Expected:** The shift shows as Assigned and the pharmacist receives a notification promptly.\n**Actual:** The shift shows as Assigned, but the pharmacist receives no notification (reported by the dispatcher).\n\n**Frequency:** 2 of 2 assignments made after lunch today. Earlier assignments today sent notifications normally.\n**Evidence:** None yet. Need shift ids and screenshots.\n**Impact:** Pharmacists may not know they have been assigned. Workaround: call or text the pharmacist.\n**Possible cause (guess only):** Something that changes in the afternoon, such as a time zone cut-off, a queue problem or a deploy.\n\n**Questions for the reporter:**\n1. Shift ids and exact assignment times, with time zone?\n2. Which pharmacists, and do they have notifications enabled on their app?\n3. Did any later assignments work?\n4. Which app version are the pharmacists using?",
+          "rubric": [
+            "Specific title with area, symptom and condition",
+            "Steps start from a known state and are numbered",
+            "Expected and actual are separated",
+            "Unknowns marked as to confirm rather than invented",
+            "Includes frequency, impact, workaround and questions for the reporter"
+          ]
+        }
+      ]
+    }
+  ]
+}

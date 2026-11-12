@@ -1,0 +1,325 @@
+{
+  "id": "pw-u7",
+  "title": "Locator strategy drill",
+  "summary": "Sixteen graded questions and four open ones on picking, scoping and fixing locators, and reading what the error says. Every answer was run against the TodoMVC demo.",
+  "lessons": [
+    {
+      "id": "pw-u7-l1",
+      "title": "Locator drill A: role, label, placeholder, text",
+      "minutes": 10,
+      "body": "This drill trains the first choice: find things the way a user does. Read the page below, then answer.\n\n**The practice page.** Open https://demo.playwright.dev/todomvc/ and add three todos: Buy milk, Book a flight, Call the bank. Tick \"Buy milk\". The page exposes this (read from the accessibility tree):\n\n```text\nheading \"todos\"\ntextbox \"What needs to be done?\"            (also the placeholder)\ncheckbox \"Mark all as complete\"             (the select-all box)\n3 list items, each with: checkbox \"Toggle Todo\", the title, button \"Delete\" (shown on hover)\n\"2 items left\"                              (data-testid=\"todo-count\")\nlinks: All, Active, Completed               button: Clear completed\n```\nRows carry `data-testid=\"todo-item\"` and titles `data-testid=\"todo-title\"`. Every answer in this drill was run against this page.\n\n**Reminders before you start**\n\n- Use `getByRole` first. Roles you need here: `heading`, `textbox`, `link`, `button`, `checkbox`.\n- `name` matches the accessible name, case-insensitively and as a substring, unless you pass `exact: true`.\n- `getByPlaceholder` and `getByLabel` suit form fields; `getByText` suits plain text.\n\nWorked example. The \"Completed\" filter looks like a tab but is a **link** (it has an `href`), so:\n\n```ts\nawait page.getByRole('link', { name: 'Completed' }).click();\nawait expect(page).toHaveURL(/#\\/completed/);\n```\n\nIf you picked `getByRole('button', ...)` it would find nothing and time out. When a role guess is wrong, check what Playwright sees: `npx playwright codegen` suggests the role, or print `await page.locator('body').ariaSnapshot()`.\n\nSubstring matching has a trap in both directions. `getByText('book a')` finds \"Book a flight\" because matching ignores case and accepts a substring. That is handy, and also how a short name can match two elements. Add `exact: true` when the full string is the point:\n\n```ts\npage.getByText('book a');                    // matches \"Book a flight\"\npage.getByText('book a', { exact: true });   // matches nothing\n```\n\nNow do the five exercises. The graded ones have one right answer; the last asks for your own locators.",
+      "keyPoints": [
+        "Role first: heading, textbox, link, button and checkbox cover most of a page.",
+        "A filter that navigates is a link, not a button; check the role if a locator finds nothing.",
+        "`name` and `getByText` are case-insensitive substring matches unless `exact: true`.",
+        "When unsure of a role, use codegen or an ARIA snapshot to see what Playwright sees."
+      ],
+      "interviewAngle": "A live \"write the locator\" exercise is common. Say your order out loud (role, label, text, test id) and check the guess against the page. This drill is practice on a public demo site; at work you wrote basic locators, so describe it that way.",
+      "exercises": [
+        {
+          "id": "pw-u7-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which locator is the best way to click the **Active** filter?",
+          "choices": [
+            "page.locator('ul.filters > li:nth-child(2)')",
+            "page.getByRole('button', { name: 'Active' })",
+            "page.getByRole('link', { name: 'Active' })",
+            "page.getByText('A')"
+          ],
+          "answer": 2,
+          "explanation": "The filters are links with an href. Role plus name is stable; the CSS chain depends on layout, and 'A' would match many elements."
+        },
+        {
+          "id": "pw-u7-l1-e2",
+          "type": "short",
+          "prompt": "Which role does the **Clear completed** control have? (One word.)",
+          "accept": [
+            "button"
+          ],
+          "answer": "button",
+          "explanation": "It is a button element, so getByRole('button', { name: 'Clear completed' }) finds it."
+        },
+        {
+          "id": "pw-u7-l1-e3",
+          "type": "mcq",
+          "prompt": "`page.getByText('book a')` is used on a list that contains \"Book a flight\". What happens?",
+          "choices": [
+            "It throws a syntax error",
+            "It matches \"Book a flight\", since text matching is case-insensitive and by substring",
+            "It matches only if you add a role",
+            "It matches nothing because the case differs"
+          ],
+          "answer": 1,
+          "explanation": "That is the default. `{ exact: true }` switches to whole-string, case-sensitive matching, and then nothing matches."
+        },
+        {
+          "id": "pw-u7-l1-e4",
+          "type": "mcq",
+          "prompt": "You want a locator for the text box where new todos are typed. Which is the most readable and robust?",
+          "choices": [
+            "page.locator('//header/input')",
+            "page.locator('input').first()",
+            "page.locator('.new-todo')",
+            "page.getByPlaceholder('What needs to be done?')"
+          ],
+          "answer": 3,
+          "explanation": "The placeholder is what a user sees. The others depend on markup order, a class name or an XPath path. getByRole('textbox', { name: ... }) is equally good."
+        },
+        {
+          "id": "pw-u7-l1-e5",
+          "type": "open",
+          "prompt": "Write one locator for each: the heading \"todos\"; the filter link \"Completed\"; the \"Clear completed\" button; the text box (by placeholder); the text \"2 items left\" matched as a whole. Add one sentence on which you would check with codegen if unsure.",
+          "answer": "```ts\npage.getByRole('heading', { name: 'todos' });\npage.getByRole('link', { name: 'Completed' });\npage.getByRole('button', { name: 'Clear completed' });\npage.getByPlaceholder('What needs to be done?');\npage.getByText('2 items left', { exact: true });\n```\nI would check the filter, because it looks like a tab or button but is a link; codegen shows the role it sees.",
+          "rubric": [
+            "Uses getByRole for the heading, link and button",
+            "Link role (not button) for Completed",
+            "getByPlaceholder for the text box",
+            "exact: true for the whole-string text",
+            "Mentions checking the role with codegen or a snapshot"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u7-l2",
+      "title": "Locator drill B: test ids, filter and strictness",
+      "minutes": 10,
+      "body": "Roles and text are not always enough. A list of identical rows has the same checkbox and button in each. This drill covers the tools for that: `getByTestId`, `filter`, chaining, and strict mode.\n\n**The practice page.** Open https://demo.playwright.dev/todomvc/ and add three todos: Buy milk, Book a flight, Call the bank. Tick \"Buy milk\". The page exposes this (read from the accessibility tree):\n\n```text\nheading \"todos\"\ntextbox \"What needs to be done?\"            (also the placeholder)\ncheckbox \"Mark all as complete\"             (the select-all box)\n3 list items, each with: checkbox \"Toggle Todo\", the title, button \"Delete\" (shown on hover)\n\"2 items left\"                              (data-testid=\"todo-count\")\nlinks: All, Active, Completed               button: Clear completed\n```\nRows carry `data-testid=\"todo-item\"` and titles `data-testid=\"todo-title\"`. Every answer in this drill was run against this page.\n\n**Scope with filter, then look inside**\n\nTo tick the checkbox of \"Book a flight\" only:\n\n```ts\nconst row = page.getByTestId('todo-item').filter({ hasText: 'Book a flight' });\nawait row.getByRole('checkbox').check();\nawait expect(row).toHaveClass(/completed/);\n```\n\n`filter({ hasText })` keeps rows whose text contains the string. `hasNotText` keeps the others. `has: locator` keeps rows containing a matching child. I ran all three on this page: three rows, `hasNotText: 'milk'` leaves 2.\n\n**Strict mode**\n\nOn this page `page.getByRole('checkbox')` matches **four** elements: the select-all box plus three row checkboxes. Acting on it fails, and the message names every match:\n\n```text\nError: locator.click: Error: strict mode violation: getByRole('checkbox') resolved to 4 elements:\n    1) <input id=\"toggle-all\" type=\"checkbox\" class=\"toggle-all\"/> aka getByRole('checkbox', { name: '❯Mark all as complete' })\n    2) <input class=\"toggle\" type=\"checkbox\" aria-label=\"Toggle Todo\"/> aka ...\n```\n\nRead it as a gift: it lists the elements and suggests narrower locators. The fix is to narrow, not to add `.first()`.\n\n**`first()`, `nth()` and `last()`**\n\nThey work (`getByTestId('todo-title').nth(1)` is \"Book a flight\"), but they tie the test to order. If a new row is added at the top, the test clicks the wrong thing and may still pass. Prefer a filter on content; use `nth` when order is the thing under test.\n\n**Counting**\n\n`await expect(locator).toHaveCount(3)` retries until the count is right. Use it for \"three rows\" instead of reading `count()` once.",
+      "keyPoints": [
+        "`filter({ hasText })`, `hasNotText` and `has` narrow a list of similar elements by content.",
+        "Chain from a row: `row.getByRole('checkbox')` searches only inside that row.",
+        "A strict mode violation lists every match; narrow the locator rather than adding `.first()`.",
+        "`nth()` ties a test to order; filter by content unless order is what you are testing."
+      ],
+      "interviewAngle": "\"What do you do when a locator matches several elements?\" is a favourite follow-up. Answer: narrow by parent or content with filter, and avoid positional picks. This is practice on a demo site, learned in practice, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u7-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which line ticks the checkbox in the row titled \"Book a flight\" and nothing else?",
+          "choices": [
+            "page.getByText('Book a flight').check()",
+            "page.getByTestId('todo-item').filter({ hasText: 'Book a flight' }).getByRole('checkbox').check()",
+            "page.getByRole('checkbox').nth(1).check()",
+            "page.getByRole('checkbox').check()"
+          ],
+          "answer": 1,
+          "explanation": "The filter scopes to one row and the chained role locator finds its checkbox. nth(1) would pick the first todo, because index 0 is the select-all box, and it shifts when rows change."
+        },
+        {
+          "id": "pw-u7-l2-e2",
+          "type": "short",
+          "prompt": "With three todos on the page, how many elements does `page.getByRole('checkbox')` match? (A number.)",
+          "accept": [
+            "4",
+            "four"
+          ],
+          "answer": "4",
+          "explanation": "Three row checkboxes plus the select-all checkbox. Acting on it is a strict mode violation."
+        },
+        {
+          "id": "pw-u7-l2-e3",
+          "type": "mcq",
+          "prompt": "Which assertion checks that two rows do **not** contain the word \"milk\" (three rows in total)?",
+          "choices": [
+            "await expect(page.getByTestId('todo-item').filter({ hasNotText: 'milk' })).toHaveCount(2);",
+            "expect(page.getByTestId('todo-item').count()).toBe(2);",
+            "await expect(page.getByTestId('todo-item')).not.toHaveCount(2);",
+            "await expect(page.getByText('milk')).toHaveCount(2);"
+          ],
+          "answer": 0,
+          "explanation": "hasNotText keeps rows without the text, and toHaveCount retries. The third line is missing await and reads the count once."
+        },
+        {
+          "id": "pw-u7-l2-e4",
+          "type": "mcq",
+          "prompt": "A teammate fixes a strict mode violation by adding `.first()`. What is the risk?",
+          "choices": [
+            "first() disables auto-waiting",
+            "The test now depends on order and can click the wrong element after a layout or data change",
+            "There is none; first() is always safe",
+            "first() makes the locator case-sensitive"
+          ],
+          "answer": 1,
+          "explanation": "A positional pick passes while quietly testing the wrong thing. Narrowing by content or parent states the intent."
+        },
+        {
+          "id": "pw-u7-l2-e5",
+          "type": "open",
+          "prompt": "On the practice page, write locators for: the title of the second todo using content (not position); the Delete button of the row containing \"Call the bank\"; the count of rows. Then say in two sentences why you did not use nth().",
+          "answer": "```ts\nconst row = page.getByTestId('todo-item').filter({ hasText: 'Call the bank' });\nrow.getByTestId('todo-title');\nawait row.hover();\nrow.getByRole('button', { name: 'Delete' });\nawait expect(page.getByTestId('todo-item')).toHaveCount(3);\n```\nI avoided nth() because it depends on row order, so adding a todo at the top would change which element is picked. Filtering on text says what I mean and survives reordering.",
+          "rubric": [
+            "Uses filter with hasText for the row",
+            "Chains getByRole('button', { name: 'Delete' }) inside the row",
+            "Mentions hover because the button shows on hover, or accepts it was noticed",
+            "Uses toHaveCount for the rows",
+            "Explains the order dependence of nth()"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u7-l3",
+      "title": "Locator drill C: fix the brittle locator",
+      "minutes": 10,
+      "body": "Each exercise gives a locator that works today and breaks tomorrow. Replace it with one that states intent. The page is the same TodoMVC demo with three todos.\n\n**Why each of these is brittle**\n\n| Brittle locator | What breaks it |\n|---|---|\n| `page.locator('.todo-list li:nth-child(2) .toggle')` | Row order, a renamed class |\n| `page.locator('//a[text()=\"Completed\"]')` | Any wording change, XPath fragility |\n| `page.locator('.new-todo')` | A class rename during a redesign |\n| `page.locator('footer > span > strong')` | Any extra wrapper, a layout change |\n\n**The pattern for fixing one**\n\n1. Say what a user would call the element. \"The checkbox of the Book a flight row.\"\n2. Pick the highest option that works: role and name, then label or placeholder, then text, then test id.\n3. If several rows look alike, scope with `filter` on the content you care about.\n4. Run it. A fix you did not run is a guess.\n\nFixed versions, all run on the practice page:\n\n```ts\n// was: '.todo-list li:nth-child(2) .toggle'\npage.getByTestId('todo-item').filter({ hasText: 'Book a flight' }).getByRole('checkbox');\n\n// was: '//a[text()=\"Completed\"]'\npage.getByRole('link', { name: 'Completed' });\n\n// was: '.new-todo'\npage.getByPlaceholder('What needs to be done?');\n\n// was: 'footer > span > strong'  (the \"2\" in \"2 items left\")\npage.getByTestId('todo-count');   // then assert toContainText('2 items left')\n```\n\n**When a test id is right**\n\nThe count has no role and its number sits inside a nested tag. A `data-testid` is the honest choice. It needs a developer to add it, which is a normal ticket: \"Add data-testid=todo-count to the item counter for automated tests.\"\n\n**Do not**\n\nDo not fix brittleness by copying the long selector that Chrome DevTools offers (\"Copy selector\"). It records the path, which is the thing that breaks.",
+      "keyPoints": [
+        "Fix a brittle locator by naming what a user sees, then choosing role, label, text or test id.",
+        "Scope similar rows with `filter` on content, not `nth-child`.",
+        "A test id is the right tool when no role or text is stable; ask a developer to add it.",
+        "Run the replacement; do not trust it unseen."
+      ],
+      "interviewAngle": "A \"fix this test\" exercise often starts with a brittle locator. Explain each change in a sentence: what it was tied to, what it is tied to now. Keep the claim modest: you wrote basic tests, and this drill was practised on a demo site.",
+      "exercises": [
+        {
+          "id": "pw-u7-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "The row order may change. Which replacement for `page.locator('.todo-list li:nth-child(2) .toggle')` is best, to tick \"Book a flight\"?",
+          "choices": [
+            "page.locator('.toggle').nth(1)",
+            "page.getByRole('checkbox').first()",
+            "page.locator('li:nth-of-type(2) input')",
+            "page.getByTestId('todo-item').filter({ hasText: 'Book a flight' }).getByRole('checkbox')"
+          ],
+          "answer": 3,
+          "explanation": "It targets the row by its content and the control by its role. The others still depend on position or match several elements."
+        },
+        {
+          "id": "pw-u7-l3-e2",
+          "type": "mcq",
+          "prompt": "Best replacement for `page.locator('//a[text()=\"Completed\"]')`?",
+          "choices": [
+            "page.getByRole('link', { name: 'Completed' })",
+            "page.locator('text=Completed')",
+            "page.locator('a:has-text(\"Completed\")')",
+            "page.locator('//footer//a[3]')"
+          ],
+          "answer": 0,
+          "explanation": "Role and name is the recommended, readable form. The others are CSS, legacy text or position."
+        },
+        {
+          "id": "pw-u7-l3-e3",
+          "type": "short",
+          "prompt": "Which `getBy` method finds an input by its placeholder text? (Method name only.)",
+          "accept": [
+            "getbyplaceholder",
+            "getByPlaceholder",
+            "getByPlaceholder()"
+          ],
+          "answer": "getByPlaceholder",
+          "explanation": "page.getByPlaceholder('What needs to be done?') replaces the class-based locator."
+        },
+        {
+          "id": "pw-u7-l3-e4",
+          "type": "mcq",
+          "prompt": "When is `getByTestId` the right choice?",
+          "choices": [
+            "Never; Playwright does not support it",
+            "Always, because it never breaks",
+            "When no role, label or text is stable, and a developer can add a data-testid",
+            "Only for buttons"
+          ],
+          "answer": 2,
+          "explanation": "Test ids are an explicit contract with developers. Use them when user-facing locators do not fit, such as a counter or a row without a name."
+        },
+        {
+          "id": "pw-u7-l3-e5",
+          "type": "open",
+          "prompt": "Rewrite these three locators and say in one line what each was tied to: (1) `page.locator('#app section.main > ul > li:last-child label')` to read the last todo's title; (2) `page.locator('button.clear-completed')`; (3) `page.locator('input.toggle-all')`. Assume the select-all checkbox is named \"Mark all as complete\".",
+          "answer": "```ts\npage.getByTestId('todo-title').last();                       // or filter by the known text\npage.getByRole('button', { name: 'Clear completed' });\npage.getByLabel('Mark all as complete');                      // or getByRole('checkbox', { name: /Mark all as complete/ })\n```\n(1) was tied to the page structure and the last position; (2) to a class name; (3) to a class name. On the demo the select-all name has a leading symbol, so use a regular expression or getByLabel substring match and run it to confirm.",
+          "rubric": [
+            "Title read by test id or by known text instead of a structural path",
+            "Clear completed uses role button with its name",
+            "Select-all uses label or role checkbox, not a class",
+            "States what each original depended on",
+            "Notes running the locator to confirm"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u7-l4",
+      "title": "Locator drill D: read the error message",
+      "minutes": 9,
+      "body": "Most debugging starts with the first lines of the error. This drill uses messages produced by real runs on the practice page. The message tells you which of three things went wrong: the locator found nothing, it found too many, or it found the right element with the wrong value.\n\n**1. Found nothing: a timeout while waiting**\n\n```text\nError: locator.fill: Test timeout of 8000ms exceeded.\n  - waiting for getByPlaceholder('What needs doing?')\n```\n\nPlaywright kept looking until the timeout. The locator text is on the last line. Compare it with the page: the real placeholder is \"What needs to be done?\". Fix the string, or check the page really reached that screen.\n\n**2. Found too many: strict mode**\n\n```text\nError: locator.check: Error: strict mode violation: getByRole('checkbox') resolved to 2 elements:\n```\n\nThe message lists the elements. Narrow the locator (filter by row, or a more specific name).\n\n**3. Found it, wrong value: an assertion failure**\n\n```text\nError: expect(locator).toHaveText(expected) failed\nLocator:  getByTestId('todo-count')\nExpected: \"2 items left\"\nReceived: \"1 item left\"\n```\n\nThe locator worked. Either the test's expectation is wrong, or the app is. Decide which by asking what the requirement says. Do not edit the expected value until you know.\n\n**4. A wrong role guess**\n\n```text\nTimeoutError: locator.click: Timeout 1500ms exceeded.\n  - waiting for getByRole('button', { name: 'Assign' })\n```\n\nNothing on the page is a button named Assign. Maybe the label is \"Assign pharmacist\", the control is a link, or the page did not load. The trace or screenshot shows the page at that moment.\n\n**5. \"Test ended\" after a missing await**\n\n```text\nError: expect(locator).toBeVisible() failed ... Error: element(s) not found\n  - Expect \"toBeVisible\" getByText('9 items left') with timeout 5000ms\n  - Test ended.\n```\n\nThe assertion was not awaited, so the test finished while it was still checking. In the Playwright version I ran (1.65) the test fails with \"Test ended\" rather than passing quietly.\n\n**A reading order**\n\nRead the first error line, then the last \"waiting for\" line, then the code frame with the arrow, then open the screenshot or trace.",
+      "keyPoints": [
+        "Timeout with 'waiting for <locator>': nothing matched. Compare the locator text with the page.",
+        "Strict mode violation: too many matches. Narrow the locator.",
+        "Expected vs Received: the locator worked; decide whether the test or the app is wrong.",
+        "Open the screenshot or trace before changing code."
+      ],
+      "interviewAngle": "Reading an error aloud is a good interview habit: \"it timed out waiting for this locator, so nothing matched; I'd check the page.\" Be honest that this is practice, and that at work you read failures from the report and trace on basic tests.",
+      "exercises": [
+        {
+          "id": "pw-u7-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A fill times out with `waiting for getByPlaceholder('What needs doing?')`. What is the most likely cause?",
+          "choices": [
+            "The placeholder text in the test does not match the page",
+            "Playwright is too slow",
+            "The test needs a fixed wait",
+            "Strict mode is disabled"
+          ],
+          "answer": 0,
+          "explanation": "Nothing matched, so it waited until the timeout. The real placeholder reads 'What needs to be done?'."
+        },
+        {
+          "id": "pw-u7-l4-e2",
+          "type": "mcq",
+          "prompt": "`strict mode violation: getByRole('checkbox') resolved to 2 elements`. What do you do?",
+          "choices": [
+            "Raise the timeout",
+            "Narrow the locator to the intended element, for example by row or by name",
+            "Turn strict mode off",
+            "Add .first() and move on"
+          ],
+          "answer": 1,
+          "explanation": "The message lists the matches. Choose the one you mean by a more specific locator."
+        },
+        {
+          "id": "pw-u7-l4-e3",
+          "type": "mcq",
+          "prompt": "`Expected: \"2 items left\" Received: \"1 item left\"`. What is the right first move?",
+          "choices": [
+            "Add retries",
+            "Replace toHaveText with a sleep",
+            "Decide from the requirement whether the test or the app is wrong",
+            "Change the expected value to match"
+          ],
+          "answer": 2,
+          "explanation": "The locator found the element. Editing the expectation without checking could hide a real bug."
+        },
+        {
+          "id": "pw-u7-l4-e4",
+          "type": "short",
+          "prompt": "Which option makes `getByText` match only the whole string? (Write the option as it appears in code.)",
+          "accept": [
+            "exact: true",
+            "exact:true",
+            "{ exact: true }",
+            "{exact: true}",
+            "{exact:true}"
+          ],
+          "answer": "exact: true",
+          "explanation": "`getByText('book a', { exact: true })` is case-sensitive and whole-string."
+        },
+        {
+          "id": "pw-u7-l4-e5",
+          "type": "open",
+          "prompt": "Explain what each message means and your next step: (a) `waiting for getByRole('button', { name: 'Assign' })` then a timeout; (b) `Expected: \"Filled\" Received: \"Open\"`; (c) `strict mode violation: getByRole('row') resolved to 6 elements`.",
+          "answer": "(a) Nothing matched the role and name. Next: open the screenshot or trace, check the real control's role and label (maybe 'Assign pharmacist' or a link), and that the page loaded. (b) The locator found the element but the value differs. Next: check the requirement and the data, whether the assignment really happened or the UI updates late, and decide if it is a test or an app bug. (c) The locator matches six rows. Next: narrow it with filter on a row's content or a parent locator.",
+          "rubric": [
+            "Timeout = nothing matched; checks the page, screenshot or trace",
+            "Expected/Received = locator fine; decides test vs app by requirement",
+            "Strict violation = too many; narrow with filter or parent",
+            "Does not suggest sleeps or .first() as the fix"
+          ]
+        }
+      ]
+    }
+  ]
+}

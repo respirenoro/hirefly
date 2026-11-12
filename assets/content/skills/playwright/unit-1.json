@@ -1,0 +1,193 @@
+{
+  "id": "pw-u1",
+  "title": "Foundations: what, why, first test",
+  "summary": "What end-to-end automation is for, how it sits beside manual testing, and getting a first test running with a report.",
+  "lessons": [
+    {
+      "id": "pw-u1-l1",
+      "title": "What end-to-end automation is for",
+      "minutes": 7,
+      "body": "An end-to-end (E2E) test drives the real application through a real browser, the way a user would: open the page, log in, fill a form, click, read what appears. It checks that the front end, the back end and the database work together. That is its value and its cost. It covers a lot, but it is slower and more fragile than a unit test, so you use it sparingly and on purpose.\n\n**Where it sits next to manual testing**\n\nManual testing is good at finding things nobody predicted: odd layouts, confusing wording, a workflow that technically works but feels wrong. It is also the right choice for a feature that just shipped and is still changing. Automation is good at repeating the same checks, exactly, on every build, at 3 a.m., without getting bored.\n\n| Situation | Better fit |\n|---|---|\n| New feature, still changing each sprint | Manual and exploratory |\n| Check you repeat every release (regression) | Automate |\n| Usability, wording, \"does this feel right\" | Manual |\n| Happy path that must never break | Automate |\n| One-off check you will never run again | Manual |\n\nIn the scheduling product, \"a dispatcher requests an emergency shift and it appears in the open shifts list\" is a path that matters on every release. That is a strong first candidate. \"Does the new SOS alert wording read clearly to a pharmacist\" is not.\n\n**What an E2E test looks like in plain terms**\n\n1. Start from a known state (a test pharmacy exists, you are logged in).\n2. Do what the user does.\n3. Check something the user would see.\n\nIf you cannot say what the user sees at the end, the test has no point yet.\n\n**Honest limits**\n\nAutomation does not replace testers. It frees them from re-running the same twenty clicks so they can spend time on the parts that need judgment. A suite that is flaky or slow gets ignored, which is worse than no suite. Keep the suite small and trusted.\n\nPlaywright is a tool for writing these tests in code. `@playwright/test` is its test runner, and this module uses it with TypeScript.",
+      "keyPoints": [
+        "E2E tests drive a real browser through a user flow and check what the user sees.",
+        "Automate stable, repeated, high-value paths; keep exploratory and usability work manual.",
+        "A small trusted suite beats a large flaky one.",
+        "Every test follows the same shape: known state, user actions, visible result."
+      ],
+      "interviewAngle": "Interviewers for QA roles often ask where automation fits. A safe, true answer: you used manual testing for new and changing features and UAT, and automated a few stable regression paths. Say that automation covers repeated checks and manual covers judgment. Do not present automation as replacing testers, and do not claim to have built a large framework.",
+      "exercises": [
+        {
+          "id": "pw-u1-l1-e1",
+          "type": "mcq",
+          "prompt": "Which check is the **best first candidate** for an automated E2E test?",
+          "choices": [
+            "Whether the new SOS alert wording sounds reassuring",
+            "Exploring an unfinished feature to see what breaks",
+            "A dispatcher requests a shift and it appears in the open shifts list, checked on every release",
+            "A one-time check of a data migration script"
+          ],
+          "answer": 2,
+          "explanation": "Stable, repeated, high-value paths pay back the effort of automating. The others need judgment, are still changing, or run once.",
+          "placement": true
+        },
+        {
+          "id": "pw-u1-l1-e2",
+          "type": "mcq",
+          "prompt": "Why are E2E tests used sparingly compared with unit tests?",
+          "choices": [
+            "They cannot test a real browser",
+            "They are slower and more fragile because they exercise the whole stack",
+            "They only work on static pages",
+            "They replace the need for any manual testing"
+          ],
+          "answer": 1,
+          "explanation": "Covering the full stack is the strength and the cost: more moving parts means more time and more ways to fail for unrelated reasons."
+        },
+        {
+          "id": "pw-u1-l1-e3",
+          "type": "open",
+          "prompt": "Explain in four or five sentences how you decide whether a test should be automated or run manually. Use one example from shift scheduling software for each side.",
+          "answer": "I automate checks that are repeated, stable and important. \"A dispatcher requests an emergency shift and it shows in the open shifts list\" runs every release and rarely changes, so a script saves time and removes human slips. I keep manual testing for things that change often or need judgment. The new SOS alert is still being shaped, and whether its wording is clear to a pharmacist is something a person has to read and decide. I also keep exploratory time for finding problems nobody wrote a check for. The goal is a small automated set that people trust, with manual effort spent where judgment matters.",
+          "rubric": [
+            "Names at least two criteria (repeated, stable, high value, cost to maintain)",
+            "Gives a scheduling example for automate and one for manual",
+            "Mentions exploratory or judgment-based work staying manual",
+            "Does not claim automation replaces manual testing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u1-l2",
+      "title": "Install, first test, running and the report",
+      "minutes": 9,
+      "body": "**Install**\n\nWith Node.js installed, run this in an empty project folder:\n\n```bash\nnpm init playwright@latest\n```\n\nThe installer asks a few questions (TypeScript or JavaScript, the tests folder name, whether to add a GitHub Actions workflow, whether to install browsers) and then sets things up. You end up with:\n\n```text\nplaywright.config.ts   settings for the whole suite\npackage.json           dependencies, including @playwright/test\ntests/                 your test files, with a small example.spec.ts\n```\n\nBrowsers (Chromium, Firefox, WebKit) are downloaded separately by Playwright. If you skip that step, `npx playwright install` fetches them.\n\n**The first test**\n\nA test file ends in `.spec.ts`. Here is a test against a hypothetical scheduling app running locally:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('dispatcher sees the open shifts page', async ({ page }) => {\n  await page.goto('http://localhost:3000/shifts');\n  await expect(page.getByRole('heading', { name: 'Open shifts' })).toBeVisible();\n});\n```\n\nI ran the same shape against a public site (`await page.goto('https://playwright.dev/'); await expect(page).toHaveTitle(/Playwright/);` then clicking the \"Get started\" link and expecting an \"Installation\" heading) and it passed with Playwright 1.65. Read the first test line by line. `test` defines one test. The `{ page }` argument is a fresh browser tab that Playwright creates for this test and throws away afterwards. `page.goto` opens a URL. `expect(...).toBeVisible()` checks that the heading is on screen. Everything that talks to the browser is `await`ed because it is asynchronous.\n\n**Running**\n\n```bash\nnpx playwright test                  # all tests, headless, all configured browsers\nnpx playwright test --project=chromium   # one browser only\nnpx playwright test shifts.spec.ts   # one file\nnpx playwright test --headed         # watch the browser window\nnpx playwright test --ui             # interactive UI mode\n```\n\nHeadless means no visible window. It is faster and is what runs in a pipeline. Use headed or UI mode while you are writing and debugging.\n\n**The report**\n\nAfter a run, the default HTML reporter writes a report folder. Open it with:\n\n```bash\nnpx playwright show-report\n```\n\nIt lists each test, whether it passed, failed or was flaky, how long it took, and for failures the error and the steps leading up to it. When a test fails in a pipeline, this report (or the same data as an artifact) is where you start.",
+      "keyPoints": [
+        "`npm init playwright@latest` creates the config, a tests folder and installs the runner.",
+        "A test is `test('name', async ({ page }) => { ... })`; `page` is a fresh browser tab.",
+        "Headless is the default and what CI uses; `--headed` and `--ui` help while writing.",
+        "`npx playwright show-report` opens the HTML report with failures and steps."
+      ],
+      "interviewAngle": "A common practical question is \"walk me through a test you wrote\". Be ready to explain this skeleton without notes: import, `test`, `page`, `goto`, an assertion, and how you ran it. Be honest that you wrote basic tests and ran them in Azure DevOps Pipelines, and that you can read the report to find out why one failed.",
+      "exercises": [
+        {
+          "id": "pw-u1-l2-e1",
+          "type": "mcq",
+          "prompt": "What does the `{ page }` argument in a Playwright test give you?",
+          "choices": [
+            "A shared browser tab reused by every test",
+            "A fresh, isolated browser page created for that test",
+            "A list of every page in the application",
+            "A screenshot of the current page"
+          ],
+          "answer": 1,
+          "explanation": "Playwright gives each test its own isolated page (inside its own browser context) so tests do not leak state into each other.",
+          "placement": true
+        },
+        {
+          "id": "pw-u1-l2-e2",
+          "type": "short",
+          "prompt": "Which command opens the HTML report after a test run? (Give the full command starting with `npx`.)",
+          "accept": [
+            "npx playwright show-report"
+          ],
+          "answer": "npx playwright show-report",
+          "explanation": "`show-report` serves the generated HTML report in your browser."
+        },
+        {
+          "id": "pw-u1-l2-e3",
+          "type": "mcq",
+          "prompt": "Which statement about headless mode is true?",
+          "choices": [
+            "It runs tests without a visible browser window and is the default",
+            "It skips all assertions",
+            "It only works on Linux",
+            "It must be turned on in every test file"
+          ],
+          "answer": 0,
+          "explanation": "Headless is the default for `npx playwright test`. Add `--headed` to watch the browser."
+        },
+        {
+          "id": "pw-u1-l2-e4",
+          "type": "open",
+          "prompt": "Write a complete Playwright test (TypeScript) that opens `http://localhost:3000/pharmacies`, and checks that a heading named \"Pharmacies\" is visible. Then give the command to run only that file, with the browser visible.",
+          "answer": "```ts\n// tests/pharmacies.spec.ts\nimport { test, expect } from '@playwright/test';\n\ntest('pharmacies page shows its heading', async ({ page }) => {\n  await page.goto('http://localhost:3000/pharmacies');\n  await expect(page.getByRole('heading', { name: 'Pharmacies' })).toBeVisible();\n});\n```\n\nRun it with the browser visible:\n\n```bash\nnpx playwright test pharmacies.spec.ts --headed\n```",
+          "rubric": [
+            "Imports test and expect from @playwright/test",
+            "Uses async/await with page.goto",
+            "Uses a role-based heading locator and toBeVisible",
+            "Run command names the file and includes --headed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u1-l3",
+      "title": "Browser, context and page: how tests stay isolated",
+      "minutes": 9,
+      "body": "Three objects sit under every Playwright test.\n\n- **Browser**: one launched browser (Chromium, for example). Starting it is slow, so the runner starts it once per worker.\n- **Browser context**: a fresh, private browser profile inside that browser, like an incognito window. It has its own cookies, local storage and session. Creating one is fast.\n- **Page**: a tab inside a context.\n\nBy default each test gets its **own new context and page**. That is the reason tests do not leak state into each other: a todo added in one test is not there in the next. You can see it on the TodoMVC demo, which keeps its list in local storage:\n\n```ts\ntest('clean context 1 adds', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc/');\n  // ...adds a todo called \"leftover?\"\n});\n\ntest('clean context 2 checks', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc/');\n  await expect(page.getByTestId('todo-item')).toHaveCount(0);   // passes\n});\n```\n\nI ran this pair. The second test passes because it gets a brand-new context, not because the first test cleaned up.\n\n**Two users in one test**\n\nSometimes a test needs two people, such as a dispatcher and a pharmacist. Ask for the `browser` fixture and make two contexts:\n\n```ts\ntest('two contexts do not share storage', async ({ browser }) => {\n  const a = await browser.newContext();\n  const b = await browser.newContext();\n  const pa = await a.newPage();\n  const pb = await b.newPage();\n  await pa.goto('https://demo.playwright.dev/todomvc/');\n  await pb.goto('https://demo.playwright.dev/todomvc/');\n  // add a todo in pa only\n  await expect(pb.getByTestId('todo-item')).toHaveCount(0);\n  await a.close();\n  await b.close();\n});\n```\n\nTwo **pages in the same context** share storage and cookies. Two **contexts** do not. I ran that too: a second page in context A saw A's todo; context B saw nothing.\n\n**What isolation does not cover**\n\nA fresh context isolates the browser, not the server. If a test creates a shift in the database, the next test can see it. Server-side data needs its own care, covered in the test data lesson.\n\n**Why this matters**\n\nIsolation lets Playwright run tests in parallel and makes a failure point to one test, not to whatever ran before it.",
+      "keyPoints": [
+        "Each test gets a new browser context and page by default, so browser state does not leak between tests.",
+        "A context is a private profile (cookies, local storage); a page is a tab inside it.",
+        "Use `browser.newContext()` when one test needs two separate users.",
+        "Isolation covers the browser only; data saved on the server is shared."
+      ],
+      "interviewAngle": "Interviewers ask \"what is the difference between browser, context and page?\" The answer is two sentences: a context is an isolated profile, each test gets a fresh one, so tests do not share cookies or storage. This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u1-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why does a todo added in one Playwright test not appear in the next test?",
+          "choices": [
+            "Tests always run in alphabetical order",
+            "The demo site clears its data every second",
+            "Each test gets its own new browser context with separate storage",
+            "Playwright deletes the browser between every test"
+          ],
+          "answer": 2,
+          "explanation": "A new context is created per test, with its own cookies and local storage. The browser process itself is reused."
+        },
+        {
+          "id": "pw-u1-l3-e2",
+          "type": "mcq",
+          "prompt": "A test needs a dispatcher and a pharmacist logged in at the same time. What do you use?",
+          "choices": [
+            "Two browser contexts from the `browser` fixture",
+            "Two `test` blocks that run in order",
+            "A fixed wait between logins",
+            "Two pages from the same context"
+          ],
+          "answer": 0,
+          "explanation": "Pages in one context share cookies and storage, so both would be the same user. Separate contexts are separate sessions."
+        },
+        {
+          "id": "pw-u1-l3-e3",
+          "type": "short",
+          "prompt": "What do two pages created from the same browser context share? (One or two words: cookies and ...)",
+          "accept": [
+            "storage",
+            "local storage",
+            "cookies and storage",
+            "session",
+            "session storage"
+          ],
+          "answer": "storage",
+          "explanation": "They share cookies and local storage because they live in one profile."
+        },
+        {
+          "id": "pw-u1-l3-e4",
+          "type": "open",
+          "prompt": "Explain in four or five sentences the difference between a browser, a browser context and a page, and why it makes tests safer to run in parallel.",
+          "answer": "A browser is the launched Chromium process. A context is an isolated profile inside it with its own cookies and local storage, like an incognito window. A page is a tab in a context. Each test gets a fresh context and page, so one test's login or data cannot leak into another. That is what lets Playwright run tests in parallel and report a failure against one test only. It does not isolate the server database.",
+          "rubric": [
+            "Defines browser, context and page correctly",
+            "Says each test gets a new context",
+            "Links isolation to parallel running or independent failures",
+            "Notes server data is not isolated"
+          ]
+        }
+      ]
+    }
+  ]
+}

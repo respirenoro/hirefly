@@ -1,0 +1,506 @@
+{
+  "id": "playwright",
+  "title": "Playwright",
+  "tagline": "Read, write and debug basic end-to-end tests, and talk about them honestly.",
+  "claim": "Resume: taught myself basic Playwright end-to-end tests run in Azure DevOps Pipelines. To back it, you must be able to write a simple TypeScript test with good locators and retrying assertions, run it in a pipeline, read a failure from the report and trace, and say plainly that most of your QA was manual. You are not an automation engineer and have not designed a framework.",
+  "units": [
+    "unit-1.json",
+    "unit-2.json",
+    "unit-7.json",
+    "unit-3.json",
+    "unit-4.json",
+    "unit-8.json",
+    "unit-5.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "pw-iq-1",
+      "prompt": "Tell me about your test automation experience.",
+      "strongAnswer": "I have basic end-to-end automation experience. Most of my QA at a scheduling software company was manual: UAT, release testing and managing test cases in Azure DevOps Test Plans. I taught myself Playwright with TypeScript and wrote tests for our core flow, where a dispatcher requests a shift, and they ran in our Azure DevOps pipeline. I can read the report and trace to see why a test failed and fix things like brittle locators or fixed waits. I haven't designed a framework, so I'd call myself a tester who can automate the basics, and I'm keen to build on that."
+    },
+    {
+      "id": "pw-iq-2",
+      "prompt": "How do you choose locators in Playwright, and why?",
+      "strongAnswer": "I start with what the user sees: getByRole with the accessible name, then getByLabel for form fields, getByText, and getByTestId when nothing else is stable. I avoid long CSS chains and XPath by position because they break whenever the markup or a class name changes, even though nothing is wrong for the user. If a locator matches several elements, I narrow it with a filter on a row or parent instead of picking the first one. When I'm unsure, I use codegen to see what Playwright suggests and then tidy it up."
+    },
+    {
+      "id": "pw-iq-3",
+      "prompt": "What is a flaky test and what do you do about one?",
+      "strongAnswer": "A flaky test passes and fails on the same code. When I saw one, I didn't just re-run it. I opened the trace from the failed attempt to find the cause, which was usually timing, like a fixed wait, or shared data left by an earlier run. I replaced waits with assertions that retry, and made tests create their own data. If I couldn't fix it that day, I'd mark it with test.fixme and a ticket so it didn't block people, and I'd tell the team. If it turned out to be a real intermittent bug, that goes to development with the trace attached."
+    },
+    {
+      "id": "pw-iq-4",
+      "prompt": "What would you automate first, and what would you leave manual?",
+      "strongAnswer": "I'd automate a small smoke set of high-risk, frequently used paths. For our scheduling software that was logging in, requesting a shift, assigning a pharmacist and cancelling a shift. They run on every release, rarely change and matter a lot if they break. I'd leave new or changing features, usability and wording checks, and exploratory testing manual, because those need judgment. Automating everything gives a slow, fragile suite that people ignore, so I'd keep it small and trusted, and grow it from real bugs that slipped through."
+    },
+    {
+      "id": "pw-iq-5",
+      "prompt": "How do your tests run in a CI pipeline?",
+      "strongAnswer": "In Azure DevOps Pipelines the job installs Node, runs npm ci, installs the Playwright browsers with their dependencies, and runs the tests headless with CI set to true. Credentials come from secret pipeline variables. After the tests, whether they pass or fail, it publishes the JUnit results so they show in the Tests tab, and the HTML report as an artifact so I can open the failure and its trace. I adapted and maintained the test steps; I didn't build the wider pipeline infrastructure."
+    },
+    {
+      "id": "pw-iq-6",
+      "prompt": "A test passes locally but fails in the pipeline. How do you investigate?",
+      "strongAnswer": "I start with the report and trace from the pipeline run, because they show the page at the failing step. Then I think about what differs: CI is headless, slower, on Linux, with its own data and base URL, and the login might not complete. I look for fixed waits and missing awaits, which slow machines expose. I'd try reproducing locally with the CI settings. The fix is then one of three things: wait on the right condition, create the data the test needs, or raise a bug if the app really misbehaves."
+    },
+    {
+      "id": "pw-iq-7",
+      "prompt": "Why did you learn Playwright, and how did it fit with your manual testing?",
+      "strongAnswer": "Release testing meant re-running the same core checks every two-week sprint, and those were the ones I could least afford to get wrong or skip under time pressure. I taught myself Playwright to automate a few of them so they ran in the pipeline on every build. That freed my manual time for UAT, exploratory testing of new features and checking wording and usability, which need judgment. I still did most of my QA by hand, and I think that mix is right for a small team."
+    },
+    {
+      "id": "pw-iq-8",
+      "prompt": "What is the difference between a browser, a browser context and a page in Playwright?",
+      "strongAnswer": "A browser is the launched browser process. A context is an isolated profile inside it, with its own cookies and local storage, like an incognito window. A page is a tab in a context. Each test gets a fresh context and page, so one test's login or data does not leak into the next, and that is what makes parallel runs safe. I learned this by running two contexts side by side on a demo site; at work my tests used the default page fixture."
+    },
+    {
+      "id": "pw-iq-9",
+      "prompt": "How do you deal with logging in across many tests?",
+      "strongAnswer": "I would log in once in a setup step, save the browser state to a file with storageState, and reuse it in the test project, so most tests start already signed in and a login problem does not fail unrelated tests. The auth file goes in .gitignore and the credentials come from environment variables or pipeline secrets. I understand how this works from the Playwright docs and a demo; at work my basic tests logged in the simple way, so I would not call it something I built."
+    },
+    {
+      "id": "pw-iq-10",
+      "prompt": "How does Playwright handle waiting, and what do you do instead of sleeps?",
+      "strongAnswer": "Before an action Playwright waits until the element is attached, visible, stable, enabled and able to receive the click. Assertions like toHaveText and toBeVisible retry until they pass or time out, five seconds by default. So I wait on the real condition with an assertion, raise one timeout if the app is legitimately slow, and avoid waitForTimeout. When there is no visible signal I can wait on a specific response, started before the action."
+    },
+    {
+      "id": "pw-iq-11",
+      "prompt": "How do you handle test data and secrets?",
+      "strongAnswer": "URLs and credentials come from environment variables, with a default only for non-secrets, and in a pipeline the secrets are secret variables mapped into the test step. Nothing sensitive is in the repository. For records, I give each test its own data with a unique name so tests do not interfere, and I would create it through an API call rather than a long click path where the team provides one. If a secret is missing, the test skips with a reason instead of failing misleadingly."
+    },
+    {
+      "id": "pw-iq-12",
+      "prompt": "What is the page object model, and have you used it?",
+      "strongAnswer": "A page object is a class that holds the locators and common actions for one page, so when the UI changes I fix one place instead of every test. Tests keep their own assertions. I wrote one with a fixture on a demo site and understand it. In my work the suite was small, so plain locators in the tests were enough, and I would only introduce page objects once the same locators repeat in several tests."
+    },
+    {
+      "id": "pw-iq-13",
+      "prompt": "How would you test what the app shows when the server returns an error?",
+      "strongAnswer": "I would intercept the request with page.route before the page loads and fulfil it with a 500 or abort it, then assert that the user sees a clear message and a way to retry. That is hard to cause with the real server. I would be clear about what it proves: the front end handles the failure, not that the real server behaves that way. I have done this on a demo site, not at work."
+    },
+    {
+      "id": "pw-iq-14",
+      "prompt": "What is in a Playwright trace and when do you use it?",
+      "strongAnswer": "A trace records a test run: every action, a page snapshot before and after each step, the locator used, network calls and console messages. In the config I set it to record on the first retry, so passing runs stay light. When a test fails in the pipeline I open the trace from the report, click the failing step and see what the page looked like and which locator was waited for. That is how I told a real bug from a changed label or a timing problem."
+    },
+    {
+      "id": "pw-iq-15",
+      "prompt": "Walk me through a test you wrote.",
+      "strongAnswer": "It checked that a dispatcher can request an emergency shift and see it in the open list. It opened the new shift form, picked the pharmacy and time, submitted, and asserted the shift appeared. At first it was flaky because I had used a fixed wait, so I replaced it with an assertion on the status text, which retries. I used role and label locators so small UI tweaks would not break it. It ran in our Azure DevOps pipeline, and I read the report when it failed."
+    },
+    {
+      "id": "pw-iq-16",
+      "prompt": "Retries pass a test on the second attempt and the pipeline is green. Is that fine?",
+      "strongAnswer": "Not fully. Playwright reports a test that fails and then passes on retry as flaky, and the build can still be green, so I look at the flaky count, not only the colour. A small number of retries absorbs rare infrastructure noise, but a test that needs them regularly has a cause: timing, shared data, order dependence, or a real intermittent bug. I would open the trace of the failed attempt, find the cause, and quarantine the test with a ticket if I cannot fix it that day."
+    }
+  ],
+  "resources": [
+    {
+      "title": "Installation",
+      "url": "https://playwright.dev/docs/intro",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "The official install, first run and report walkthrough that the first lab follows.",
+      "units": [
+        "pw-u1"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Open it when you do the lab \"Install Playwright and run your first test\" and the install differs from what you see.",
+      "versus": "The official page is always current on commands; HireFly explains what the first run shows and what to say about it."
+    },
+    {
+      "title": "Best Practices",
+      "url": "https://playwright.dev/docs/best-practices",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "The project's own advice on user-facing locators, isolation, traces and what to test; read it after the locator drill.",
+      "units": [
+        "pw-u2",
+        "pw-u7",
+        "pw-u3"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it after \"Locator strategy drill\".",
+      "versus": "It is the project's own advice and stays current; HireFly turns it into drills with answers."
+    },
+    {
+      "title": "Locators",
+      "url": "https://playwright.dev/docs/locators",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 40,
+      "free": true,
+      "why": "The complete list of built-in locators with filtering and chaining, beyond the four used in the drills.",
+      "units": [
+        "pw-u2",
+        "pw-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it as a reference during \"Locators and actions\" and the locator drills.",
+      "versus": "Complete and current, but long; HireFly teaches the four you will actually use and why."
+    },
+    {
+      "title": "Assertions",
+      "url": "https://playwright.dev/docs/test-assertions",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 30,
+      "free": true,
+      "why": "Every auto-retrying assertion with examples; use it to extend the assertions drill.",
+      "units": [
+        "pw-u3"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it after \"Assertions\" to see the full list.",
+      "versus": "A reference list with examples; HireFly teaches the choice among them."
+    },
+    {
+      "title": "Trace viewer",
+      "url": "https://playwright.dev/docs/trace-viewer",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "Shows the trace viewer interface, which this module can only describe in text.",
+      "units": [
+        "pw-u4"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it before the lab \"Debug a failure with the trace viewer\".",
+      "versus": "The vendor shows the interface, which text lessons only describe; HireFly gives a failure to debug."
+    },
+    {
+      "title": "Continuous Integration",
+      "url": "https://playwright.dev/docs/ci",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "Official Azure Pipelines samples, including publishing JUnit results and the HTML report, and sharding.",
+      "units": [
+        "pw-u5"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it while you do the lab \"Add an Azure Pipelines YAML file and publish results\".",
+      "versus": "Official pipeline samples that stay current; HireFly explains what each part does and how to read a failed run."
+    },
+    {
+      "title": "Build your first end-to-end test with Playwright",
+      "url": "https://learn.microsoft.com/en-us/training/modules/build-with-playwright",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 60,
+      "free": true,
+      "why": "A guided beginner module with VS Code running, debugging and recording, which gives hands-on steps the lessons do not.",
+      "units": [
+        "pw-u1",
+        "pw-u4"
+      ],
+      "priority": "core",
+      "useWhen": "Do it first, before \"Foundations: what, why, first test\", because running, debugging and recording in VS Code is hands-on.",
+      "versus": "A guided module in the real tool from Microsoft; HireFly is shorter and focused on what to say honestly about basic automation."
+    },
+    {
+      "title": "Getting started with end-to-end testing with Playwright",
+      "url": "https://learn.microsoft.com/shows/getting-started-with-end-to-end-testing-with-playwright/introduction-to-playwright-for-end-to-end-testing",
+      "source": "Microsoft Learn",
+      "kind": "video",
+      "minutes": 90,
+      "free": true,
+      "why": "A beginner video series: watching someone write and debug tests fills the gap text leaves.",
+      "units": [
+        "pw-u1",
+        "pw-u2"
+      ],
+      "priority": "core",
+      "useWhen": "Watch it alongside \"Foundations: what, why, first test\" and \"Locators and actions\".",
+      "versus": "Video shows writing and debugging tests, which text cannot; HireFly adds graded drills and talk tracks."
+    },
+    {
+      "title": "TodoMVC demo for Playwright",
+      "url": "https://demo.playwright.dev/todomvc/",
+      "source": "Playwright",
+      "kind": "practice",
+      "minutes": 120,
+      "free": true,
+      "why": "The practice site used in every lab and drill; free, public and safe to break.",
+      "units": [
+        "pw-u7",
+        "pw-u3",
+        "pw-u5"
+      ],
+      "priority": "core",
+      "useWhen": "Keep it open for every lab and drill from the first test onward.",
+      "versus": "It is the free public practice site; HireFly supplies the tasks that use it."
+    },
+    {
+      "title": "API testing",
+      "url": "https://playwright.dev/docs/api-testing",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "The request fixture in full, deepening the first API check.",
+      "units": [
+        "pw-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after \"Beyond the basics (learned in practice)\" if API checks interest you.",
+      "versus": "The full request fixture; HireFly shows one first check and labels it as learned in practice."
+    },
+    {
+      "title": "Mock APIs",
+      "url": "https://playwright.dev/docs/mock",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "Route, fulfil and HAR replay in detail, deepening the mocking lesson.",
+      "units": [
+        "pw-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it after the same unit if mocking comes up.",
+      "versus": "Detailed route and HAR replay; HireFly stays at a reader's level."
+    },
+    {
+      "title": "Playwright Interview Questions and Answers 2026",
+      "url": "https://testdino.com/blog/playwright-interview-questions-answers-2026",
+      "source": "TestDino",
+      "kind": "reference",
+      "minutes": 45,
+      "free": true,
+      "why": "A third-party question list to rehearse aloud; answers are written for automation engineers, so adapt them to your honest level.",
+      "units": [
+        "pw-u6"
+      ],
+      "priority": "optional",
+      "useWhen": "Use it to rehearse aloud the day before an interview.",
+      "versus": "The questions are for automation engineers and may push you beyond your honest level; HireFly's \"In the interview\" fits basic experience."
+    }
+  ],
+  "labs": [
+    {
+      "id": "pw-lab-1",
+      "title": "Install Playwright and run your first test",
+      "minutes": 30,
+      "goal": "Have a working Playwright project, a passing test and an open HTML report.",
+      "setup": "Install Node.js (LTS) from nodejs.org and a code editor. Everything else is free; the practice site is https://demo.playwright.dev/todomvc/. Commands work in Git Bash, PowerShell or a macOS/Linux shell unless noted. Versions checked: Playwright 1.65, Node 24. Make an empty folder, for example `hirefly-pw`, and open a terminal in it.",
+      "steps": [
+        "Run `npm init playwright@latest`. Choose TypeScript, keep the `tests` folder, answer No to the GitHub Actions workflow, and Yes to installing browsers. (To save time, `npx playwright install chromium` installs one browser.)",
+        "Open `playwright.config.ts` and find the `projects` list. Note the browsers and the commented `baseURL` line.",
+        "Create `tests/first.spec.ts` with a test that opens `https://playwright.dev/`, expects the title to match `/Playwright/`, clicks the link named \"Get started\" and expects a heading named \"Installation\" to be visible.",
+        "Run `npx playwright test --project=chromium`. Read the summary line.",
+        "Break the test on purpose: change the heading name to `\"Nothing here\"` and run again. Read the error: find the `waiting for` line and the code frame.",
+        "Fix it back and run `npx playwright test --project=chromium` once more.",
+        "Run `npx playwright show-report` and open the test in the report."
+      ],
+      "check": [
+        "The first run ends with `1 passed` for the Chromium project.",
+        "The broken run fails with a message that includes the locator you wrote.",
+        "The HTML report lists first.spec.ts as passed after the fix."
+      ],
+      "talkTrack": "I set up Playwright from scratch, wrote a test with a role locator and a retrying assertion, ran it, and read the failure and report."
+    },
+    {
+      "id": "pw-lab-2",
+      "title": "Write five tests against the TodoMVC demo",
+      "minutes": 60,
+      "goal": "Five independent tests with role, placeholder and test-id locators, all passing.",
+      "setup": "Finish lab 1. In `playwright.config.ts` set `use.baseURL` to `'https://demo.playwright.dev/todomvc/'` (with the trailing slash) and add `await page.goto('./')` in a `beforeEach`.",
+      "steps": [
+        "Create `tests/todo.spec.ts` with `test.beforeEach` that calls `page.goto('./')`.",
+        "Test 1: fill the placeholder `What needs to be done?` with \"Call Maple Street Pharmacy\", press Enter, expect `getByTestId('todo-title')` to have that text and `getByText('1 item left')` to be visible.",
+        "Test 2: add \"Confirm shift 1042\", check the checkbox named `Toggle Todo`, expect the `todo-item` to have a class matching `/completed/` and \"0 items left\" visible.",
+        "Test 3: add three todos in a loop, expect `getByTestId('todo-item')` to have count 3 and \"3 items left\" to be visible.",
+        "Test 4: add two todos, tick the first, click the link named Active, expect one item; click Completed, expect one item and a URL matching `/#\\/completed/`.",
+        "Test 5: add \"temporary\", hover its row, click its Delete button, expect zero items.",
+        "Run `npx playwright test todo --project=chromium`.",
+        "Try the trap: set `baseURL` without the trailing slash and use `page.goto('/')`. Run once, watch the timeouts, then restore the fix."
+      ],
+      "check": [
+        "The run ends with `5 passed` in about two to five seconds.",
+        "With the slash removed and `goto('/')` the tests time out waiting for the placeholder.",
+        "No test uses `waitForTimeout`, CSS classes or XPath."
+      ],
+      "talkTrack": "I wrote five independent end-to-end tests with user-facing locators and retrying assertions, and I know the baseURL path trap."
+    },
+    {
+      "id": "pw-lab-3",
+      "title": "Debug a failure with the trace viewer",
+      "minutes": 40,
+      "goal": "Produce a trace for a failing test and use it to find the cause.",
+      "setup": "Finish lab 2. Make sure `playwright.config.ts` has `trace: 'on-first-retry'` and `screenshot: 'only-on-failure'` under `use`.",
+      "steps": [
+        "Add a test that fills `getByPlaceholder('What needs doing?')` (the wrong text) and presses Enter.",
+        "Run `npx playwright test --retries=1 --project=chromium -g \"wrong placeholder\"`, adjusting `-g` to your test title. The test should fail twice.",
+        "Find the screenshot and `error-context.md` under `test-results/<test-name>`. Open the screenshot.",
+        "Find `test-results/<test-name>-retry1/trace.zip`.",
+        "Open it with `npx playwright show-trace test-results/<test-name>-retry1/trace.zip`, or run `npx playwright show-report` and click the trace icon.",
+        "In the viewer click the failing step. Read which locator it waited for, and compare with the page snapshot.",
+        "Fix the placeholder text and run the same command. It should pass on the first attempt with no trace.",
+        "Run `npx playwright test --trace on` once and look at how many `trace.zip` files appear."
+      ],
+      "check": [
+        "The failing run creates a `-retry1` folder with `trace.zip`.",
+        "The error text names `getByPlaceholder('What needs doing?')` and a timeout.",
+        "After the fix the test passes and no retry folder is created."
+      ],
+      "talkTrack": "When a test failed I opened the screenshot and trace, saw which locator it waited for, and found whether it was a wrong locator, data or timing."
+    },
+    {
+      "id": "pw-lab-4",
+      "title": "Record with codegen, then clean up the locators",
+      "minutes": 40,
+      "goal": "Turn a recorded test into a readable one with a good name and real assertions.",
+      "setup": "Finish lab 1. Codegen opens a browser window and an inspector, so run it on a desktop session, not over a remote shell.",
+      "steps": [
+        "Run `npx playwright codegen https://demo.playwright.dev/todomvc/`.",
+        "In the browser, add two todos, tick one, click the Active link, then stop recording.",
+        "Copy the generated code into `tests/recorded.spec.ts`.",
+        "Rename the test to a sentence about behaviour.",
+        "Replace any locator that is a CSS or position pick with a role, placeholder or filter-by-text locator.",
+        "Add assertions: the item count after filtering, the URL, and the count text. Recorded tests usually check little.",
+        "Replace any hard-coded full URL with `page.goto('./')` if you configured `baseURL`.",
+        "Run `npx playwright test recorded --project=chromium` and confirm it passes. Then run `npx playwright codegen --help` and note the `-o` option that saves a file directly."
+      ],
+      "check": [
+        "The cleaned test has at least three `expect` lines.",
+        "No locator in the final file uses `nth-child`, a class chain or XPath.",
+        "The test passes with `1 passed`."
+      ],
+      "talkTrack": "I use codegen to find locators and draft a flow, then rewrite it with a clear name, sturdy locators and real assertions."
+    },
+    {
+      "id": "pw-lab-5",
+      "title": "Add an Azure Pipelines YAML file and publish results",
+      "minutes": 60,
+      "goal": "A pipeline file in your repository that installs, runs, and publishes JUnit results and the HTML report.",
+      "setup": "A free Azure DevOps organisation, a project and a Git repository containing your Playwright folder (include `package-lock.json`; ignore `node_modules`, `test-results`, `playwright-report` and `results`). In `playwright.config.ts` use `reporter: [['html', { open: 'never' }], ['junit', { outputFile: 'results/junit.xml' }]]`. Azure DevOps free-tier parallel job limits change; check your organisation's allowance.",
+      "steps": [
+        "Locally run `CI=true npx playwright test` (in PowerShell: `$env:CI='true'; npx playwright test`) and confirm `results/junit.xml` and `playwright-report/index.html` exist.",
+        "Create `azure-pipelines.yml` at the repo root: trigger `main`, pool `vmImage: ubuntu-latest`, a `UseNode@1` step, `npm ci`, `npx playwright install --with-deps chromium`, and `npx playwright test` with `env: CI: 'true'`.",
+        "Add `PublishTestResults@2` with `testResultsFormat: JUnit`, `testResultsFiles: results/junit.xml`, `failTaskOnFailedTests: true` and `condition: succeededOrFailed()`.",
+        "Add `PublishPipelineArtifact@1` with `targetPath: playwright-report`, `artifact: playwright-report` and `condition: succeededOrFailed()`.",
+        "Check the YAML parses (for example paste it into a YAML validator, or in the Azure editor use Validate).",
+        "In Azure DevOps choose Pipelines, New pipeline, point to the repo and the existing YAML file, and run it.",
+        "After the run open the Tests tab, then download the `playwright-report` artifact and open `index.html`.",
+        "Break one test on purpose, push, and confirm the run fails but still shows results and the artifact."
+      ],
+      "check": [
+        "The local CI-style run produces both `results/junit.xml` and `playwright-report/index.html`.",
+        "A green run shows the Tests tab with your tests listed.",
+        "The deliberately broken run is red and still publishes results because of `succeededOrFailed()`."
+      ],
+      "talkTrack": "I can read and edit an Azure pipeline that installs Playwright, runs the tests headless, and publishes the JUnit results and report even on failure."
+    },
+    {
+      "id": "pw-lab-6",
+      "title": "Fix five failing tests",
+      "minutes": 45,
+      "goal": "Read five error messages, name each cause, and fix each with one change.",
+      "setup": "Finish lab 2 so the baseURL is set. Create `tests/broken.spec.ts` from the five tests in the lesson 'Read and fix five failing tests'.",
+      "steps": [
+        "Run `npx playwright test broken --reporter=line --workers=1 --timeout=8000` and note which tests fail.",
+        "Test 1: read the `waiting for` line, correct the placeholder text.",
+        "Test 2: add the missing `await` to the assertion and correct the expected text to \"0 items left\".",
+        "Test 3: scope the checkbox locator to the `todo-item` row.",
+        "Test 4: change the expected text to \"1 item left\".",
+        "Test 5: replace the one-time `count()` and the sleep with `toHaveCount(1)`.",
+        "Rerun after each fix, and write one sentence on the cause for each test."
+      ],
+      "check": [
+        "The first run reports failures for the broken file.",
+        "After all five fixes the run ends with `5 passed`.",
+        "You have five one-sentence causes: wrong string, missing await, ambiguous locator, wrong expectation, one-time read."
+      ],
+      "talkTrack": "I can read a failing test, say what kind of failure it is, and fix it one change at a time."
+    },
+    {
+      "id": "pw-lab-7",
+      "title": "Refactor to a page object and fixture, and add an API check",
+      "minutes": 50,
+      "goal": "A TodoPage page object used through a fixture, and three passing API tests.",
+      "setup": "Finish lab 2. The API tests call a free public practice API, jsonplaceholder.typicode.com, which fakes writes.",
+      "steps": [
+        "Create `tests/todo-page.ts` with a `TodoPage` class: locators for the input, items and count, and `goto`, `add` and `complete` methods.",
+        "In a new spec, extend `test` with a `todoPage` fixture that builds the page object, calls `goto()` and passes it to the test with `use`.",
+        "Write one test that adds two todos, completes one, and asserts the item count is 2 and the count text contains \"1 item left\".",
+        "Run it with `npx playwright test pom --project=chromium`.",
+        "Create `tests/api.spec.ts` using the `request` fixture: GET `https://jsonplaceholder.typicode.com/posts/1` expects status 200 and `toMatchObject({ id: 1, userId: 1 })`.",
+        "Add a POST to `https://jsonplaceholder.typicode.com/posts` with `data: { title: 'Shift 1042', body: 'filled', userId: 1 }` expecting status 201.",
+        "Add a GET to `https://jsonplaceholder.typicode.com/posts/99999` expecting 404. Run `npx playwright test api --project=chromium`."
+      ],
+      "check": [
+        "The page-object test passes and contains no locator strings in the test body.",
+        "The three API tests pass.",
+        "You can explain why `expect` stays in the tests and not in the page object."
+      ],
+      "talkTrack": "I understand page objects, fixtures and the request fixture and have built a small working example; at work my suite was simpler."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you to write a simple TypeScript test, choose good locators and retrying assertions, read a failure and explain a pipeline run, while being plain that most of your QA was manual. Reading alone is not enough: running tests in the labs and the vendor's hands-on and video material are what make the skill real. It will not make you an automation engineer.",
+    "hireflyBetter": [
+      "You need the honest wording about basic experience.",
+      "You want locator and assertion drills with answers.",
+      "You need to read and fix failing tests.",
+      "You want the Azure Pipelines run connected to what you did at work.",
+      "You have days and need the shortest path."
+    ],
+    "externalBetter": [
+      "You need to see tests written and debugged in video.",
+      "You need the official install and commands, which stay current.",
+      "You want guided practice in VS Code from Microsoft.",
+      "You need the trace viewer interface.",
+      "You want API testing or mocking in depth."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the lab \"Install Playwright and run your first test\" (30 minutes).",
+          "Work \"Locators and actions\" and \"Assertions\" (45 minutes).",
+          "Do the lab \"Write five tests against the TodoMVC demo\" (60 minutes).",
+          "Do the lab \"Debug a failure with the trace viewer\" (40 minutes).",
+          "Work \"In a pipeline\" (45 minutes).",
+          "Read \"In the interview\" and rehearse honestly (30 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Do \"Build your first end-to-end test with Playwright\" (1 hour).",
+          "Work \"Foundations: what, why, first test\" and the lab \"Install Playwright and run your first test\" (55 minutes).",
+          "Watch \"Getting started with end-to-end testing with Playwright\" (1.5 hours).",
+          "Work \"Locators and actions\" and \"Locator strategy drill\" (1 hour).",
+          "Work \"Assertions\" and do the lab \"Write five tests against the TodoMVC demo\" (1.5 hours).",
+          "Work \"Structure, configuration and debugging\" and the labs \"Debug a failure with the trace viewer\" and \"Record with codegen, then clean up the locators\" (2.5 hours).",
+          "Work \"In a pipeline\" and do the lab \"Add an Azure Pipelines YAML file and publish results\" (1.5 hours).",
+          "Do the lab \"Fix five failing tests\" (45 minutes).",
+          "Work \"Beyond the basics (learned in practice)\" and read \"In the interview\" (45 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Do \"Build your first end-to-end test with Playwright\" and watch \"Getting started with end-to-end testing with Playwright\" (2.5 hours).",
+          "Work every HireFly unit in order and do all seven labs (11 hours).",
+          "Read \"Best Practices\", \"Locators\", \"Assertions\" and \"Trace viewer\" (2 hours).",
+          "Read \"Continuous Integration\" and extend your pipeline with the lab \"Refactor to a page object and fixture, and add an API check\" (3 hours).",
+          "Write tests on a real or demo app in \"TodoMVC demo for Playwright\" and automate one of your manual smoke paths (16 hours).",
+          "Read \"API testing\" and \"Mock APIs\" (1 hour).",
+          "Rehearse with \"Playwright Interview Questions and Answers 2026\" and \"In the interview\" (2 hours)."
+        ]
+      }
+    ]
+  }
+}

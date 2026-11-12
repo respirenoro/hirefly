@@ -1,0 +1,160 @@
+{
+  "id": "power-bi-u7",
+  "title": "Hands-on: from the practice CSVs to a star schema",
+  "summary": "Import the practice files, shape the shift data in Power Query and build a checked star schema with a date table.",
+  "lessons": [
+    {
+      "id": "power-bi-u7-l1",
+      "title": "Importing the practice CSVs",
+      "minutes": 8,
+      "body": "This unit works on the practice data in `assets/content/datasets/` (export the folder from the app). Install Power BI Desktop for free from the Microsoft Store, then import all five files so you can use the same figures as this course.\n\n**Steps.** Home > Get data > Text/CSV, pick a file, then choose **Transform Data** rather than Load so you can check it first. Repeat for each file, or choose Get data > Folder if you prefer one place. Name each query clearly: `Pharmacies`, `Pharmacists`, `Shifts`, `Assignments`, `Tickets`.\n\n**Row counts to confirm** (View > Column quality/profile shows them, or use the Model view later):\n\n| Query | Rows | Note |\n|---|---|---|\n| Pharmacies | 40 | id, name, city, state |\n| Pharmacists | 60 | 56 active, 4 not |\n| Shifts | 1019 | 828 completed, 171 cancelled, 20 open |\n| Assignments | 906 | 828 completed, 78 cancelled |\n| Tickets | 734 | five categories |\n\n**Profile with care.** Turn on View > Column quality, Column distribution and Column profile. The status bar at the bottom says \"Column profiling based on top 1000 rows\" by default. `Shifts` has 1019 rows, so the last 19 are not profiled until you switch it to **entire data set**. This is a real trap: a count taken from the profile would be wrong by 19. With the full set, `filled_at` shows 113 empty values (11.1%), `pharmacist_id` 113 empty and `cancel_reason` 848 empty. Empty is correct here: an unfilled shift has no filled time and no pharmacist, and an uncancelled shift has no reason.\n\n**Types.** Power BI detects most types. Confirm the `requested_at`, `filled_at` and `starts_at` columns are Date/Time (they are text `YYYY-MM-DD HH:MM:SS` in the file), and `is_emergency` is a whole number. A date shown as text breaks time intelligence later.\n\n**Parameters.** If you plan to move the folder, create a parameter for the folder path (Manage Parameters) so you change the location in one place. The file path is stored in each query's Source step.\n\n**Load options.** Right-click a query to turn Enable load off for staging queries. Rename `id` columns when you know they will clash in a model, for example `shift_id`, so fields stay readable in the report.\n\nClose & Apply when the counts match. If a row count is off, go back to Source, and check the delimiter and the header row.",
+      "keyPoints": [
+        "Use Transform Data first, then confirm row counts: 40, 60, 1019, 906 and 734.",
+        "Switch column profiling to the entire data set; the default sees only 1000 rows.",
+        "Empty filled_at (113) is valid for unfilled shifts, not an error.",
+        "Confirm datetime columns are Date/Time, not text."
+      ],
+      "interviewAngle": "Be clear this is practice data: \"I imported sample scheduling CSVs and checked row counts and types before modelling.\" The 1000-row profiling trap is a detail that shows you actually used the tool; only mention it if you hit it yourself.",
+      "exercises": [
+        {
+          "id": "power-bi-u7-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "The Power Query status bar says column profiling is based on the top 1000 rows. Shifts has 1019 rows. What should you do before relying on the profile?",
+          "choices": [
+            "Switch profiling to the entire data set",
+            "Nothing; 1000 rows is always representative",
+            "Remove the last 19 rows",
+            "Change the column to text"
+          ],
+          "answer": 0,
+          "explanation": "Profiling the whole table gives true counts of empty and distinct values."
+        },
+        {
+          "id": "power-bi-u7-l1-e2",
+          "type": "short",
+          "prompt": "How many rows are in the practice Shifts table? (Number only.)",
+          "accept": [
+            "1019"
+          ],
+          "answer": "1019",
+          "explanation": "828 completed + 171 cancelled + 20 open."
+        },
+        {
+          "id": "power-bi-u7-l1-e3",
+          "type": "open",
+          "prompt": "List the checks you make right after importing shifts.csv before building any model.",
+          "answer": "Confirm row count (1019). Switch column profiling to the entire data set and read empties: filled_at 113, pharmacist_id 113, cancel_reason 848, which are valid. Confirm requested_at, filled_at and starts_at are Date/Time and is_emergency is a whole number. Check status values (completed, cancelled, open) and that no unexpected categories exist. Name the query and rename ambiguous columns, then Close & Apply.",
+          "rubric": [
+            "Checks row count",
+            "Profiles the entire data set",
+            "Explains valid empties",
+            "Confirms data types",
+            "Checks status values"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u7-l2",
+      "title": "Power Query steps for the shift data",
+      "minutes": 9,
+      "body": "Prepare `Shifts` so the model needs very little DAX. Each action below becomes an Applied Step you can name and explain.\n\n1. **Change Type** on the three datetimes and `is_emergency`.\n2. **Add `request_date`**: select `requested_at`, Add Column > Date > Date Only. Relationships to a date table need a date without a time.\n3. **Add `hours_to_fill`**: Add Column > Custom Column with\n   ```text\n   Duration.TotalHours([filled_at] - [requested_at])\n   ```\n   When `filled_at` is null the result is null, so an unfilled shift has no value instead of a wrong one.\n4. **Add `is_filled`**: Conditional Column, 1 if `filled_at` is not null, otherwise 0.\n5. **Label empty reasons**: Replace Values on `cancel_reason`, null to `Not cancelled`. This is only a label; keep nulls if a report must tell \"no reason recorded\" from \"not cancelled\".\n6. **Remove unneeded columns**, if any, to keep the model small.\n\n**Check the results** with Column statistics (Transform > Statistics, or View > Column profile):\n\n| Column | Expected |\n|---|---|\n| `hours_to_fill` count | 906 |\n| `hours_to_fill` average | about 9.52 |\n| `hours_to_fill` min | not below 0 |\n| `hours_to_fill` max | about 34.68 |\n| `is_filled` sum | 906 |\n\nIf the minimum is negative, the subtraction ran the wrong way or the column types are wrong.\n\n**Other tools to know.**\n\n- **Merge Queries** joins tables, for example shifts to pharmacies. In a star schema you usually use a relationship instead.\n- **Append Queries** stacks monthly extracts with the same columns.\n- **Unpivot Columns** reshapes month columns into rows.\n- **Group By** builds small check tables, such as shifts per state, which should read FL 537, GA 340, SC 85, AL 57 after a merge.\n- **Reference** starts a new query from another and keeps the steps tidy; **Duplicate** copies the steps.\n\nRename steps so they read like a recipe (for example \"Added hours to fill\"). Put filters and column removal early; against a database source they let Power Query fold the work into the source query. Apply the changes and refresh once with unchanged data to confirm nothing moves.",
+      "keyPoints": [
+        "Date Only for the date key; keep the full datetime for time-of-day analysis.",
+        "Duration.TotalHours keeps nulls as null for unfilled shifts.",
+        "Check statistics: 906 values, mean about 9.52, no negatives.",
+        "Merge only when you need a flat table; otherwise use relationships."
+      ],
+      "interviewAngle": "You can say: \"I did the same shaping in SQL, such as computing time to fill and filtering cancelled shifts; in Power Query I recorded the steps so they rerun on refresh.\" Keep it clear that this is practice work.",
+      "exercises": [
+        {
+          "id": "power-bi-u7-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "`hours_to_fill` is computed with Duration.TotalHours on filled_at minus requested_at. What happens for an open shift with no filled_at?",
+          "choices": [
+            "The result is null, so it does not distort the average",
+            "The result is 0 hours",
+            "The refresh fails",
+            "The result is a negative number"
+          ],
+          "answer": 0,
+          "explanation": "Subtracting from null yields null in Power Query, and averages ignore it. In Excel an empty cell would act as 0."
+        },
+        {
+          "id": "power-bi-u7-l2-e2",
+          "type": "short",
+          "prompt": "What average hours to fill should you see in the practice Shifts data? (Two decimals.)",
+          "accept": [
+            "9.52"
+          ],
+          "answer": "9.52",
+          "explanation": "The average over the 906 filled shifts is 9.52 hours."
+        },
+        {
+          "id": "power-bi-u7-l2-e3",
+          "type": "open",
+          "prompt": "Explain how you would create the date key for relating Shifts to a date table, and why you cannot relate on requested_at directly.",
+          "answer": "Add a column with Add Column > Date > Date Only on requested_at, named request_date. A date table has one row per day with no time, so a datetime such as 2026-01-03 05:23:10 would not match any date key. Relate Dates[Date] (one) to Shifts[request_date] (many).",
+          "rubric": [
+            "Uses Date Only",
+            "Explains the time part prevents matching",
+            "Gives the one-to-many relationship"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u7-l3",
+      "title": "A star schema and a date table from the practice tables",
+      "minutes": 10,
+      "body": "Build the model in Model view. The practice tables give a small but real star.\n\n**Tables and roles**\n\n| Table | Role | Rows |\n|---|---|---|\n| `Shifts` | fact, one row per shift request | 1019 |\n| `Pharmacies` | dimension (where) | 40 |\n| `Pharmacists` | dimension (who) | 60 |\n| `Dates` | dimension (when) | one row per day |\n| `Assignments` | second fact, one row per assignment | 906 |\n| `Tickets` | separate fact, linked only to pharmacies | 734 |\n\n**Relationships**\n\n- `Pharmacies[id]` to `Shifts[pharmacy_id]`: one-to-many, single direction.\n- `Pharmacists[id]` to `Shifts[pharmacist_id]`: one-to-many. The 113 empty pharmacist ids show as Blank in visuals, which is correct.\n- `Dates[Date]` to `Shifts[request_date]`: active.\n- `Shifts[id]` to `Assignments[shift_id]`: one-to-many, so an assignment is filtered by its shift's pharmacy and date.\n- `Pharmacies[id]` to `Tickets[pharmacy_id]`: one-to-many.\n\n**The date table.** The data spans 27 December 2025 to early October 2026, so:\n\n```text\nDates =\nADDCOLUMNS(\n    CALENDAR(DATE(2025,12,1), DATE(2026,12,31)),\n    \"Year\", YEAR([Date]),\n    \"MonthNum\", MONTH([Date]),\n    \"Month\", FORMAT([Date], \"MMM\"),\n    \"YearMonth\", FORMAT([Date], \"yyyy-mm\")\n)\n```\n\nThat is 396 rows. Mark it as a date table, sort `Month` by `MonthNum`, and hide `Shifts[requested_at]` so people use the date table.\n\n**Role-playing dates.** A shift has three dates: requested, filled and starting. Add a date-only column for each and relate each to `Dates[Date]`, keeping one active (request) and the others inactive. A measure picks another on demand:\n\n```text\nShifts Starting = CALCULATE([Total Shifts], USERELATIONSHIP(Dates[Date], Shifts[start_date]))\n```\n\n**Check the model with a table visual.** `Pharmacies[state]` with `COUNTROWS(Shifts)` should read FL 537, GA 340, SC 85, AL 57, total 1019. If a total is wrong or a value repeats on every row, look for a missing or inactive relationship. Hide key columns from Report view and put measures in a dedicated table so the Fields pane stays tidy.",
+      "keyPoints": [
+        "Shifts is the fact; Pharmacies, Pharmacists and Dates are dimensions.",
+        "Relate on a date-only key; keep one active date relationship and use USERELATIONSHIP for others.",
+        "Blank pharmacist rows are the 113 unfilled shifts.",
+        "Check the model: shifts by state must read 537, 340, 85, 57."
+      ],
+      "interviewAngle": "Draw the model from memory in an interview: Shifts in the centre, three dimensions around it, and say which relationship is active and why. Be honest that you built it on practice data and designed it by following the standard pattern.",
+      "exercises": [
+        {
+          "id": "power-bi-u7-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Shifts has requested, filled and starting dates. How do you model them against one Dates table?",
+          "choices": [
+            "Relate all three; keep one active and use USERELATIONSHIP in measures for the others",
+            "Make all three relationships active at once",
+            "Copy the Dates table into the fact table",
+            "Use only the starting date and delete the others"
+          ],
+          "answer": 0,
+          "explanation": "Only one relationship between two tables can be active. Inactive ones are activated inside a measure with USERELATIONSHIP."
+        },
+        {
+          "id": "power-bi-u7-l3-e2",
+          "type": "short",
+          "prompt": "How many rows does Dates have with CALENDAR(DATE(2025,12,1), DATE(2026,12,31))? (Number only.)",
+          "accept": [
+            "396"
+          ],
+          "answer": "396",
+          "explanation": "31 days of December 2025 plus 365 days of 2026."
+        },
+        {
+          "id": "power-bi-u7-l3-e3",
+          "type": "open",
+          "prompt": "Describe the star schema you would build from the practice CSVs and what a table of Pharmacies[state] by Total Shifts should show.",
+          "answer": "Fact: Shifts (1019 rows). Dimensions: Pharmacies (40), Pharmacists (60) and Dates. Assignments joins to Shifts on shift_id and Tickets joins to Pharmacies. Relationships are one-to-many from the dimension to the fact, single direction, with Dates related on request_date. A table of state against COUNTROWS(Shifts) should show FL 537, GA 340, SC 85, AL 57 and a total of 1019.",
+          "rubric": [
+            "Identifies the fact and dimensions",
+            "One-to-many, single direction",
+            "Date table related on a date-only key",
+            "States the expected counts"
+          ]
+        }
+      ]
+    }
+  ]
+}

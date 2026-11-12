@@ -1,0 +1,55 @@
+{
+  "id": "ado-u4",
+  "title": "Repos at a tester and PM level",
+  "summary": "Enough Git and Azure Repos to follow what developers are doing, link work to code and understand why branch policies exist.",
+  "lessons": [
+    {
+      "id": "ado-u4-l1",
+      "title": "Branches, commits and pull requests",
+      "minutes": 8,
+      "body": "You will not write production code, but you will be in conversations about it. Knowing the vocabulary lets you ask the right question about a change.\n\n**Repository (repo).** The project's code and its full history, stored with Git. A project can have several repos.\n\n**Commit.** A saved snapshot of changes, with an author, a time and a message, for example 'Add radius filter to SOS recipient lookup'. Commits have a hash id like `a3f9c1e`.\n\n**Branch.** A separate line of work. The main branch (often `main`) holds the code that is considered good. A developer creates a **feature branch** such as `feature/sos-radius`, commits to it, and the main branch is untouched until the branch is merged.\n\n**Pull request (PR).** A request to merge a branch into another, usually into `main`. The PR page shows:\n\n- the title and description, and linked work items,\n- the **files changed** (the diff), with lines added and removed,\n- reviewers and their votes (Approve, Approve with suggestions, Wait for author, Reject),\n- comments on specific lines, with a resolved or unresolved status,\n- the results of any automated build or tests that ran on the PR.\n\n**Merge** completes the PR. Common merge styles are merge commit, squash (all commits become one) and rebase. You only need to know that squash gives a tidy history, one commit per PR.\n\n**Worked example.** The SOS story is 'SOS request notifies pharmacists within the chosen radius'. The developer creates `feature/sos-radius`, makes six commits, and opens a PR titled 'SOS: filter recipients by radius' linked to the story. Two teammates review. One leaves a comment: 'What happens when radius is 0?' The developer fixes it, the build and tests pass, the PR is approved and merged. The story's links now show the PR and the commits.\n\n**What a tester or PM does with this:**\n\n- Read the PR description and the file list to see what areas changed, and decide what to regression test.\n- Check whether the PR is linked to the right story.\n- Notice a PR that has been waiting for review for days, which is a sprint risk.\n\nYou do not need to approve code changes. Say so if asked.",
+      "keyPoints": [
+        "Commit = saved snapshot; branch = separate line of work; PR = request to merge it.",
+        "A PR shows the diff, reviewers, comments and automated check results.",
+        "Reading what changed helps you choose what to retest.",
+        "Stale PRs waiting for review are a delivery risk worth raising."
+      ],
+      "interviewAngle": "This is a 'do you speak the language' topic. Show you understand the flow from story to branch to PR to merge, and that you use PRs to scope testing. Be clear that you reviewed work items and results, not code, and that developers owned Git operations.",
+      "exercises": [
+        {"id": "ado-u4-l1-e1", "type": "mcq", "placement": true, "prompt": "What is a pull request?",
+         "choices": ["A download of the repo to your computer", "A request to merge one branch into another, with review", "A backup of a pipeline", "A type of work item"], "answer": 1, "explanation": "A pull request asks to merge a branch into another and provides review, comments and checks."},
+        {"id": "ado-u4-l1-e2", "type": "short", "prompt": "What is the name for a separate line of work in Git, such as feature/sos-radius?",
+         "accept": ["branch", "a branch", "feature branch"], "answer": "Branch", "explanation": "A branch isolates changes until they are merged."},
+        {"id": "ado-u4-l1-e3", "type": "mcq", "prompt": "As a tester, why would you open the 'files changed' tab of a PR?",
+         "choices": ["To approve the code", "To see which areas changed so you can decide what to retest", "To delete the branch", "To change the sprint"], "answer": 1, "explanation": "The diff tells you which features and modules were touched, which guides regression testing."},
+        {"id": "ado-u4-l1-e4", "type": "open", "prompt": "A developer says 'the PR for the SOS radius story is up'. List five things you would check or ask, from the perspective of a PM or tester who does not review code.",
+         "answer": "1. **Link:** is the PR linked to the right story so the story shows the code change?\n2. **Description:** does it say what changed and how to test it?\n3. **Scope:** from the files changed, which areas could be affected (recipient lookup, notification sending, the settings page)? That sets my regression focus.\n4. **Checks:** did the build and automated tests pass on the PR?\n5. **Review status:** who has reviewed, are there unresolved comments, and is it likely to merge in time for the sprint?\n\nI would also ask when it will be deployed to the test environment so I can start running test cases.",
+         "rubric": ["Checks work item link", "Uses changed files to scope testing", "Checks build or test status", "Checks review status or timing", "Asks about test environment availability"]}
+      ]
+    },
+    {
+      "id": "ado-u4-l2",
+      "title": "Linking work to code and branch policies",
+      "minutes": 7,
+      "body": "The link between a requirement and its code is what makes later questions answerable: 'what changed for this story?' or 'which story does this commit belong to?'\n\n**How linking happens.**\n\n- **From the work item:** open the story, add a link, and choose Branch, Commit, Pull Request or Build. The work item shows a Development section listing these.\n- **From the PR:** the PR has a 'Work items' area where the developer links stories and bugs.\n- **From a commit message:** writing `#1234` in a commit message or PR description links work item 1234. Some teams also write `Fixes #1234` and configure the work item to move state on merge.\n- **From the branch:** creating a branch directly from a work item links it automatically.\n\nThe result, in the story, is a visible chain: Story 1234 -> branch -> PR 87 -> merged -> build 2041 -> release. For a bug, that is the proof of a fix. For UAT, you can tell a stakeholder exactly which change fixed the issue they reported.\n\n**Branch policies.** These are rules the repo enforces on a branch, usually `main`, so that nobody pushes straight to it. Typical rules:\n\n- a PR is required; no direct pushes,\n- a minimum number of reviewers must approve,\n- linked work items are required,\n- comments must be resolved before completing,\n- a build or test pipeline must succeed on the PR (a build validation),\n- certain people or teams must review changes to specific paths.\n\nAdministrators set these up. As a PM or tester you do not configure them, but you benefit: they prevent unreviewed or untested code reaching `main`, and the 'linked work item required' rule keeps traceability intact.\n\n**Example.** For the SOS feature, a policy requires one approval, a linked story and a passing Playwright smoke test on the PR build. A PR that breaks the SOS flow cannot merge, which catches the problem before test cases are even run manually.\n\nAsk a developer or administrator if you want to know which policies apply to a repo; the exact settings are in the repo's branch settings, but describing what they do is enough for interviews.",
+      "keyPoints": [
+        "Link work items to branches, commits and PRs; `#1234` in a message creates a link.",
+        "The Development section of a work item shows the code chain.",
+        "Branch policies require review, linked items and passing builds before merge.",
+        "Policies are set by administrators; you benefit from the traceability and gates."
+      ],
+      "interviewAngle": "A good answer explains why teams link work to code (traceability, proof of a fix, release notes) and what branch policies protect. Say you worked within these policies and encouraged the team to link PRs to stories, but did not configure them. This is the honest scope of a PM and UAT tester.",
+      "exercises": [
+        {"id": "ado-u4-l2-e1", "type": "mcq", "placement": true, "prompt": "What is the main purpose of a branch policy on main?",
+         "choices": ["To rename branches", "To prevent changes reaching main without review and passing checks", "To delete old commits", "To assign work items"], "answer": 1, "explanation": "Branch policies enforce review, linked work and build checks before a merge."},
+        {"id": "ado-u4-l2-e2", "type": "short", "prompt": "What can you type in a commit message to link it to work item 1234?",
+         "accept": ["#1234", "# 1234"], "answer": "#1234", "explanation": "A hash followed by the work item id creates a link."},
+        {"id": "ado-u4-l2-e3", "type": "mcq", "prompt": "A customer asks which change fixed their reported SOS bug. Where is the fastest place to look?",
+         "choices": ["The sprint burndown", "The Development links on the Bug work item", "The Kanban board columns", "The process template"], "answer": 1, "explanation": "The bug's linked PR, commit and build show exactly what fixed it."},
+        {"id": "ado-u4-l2-e4", "type": "open", "prompt": "Explain to a non-technical stakeholder why the team requires a linked work item and a passing test on every pull request. Use the SOS feature as the example. Keep it to about five sentences.",
+         "answer": "\"Every change to the product goes through a pull request, which is like a checkpoint before the code joins the main product. We require the change to be linked to a story, so we can always say why a change was made and what requirement it supports. We also require automated tests to pass, so a change that breaks something important, like sending an SOS alert, is caught within minutes rather than during testing or by a pharmacist in an emergency. Another person also reviews the change. It adds a little time to each change but removes a lot of risk, and it lets us trace any problem back to its cause.\"",
+         "rubric": ["Explains the PR as a checkpoint in plain language", "Explains the link as traceability or reason for a change", "Explains the automated test requirement with the SOS example", "Avoids jargon and stays short"]}
+      ]
+    }
+  ]
+}

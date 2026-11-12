@@ -1,0 +1,73 @@
+{
+  "id": "ado-u10",
+  "title": "Access levels and permissions",
+  "summary": "What Stakeholder, Basic and Basic + Test Plans allow, how permissions differ, and how to diagnose missing features.",
+  "lessons": [
+    {
+      "id": "ado-u10-l1",
+      "title": "Access levels, permissions and what a tester needs",
+      "minutes": 9,
+      "body": "Two separate controls decide what a person can do in Azure DevOps. Mixing them up is the most common admin-side misunderstanding.\n\n**Access level** is the license: what features a user gets at all.\n\n| Access level | Typical person | Notes |\n|---|---|---|\n| Stakeholder | Customer executive, business viewer | Free. Can view work items and dashboards, take part in discussion, add and edit some items. Limited backlog and board features. No Test Plans hub, but can give feedback with the Test & Feedback extension |\n| Basic | Developer, PM, tester | Full Boards, Repos, Pipelines, Artifacts. The first five users in an organization are free. Can run tests and see test charts and reports |\n| Basic + Test Plans | Test lead, anyone who builds test plans | Adds creating and managing test plans, suites, configurations, parameters, and preparing UAT |\n| Visual Studio subscriber | Developers with Visual Studio Enterprise or Test Professional | Test Plans is included with Visual Studio Enterprise, Test Professional and MSDN Platforms |\n\n**Permissions** control actions inside the project, granted through security groups (Readers, Contributors, Project Administrators, plus teams you create) and per-area-path settings. For testing, examples are Manage test plans, Manage test suites, Create test runs and Manage test configurations. You need the right access level and the right permission.\n\nSo, to be exact about a tester:\n\n- To **run** manual tests and mark outcomes: Basic.\n- To **create or edit** test plans and suites, author test cases in the grid, assign configurations and testers: Basic + Test Plans.\n- To **provide exploratory feedback** with the browser extension: Stakeholder is enough.\n\n**Trial.** An organization admin can start a 30-day Test Plans trial from billing settings and must assign Basic + Test Plans to each user who needs it during the trial. If the trial ends and billing is not set up, those users fall back to Stakeholder access. That fallback is why a plan can suddenly look read-only or hidden.\n\n**Symptom guide.**\n\n| What the user sees | Likely cause |\n|---|---|\n| Test Plans menu missing | Stakeholder access |\n| Can run tests but cannot create a suite | Basic without Test Plans |\n| Can see the suite but cannot add a case | Missing Manage test suites on the area path |\n| Cannot edit the same story | Edit work items permission on the area path |\n\n**Your honest level.** You were a power user. You asked admins for access and area-path permissions; you did not manage the organization, billing or security groups. Know the vocabulary so you can ask for the right thing: \"I need Basic + Test Plans and Manage test suites on the Dispatch area\".\n\nFree practice: a new organization gives you five free Basic users, so for the lab you are one of them. Start the Test Plans trial in the lab organization to get Basic + Test Plans.",
+      "keyPoints": [
+        "Access level is the license; permissions are what you may do inside a project.",
+        "Running tests needs Basic; creating plans and suites needs Basic + Test Plans.",
+        "Stakeholders can give feedback with Test & Feedback and view dashboards.",
+        "A 30-day trial exists; when it ends without billing, users fall back to Stakeholder."
+      ],
+      "interviewAngle": "If asked about administration, state it clearly: you requested access and understood the model; you did not administer it. A good answer: 'Testers who run cases need Basic; whoever authors plans and suites needs Basic + Test Plans.' That specificity signals real use.",
+      "exercises": [
+        {
+          "id": "ado-u10-l1-e1",
+          "type": "mcq",
+          "prompt": "A UAT tester from the customer needs to execute assigned test cases and mark pass or fail. What is the minimum access level?",
+          "choices": [
+            "Stakeholder",
+            "Basic",
+            "Basic + Test Plans",
+            "Project Administrator"
+          ],
+          "answer": 1,
+          "explanation": "Executing tests and marking outcomes requires Basic; authoring and preparing plans needs Basic + Test Plans.",
+          "placement": true
+        },
+        {
+          "id": "ado-u10-l1-e2",
+          "type": "mcq",
+          "prompt": "A colleague can run tests but cannot create a new test suite. Which explanation fits best?",
+          "choices": [
+            "They have Basic but not Basic + Test Plans",
+            "Their browser is out of date",
+            "The sprint is closed",
+            "They are in Stakeholder"
+          ],
+          "answer": 0,
+          "explanation": "Creating suites needs Basic + Test Plans (and permission on the area path)."
+        },
+        {
+          "id": "ado-u10-l1-e3",
+          "type": "short",
+          "prompt": "Which access level is needed to create test plans and suites?",
+          "accept": [
+            "basic + test plans",
+            "basic and test plans",
+            "basic+test plans"
+          ],
+          "answer": "Basic + Test Plans",
+          "explanation": "It is the access level that adds test planning."
+        },
+        {
+          "id": "ado-u10-l1-e4",
+          "type": "open",
+          "prompt": "Your lab organization's Test Plans menu has vanished after a month. List the likely causes and how you would check each.",
+          "answer": "1. The 30-day trial ended and no billing is set up, so your user fell back to Stakeholder: check the organization billing settings and your access level under Organization settings, Users. 2. The license was assigned to a different user or removed: check the users page. 3. Your access is Basic: you can still run tests but not see plan-creation controls; ask the owner (in a lab, yourself) to assign Basic + Test Plans or restart the trial. 4. Project-level permissions: check you still have the area-path permission to manage test plans and suites.",
+          "rubric": [
+            "Identifies trial expiry falling back to Stakeholder",
+            "Checks the user's access level",
+            "Distinguishes access level from permission",
+            "Describes the fix"
+          ]
+        }
+      ]
+    }
+  ]
+}

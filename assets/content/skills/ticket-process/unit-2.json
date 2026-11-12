@@ -1,0 +1,169 @@
+{
+  "id": "ticket-u2",
+  "title": "Intake and triage",
+  "summary": "Gather the right information, reproduce the problem, separate severity from priority, spot duplicates and know when to escalate.",
+  "lessons": [
+    {
+      "id": "ticket-u2-l1",
+      "title": "Gathering information and reproducing",
+      "minutes": 8,
+      "body": "A first report is usually a symptom. 'The schedule is wrong' tells you something happened. Your job at intake is to turn the symptom into a case someone can reproduce.\n\n**Questions that usually unlock a vague report:**\n\n| Ask | Why |\n|---|---|\n| Who is affected? One person, one pharmacy, everyone? | Scope and priority |\n| What were you trying to do? | The goal, not just the error |\n| What did you expect, and what happened instead? | The difference is the bug |\n| When did it start? Did it ever work? | Points to a recent change |\n| Where: web, mobile app, which browser or device, which account or role? | Environment |\n| Can you send a screenshot, shift id or the exact time? | Evidence |\n| Is there a workaround? | Priority |\n\nDo not send ten questions at once. Ask the two or three that matter most, in plain words, and say why. 'To check this I need the shift id and the pharmacist's time zone' feels like help, not interrogation.\n\n**Reproducing.** Try to make it happen yourself, on the same version, with similar data. Follow the reporter's steps exactly first, then vary one thing at a time.\n\nExample: a pharmacist says a shift shows an hour late. You create a shift for 9:00 AM for a pharmacist in Mountain time while you are in Eastern time. It displays correctly. You change the pharmacist to Arizona, which does not observe daylight saving time, and the shift is an hour off. Now you have a reproducible case: the time zone conversion fails for a zone without daylight saving changes.\n\nRecord three outcomes:\n\n1. **Reproduced.** Write exact steps.\n2. **Not reproduced.** Note what you tried, with environment and data. Ask for more.\n3. **Intermittent.** Note how often, and what is common among the failures.\n\nBefore writing anything off as 'cannot reproduce', check the usual suspects: different build version, user role or permissions, data state, time zone and locale, browser cache, and timing such as a delay before a notification arrives.\n\nAlso keep the customer's words. Quote the original report in the ticket, then add your own summary. Their phrasing sometimes holds a clue you missed.",
+      "keyPoints": [
+        "Turn a symptom into a case: who, what they tried, expected versus actual, when, where, evidence.",
+        "Ask two or three questions at a time and say why you need the answers.",
+        "Reproduce on the same version and vary one thing at a time.",
+        "If you cannot reproduce, record what you tried and check environment, role, data and time zone."
+      ],
+      "interviewAngle": "Describe your questioning approach with a real example from the scheduling software. This is also where your earlier phone and email support work shows: you learned to get details from a stressed person without making them feel interrogated. Keep the example short: the report, your two or three questions, what you learned, and what you did next.",
+      "exercises": [
+        {
+          "id": "ticket-u2-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A customer writes: 'The schedule is wrong.' What is the best first reply?",
+          "choices": [
+            "We will look into it.",
+            "Please send a complete description of everything you did this week.",
+            "Thanks. To find it, which pharmacist and shift is affected, and what time did you expect versus what you see?",
+            "That is not a valid ticket."
+          ],
+          "answer": 2,
+          "explanation": "A good reply is polite, asks two or three specific questions, and explains the purpose."
+        },
+        {
+          "id": "ticket-u2-l1-e2",
+          "type": "mcq",
+          "prompt": "You cannot reproduce a bug using the reporter's steps. Which of these should you check first?",
+          "choices": [
+            "Whether the reporter is mistaken",
+            "Differences in build version, role, data, time zone and timing",
+            "Whether the ticket is a duplicate",
+            "How many tickets the reporter has filed"
+          ],
+          "answer": 1,
+          "explanation": "Environment and data differences explain most 'cannot reproduce' cases. Do not assume the reporter is wrong."
+        },
+        {
+          "id": "ticket-u2-l1-e3",
+          "type": "open",
+          "prompt": "A pharmacy staffing firm emails: 'Pharmacists are not getting alerts for new shifts, please fix ASAP.' Write the reply you would send: acknowledge, ask for the two or three most useful details and why, and say what happens next. Keep it under 120 words.",
+          "answer": "Hi, thanks for letting us know. I understand this is urgent and I'm looking into it now.\n\nTo narrow it down quickly, could you tell me:\n1. Is it all pharmacists, or specific ones? A name or two would help.\n2. About what time did you last assign a shift where the alert didn't arrive, and for which shift?\n3. Are they using the mobile app or email alerts?\n\nWith that I can check the notification log and try to reproduce it. I'll update you within the hour with what I find, even if it's only that I need more information.",
+          "rubric": [
+            "Acknowledges urgency without promising a fix",
+            "Asks two or three specific questions",
+            "Explains why details are needed",
+            "States a concrete next step and timing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u2-l2",
+      "title": "Severity versus priority",
+      "minutes": 9,
+      "body": "These two words are often confused, and interviewers like to ask about them.\n\n- **Severity** is the impact of the problem on the product and users if it happens: how bad it is.\n- **Priority** is the order in which the team should deal with it: how soon.\n\nSeverity is mostly a technical and user-impact judgment. Priority also takes in business context: how many customers are affected, deadlines, contracts, workarounds, effort, and what else is waiting. Many teams use one field only. Even then, thinking in both dimensions makes better decisions.\n\n**Severity levels (an example scale):**\n\n| Level | Meaning | Dispatch software example |\n|---|---|---|\n| Critical | System down, data loss, safety or compliance risk, no workaround | No shifts can be assigned to anyone |\n| Major | Core function broken for many users, workaround is painful | Notifications fail for all mobile users |\n| Moderate | Function broken for some users or with a reasonable workaround | Wrong time zone shown for pharmacists in one region |\n| Minor | Cosmetic or low-impact | Button label misspelled |\n\n**A worked matrix.** Combine severity with how widespread the problem is and whether a workaround exists:\n\n| | Affects many customers | Affects one customer |\n|---|---|---|\n| **Critical severity** | P1: drop everything, fix now | P1 or P2, depending on how important the customer is and the clock |\n| **Major severity** | P2: fix this sprint or sooner | P3 if there is a workaround, otherwise P2 |\n| **Moderate severity** | P3: plan into the next sprint | P4: backlog, with a workaround communicated |\n| **Minor severity** | P4: backlog | P4 or close |\n\nNow test it against three tickets:\n\n1. **A shift is lost when two dispatchers edit it at the same time.** Data loss, can happen to any customer. Critical severity, many customers: P1.\n2. **The date format in an export shows 2026-11-11 instead of 11/11/2026.** Minor severity, affects one customer who is asking for it. P4, unless there is a contract reason.\n3. **A typo in the login screen two days before a major demo.** Minor severity, but the business context raises priority. Priority is higher than severity suggests. That is exactly why they are separate.\n\nWrite your reasoning in the ticket in one line: 'Severity major, all mobile users affected, no workaround, so P2.' Disagreement is easier to resolve when the logic is visible.",
+      "keyPoints": [
+        "Severity is how bad the impact is; priority is how soon it should be handled.",
+        "Priority also depends on spread, workarounds, deadlines and effort.",
+        "A matrix of severity by spread gives a defensible starting point.",
+        "State your reasoning in the ticket so others can challenge it."
+      ],
+      "interviewAngle": "Give a pair of examples where severity and priority differ, such as a cosmetic typo before a demo, or a serious bug affecting only a test account. If the company uses a single field, say you can still reason in both dimensions. Mention that priority was agreed with the development team and customer stakeholders.",
+      "exercises": [
+        {
+          "id": "ticket-u2-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which statement best distinguishes severity from priority?",
+          "choices": [
+            "Severity is set by customers, priority by developers",
+            "Severity is how bad the impact is; priority is how soon it should be dealt with",
+            "They mean the same thing",
+            "Priority only applies to features"
+          ],
+          "answer": 1,
+          "explanation": "Severity measures impact. Priority orders the work, taking business context into account."
+        },
+        {
+          "id": "ticket-u2-l2-e2",
+          "type": "mcq",
+          "prompt": "A misspelling appears on the login screen of a product that will be shown to a major prospect tomorrow. What are the likely severity and priority?",
+          "choices": [
+            "High severity, low priority",
+            "Low severity, high priority",
+            "Low severity, low priority",
+            "High severity, high priority"
+          ],
+          "answer": 1,
+          "explanation": "The harm is cosmetic, but the demo makes it worth fixing right away."
+        },
+        {
+          "id": "ticket-u2-l2-e3",
+          "type": "open",
+          "prompt": "Rate these three tickets for severity and priority and give a one-line reason for each: (A) emergency shifts assigned to a pharmacist do not trigger any notification for any customer; (B) a report's column header says 'Pharmacy ID' instead of 'Pharmacy Id'; (C) a single pharmacy sees every shift one hour late, but has a manual workaround.",
+          "answer": "**A:** Severity critical, priority P1. Emergency shifts could go unfilled for all customers, and there is no workaround. Fix now.\n\n**B:** Severity minor, priority P4. Cosmetic, no business effect. Backlog, batch with other copy fixes.\n\n**C:** Severity moderate, priority P3, possibly P2 if the pharmacy is a key account or shifts are time critical. It is wrong data for one customer with a workaround, so plan it into the next sprint, and give the pharmacy the workaround steps and a date.",
+          "rubric": [
+            "A is rated at the top level with no-workaround reasoning",
+            "B is rated low on both",
+            "C considers spread and workaround",
+            "Each rating has a stated reason"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u2-l3",
+      "title": "Duplicates and escalation",
+      "minutes": 7,
+      "body": "Two more triage habits keep a queue manageable.\n\n**Duplicates.** The same problem often arrives from several people. Search before you create or work a ticket: by key words from the summary, the affected feature, the error message, and the time frame. Customer-facing wording and developer wording differ, so try both ('alert' and 'notification').\n\nWhen you find a duplicate:\n\n1. Pick one **primary** ticket, usually the oldest with the best detail.\n2. Link the duplicate to the primary using the tool's duplicate link.\n3. Copy any new information from the duplicate into the primary: another customer, another environment, a new screenshot. A second report is useful data about scope.\n4. Close the duplicate with a note, and tell the reporter their issue is being tracked under the primary.\n\nAvoid merging tickets that only look alike. Two 'shift missing' reports may have different causes: one a time zone bug, the other a permissions problem. If in doubt, link them as related and keep both.\n\n**When to escalate.** Escalation means passing a ticket to someone with more authority or skill, or raising its urgency. Do it when:\n\n- It meets a defined severity threshold, for example data loss or a patient-facing outage.\n- An SLA or promised date is about to be missed.\n- You have exhausted your own troubleshooting and need a developer's access, such as logs or the database.\n- The customer relationship is at risk or the customer asks for a manager.\n- The same issue has come back repeatedly.\n- There is a security or compliance concern.\n\nHow to escalate well: say it plainly, put it in writing, and make it easy to act on. 'Escalating to engineering: shifts assigned after 6 PM Central are not sending notifications. Affects at least 3 pharmacies, no workaround, 2 emergency shifts at risk tomorrow. Reproduced on staging with shift 4821; logs attached. I need a developer to look at the notification queue today.'\n\nThat message contains impact, evidence, ask and deadline. Compare with 'Not working, please look.' The first gets a response in minutes.\n\nEscalating is not failure. Waiting too long to escalate a critical problem is the real failure. Also, tell the customer an escalation has happened and what to expect next.",
+      "keyPoints": [
+        "Search before filing, and link duplicates to one primary ticket.",
+        "Copy new details from the duplicate to the primary, since extra reports show scope.",
+        "Escalate on severity, SLA risk, missing access, relationship risk or repeats.",
+        "An escalation message states impact, evidence, the specific ask and the deadline."
+      ],
+      "interviewAngle": "Interviewers want to know you can escalate without panic or delay. Tell a short story: you reproduced a notification failure, gathered evidence, and handed it to a developer with impact and a deadline. Be clear that you decided based on thresholds, not just because a customer was loud.",
+      "exercises": [
+        {
+          "id": "ticket-u2-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A second pharmacy reports an issue already tracked in another ticket. What should you do?",
+          "choices": [
+            "Delete the new ticket",
+            "Link it as a duplicate, copy useful new details to the primary, close it, and tell the reporter",
+            "Leave both open and assign them to different people",
+            "Merge it without reading it"
+          ],
+          "answer": 1,
+          "explanation": "Linking keeps the record, and the extra details widen the picture on the primary ticket."
+        },
+        {
+          "id": "ticket-u2-l3-e2",
+          "type": "mcq",
+          "prompt": "Which of these is the strongest reason to escalate right away?",
+          "choices": [
+            "A customer used capital letters in their email",
+            "A bug is causing data loss for several pharmacies with no workaround",
+            "The ticket is two days old",
+            "A feature request has many upvotes"
+          ],
+          "answer": 1,
+          "explanation": "Data loss with no workaround and wide spread meets a severity threshold."
+        },
+        {
+          "id": "ticket-u2-l3-e3",
+          "type": "open",
+          "prompt": "Write a short escalation message to a developer lead about shifts not sending notifications. Include impact, evidence, a clear ask and a deadline. Invent plausible details.",
+          "answer": "**Escalation: shift assignment notifications not sending (urgent)**\n\nImpact: 4 pharmacies have reported no alerts after assignment since about 6 PM Central last night. Two emergency shifts for tomorrow morning are at risk of going unfilled. No workaround except calling pharmacists.\n\nEvidence: Reproduced on staging with shift 4821; assignment saved but no entry appears in the notification log. Production logs for shift 4821 and 4830 attached. Earlier shifts the same day were sent normally.\n\nAsk: Can a developer check the notification queue and worker today? I need an update by 2 PM so I can tell the customer whether to start calling pharmacists manually.",
+          "rubric": [
+            "States user and business impact with numbers",
+            "Provides reproduction and evidence",
+            "Makes a specific request",
+            "Gives a deadline and the reason for it"
+          ]
+        }
+      ]
+    }
+  ]
+}

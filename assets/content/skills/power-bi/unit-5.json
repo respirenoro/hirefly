@@ -1,0 +1,117 @@
+{
+  "id": "power-bi-u5",
+  "title": "Sharing your work",
+  "summary": "Publish a report, organise it in workspaces, keep it refreshed, and understand row-level security at a concept level.",
+  "lessons": [
+    {
+      "id": "power-bi-u5-l1",
+      "title": "Publishing, workspaces and refresh",
+      "minutes": 8,
+      "body": "A report on your laptop helps nobody else. Sharing means publishing to the **Power BI Service** and keeping the data fresh.\n\n**Publish.** In Desktop, sign in with a work or school account and choose Home > Publish. Pick a destination **workspace**. Desktop uploads two things: the **report** (pages and visuals) and the **semantic model** (tables, relationships, measures). The semantic model used to be called a *dataset*, and many articles and interview questions still use that word.\n\n**Workspaces.** A workspace is a shared area in the Service where reports and models live. \"My workspace\" is personal. Team workspaces have roles that control what people can do:\n\n| Role | Can do (roughly) |\n|---|---|\n| Admin | everything, including managing members |\n| Member | edit and publish content, add people with lower roles |\n| Contributor | create, edit and delete content and publish reports; cannot manage access |\n| Viewer | view only |\n\nFor wider audiences, you can package content as an **app** so readers get a clean entry point without access to the whole workspace. Sharing a report with a person or link also needs the right licence for them or for the workspace's capacity. Exact rules change, so ask your administrator.\n\n**Refresh.** Imported data is a copy loaded at refresh time. If the source changes, the report does not change until the model refreshes. In the Service, open the semantic model's settings and set a **scheduled refresh**, such as daily at 06:00, and add the data source credentials.\n\n| Source location | What refresh needs |\n|---|---|\n| Cloud source (SharePoint, Azure SQL) | credentials in the Service |\n| On-premises source (a SQL Server inside the office network) | an **on-premises data gateway** installed on a machine that can reach it |\n| Local file on your laptop | not reliable; move it to OneDrive or SharePoint |\n\n**Import versus DirectQuery.** **Import** stores a compressed copy in the model: fast, but needs refresh. **DirectQuery** sends queries to the source each time a visual loads: always current, but slower and with some DAX limits. Import is the default choice for learning projects.\n\nAfter publishing, open the report in the Service and check: do the numbers match Desktop, do slicers work, and does the refresh history show success? Tell the audience when the data was last refreshed, for example in a text box.\n\nAs a beginner you may not be able to publish at all. Publishing needs a work or school account; Power BI generally does not accept a plain personal email address for sign-up. Without one you can still build everything in Desktop, save the .pbix file and demo it from there. Never upload real company data to any personal or trial account.",
+      "keyPoints": [
+        "Publish sends a report and its semantic model (formerly dataset) to a workspace.",
+        "Workspace roles: Admin, Member, Contributor, Viewer.",
+        "Imported data changes only on refresh; schedule it in the Service.",
+        "On-premises sources need an on-premises data gateway.",
+        "Import is a stored copy; DirectQuery queries the source live."
+      ],
+      "interviewAngle": "You can explain publishing and refresh at a concept level, and that is enough for an entry-level question. Say \"I understand the workflow, but I have not administered a tenant or a gateway\". Never upload real company or pharmacist data to a personal account to practise.",
+      "exercises": [
+        {
+          "id": "power-bi-u5-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A published report uses Import mode. New shifts are added to the source every day, but the report still shows last week's numbers. What is missing?",
+          "choices": [
+            "A scheduled refresh for the semantic model",
+            "A new visual",
+            "A DirectQuery slicer",
+            "A different workspace role"
+          ],
+          "answer": 0,
+          "explanation": "Imported data is a copy. It updates only when the model refreshes, so set up a scheduled refresh in the Service."
+        },
+        {
+          "id": "power-bi-u5-l1-e2",
+          "type": "short",
+          "prompt": "What component lets the Power BI Service refresh data from a SQL Server that sits inside a company network? (Two or three words.)",
+          "accept": [
+            "gateway",
+            "data gateway",
+            "on-premises data gateway",
+            "on-premises gateway",
+            "on premises data gateway",
+            "on premises gateway"
+          ],
+          "answer": "On-premises data gateway",
+          "explanation": "The gateway is software on a machine inside the network that passes data to the Service securely for refresh."
+        },
+        {
+          "id": "power-bi-u5-l1-e3",
+          "type": "open",
+          "prompt": "You have finished the fill-rate report in Desktop. Explain how you would get it to a team of operations managers and keep it current.",
+          "answer": "Publish from Desktop to a team workspace, which uploads the report and its semantic model. Check in the Service that numbers match Desktop. If the source is a cloud file or database, enter credentials and set a scheduled refresh, for example daily; if it is on-premises, an on-premises data gateway is needed. Share the report with the managers (as Viewers or through an app) and confirm they have the right licences. Mention the last refresh time on the report.",
+          "rubric": [
+            "Publishes to a workspace",
+            "Sets a scheduled refresh with credentials",
+            "Mentions a gateway for on-premises sources",
+            "Shares with the audience through an appropriate role or app"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u5-l2",
+      "title": "Row-level security (concept)",
+      "minutes": 7,
+      "body": "Row-level security (RLS) restricts which **rows** of data a person sees in the same report. Without it you would need a separate report for each audience.\n\n**The scenario.** Your pharmacies belong to regions. The East manager should see only East pharmacies, and the South manager only South. You publish one report, and RLS makes each manager see their own slice.\n\n**How it works**\n\n1. In Desktop, open Modeling > Manage roles and create a role, for example `East`.\n2. Choose a table and write a DAX filter expression that must be true for visible rows:\n\n```text\n[region] = \"East\"\n```\n\nThat filter goes on the `Pharmacies` table. Through the one-to-many relationship, it also filters `Shifts`, so only East shifts remain in every visual.\n\n3. Test with Modeling > View as, choosing the role, to see what that person would see.\n4. Publish. In the Service, open the semantic model's Security settings and add people or groups to each role.\n\n**What a role does to the numbers (sample data)**\n\n| View | Pharmacies visible | Total Shifts |\n|---|---|---|\n| Full access | Eastside, Harbor, Lakeview | 6 |\n| Role `East` | Eastside | 2 |\n| Role `South` | Harbor | 3 |\n\n**Dynamic RLS.** Instead of one role per region, add a small `UserRegions` table with columns email and region, relate it, and filter with `[email] = USERPRINCIPALNAME()`. The function returns the signed-in user's account name, so one role handles everyone. That is more maintainable as people change.\n\n**Limits to know**\n\n- RLS applies to people who view content. Users with Admin, Member or Contributor roles in the workspace (who can edit the model) are not restricted by it, so share with Viewers or through an app.\n- Filters flow along relationships in the filter direction. A well-built star schema makes RLS predictable.\n- It controls rows only. Hiding sensitive columns needs other approaches, and it is not a substitute for deciding what data belongs in a report at all.\n- Test with real role members before relying on it.\n\nIn a healthcare-related setting, who may see what is a serious question. As an analyst, your job is to ask what the access rules are and to follow them, not to decide them alone.",
+      "keyPoints": [
+        "RLS limits which rows a viewer sees, using a DAX filter on a role.",
+        "A filter on a dimension flows to the fact table through the relationship.",
+        "Test with View as, then assign people to roles in the Service.",
+        "Dynamic RLS uses USERPRINCIPALNAME() to avoid one role per person.",
+        "RLS restricts viewers, not workspace Admins, Members or Contributors."
+      ],
+      "interviewAngle": "At entry level, being able to explain RLS in one clear paragraph is enough. Say it is something you understand conceptually and tested only on a practice model. Note that who may see data is decided by the data owner and compliance rules, particularly in healthcare, and you would confirm requirements first.",
+      "exercises": [
+        {
+          "id": "power-bi-u5-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "How is a row-level security role defined in Power BI?",
+          "choices": [
+            "By hiding the report page from users",
+            "By writing a DAX filter expression on one or more tables, then assigning users to the role",
+            "By creating a separate report for each user",
+            "By setting a visual-level filter"
+          ],
+          "answer": 1,
+          "explanation": "A role holds DAX filter expressions that limit visible rows. Users or groups are then assigned to the role in the Service."
+        },
+        {
+          "id": "power-bi-u5-l2-e2",
+          "type": "short",
+          "prompt": "Which DAX function returns the signed-in user's account name and is used for dynamic row-level security?",
+          "accept": [
+            "userprincipalname",
+            "userprincipalname()"
+          ],
+          "answer": "USERPRINCIPALNAME",
+          "explanation": "USERPRINCIPALNAME() returns the user's sign-in name, which can be matched against an email column."
+        },
+        {
+          "id": "power-bi-u5-l2-e3",
+          "type": "open",
+          "prompt": "Regional managers should see only their own region's shifts in one shared report. Explain how you would set that up with row-level security and what you would test.",
+          "answer": "In Desktop, use Manage roles to create a role per region (or a dynamic role) with a DAX filter on the Pharmacies table such as [region] = \"East\". Because Pharmacies is related one-to-many to Shifts, the filter also restricts shifts. Use View as to test each role and check totals. Publish, then in the Service assign each manager to the matching role. Share with them as Viewers or through an app, since workspace Admins, Members and Contributors are not restricted by RLS. Finally, confirm access rules with the data owner.",
+          "rubric": [
+            "Creates a role with a DAX filter on the region column of a dimension",
+            "Explains the filter flows to the fact table through the relationship",
+            "Tests with View as",
+            "Assigns members in the Service and notes RLS applies to viewers"
+          ]
+        }
+      ]
+    }
+  ]
+}

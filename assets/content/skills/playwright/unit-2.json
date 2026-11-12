@@ -1,0 +1,138 @@
+{
+  "id": "pw-u2",
+  "title": "Locators and actions",
+  "summary": "Finding elements the way a user would, why role-based locators beat CSS and XPath, and filling forms with auto-waiting.",
+  "lessons": [
+    {
+      "id": "pw-u2-l1",
+      "title": "Locators: finding elements the way a user would",
+      "minutes": 9,
+      "body": "A locator tells Playwright how to find an element. The most important habit is to find elements by what a user sees or what assistive technology exposes, not by how the page happens to be built.\n\n**The recommended locators**\n\n```ts\npage.getByRole('button', { name: 'Request shift' })   // by accessible role and name\npage.getByLabel('Pharmacy')                           // form field by its label\npage.getByPlaceholder('Search pharmacists')           // by placeholder text\npage.getByText('No open shifts')                      // by visible text\npage.getByTestId('shift-row')                         // by data-testid attribute\n```\n\n`getByRole` is the first choice. Roles include `button`, `link`, `heading`, `textbox`, `checkbox`, `row` and `combobox`. The `name` option matches the accessible name (usually the visible text or the label). It matches case-insensitively and as a substring unless you pass `exact: true`.\n\n`getByTestId` reads the `data-testid` attribute by default. Use it when no role or text is stable, for example a table row that has no useful name. It needs a developer to add the attribute, which is a fair request in a ticket.\n\n**Why not brittle CSS and XPath**\n\n```ts\n// Brittle: breaks when a class is renamed or a div is added\npage.locator('div.container > div:nth-child(3) > button.btn-primary');\npage.locator('//div[@id=\"app\"]/div[2]/form/button');\n```\n\nThese tie the test to layout details no user cares about. A designer changes a class name and twenty tests fail although nothing is wrong for users. A role locator keeps working through that change, and if it stops working, it often means the page really did become harder to use (a button lost its label).\n\n**Narrowing and strictness**\n\nLocators are strict: if one matches more than one element and you try to act on it, Playwright throws an error rather than guessing. Narrow with another locator or `filter`:\n\n```ts\nconst row = page.getByRole('row').filter({ hasText: 'Maple Street Pharmacy' });\nawait row.getByRole('button', { name: 'Assign' }).click();\n```\n\nA locator is a recipe, not an element. It is re-evaluated each time you use it, which is why it survives the page re-rendering.\n\nIf you are unsure what to use, run `npx playwright codegen` and read the locators it suggests, then tidy them.",
+      "keyPoints": [
+        "Prefer getByRole, getByLabel, getByText and getByTestId over CSS or XPath.",
+        "Role and label locators match how users find things and survive markup changes.",
+        "Locators are strict: multiple matches raise an error; narrow with `filter` or a parent locator.",
+        "A locator is re-evaluated on every use, so it handles re-rendered pages."
+      ],
+      "interviewAngle": "\"How do you choose locators?\" is a very common question. Answer with the order you use (role, label, text, test id), the reason (resilience, closer to the user), and what you avoid (long CSS chains, XPath by position). If you only wrote basic tests, say you followed Playwright's recommended order and used codegen to check yourself.",
+      "exercises": [
+        {
+          "id": "pw-u2-l1-e1",
+          "type": "mcq",
+          "prompt": "Which locator is the most resilient to a developer renaming CSS classes and wrapping elements in extra divs?",
+          "choices": [
+            "page.locator('div.panel > div:nth-child(2) button')",
+            "page.locator('//form/div[3]/button')",
+            "page.getByRole('button', { name: 'Request shift' })",
+            "page.locator('.btn-primary')"
+          ],
+          "answer": 2,
+          "explanation": "A role-plus-name locator depends on what the user sees, not on the markup, so layout changes do not break it.",
+          "placement": true
+        },
+        {
+          "id": "pw-u2-l1-e2",
+          "type": "mcq",
+          "prompt": "A locator matches three rows and you call `.click()` on it. What happens?",
+          "choices": [
+            "Playwright clicks the first row",
+            "Playwright clicks all three rows",
+            "It throws a strict mode violation error",
+            "It waits until only one row remains"
+          ],
+          "answer": 2,
+          "explanation": "Locators are strict. Playwright refuses to guess and tells you to narrow the locator."
+        },
+        {
+          "id": "pw-u2-l1-e3",
+          "type": "short",
+          "prompt": "Which attribute does `getByTestId` read by default? (Just the attribute name.)",
+          "accept": [
+            "data-testid"
+          ],
+          "answer": "data-testid",
+          "explanation": "The default test id attribute is `data-testid`; it can be changed in the config with `testIdAttribute`."
+        },
+        {
+          "id": "pw-u2-l1-e4",
+          "type": "open",
+          "prompt": "Rewrite this brittle locator as a better one and explain the change in two sentences: `page.locator('#app > div:nth-child(2) > form > div > button.primary')`. The button is labelled \"Find pharmacist\". Then write a locator that clicks the \"Assign\" button inside the table row for \"Maple Street Pharmacy\".",
+          "answer": "```ts\nawait page.getByRole('button', { name: 'Find pharmacist' }).click();\n\nconst row = page.getByRole('row').filter({ hasText: 'Maple Street Pharmacy' });\nawait row.getByRole('button', { name: 'Assign' }).click();\n```\n\nThe original depends on exact nesting and a class name, so any layout change breaks it. The role locator depends on what the user sees (a button with that label), so it survives markup changes and fails only when the user-facing behaviour changes.",
+          "rubric": [
+            "Uses getByRole with the button name",
+            "Explains brittleness of position/class based selectors",
+            "Narrows to the row using filter and then a nested locator",
+            "Code is valid TypeScript with await"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u2-l2",
+      "title": "Actions, forms and auto-waiting",
+      "minutes": 9,
+      "body": "Actions are methods on a locator that do something: `click`, `fill`, `check`, `selectOption`, `press`. Here is a full \"request an emergency shift\" flow against a hypothetical form:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('dispatcher requests an emergency shift', async ({ page }) => {\n  await page.goto('/shifts/new');\n\n  await page.getByLabel('Pharmacy').selectOption({ label: 'Maple Street Pharmacy' });\n  await page.getByLabel('Start time').fill('2026-11-14T08:00');\n  await page.getByLabel('Notes').fill('Pharmacist called out sick');\n  await page.getByRole('checkbox', { name: 'Emergency' }).check();\n  await page.getByRole('button', { name: 'Request shift' }).click();\n\n  await expect(page.getByText('Shift requested')).toBeVisible();\n});\n```\n\n`page.goto('/shifts/new')` with a relative path works once `baseURL` is set in the config (covered later).\n\n**What each action does**\n\n| Action | Use |\n|---|---|\n| `fill(text)` | Clears the field and sets its value; the normal way to enter text |\n| `click()` | Clicks the element; use `dblclick()` for a double click |\n| `check()` / `uncheck()` | Ticks or unticks a checkbox, and verifies the result |\n| `selectOption(...)` | Chooses an option in a native `<select>` by value, label or index |\n| `press('Enter')` | Presses a key on the element |\n| `pressSequentially(text)` | Types key by key, only for fields that react to each keystroke |\n\n**Auto-waiting**\n\nBefore an action, Playwright waits until the element is attached to the page, visible, stable (not mid-animation), enabled, and able to receive the click (not covered by another element). You do not write \"wait until the button is ready\". If the conditions are not met within the action timeout, the test fails with a message naming which condition failed, which is very useful when debugging.\n\nThis removes the most common cause of flaky tests in older tools: acting before the page is ready. You rarely need an explicit wait. The next unit covers waiting on results with assertions.\n\n**Common slips**\n\n- Forgetting `await`. The test then finishes before the action happens, or passes without checking anything.\n- Using `fill` on a custom dropdown built from divs. Click it, then click the option by role (`option`) instead.",
+      "keyPoints": [
+        "Actions live on locators: click, fill, check, selectOption, press.",
+        "Playwright auto-waits for the element to be visible, stable, enabled and unobstructed before acting.",
+        "Do not add manual waits before actions; read the failure message when auto-wait times out.",
+        "Missing `await` is the classic beginner bug."
+      ],
+      "interviewAngle": "You may be asked \"how do you handle waiting?\" The strong answer: Playwright auto-waits before actions and retries assertions, so you do not sprinkle sleeps. Connect it to your own experience: tests that failed because a page was slow taught you to look for the real condition to wait on, not add delays.",
+      "exercises": [
+        {
+          "id": "pw-u2-l2-e1",
+          "type": "mcq",
+          "prompt": "What does Playwright do before clicking a button?",
+          "choices": [
+            "Clicks immediately and retries manually in your test",
+            "Waits for the button to be visible, stable, enabled and able to receive the click",
+            "Waits a fixed 1000 ms",
+            "Reloads the page to make sure it is current"
+          ],
+          "answer": 1,
+          "explanation": "Actionability checks are built in; if they do not pass within the timeout, the test fails with the reason.",
+          "placement": true
+        },
+        {
+          "id": "pw-u2-l2-e2",
+          "type": "mcq",
+          "prompt": "Which line correctly enters text in a field labelled \"Notes\"?",
+          "choices": [
+            "page.getByLabel('Notes').fill('Pharmacist called out sick');",
+            "page.getByLabel('Notes').value = 'Pharmacist called out sick';",
+            "page.getByLabel('Notes').type = 'Pharmacist called out sick';",
+            "page.fill('Notes');"
+          ],
+          "answer": 0,
+          "explanation": "`fill` is the method for setting a text field; the others are not valid Playwright calls."
+        },
+        {
+          "id": "pw-u2-l2-e3",
+          "type": "mcq",
+          "prompt": "A test passes even though the shift was never created. The last two lines are `page.getByRole('button', { name: 'Request shift' }).click();` and the test ends. What is the likely cause?",
+          "choices": [
+            "The button locator is too strict",
+            "Playwright cannot click buttons",
+            "Missing `await` before the click",
+            "The page has no heading"
+          ],
+          "answer": 2,
+          "explanation": "Without `await`, the test can finish before the click happens, so nothing is checked."
+        },
+        {
+          "id": "pw-u2-l2-e4",
+          "type": "open",
+          "prompt": "Write a test that opens `/pharmacists`, types \"Rivera\" into the search box (placeholder \"Search pharmacists\"), presses Enter, and checks that a row containing \"Rivera\" is visible.",
+          "answer": "```ts\nimport { test, expect } from '@playwright/test';\n\ntest('search finds a pharmacist by last name', async ({ page }) => {\n  await page.goto('/pharmacists');\n  const search = page.getByPlaceholder('Search pharmacists');\n  await search.fill('Rivera');\n  await search.press('Enter');\n  await expect(page.getByRole('row').filter({ hasText: 'Rivera' })).toBeVisible();\n});\n```",
+          "rubric": [
+            "Uses getByPlaceholder and fill",
+            "Presses Enter with press",
+            "Asserts with expect and toBeVisible on a row filtered by text",
+            "Uses async/await throughout; no fixed sleeps"
+          ]
+        }
+      ]
+    }
+  ]
+}

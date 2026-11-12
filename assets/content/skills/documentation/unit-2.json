@@ -1,0 +1,142 @@
+{
+  "id": "doc-u2",
+  "title": "Knowledge base articles and user guides",
+  "summary": "How-to structure, searchable titles, numbered steps, callouts, troubleshooting articles and before/after rewrites.",
+  "lessons": [
+    {
+      "id": "doc-u2-l1",
+      "title": "Anatomy of a good how-to article",
+      "minutes": 9,
+      "body": "A how-to article is the workhorse of a knowledge base. A good one lets a reader finish a task without asking anyone. Its parts, in order:\n\n1. **A title users would search for.** Use the words in the tickets and the search bar: \"Cancel a shift and record the reason\", not \"Shift lifecycle management\". Start with a verb for tasks. Avoid internal feature names the user has never seen.\n2. **One-line summary.** What the article helps with and who it is for.\n3. **Before you start.** Permissions, prerequisites, anything needed. \"You need the Dispatcher role.\"\n4. **Numbered steps.** One action per step, in the order done, naming buttons and fields exactly as on screen.\n5. **Result.** What the reader should see when it worked.\n6. **If something goes wrong / related.** Links to the troubleshooting article and related tasks.\n\n**A full example**\n\n> **Cancel a shift and record the reason**\n>\n> Use this when a pharmacy no longer needs the cover it requested. You need the Dispatcher role.\n>\n> 1. Open **Shifts** and select the shift you want to cancel.\n> 2. Select **Cancel shift**.\n> 3. In **Reason**, choose the closest match. If none fits, choose **Other** and add a note.\n> 4. Select **Confirm cancellation**.\n>\n> **Result:** The shift shows the status **Cancelled**, and the assigned pharmacist, if any, is notified.\n>\n> **Note:** Cancelling within a few hours of the start time may need approval from your manager. Check your agency's policy.\n>\n> **Related:** Reassign a pharmacist to a different shift\n\n**Rules for steps**\n\n- One action per step. \"Select the pharmacy and set the start time\" is two steps.\n- Put the location before the action: \"In Reason, choose...\" not \"Choose in Reason\".\n- Bold the interface labels exactly as shown, so readers can match them.\n- Warnings go before the step they apply to, not after.\n\n**Screenshots and callouts**\n\nUse a screenshot only where it removes doubt, such as locating a small icon. Crop to the relevant area and mark the target. Screenshots go out of date as soon as the interface changes, so the text must stand alone without them. Always add alt text.\n\nUse callouts sparingly: *Note* for helpful context, *Important* for something that can cause data loss or a wrong outcome. If everything is flagged important, nothing is.",
+      "keyPoints": [
+        "Title with the user's words, a summary, prerequisites, numbered steps, expected result, related links.",
+        "One action per step, location first, interface labels exactly as shown.",
+        "Warnings come before the step they affect.",
+        "Text must work without screenshots; callouts are for what matters."
+      ],
+      "interviewAngle": "A writing test often asks for a how-to article. Interviewers look for structure: verb-first title, prerequisites, numbered one-action steps, result. Say you wrote knowledge base articles from real ticket questions and checked them against the product, and that you used the customer's own wording in titles.",
+      "exercises": [
+        {
+          "id": "doc-u2-l1-e1",
+          "type": "mcq",
+          "prompt": "Which is the best title for a knowledge base article?",
+          "choices": [
+            "Shift Cancellation Functionality",
+            "Cancel a shift and record the reason",
+            "Shifts Module, Part 4",
+            "Cancellation Workflow Overview"
+          ],
+          "answer": 1,
+          "explanation": "A verb-first task title using the user's wording is what people type into search.",
+          "placement": true
+        },
+        {
+          "id": "doc-u2-l1-e2",
+          "type": "mcq",
+          "prompt": "Which step is written correctly?",
+          "choices": [
+            "Select the pharmacy and then set the start time and notes.",
+            "Choose, in Reason, the closest match.",
+            "In **Reason**, choose the closest match.",
+            "The reason should be chosen."
+          ],
+          "answer": 2,
+          "explanation": "It has the location first, one action, and the interface label in bold."
+        },
+        {
+          "id": "doc-u2-l1-e3",
+          "type": "mcq",
+          "prompt": "Where should a warning that cancellation cannot be undone appear?",
+          "choices": [
+            "After the last step",
+            "In a footnote",
+            "Immediately before the step that confirms cancellation",
+            "Only in the release notes"
+          ],
+          "answer": 2,
+          "explanation": "Readers act as they read; a warning after the step is too late."
+        },
+        {
+          "id": "doc-u2-l1-e4",
+          "type": "open",
+          "prompt": "Write a complete how-to article for: \"Assign a pharmacist to an open shift.\" Assume the screen has a shift list, an **Assign** button on each open shift, a searchable list of available pharmacists, and a **Confirm assignment** button. The pharmacist is notified automatically. Include a title, summary, prerequisites, numbered steps, result and a related link.",
+          "answer": "**Assign a pharmacist to an open shift**\n\nUse this to fill an open shift by choosing an available pharmacist. You need the Dispatcher role.\n\n**Before you start**\n- The shift must have the status **Open**.\n\n**Steps**\n1. Open **Shifts** and find the open shift.\n2. Select **Assign** on that shift.\n3. In the pharmacist list, search for a name, or scroll to see who is available.\n4. Select the pharmacist you want.\n5. Select **Confirm assignment**.\n\n**Result:** The shift status changes to **Filled**, and the pharmacist is notified automatically.\n\n**If the pharmacist is not listed:** They may be unavailable at those times. See \"Why can't I find a pharmacist when assigning a shift?\"\n\n**Related:** Cancel a shift and record the reason",
+          "rubric": [
+            "Verb-first title using the user's words",
+            "States who it is for and the prerequisite",
+            "Numbered steps, one action each, labels as on screen",
+            "States the result",
+            "Includes a related or troubleshooting link"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u2-l2",
+      "title": "Troubleshooting articles and before/after rewrites",
+      "minutes": 9,
+      "body": "A troubleshooting article starts from a symptom, not a feature. Readers know what they see (\"I did not get an alert\"), not why. Structure it around the symptom:\n\n1. **Title as the symptom**, in the user's words: \"A pharmacist is not receiving shift alerts\".\n2. **Quick check list**, ordered from most common and cheapest cause to rarest.\n3. **Fix for each cause**, with steps.\n4. **When to contact support**, and what to include so the first reply can solve it.\n\n**Example**\n\n> **A pharmacist is not receiving shift alerts**\n>\n> Check these in order.\n>\n> **1. Alerts are turned off.** In **Settings**, check that the alert types are on.\n> **2. The phone number or email is wrong.** Open the pharmacist's profile and check the contact details.\n> **3. The pharmacist is outside the alert distance.** Alerts go only to pharmacists within the distance set for the shift. Increase it, or assign directly.\n> **4. The shift is already filled.** Alerts stop once a shift is filled.\n>\n> **Still not working?** Contact support and include the shift ID, the pharmacist's name, and the time you expected the alert.\n\nNotice that the last line asks for exactly what a support agent would otherwise ask in the first reply. That alone cuts back-and-forth.\n\n**Before and after rewrites**\n\nRewriting is the other writing-test staple. Take a paragraph and make it usable.\n\n*Before:*\n\"In the event that a user wishes to be able to view the history of assignments, they can do so by going to the shift in question and looking at the section where the information is shown, which is called History.\"\n\n*After:*\n\"To see who was assigned to a shift before: open the shift and select **History**.\"\n\n*What changed:* The task leads. The wordy conditional became a short sentence. The label is bold and matches the screen. Nothing was lost.\n\n*Before:*\n\"Error 4021 occurs.\"\n\n*After:*\n\"**Error 4021: 'Pharmacy not found'.** This appears when the pharmacy was removed from your account. Ask your account administrator to add it back, then try again.\"\n\nAn error article should give the message exactly as shown, why it happens, and what to do.\n\n**Checklist for editing**\n\nIs the title searchable? Is the first screen enough for the common case? Is each step one action? Are labels exact? Does the article say what success looks like?",
+      "keyPoints": [
+        "Troubleshooting articles start with the symptom and list causes in order of likelihood.",
+        "End with when to contact support and exactly what details to send.",
+        "Quote error messages exactly, then say why and what to do.",
+        "Rewrite by leading with the task, shortening sentences and matching on-screen labels."
+      ],
+      "interviewAngle": "Editing tests may give you a messy paragraph and ask you to fix it. Talk through each change as you make it: lead with the task, one idea per sentence, match the interface, remove filler. You can mention that you rewrote existing documentation for the same reasons, without needing to invent specifics.",
+      "exercises": [
+        {
+          "id": "doc-u2-l2-e1",
+          "type": "mcq",
+          "prompt": "What is the best structure for a troubleshooting article?",
+          "choices": [
+            "Product history, features, then possible problems",
+            "Symptom as title, causes from most to least likely with fixes, then when to contact support",
+            "A single paragraph describing all errors",
+            "Only a list of error codes"
+          ],
+          "answer": 1,
+          "explanation": "Readers arrive with a symptom. Ordering causes by likelihood solves most cases in the first checks.",
+          "placement": true
+        },
+        {
+          "id": "doc-u2-l2-e2",
+          "type": "mcq",
+          "prompt": "Which \"contact support\" line is strongest?",
+          "choices": [
+            "Contact support.",
+            "If this does not work, contact support with the shift ID, the pharmacist's name and the time you expected the alert.",
+            "Support can help you.",
+            "Please reach out to the appropriate team."
+          ],
+          "answer": 1,
+          "explanation": "It tells the reader what to send, saving a round of questions."
+        },
+        {
+          "id": "doc-u2-l2-e3",
+          "type": "short",
+          "prompt": "Complete: an error article should quote the error message ____ as it appears on screen. (One word.)",
+          "accept": [
+            "exactly",
+            "verbatim",
+            "word for word"
+          ],
+          "answer": "exactly",
+          "explanation": "Readers search for the message text, so it must match what they see."
+        },
+        {
+          "id": "doc-u2-l2-e4",
+          "type": "open",
+          "prompt": "Rewrite this into a troubleshooting article with a title, three ordered causes and a contact-support line: \"If the dispatch map does not load, it might be a problem with the browser, or perhaps the internet connection, or the page may need to be refreshed, otherwise our support team might be able to help.\"",
+          "answer": "**The dispatch map does not load**\n\nCheck these in order.\n\n1. **The page needs a refresh.** Reload the page (Ctrl+R, or Cmd+R on Mac). Most map problems clear after a reload.\n2. **Your connection is unstable.** Open another website. If it is slow or fails, reconnect to your network and reload the map.\n3. **The browser is out of date or blocking the map.** Update your browser, or try a different one. Turn off extensions that block content, then reload.\n\n**Still not working?** Contact support and include your browser name and version, and a screenshot of what you see.",
+          "rubric": [
+            "Symptom-based title",
+            "Three causes ordered from cheapest/most likely",
+            "Each cause has a concrete action",
+            "Contact line asks for useful details",
+            "Plain, short sentences"
+          ]
+        }
+      ]
+    }
+  ]
+}

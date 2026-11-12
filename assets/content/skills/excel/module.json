@@ -1,0 +1,520 @@
+{
+  "id": "excel",
+  "title": "Excel",
+  "tagline": "From solid moderate Excel to passing a timed spreadsheet test: clean data, conditional formulas, lookups, pivots and honest talk about your level.",
+  "claim": "Resume says Excel at a moderate level: pivot tables and VLOOKUP. To back it you must clean a messy export, summarise it with SUMIFS/COUNTIFS and a pivot table, look values up without the common errors, and say plainly that XLOOKUP and Power Query are things you are still learning. You do not claim advanced skill, macros or VBA.",
+  "units": [
+    "unit-1.json",
+    "unit-2.json",
+    "unit-3.json",
+    "unit-4.json",
+    "unit-5.json",
+    "unit-7.json",
+    "unit-8.json",
+    "unit-9.json",
+    "unit-10.json",
+    "unit-11.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "excel-iq-1",
+      "prompt": "How would you rate your Excel skills?",
+      "strongAnswer": "I would call myself moderate and comfortable with the everyday analyst toolkit. I build pivot tables to summarise data, I use VLOOKUP to join lists, and I write conditional formulas like SUMIFS and COUNTIFS. I am newer to XLOOKUP and Power Query, which I have been learning on my own. I have not written macros or VBA, so I would not say advanced. If a task needs something I have not done, I look it up and check my result against a number I can verify by hand."
+    },
+    {
+      "id": "excel-iq-2",
+      "prompt": "Walk me through how you would build a summary report from a raw data export.",
+      "strongAnswer": "First I look at the data: headers, blank rows, text stored as numbers, stray spaces, and duplicates. I clean those, then turn the range into a Table so formulas and pivots grow with new rows. I build a pivot table with the category in rows and a count or sum in values, add a date grouping or slicer if the reader needs to filter, and check the grand total against a count I did another way. Last I format it and add a chart if it helps the reader."
+    },
+    {
+      "id": "excel-iq-3",
+      "prompt": "What is the difference between VLOOKUP, INDEX/MATCH and XLOOKUP?",
+      "strongAnswer": "VLOOKUP searches the first column of a range and returns a value from a column number you count. It breaks if columns are inserted, cannot look left, and defaults to approximate match unless you pass FALSE. INDEX/MATCH separates the return column from the lookup column, so it can look left and survives inserted columns. XLOOKUP does the same job in one function with exact match by default and a built-in not-found argument. I use VLOOKUP daily and I am newer to XLOOKUP, which needs Microsoft 365 or Excel 2021 or later."
+    },
+    {
+      "id": "excel-iq-4",
+      "prompt": "A VLOOKUP returns #N/A but you can see the value in the list. What do you check?",
+      "strongAnswer": "I check the usual causes in order. First, hidden spaces: I compare LEN of the two cells, and wrap the lookup value in TRIM if they differ. Second, data type: one side may be a number and the other text, which I spot by left or right alignment or ISNUMBER. Third, whether the fourth argument is FALSE for exact match, and whether the lookup value is really in the first column of the range. If it is genuinely missing, I wrap the formula in IFNA so a real not-found is labelled rather than hiding other errors."
+    },
+    {
+      "id": "excel-iq-5",
+      "prompt": "How do you reconcile two lists to find what is missing from one?",
+      "strongAnswer": "I first make the keys comparable: trim spaces, match case and data type. Then next to the first list I add a check column, either COUNTIF against the second list or an IF around MATCH, so each row says Found or Missing. I repeat it the other way round, because a one-direction check misses items that only exist in the second list. I filter each check column for Missing, count the rows, and confirm that matched plus missing equals the total I started with."
+    },
+    {
+      "id": "excel-iq-6",
+      "prompt": "Have you used macros or VBA?",
+      "strongAnswer": "No, I have not written macros or VBA, and I would rather say that than overstate it. What I have used is the non-code side of repeatable work: Tables, pivot tables, formulas that fill down, and data validation. I have also started learning Power Query, which records cleaning steps and re-runs them on refresh, and for many repeat jobs that covers what people reach for macros to do. If a role needs VBA, I would want to learn it with an example to work from."
+    },
+    {
+      "id": "excel-iq-7",
+      "prompt": "A formula shows an error or a column has odd values. How do you troubleshoot it?",
+      "strongAnswer": "I read the error first, because each one points at a cause: #N/A is a lookup miss, #REF! is a broken reference, #DIV/0! is a zero denominator. Then I check the inputs for spaces and text numbers, and use Evaluate Formula to step through it. I also scan new columns with MIN and MAX, because some mistakes give no error at all. For example an empty date acts as zero and creates huge negative durations. I fix the cause and use IFNA or an explicit test rather than hiding everything with IFERROR."
+    },
+    {
+      "id": "excel-iq-8",
+      "prompt": "When do you use a pivot table and when formulas like SUMIFS?",
+      "strongAnswer": "I use a pivot table when I need to explore and summarise quickly by several categories, because it is fast and I can change the layout with drag and drop. I use SUMIFS or COUNTIFS when the result has to sit in a fixed layout, feed another formula, or update without a manual refresh. Either way I reconcile: the pivot grand total should equal a row count, and a SUMIFS table should add up to the total. Pivot tables and SUMIFS are both part of my everyday Excel work."
+    },
+    {
+      "id": "excel-iq-9",
+      "prompt": "Why do you turn a data range into a Table?",
+      "strongAnswer": "A Table grows when I add rows, so formulas, pivots and charts pointing at it update without me resizing ranges. Formulas fill down by themselves and I can use structured references like tblShifts[status], which read clearly. It also gives filter buttons and a total row that respects filters. I name the table so formulas are understandable to the next person. It is a simple habit that avoids range-size mistakes in SUMIFS and keeps reports accurate as the data changes."
+    },
+    {
+      "id": "excel-iq-10",
+      "prompt": "Have you used dynamic arrays such as FILTER, SORT and UNIQUE?",
+      "strongAnswer": "I am newer to those. I have been learning them on my own with sample data, for example building a category summary with UNIQUE and COUNTIFS and a filtered list with FILTER. I know the formula spills, that blocked cells cause #SPILL!, and that they need Microsoft 365 or Excel 2021 or later. At work I got the same results with filters, pivot tables and SQL, and I would use a pivot table when I am not sure the recipient has a recent version."
+    },
+    {
+      "id": "excel-iq-11",
+      "prompt": "How do you decide which chart to use?",
+      "strongAnswer": "I start with the message. If it is a change over time I use a line or column chart with the dates in order. For comparing categories I use a sorted bar or column chart that starts at zero. I use a pie only for two to four parts of a whole. Then I title the chart with the finding, such as ticket volume fell after May, remove clutter and label directly. I try not to rely on colour alone, and I check that the chart agrees with the table behind it."
+    },
+    {
+      "id": "excel-iq-12",
+      "prompt": "How would you protect a workbook other people will fill in?",
+      "strongAnswer": "I unlock only the cells people should edit, leave formulas locked, then protect the sheet and allow actions like filtering if needed. I add data validation, such as dropdown lists for status, so entries are consistent, and an input message explaining the field. I would tell people that a sheet password is only a guard against accidents, not real security, and I would not put sensitive personal or health data in a spreadsheet that is widely shared. I test it by trying to break it."
+    },
+    {
+      "id": "excel-iq-13",
+      "prompt": "You get a file with dates stored as text and blank cells. What do you do?",
+      "strongAnswer": "I keep the raw sheet and work on a copy. I check whether dates are real by looking at alignment or switching to General format. If they are text I convert them with DATEVALUE, Text to Columns or Power Query, then confirm with a sample. For blanks I decide what they mean, such as an unfilled shift, and guard calculations with IF so an empty cell is not read as zero. I record the assumptions and check counts before and after the cleanup."
+    },
+    {
+      "id": "excel-iq-14",
+      "prompt": "Have you used Power Query, and what is it for?",
+      "strongAnswer": "I am still learning it, on my own, using sample files. It imports and reshapes data and records each step, so the same cleaning reruns when I refresh with a new file. I have practised merging two tables, appending, unpivoting and grouping, and checking row counts after a merge. At work I did that kind of cleaning by hand in Excel and with SQL. I would use Power Query for any report that has to be rebuilt every week or month."
+    },
+    {
+      "id": "excel-iq-15",
+      "prompt": "You get 20 tasks and 45 minutes. How do you approach it?",
+      "strongAnswer": "I read all the tasks first and mark the quick ones. I copy the raw data so I never overwrite it. I do the sure points first, use formulas and references rather than typed values, and move on if a task is taking more than about five minutes, leaving a note of what I tried. I check each result another way, such as a pivot total against a count. In the last five minutes I tidy formats, add chart titles and write down my assumptions."
+    },
+    {
+      "id": "excel-iq-16",
+      "prompt": "How do you make sure your numbers are right before you send a report?",
+      "strongAnswer": "I reconcile totals two ways, for instance the pivot grand total against a row count, and I check a few rows by hand. I look for blanks, duplicates and outliers, test any ratio against a number I can calculate separately, and confirm that percentages are built from totals, not averaged. I note the definitions and assumptions, such as how blanks were treated. At work I often checked reports against my SQL results, and I use the same habit in Excel."
+    }
+  ],
+  "resources": [
+    {
+      "title": "Exam MO-200: Microsoft Excel (Office 2019)",
+      "url": "https://learn.microsoft.com/certifications/exams/mo-200",
+      "source": "Microsoft Learn",
+      "kind": "certification",
+      "minutes": 30,
+      "free": true,
+      "why": "The official skills areas (worksheets, cells and ranges, tables, formulas, charts) with weightings; use it as a checklist of what a baseline Excel test covers.",
+      "units": [
+        "excel-u1",
+        "excel-u9"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read the skills outline on day one and tick off what you can already do before choosing units.",
+      "versus": "It is a vendor checklist with weightings and no teaching; HireFly teaches the items interviews test and shows them on the shift data."
+    },
+    {
+      "title": "Learn to use Power Query and Power Pivot in Excel",
+      "url": "https://support.microsoft.com/office/learn-to-use-power-query-and-power-pivot-in-excel-42d895c2-d1d7-41d0-88da-d1ed7ecc102d",
+      "source": "Microsoft Support",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "Microsoft's own overview and training links for Power Query, including which Excel versions have it.",
+      "units": [
+        "excel-u5",
+        "excel-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it when you want to know which Excel versions have Power Query, before \"Power Query depth and what-if\".",
+      "versus": "Microsoft's page is an index of links and version notes; HireFly's lessons walk a real merge and unpivot and say honestly that this is newly learned."
+    },
+    {
+      "title": "Get to know Power Query",
+      "url": "https://support.microsoft.com/en-gb/office/b13eed81-33fe-410d-9247-1747269c28e4",
+      "source": "Microsoft Support",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "A short guided first import that complements the merge, append and unpivot lesson.",
+      "units": [
+        "excel-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Follow it just before the lab \"Build a refreshable Power Query summary\" if you have never opened the editor.",
+      "versus": "It is the vendor's current screens for a first import; HireFly adds the practice CSVs and the interview wording for a skill you are still learning."
+    },
+    {
+      "title": "Explore the Power Query user interface",
+      "url": "https://learn.microsoft.com/en-us/training/modules/automate-data-cleaning-power-query/2-explore-power-query",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 25,
+      "free": true,
+      "why": "A free Learn module that walks the editor, applied steps and loading, which you can follow with the practice CSVs.",
+      "units": [
+        "excel-u10"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Do it before \"Power Query depth and what-if\" if the editor feels unfamiliar.",
+      "versus": "Microsoft Learn shows the editor with screenshots kept current; HireFly's version uses your tickets and shifts and checks the result."
+    },
+    {
+      "title": "New array functions in Excel",
+      "url": "https://support.microsoft.com/en-US/Excel/new-array-functions",
+      "source": "Microsoft Support",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "Microsoft's description of the dynamic array functions, including FILTER, SORT and UNIQUE and spilling.",
+      "units": [
+        "excel-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after \"Dynamic arrays (newly learned)\" to see the vendor's own description.",
+      "versus": "It is a short reference with no practice; HireFly gives worked summaries and a fallback for older Excel."
+    },
+    {
+      "title": "Dynamic array formulas in Excel",
+      "url": "https://exceljet.net/dynamic-array-formulas-in-excel",
+      "source": "Exceljet",
+      "kind": "reference",
+      "minutes": 20,
+      "free": true,
+      "why": "A clear reference on spill ranges, the # operator and common errors with worked examples.",
+      "units": [
+        "excel-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Keep it open while you do the lab \"Dynamic array summaries (newly learned)\".",
+      "versus": "Exceljet is a clearer reference on spill errors; HireFly applies FILTER and UNIQUE to your shift data."
+    },
+    {
+      "title": "Learn Microsoft Excel (freeCodeCamp)",
+      "url": "https://www.freecodecamp.org/news/learn-microsoft-excel",
+      "source": "freeCodeCamp",
+      "kind": "course",
+      "minutes": 180,
+      "free": true,
+      "why": "A free, project-based video course that gives watch-along practice on the fundamentals this module drills.",
+      "units": [
+        "excel-u1",
+        "excel-u2"
+      ],
+      "priority": "optional",
+      "useWhen": "Use it only if the basics in \"Foundations: references, tables and clean data\" feel slippery.",
+      "versus": "A long video gives watch-along practice but is general; HireFly is shorter and aimed at the formulas that screening tests use."
+    },
+    {
+      "title": "Free Excel tutorials list (Leila Gharani)",
+      "url": "https://www.xelplus.com/free-excel-tutorials/",
+      "source": "XelPlus",
+      "kind": "video",
+      "minutes": 120,
+      "free": true,
+      "why": "A long index of free videos, useful for pivot tables, XLOOKUP and Power Query demonstrated on screen.",
+      "units": [
+        "excel-u3",
+        "excel-u4",
+        "excel-u10"
+      ],
+      "priority": "core",
+      "useWhen": "Watch the pivot, XLOOKUP and Power Query videos after the matching HireFly units, because seeing the real interface does what text cannot.",
+      "versus": "Video shows every click in the current Excel, which HireFly cannot; HireFly is better for timed drills, honest wording about your level and the shift-data labs."
+    },
+    {
+      "title": "Excel Tutorial for Beginners (Start Here)",
+      "url": "https://kevinstratvert.com/2026/03/30/excel-tutorial-for-beginners-start-here/",
+      "source": "Kevin Stratvert",
+      "kind": "video",
+      "minutes": 60,
+      "free": true,
+      "why": "A step-by-step beginner walkthrough you can use to fill gaps in the basics.",
+      "units": [
+        "excel-u1"
+      ],
+      "priority": "optional",
+      "useWhen": "Watch it only if you are rusty on the basics before \"Foundations: references, tables and clean data\".",
+      "versus": "A slow walkthrough of the interface fills gaps; it is not tied to a test, and HireFly's drills are faster for someone already at pivots and VLOOKUP."
+    },
+    {
+      "title": "ExcelIsFun YouTube channel",
+      "url": "https://m.youtube.com/user/ExcelIsFun",
+      "source": "ExcelIsFun",
+      "kind": "video",
+      "minutes": 240,
+      "free": true,
+      "why": "Thousands of free videos; the Excel Basics playlists are a deep source for formulas, references and pivots.",
+      "units": [
+        "excel-u2",
+        "excel-u4",
+        "excel-u5"
+      ],
+      "priority": "optional",
+      "useWhen": "Search it when one topic, such as a pivot trick, still does not make sense.",
+      "versus": "An enormous library with little order; HireFly gives a fixed path and graded answers."
+    },
+    {
+      "title": "Microsoft Excel skills test",
+      "url": "https://testgorilla.com/test-library/software-skills-tests/microsoft-excel-skills-test",
+      "source": "TestGorilla",
+      "kind": "reference",
+      "minutes": 10,
+      "free": true,
+      "why": "A description of what a commercial screening test measures; read it to see the kinds of tasks employers set.",
+      "units": [
+        "excel-u11",
+        "excel-u6"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it the day before a screening test to see the task types.",
+      "versus": "It only describes a commercial test; HireFly's \"Timed-assessment drill\" lets you practise those tasks with answers."
+    },
+    {
+      "title": "How Excel and Google Sheets are tested",
+      "url": "https://www.tryexponent.com/courses/product-analytics/data-analytics-technical/how-excel-and-google-sheets-are-tested",
+      "source": "Exponent",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "An overview of how spreadsheet skills are tested in analytics interviews, with the kinds of tasks to expect.",
+      "units": [
+        "excel-u11",
+        "excel-u6"
+      ],
+      "priority": "optional",
+      "useWhen": "Skim it when the employer says there will be a spreadsheet exercise.",
+      "versus": "General and not specific to entry-level roles; HireFly's drills and \"In the interview\" are closer to what these roles ask."
+    }
+  ],
+  "labs": [
+    {
+      "id": "excel-lab-1",
+      "title": "Reproduce the documentation finding with a ticket pivot",
+      "minutes": 30,
+      "goal": "Build a pivot of tickets by category and month that shows how-do-I tickets falling from May, with a chart whose title states the finding.",
+      "setup": "Excel desktop (a free Microsoft account lets you use Excel for the web, but pivot grouping and some options differ). Export the datasets folder from the app and open `tickets.csv` (734 rows). Press Ctrl+T and name the table `tblTickets`.",
+      "steps": [
+        "Insert > PivotTable from `tblTickets` on a new sheet.",
+        "Put `category` in Rows, `opened_at` in Columns and Count of `id` in Values.",
+        "Right-click a date, choose Group, and select Months and Years.",
+        "Read the How do I row and write down the nine monthly counts (Jan to Sep).",
+        "Add a Calculated total in cells beside the pivot: the sum for January to April and for May to September, and the monthly averages.",
+        "Right-click a value, Show Values As > % of Row Total, to see How do I as a share, then switch back.",
+        "Insert a PivotChart of the How do I row only (filter the category), as a line chart.",
+        "Retitle the chart with the finding and add a note that October is partial (3 tickets).",
+        "Reconcile: the Grand Total must equal `=ROWS(tblTickets[id])`."
+      ],
+      "check": [
+        "How do I per month Jan to Sep: 35, 38, 35, 43, 8, 4, 14, 14, 14.",
+        "January to April total 151 (37.75 a month); May to September 54 (10.8 a month), a drop of about 71%.",
+        "All tickets: 369 in January to April and 362 in May to September; Grand Total 734.",
+        "Category totals: Access 123, Bug 184, Data fix 100, Feature request 122, How do I 205."
+      ],
+      "talkTrack": "In a practice workbook I built a pivot that showed how-do-I tickets dropping sharply after May, the same pattern I saw in my real documentation work, and I checked the pivot total against a row count."
+    },
+    {
+      "id": "excel-lab-2",
+      "title": "Join shifts to pharmacies with VLOOKUP and XLOOKUP",
+      "minutes": 30,
+      "goal": "Add pharmacy name and state to every shift with a lookup, prove there are no misses, and summarise shifts by state.",
+      "setup": "Excel desktop. Open `shifts.csv` (1019 rows) and `pharmacies.csv` (40 rows) in one workbook as Tables `tblShifts` and `tblPharmacies`. XLOOKUP needs Microsoft 365 or Excel 2021 or later; if you have an older version, do only the VLOOKUP part.",
+      "steps": [
+        "In `tblShifts` add a column `state` with `=VLOOKUP([@pharmacy_id],tblPharmacies,4,FALSE)`.",
+        "Add `pharmacy_name` with `=XLOOKUP([@pharmacy_id],tblPharmacies[id],tblPharmacies[name],\"Not found\")`.",
+        "Check shift 1001: it belongs to pharmacy 32.",
+        "Count lookup misses with `=COUNTIF(tblShifts[pharmacy_name],\"Not found\")`.",
+        "Count shifts by state with COUNTIFS in a small table.",
+        "Add a fill rate per state: `=COUNTIFS(state,\"FL\",filled_at,\"<>\")/COUNTIFS(state,\"FL\")`.",
+        "Sum the state counts and compare with `=ROWS(tblShifts[id])`.",
+        "Write two lines: which function you would pick on a shared file and why."
+      ],
+      "check": [
+        "Shift 1001 returns Pinecrest Community Pharmacy #132 in FL.",
+        "Misses: 0.",
+        "Shifts by state: FL 537, GA 340, SC 85, AL 57, total 1019.",
+        "Fill rate by state (filled time present): FL 89.6%, GA 88.5%, SC 87.1%, AL 87.7%."
+      ],
+      "talkTrack": "I join tables with VLOOKUP daily and I practised XLOOKUP on a shifts-to-pharmacies join, where I checked that there were zero misses and that the state counts added to 1019."
+    },
+    {
+      "id": "excel-lab-3",
+      "title": "Clean, validate and format a report",
+      "minutes": 35,
+      "goal": "Produce a one-page shift report with a safe hours-to-fill column, validation, highlighting and print setup.",
+      "setup": "Excel desktop. Open `shifts.csv` and make it a Table `tblShifts`. Keep an untouched copy of the sheet.",
+      "steps": [
+        "Add `hours_to_fill` with `=IF([@filled_at]=\"\",\"\",([@filled_at]-[@requested_at])*24)`.",
+        "Check MIN, MAX and the average of the column.",
+        "Add data validation to a new `review_status` column: list `ok,check,fix`.",
+        "Add validation on `is_emergency`: whole number between 0 and 1.",
+        "Apply a conditional formatting rule `=$G2=\"cancelled\"` to the table rows (G is status) in a pale colour.",
+        "Count blank `filled_at` values with COUNTBLANK and compare to the cancelled-unfilled plus open counts.",
+        "Set a print area for the key columns, landscape, fit to one page wide, and repeat the header row.",
+        "Export to PDF and open it."
+      ],
+      "check": [
+        "Average hours to fill is 9.52 and the minimum is not negative.",
+        "Blank filled_at: 113 (93 cancelled plus 20 open).",
+        "Highlighted cancelled rows: 171.",
+        "The PDF shows the header on each page."
+      ],
+      "talkTrack": "I cleaned and validated a shift export in practice, guarding blank dates so the average hours to fill came out at 9.52, and I checked counts before formatting and printing."
+    },
+    {
+      "id": "excel-lab-4",
+      "title": "Build a refreshable Power Query summary",
+      "minutes": 40,
+      "goal": "Create a summary of shifts by state and by month that rebuilds itself when the CSV changes.",
+      "setup": "Excel for Windows with Power Query (Data > Get Data). Save `shifts.csv` and `pharmacies.csv` in a folder that will not move.",
+      "steps": [
+        "Data > Get Data > From Text/CSV for each file; choose Transform Data.",
+        "In Shifts add `hours_to_fill` with `Duration.TotalHours([filled_at]-[requested_at])` and `request_month` with `Date.ToText([requested_at],\"yyyy-MM\")`.",
+        "Merge Shifts with Pharmacies on `pharmacy_id` = `id` (Left Outer) and expand `state`.",
+        "Check the row count is 1019, then check a Left Anti merge returns 0 rows.",
+        "Reference the merged query twice. Group one by `state` (Count Rows) and one by `request_month` (Count Rows and Average of `hours_to_fill`).",
+        "Close & Load To > Only Create Connection for the first queries; load the two summaries as tables.",
+        "Insert a column chart from the monthly table.",
+        "Test a refresh: append one row to the CSV, Data > Refresh All, and watch the counts move; remove the row again."
+      ],
+      "check": [
+        "Shifts by state: FL 537, GA 340, SC 85, AL 57 (1019).",
+        "Shifts by request month: 2025-12 has 4; 2026-01 to 2026-09 are 100, 92, 105, 102, 103, 130, 132, 142, 108; 2026-10 has 1.",
+        "Overall average `hours_to_fill` is 9.52.",
+        "The Left Anti merge returns no rows."
+      ],
+      "talkTrack": "I built a small refreshable summary in Power Query on sample data, merging shifts to pharmacies and checking the row count; at work I did the equivalent in SQL and Excel."
+    },
+    {
+      "id": "excel-lab-5",
+      "title": "Dynamic array summaries (newly learned)",
+      "minutes": 25,
+      "goal": "Make a self-growing ticket category summary and a filtered list of cancelled emergency shifts.",
+      "setup": "Excel for Microsoft 365 or Excel 2021 or later (or Excel for the web). Open `tickets.csv` as `tblTickets` and `shifts.csv` as `tblShifts` in one workbook.",
+      "steps": [
+        "On a new sheet put `=SORT(UNIQUE(tblTickets[category]))` in A2.",
+        "In B2 enter `=COUNTIFS(tblTickets[category],A2#)`.",
+        "In C2 enter `=B2#/SUM(B2#)` and format as a percentage.",
+        "Check that the counts add to the number of rows in the table.",
+        "Elsewhere enter `=SORT(FILTER(tblShifts,(tblShifts[status]=\"cancelled\")*(tblShifts[is_emergency]=1),\"None\"),4,-1)`.",
+        "Count the rows with `=ROWS()` on the spill range.",
+        "Enter `=COUNTA(UNIQUE(tblShifts[pharmacy_id]))`.",
+        "Type something in a cell under the filter result to see `#SPILL!`, then clear it."
+      ],
+      "check": [
+        "Categories: Access 123, Bug 184, Data fix 100, Feature request 122, How do I 205; total 734.",
+        "How do I share is 27.9%.",
+        "The filtered list has 33 rows.",
+        "Distinct pharmacies with shifts: 40."
+      ],
+      "talkTrack": "I have been learning dynamic arrays on my own and built a self-growing summary with UNIQUE and COUNTIFS, and I know a pivot table is the fallback for older Excel."
+    },
+    {
+      "id": "excel-lab-6",
+      "title": "Run the timed assessment drill",
+      "minutes": 45,
+      "goal": "Complete the 26 drill tasks under a timer and measure your score and time per task.",
+      "setup": "Excel desktop with `shifts.csv`, `pharmacies.csv` and `tickets.csv` as Tables. Set a 45-minute timer. Keep the drill answers hidden until you finish.",
+      "steps": [
+        "Read all 26 tasks first and mark the easy ones.",
+        "Work through drill A (tasks 1 to 13) with formulas, not typed answers.",
+        "Work through drill B (tasks 14 to 26), using a pivot where it is quicker.",
+        "If a task takes more than five minutes, leave a cell note and move on.",
+        "With five minutes left, freeze the header row, format percentages and add chart titles.",
+        "Stop the timer. Check your answers against the lesson tables.",
+        "Write the tasks you missed and the lesson to review.",
+        "Repeat the missed tasks the next day."
+      ],
+      "check": [
+        "Key answers: 1019 shifts, 828 completed (81.3%), 113 blank filled_at, 33 emergency cancellations.",
+        "Tickets: 23 critical, 105 high or critical, 9 open; average hours to close 28.63.",
+        "Emergency average hours to fill 1.26 and non-emergency 11.29.",
+        "A score of 20 or more of 26 within 45 minutes is a solid analyst-level pass."
+      ],
+      "talkTrack": "I practised timed Excel tasks on a realistic dataset, checking each total two ways, and I know which areas I still need to tighten."
+    },
+    {
+      "id": "excel-lab-7",
+      "title": "A what-if target for fill rate",
+      "minutes": 20,
+      "goal": "Use Goal Seek and a data table to find how many more shifts must be filled to reach a 92% fill rate.",
+      "setup": "Excel desktop. In a blank workbook type: B1 = 1019 (requested shifts), B2 = 906 (filled shifts), B3 = `=B2/B1`.",
+      "steps": [
+        "Format B3 as a percentage with one decimal.",
+        "Data > What-If Analysis > Goal Seek: Set cell B3 to value 0.92 by changing cell B2.",
+        "Round the answer up to a whole shift and compute the extra shifts needed.",
+        "Undo the Goal Seek (or retype 906).",
+        "List 900, 925 and 950 in D2:D4 and put `=B3` in E1.",
+        "Select D1:E4 and open Data > What-If Analysis > Data Table with B2 as the Column input cell.",
+        "Write one sentence stating that this is arithmetic, not a forecast."
+      ],
+      "check": [
+        "Current fill rate 88.9%.",
+        "Goal Seek returns 937.48 filled shifts; rounded up, 938 or 32 more than now.",
+        "Data table: 900 gives 88.3%, 925 gives 90.8%, 950 gives 93.2%."
+      ],
+      "talkTrack": "I used Goal Seek and a data table to show that reaching a 92% fill rate takes 938 filled shifts out of 1019, about 32 more than the practice data has."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you through the formulas, pivots and honest talk about your level that a timed Excel screen asks. Reading alone is not enough: Excel is a hands-on skill, so the labs, the timed drill and watching the real interface are what make it real. It will not make you advanced, and XLOOKUP and Power Query stay newly learned.",
+    "hireflyBetter": [
+      "You have days, not weeks, and need SUMIFS, COUNTIFS, lookups and pivots on shift data.",
+      "You need a timed drill with answers to build speed.",
+      "You want honest wording about XLOOKUP and Power Query.",
+      "You want a pivot finding you can say aloud, such as the drop in How do I tickets.",
+      "You want to reconcile two lists and clean an export the way a test asks."
+    ],
+    "externalBetter": [
+      "You learn by watching clicks in the current Excel, so a video series is better.",
+      "You need Power Query steps shown on the vendor's latest screens.",
+      "You want a certificate, which the MO-200 route offers and HireFly cannot.",
+      "You need the full list of every function rather than the ones interviews test.",
+      "You need long, repeated practice with fresh files."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for \"The formulas interviews test\" and \"Lookups: VLOOKUP, INDEX/MATCH and XLOOKUP\" and study only what you miss (45 minutes).",
+          "Read \"In the interview\" (25 minutes).",
+          "Do the lab \"Reproduce the documentation finding with a ticket pivot\" (30 minutes).",
+          "Do the lab \"Run the timed assessment drill\" (45 minutes).",
+          "Do the lab \"Join shifts to pharmacies with VLOOKUP and XLOOKUP\" (30 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Work \"Foundations: references, tables and clean data\" and \"The formulas interviews test\" (1 hour).",
+          "Work \"Lookups: VLOOKUP, INDEX/MATCH and XLOOKUP\" and \"Pivot tables and charts\" (1 hour).",
+          "Do the lab \"Join shifts to pharmacies with VLOOKUP and XLOOKUP\" and the lab \"Clean, validate and format a report\" (1 hour 5 minutes).",
+          "Watch the pivot and XLOOKUP videos in \"Free Excel tutorials list (Leila Gharani)\" (2 hours).",
+          "Work \"Working like an analyst\" and \"Names, errors and dates in practice\" (1 hour).",
+          "Do the lab \"Build a refreshable Power Query summary\" after \"Explore the Power Query user interface\" (1 hour 5 minutes).",
+          "Work \"Timed-assessment drill\" and the lab \"Run the timed assessment drill\" twice (2.5 hours).",
+          "Work \"Charts, pivot depth, controls and sharing\" and the lab \"A what-if target for fill rate\" (1 hour).",
+          "Finish with \"In the interview\" and \"Microsoft Excel skills test\" (45 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Work every HireFly unit in order, ending with \"Timed-assessment drill\" (9 hours).",
+          "Do all seven labs, including \"Dynamic array summaries (newly learned)\" (4 hours).",
+          "Check yourself against \"Exam MO-200: Microsoft Excel (Office 2019)\" and fill the gaps (3 hours).",
+          "Follow \"Free Excel tutorials list (Leila Gharani)\" across pivots, XLOOKUP and Power Query (6 hours).",
+          "Take \"Explore the Power Query user interface\" and \"Get to know Power Query\" and rebuild one query on your own data (3 hours).",
+          "Use Excel for real work each day, then rerun \"Run the timed assessment drill\" until you finish inside the time (6 hours).",
+          "Read \"In the interview\" again and rehearse the level answer (1 hour).",
+          "Spend remaining time on \"Learn Microsoft Excel (freeCodeCamp)\" or \"ExcelIsFun YouTube channel\" for weak topics (8 hours)."
+        ]
+      }
+    ]
+  }
+}

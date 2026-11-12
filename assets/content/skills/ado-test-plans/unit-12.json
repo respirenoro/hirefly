@@ -1,0 +1,269 @@
+{
+  "id": "tp-u12",
+  "title": "Traceability, reporting, automation and metrics",
+  "summary": "Reading the progress report, linking automated results, metrics, exit criteria, the defect life cycle and who needs which access.",
+  "lessons": [
+    {
+      "id": "tp-u12-l1",
+      "title": "Traceability and reading the progress report",
+      "minutes": 10,
+      "body": "**Traceability** means you can follow a requirement to its tests, results and defects, and a defect back to the requirement. In Azure DevOps it is built from links: a Test Case is linked to a story with Tests / Tested By, a bug found while running is linked to the test case, result and story. You can see the items linked to a test case in the Test Plans area: the suites and plans that use it, the requirements it covers and bugs linked. Boards can also add and run tests inline from a story card.\n\n**Coverage questions you can answer.**\n\n| Question | How |\n|---|---|\n| Which stories have no test? | Direct-links query on Tested By with no matching links; or empty requirement-based suites |\n| Which tests cover this story? | The story's linked test cases, or its requirement-based suite |\n| Which bugs came from which tests? | Bug links to the case and result |\n| How is each requirement doing? | Requirements quality widget (pass rate per requirement from pipeline runs) or suite results |\n\n**The Progress report.** A hub in Test Plans showing progress for one or more test plans or suites over a date range. Microsoft states it helps answer: how much testing is complete, how many tests passed, failed or are blocked, whether testing will finish in time, the daily execution rate, and which areas need attention. Outcome counts are shown per plan or suite and as trends. Use it for the stand-up and the release decision, rather than exporting to a spreadsheet. Test charts per plan (by outcome, priority, tester, configuration) can be pinned to a dashboard.\n\n**Reading it.** Worked snapshot, three days before release:\n\n| Suite | Total points | Passed | Failed | Blocked | Not run |\n|---|---|---|---|---|---|\n| Smoke | 6 | 6 | 0 | 0 | 0 |\n| SOS stories | 42 | 31 | 4 | 3 | 4 |\n| Regression | 60 | 28 | 1 | 0 | 31 |\n| UAT | 12 | 0 | 0 | 0 | 12 |\n\nOverall 120 points: 65 passed (54 percent), 5 failed, 3 blocked, 47 not run (39 percent). The pass rate of executed points is 65 of 73, about 89 percent. The risk is not the pass rate: regression has barely started and UAT has not begun. Daily execution rate decides whether you finish: if the team runs 20 points per day, 47 remaining needs 2.4 days.\n\n**Pitfalls.** A suite with zero points looks complete. Results from earlier builds linger unless points are reset. Percent passed of executed hides how much was not run.",
+      "keyPoints": [
+        "Traceability is built from Tests / Tested By links and bug links.",
+        "The Progress report shows outcomes per plan or suite over time, including daily rate.",
+        "Report both execution progress and pass rate of executed points.",
+        "Empty suites and stale results mislead."
+      ],
+      "interviewAngle": "Be ready to read a table like the one above and say what you would do. Lead with the biggest risk (unrun regression and UAT), then the failures, then the forecast. Say 'I would report execution progress and pass rate separately'.",
+      "exercises": [
+        {
+          "id": "tp-u12-l1-e1",
+          "type": "mcq",
+          "prompt": "120 points: 65 passed, 5 failed, 3 blocked, 47 not run. What is the execution progress (run over total)?",
+          "choices": [
+            "54 percent",
+            "61 percent",
+            "89 percent",
+            "39 percent"
+          ],
+          "answer": 1,
+          "explanation": "73 run of 120 is about 61 percent. 54 percent is passed over total; 89 percent is pass rate of those run.",
+          "placement": true
+        },
+        {
+          "id": "tp-u12-l1-e2",
+          "type": "mcq",
+          "prompt": "Which hides the most risk if reported alone?",
+          "choices": [
+            "Pass rate of executed points",
+            "Blocked count",
+            "Execution rate per day",
+            "Failed count"
+          ],
+          "answer": 0,
+          "explanation": "A high pass rate can sit on a small executed fraction."
+        },
+        {
+          "id": "tp-u12-l1-e3",
+          "type": "short",
+          "prompt": "Which link type ties a test case to the requirement it covers?",
+          "accept": [
+            "tests",
+            "tested by",
+            "tests / tested by",
+            "tests/tested by"
+          ],
+          "answer": "Tests / Tested By",
+          "explanation": "The traceability link."
+        },
+        {
+          "id": "tp-u12-l1-e4",
+          "type": "open",
+          "prompt": "Using the table in the lesson, write a four-line status for the product owner three days before release with a recommendation.",
+          "answer": "Status, three days out: 120 planned points, 73 run (61 percent), 65 passed, 5 failed and 3 blocked, 47 not run. Smoke is clean. SOS story suites are mostly done but have 4 failures (bugs raised, two High) and 3 blocked on an environment fault. Regression is 47 percent done and UAT has not started. At 20 points per day we need about 2.4 days for the remainder, so the date is tight. Recommendation: hold the release decision until tomorrow's progress report; fix the environment today, retest failures and start UAT; if the SOS bugs are fixed and regression passes by Thursday we can release Friday, otherwise move to Monday.",
+          "rubric": [
+            "Both execution progress and pass rate",
+            "Names failures/blocks with cause",
+            "Uses the daily rate for a forecast",
+            "Clear recommendation with conditions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u12-l2",
+      "title": "Linking automated tests to test cases and pipeline results",
+      "minutes": 9,
+      "body": "Test Plans handles manual and automated results together. Your Playwright tests run in a pipeline; this lesson says how they relate to test cases, at the level you need as a user.\n\n**Two ways automated results appear.**\n\n1. **Pipeline test results.** A pipeline runs tests and publishes results with the Publish Test Results task. Results show on the run's Tests tab, in the Runs view, in test analytics and in dashboard widgets. No test case work item is needed. This is what you did with Playwright.\n2. **Linked automated test cases.** A Test Case work item can be marked automated and associated with a test method in a code project (done from Visual Studio Test Explorer or the work item's Associated Automation, for .NET-style test projects). A pipeline task such as the Azure Test Plan task, or a build or release pipeline associated with the plan, can then run the automated tests tied to a plan and record the outcome against the test case's test point.\n\nFor Playwright with JavaScript or TypeScript, the first route is simple and reliable; the second route is better suited to .NET test frameworks. Say this plainly rather than overclaiming a workflow you have not built.\n\n**Making the first route traceable.** Put the story ID in the test title or annotation (for example `[#1234] manager sends SOS with radius 10`) so a failed result can be tied to a requirement by a person, and name the run (testRunTitle). The Requirements quality widget needs test results linked to requirements; where that link does not exist, the widget cannot count it.\n\n**What manual and automated results share.** The Runs view lists both. The progress report counts test points for plans; automated pipeline-only results are not points unless linked.\n\n**What to automate.** Stable, repetitive, high-value checks: sign in, create SOS, accept, cancel. Keep manual: new features still changing, usability, exploratory.\n\n**Maintaining automated tests.** Flaky tests erode trust. Track failure history in the Tests tab, quarantine flaky tests visibly, and fix the cause (waits, data, environment).\n\n**Honest scope.** At work you wrote basic end-to-end Playwright tests and read results in Pipelines; you did not build the framework or the linking. Know the concepts so you can say 'tests linked to cases give you traceability; pipeline-only results give you trend and failure analysis'.",
+      "keyPoints": [
+        "Pipeline-published results need no test case; linked automated test cases tie results to test points.",
+        "Association to test cases is straightforward for .NET frameworks; for Playwright use naming conventions for traceability.",
+        "The Requirements quality widget needs results linked to requirements.",
+        "Track flaky tests and fix causes."
+      ],
+      "interviewAngle": "If asked 'do you do automation?', answer: basic Playwright tests run in Pipelines, results published to the run; most testing manual. Add the conceptual point on linking automated tests to cases. Do not say you built the framework.",
+      "exercises": [
+        {
+          "id": "tp-u12-l2-e1",
+          "type": "mcq",
+          "prompt": "Your Playwright results show on the pipeline run's Tests tab but not in a Test Plans suite. Why?",
+          "choices": [
+            "Results published without linked test cases are pipeline results, not plan test points",
+            "Playwright is unsupported",
+            "The sprint ended",
+            "Stakeholder access"
+          ],
+          "answer": 0,
+          "explanation": "Only linked automated cases attach results to test points.",
+          "placement": true
+        },
+        {
+          "id": "tp-u12-l2-e2",
+          "type": "mcq",
+          "prompt": "What makes automated results traceable to a story when not linked?",
+          "choices": [
+            "Nothing",
+            "Naming conventions with the story ID and a clear run title",
+            "Higher severity",
+            "Longer retention"
+          ],
+          "answer": 1,
+          "explanation": "A convention lets people tie results to requirements."
+        },
+        {
+          "id": "tp-u12-l2-e3",
+          "type": "short",
+          "prompt": "Which Playwright reporter produces output that PublishTestResults@2 reads as JUnit?",
+          "accept": [
+            "junit"
+          ],
+          "answer": "junit",
+          "explanation": "The junit reporter."
+        },
+        {
+          "id": "tp-u12-l2-e4",
+          "type": "open",
+          "prompt": "Explain to a project manager the difference between 'Playwright results published in a pipeline' and 'automated tests linked to test cases'.",
+          "answer": "Published pipeline results give pass/fail counts, failed test names, trends and artifacts for each run, with no test cases to maintain. They are quick to set up. Linked automated tests attach the outcome to a specific test case and test point, so the plan, progress report and requirement traceability include automated runs next to manual ones. Linking takes extra setup (associating a test method with a case) and is easiest with .NET test frameworks. I did the first: basic Playwright tests and results in the run. I understand the second and would use naming conventions to approximate traceability.",
+          "rubric": [
+            "Describes published results",
+            "Describes linked cases and traceability",
+            "States the setup cost",
+            "Is honest about experience"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u12-l3",
+      "title": "Test metrics, exit criteria and the defect life cycle",
+      "minutes": 10,
+      "body": "**Metrics** support decisions; they are not targets. ISTQB groups them by purpose: progress, quality, coverage, cost and effort.\n\n| Metric | Formula | Caution |\n|---|---|---|\n| Execution progress | points run / planned | Include blocked as not progressing |\n| Pass rate | passed / run | Read with execution progress |\n| Requirements coverage | requirements with at least one test / total | Coverage is not quality |\n| Defect density | defects / size of area | Compare like with like |\n| Defects by severity and area | counts | Shows where risk concentrates |\n| Defect detection | found in test / (found in test + found after release) | Needs honest escape counts |\n| Defect age | days open | Spot stuck bugs |\n| Defect fix rate | resolved per day | Team capacity signal |\n\nAvoid vanity measures such as cases written per day or bugs found per tester; they reward the wrong behaviour.\n\n**Exit criteria** are agreed before testing and state when testing ends, for example:\n\n- all priority 1 and 2 cases executed; 95 percent of all planned points executed\n- pass rate of executed points at least 95 percent\n- no open Severity 1 or 2 bugs; Severity 3 reviewed and accepted by the owner\n- UAT signed off\n- regression suite run on the release candidate build\n\nEntry criteria mirror this: build deployed, environment verified, smoke passed, test data loaded. In agile teams these look like Definition of Ready and Definition of Done for testing.\n\n**Defect life cycle.** A generic flow: New, Assigned or Active, Fixed (Resolved), Retest, Closed. Side paths: Reopened (fix failed), Duplicate, Rejected or Not a defect, Deferred or Won't fix. In an Agile-process Bug: New, Active, Resolved, Closed (Removed is available), with a Reason recorded at each change; teams may add states. Triage meets regularly to confirm severity and priority, assign owners, and decide fix timing.\n\n**Severity versus priority.** Severity is impact on the product; priority is urgency of the fix. Azure DevOps severity values are 1 - Critical, 2 - High, 3 - Medium, 4 - Low, and priority runs 1 to 4. A cosmetic issue on the logo page before a demo can be low severity and high priority.\n\n**Escaped defects.** A bug found in production is a test result too: add a regression case and ask which technique would have caught it.\n\n**Reporting honestly.** Give numbers with interpretation, name what is untested, and separate fact from recommendation.",
+      "keyPoints": [
+        "Metrics inform decisions; read pass rate with execution progress and coverage.",
+        "Agree exit criteria before testing; they decide readiness, not feelings or dates.",
+        "Defect states: New, Active, Resolved, Closed, plus Reopened, Duplicate, Rejected, Deferred as outcomes.",
+        "Severity is impact (1 - Critical to 4 - Low); priority is urgency."
+      ],
+      "interviewAngle": "Questions like 'what metrics did you track?' and 'when is testing done?' expect exit criteria and an honest caveat: numbers do not replace judgement. Mention escaped defects and what you changed after one. Avoid claiming defect-density statistics you did not compute.",
+      "exercises": [
+        {
+          "id": "tp-u12-l3-e1",
+          "type": "mcq",
+          "prompt": "Which exit criterion is best?",
+          "choices": [
+            "Testing ends on Friday",
+            "All priority 1 and 2 cases run and no open Severity 1 or 2 bugs",
+            "The developer says it is fine",
+            "100 bugs found"
+          ],
+          "answer": 1,
+          "explanation": "Objective, agreed and tied to risk.",
+          "placement": true
+        },
+        {
+          "id": "tp-u12-l3-e2",
+          "type": "mcq",
+          "prompt": "A bug fix failed on retest. What happens in the life cycle?",
+          "choices": [
+            "Reopened and returned to the developer",
+            "Closed",
+            "Deferred automatically",
+            "Deleted"
+          ],
+          "answer": 0,
+          "explanation": "Retest failures reactivate the bug with the new evidence."
+        },
+        {
+          "id": "tp-u12-l3-e3",
+          "type": "short",
+          "prompt": "In the Azure DevOps Bug field, what is the value for the highest severity?",
+          "accept": [
+            "1 - critical",
+            "1-critical",
+            "1 critical",
+            "critical"
+          ],
+          "answer": "1 - Critical",
+          "explanation": "Values are 1 - Critical, 2 - High, 3 - Medium, 4 - Low."
+        },
+        {
+          "id": "tp-u12-l3-e4",
+          "type": "open",
+          "prompt": "Write the exit criteria and a short defect-triage agenda for the SOS release.",
+          "answer": "Exit criteria: all priority 1 and 2 cases executed and 95 percent of planned points; executed pass rate at least 95 percent; no open Severity 1 or 2; Severity 3 listed and accepted by the owner; regression suite run on the release candidate; UAT signed off. Triage agenda (20 minutes, daily during test): 1. New bugs: confirm reproduction, severity and priority. 2. Bugs resolved since yesterday: who retests and on which build. 3. Reopened bugs and why. 4. Bugs older than 5 days: decision to fix, defer or close. 5. Release impact: any Severity 1 or 2 changes the recommendation.",
+          "rubric": [
+            "Objective, measurable criteria",
+            "Severity and UAT items",
+            "Triage agenda with owners",
+            "Retest and reopen handling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u12-l4",
+      "title": "Access, licensing and permissions for Test Plans",
+      "minutes": 7,
+      "body": "Testers lose time when they cannot see or do what they expect. Know the exact rules, as Microsoft documents them.\n\n| Task | Access level |\n|---|---|\n| Give feedback with the Test & Feedback extension | Stakeholder |\n| Execute tests and mark outcomes | Basic |\n| Chart test status and view reports | Basic |\n| Create and manage test plans and suites | Basic + Test Plans |\n| Author test cases in the grid; edit them in the runner | Basic + Test Plans |\n| Assign test cases to suites, move and reorder them | Basic + Test Plans |\n| Assign configurations and testers | Basic + Test Plans |\n| Create and manage configurations and parameters | Basic + Test Plans |\n| Prepare User Acceptance Testing | Basic + Test Plans |\n\nStakeholders cannot open the Test Plans web portal; they can only use the extension. A Visual Studio Enterprise, Test Professional or MSDN Platforms subscription includes Test Plans.\n\n**Permissions** apply on top. Examples: Edit work items in this node (area path) to change test items; Manage test plans and Manage test suites (area path) to change plan properties and suite contents; View test runs, Create test runs and Delete test runs (project); Manage test configurations (project). Contributors have most of these by default; Readers can view only.\n\n**Free practice.** A new Azure DevOps organization includes five free Basic users, so a solo learner has Basic. For the planning half of Test Plans you need Basic + Test Plans; start the 30-day Test Plans trial from Organization settings, billing, and assign the license to yourself. If the trial lapses with no billing, you drop to Stakeholder access and the Test Plans area stops working. In your lab, note the date and finish test-plan labs in the 30 days. Do not enter payment details unless you choose to continue.\n\n**Troubleshooting.**\n\n| Symptom | Check |\n|---|---|\n| No Test Plans menu | Access level (Stakeholder?) and project setting |\n| Cannot create a plan | Access level, then area permission Manage test plans |\n| Cannot add a case to a suite | Manage test suites on the area |\n| Cannot change a story's test links | Edit work items on the area |\n\n**What to ask for.** 'I need Basic + Test Plans and Manage test suites on the Dispatch area'. Specific requests get fast answers.",
+      "keyPoints": [
+        "Execute tests needs Basic; creating plans, suites, configurations and preparing UAT needs Basic + Test Plans.",
+        "Stakeholders can use Test & Feedback but not the Test Plans portal.",
+        "Area-path permissions such as Manage test plans and Manage test suites apply on top of the access level.",
+        "A 30-day trial covers Basic + Test Plans; it reverts to Stakeholder when it ends without billing."
+      ],
+      "interviewAngle": "Mention this when asked about team set-up: testers who execute need Basic, whoever builds plans needs Basic + Test Plans. It is a detail that real users know. You requested access; you did not manage billing.",
+      "exercises": [
+        {
+          "id": "tp-u12-l4-e1",
+          "type": "mcq",
+          "prompt": "Who can create a test plan?",
+          "choices": [
+            "Stakeholder",
+            "Basic",
+            "Basic + Test Plans",
+            "Anyone with a pull request"
+          ],
+          "answer": 2,
+          "explanation": "Plan and suite management needs Basic + Test Plans.",
+          "placement": true
+        },
+        {
+          "id": "tp-u12-l4-e2",
+          "type": "mcq",
+          "prompt": "After the Test Plans trial ends with no billing set up, what happens to assigned users?",
+          "choices": [
+            "They get Basic + Test Plans free forever",
+            "They fall back to Stakeholder access",
+            "Their data is deleted at once",
+            "Nothing changes"
+          ],
+          "answer": 1,
+          "explanation": "Without billing, access reverts to Stakeholder."
+        },
+        {
+          "id": "tp-u12-l4-e3",
+          "type": "short",
+          "prompt": "Which area-path permission lets you add and remove test cases in a suite?",
+          "accept": [
+            "manage test suites"
+          ],
+          "answer": "Manage test suites",
+          "explanation": "It controls suite contents and hierarchy."
+        },
+        {
+          "id": "tp-u12-l4-e4",
+          "type": "open",
+          "prompt": "A new tester cannot find Test Plans, and another can run tests but cannot create a suite. Diagnose both and say what you would ask for.",
+          "answer": "First tester: probably Stakeholder access (no Test Plans portal). Ask the admin to set Basic (to execute) or Basic + Test Plans (if they will build plans). Second tester: Basic access can execute but not create suites; ask for Basic + Test Plans, and confirm the Manage test suites permission on the area path. In both cases check the access level on the user's page in organization settings before changing permissions.",
+          "rubric": [
+            "Stakeholder vs Basic diagnosis",
+            "Basic + Test Plans for authoring",
+            "Area permissions",
+            "Checks access level first"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "id": "jira-u5",
+  "title": "Jira for QA and support",
+  "summary": "Run a bug workflow, link defects to stories, hold a triage board, and understand the service-desk side of Jira at a concept level.",
+  "lessons": [
+    {
+      "id": "jira-u5-l1",
+      "title": "Bug workflow and the triage board",
+      "minutes": 8,
+      "body": "QA work in Jira is mostly moving bugs through a reliable path and keeping them connected to the work they came from.\n\nA typical **bug workflow**:\n\n```text\nOpen -> Triaged -> In Progress -> In Review -> Ready for QA -> Verified -> Closed\n                 \\-> Waiting for Info\n                 \\-> Won't Fix / Duplicate / Cannot Reproduce\n```\n\nNames vary by company. The ideas matter: someone triages every new bug, developers fix it, a tester verifies the fix on a real build, and only then is it closed. Reopening is allowed and normal when verification fails.\n\n**Resolution values** record how a bug ended, such as Done, Duplicate, Won't Do or Cannot Reproduce. They make later reporting possible: a high count of Cannot Reproduce suggests tickets lack detail.\n\n**Linking bugs to stories.** When a bug is found while testing a story, link it so the story shows its open defects. Then the question 'is this story done?' can be answered by looking at it. Using JQL:\n\n```jql\nissue in linkedIssues(DISP-210, \"is caused by\")\n```\n\n`linkedIssues()` is a core JQL function. It takes one issue key and, optionally, a link type, so it answers 'what is connected to this one issue?'. The older `issueFunction in linkedIssuesOf(...)` form comes from a marketplace app and is not core Jira, so do not use it unless you know that app is installed. Core Jira also shows linked issues on the ticket itself. Many teams also use a convention: a bug found in a story during the sprint is fixed within that story, while a bug found later gets its own ticket.\n\n**A triage board** is a board built on a filter of new, unreviewed bugs, with columns such as New, Needs Info, Triaged. In a short daily or twice-weekly triage meeting you go through each new ticket and decide:\n\n1. Is it clear enough to act on? If not, ask for details.\n2. Is it a duplicate? Link and close.\n3. What is the severity and priority? Set them.\n4. Which component and who should own it?\n5. Does it block the current release?\n\nA filter for the board might be:\n\n```jql\nproject = DISP AND issuetype = Bug AND status IN (Open, \"Needs Info\") ORDER BY created ASC\n```\n\nOldest first, so nothing is left behind.\n\nAt your last job you wrote manual test cases in Azure DevOps Test Plans and raised bugs from failed tests. The same pattern applies in Jira: a failed test step leads to a bug with the steps, linked back to the test and the story.",
+      "keyPoints": [
+        "A bug workflow ends with verification on a real build, not at the developer's merge.",
+        "Resolution values record how a bug ended and make reporting meaningful.",
+        "Link bugs to the stories they came from so a story's true state is visible.",
+        "A triage board shows new and unreviewed bugs, oldest first, and is worked through in a regular short meeting."
+      ],
+      "interviewAngle": "Talk about the loop from the real work: a test case fails in UAT, you file a bug with steps and evidence, the developer fixes it, you retest and close. Say that your test management was in Azure DevOps Test Plans and that the process maps to Jira. Do not claim use of Jira test-management apps such as Zephyr or Xray unless you used them.",
+      "exercises": [
+        {
+          "id": "jira-u5-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In a sound bug workflow, when should a bug be closed?",
+          "choices": [
+            "As soon as the developer says it is fixed",
+            "After the fix is verified on a real build by a tester",
+            "After two days with no comments",
+            "When the reporter stops replying"
+          ],
+          "answer": 1,
+          "explanation": "Verification confirms the fix works. Closing earlier hides failed fixes."
+        },
+        {
+          "id": "jira-u5-l1-e2",
+          "type": "mcq",
+          "prompt": "A triage filter is ordered by created ASC. Why?",
+          "choices": [
+            "To show newest bugs first",
+            "So the oldest unreviewed bugs are seen first and nothing is left behind",
+            "Because Jira requires ascending order",
+            "To sort by priority"
+          ],
+          "answer": 1,
+          "explanation": "Oldest-first keeps long-waiting items from being buried by new arrivals."
+        },
+        {
+          "id": "jira-u5-l1-e3",
+          "type": "open",
+          "prompt": "Set up a triage routine: write a JQL filter for a triage board of new bugs in project DISP, then write the five questions you would ask about each bug in a 15-minute triage meeting.",
+          "answer": "**Filter:**\n```jql\nproject = DISP AND issuetype = Bug AND status IN (Open, \"Needs Info\") ORDER BY created ASC\n```\n\n**Questions per bug:**\n1. Is there enough detail to reproduce it (steps, environment, expected and actual)? If not, request it and set Needs Info.\n2. Is it a duplicate of an existing ticket? If so, link and close.\n3. What are the severity (impact) and priority (urgency)?\n4. Which component does it belong to and who should own it?\n5. Does it block the current release or have a workaround?",
+          "rubric": [
+            "Filter selects bugs awaiting triage and orders oldest first",
+            "Includes a completeness check",
+            "Includes duplicate check",
+            "Covers severity or priority and ownership"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u5-l2",
+      "title": "Jira Service Management concepts",
+      "minutes": 7,
+      "body": "**Jira Service Management** (JSM) is a separate Atlassian product for service desks, IT support and customer support. It looks like Jira on the agent side but is built around customers asking for help. At a concept level, here is what to know. You do not need to claim you administered one.\n\n**Customers and agents.** Customers raise requests, usually through a **portal** or by email. Agents work the requests. Customers do not need a full Jira license to submit.\n\n**Request types.** A request type is a form for a kind of ask, written in customer language, such as 'Report a problem with a shift', 'Request access for a new pharmacy user' or 'Ask a question about billing'. Behind each request type is an ordinary issue type and workflow. Good request types collect the right information up front, so agents ask fewer follow-up questions.\n\n**Queues.** A queue is a saved filter shown as a list for agents, such as 'Unassigned', 'Waiting on customer', 'Breaching soon'. Queues are the daily working view, much like a triage board.\n\n**SLAs.** A service level agreement measures time against a goal. Two classic ones:\n\n| SLA | Measures | Example goal |\n|---|---|---|\n| Time to first response | From creation until an agent first replies | 1 hour for urgent tickets |\n| Time to resolution | From creation until resolved | 8 business hours for urgent, 5 days for normal |\n\nThe clock can pause in certain statuses, for example Waiting for customer, because the delay is not the agent's. Many teams configure goals by priority and by business hours.\n\n**Knowledge base.** A portal can suggest articles as the customer types a request, which deflects tickets. This ties to what you did in your last job: rewriting the knowledge base lowered ticket inflow by 35 percent.\n\n**Other ideas.** Automation rules can assign, notify or transition tickets. Customer satisfaction ratings can be collected after resolution. Incident, problem and change management templates exist for IT teams.\n\nThe big difference from regular Jira: in JSM, a ticket is a promise to a customer with a clock on it, so statuses and priorities carry commitments.",
+      "keyPoints": [
+        "JSM is built around customers raising requests through a portal or email.",
+        "Request types are customer-friendly forms that collect the right information.",
+        "Queues are the agents' daily working lists.",
+        "SLAs track time to first response and time to resolution, and the clock can pause while waiting on the customer.",
+        "A knowledge base reduces ticket volume."
+      ],
+      "interviewAngle": "For support-adjacent roles, show you understand the concepts: request types, queues, SLAs. Be honest that you have not configured JSM. Your real support background is phone and email tech support logging cases in Salesforce, plus the knowledge base rewrite that cut inflow by 35 percent. Tie the two together.",
+      "exercises": [
+        {
+          "id": "jira-u5-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In a service desk, why might an SLA clock pause when a ticket is Waiting for Customer?",
+          "choices": [
+            "To make agents look faster by hiding delays they caused",
+            "Because the delay is outside the agent's control",
+            "Because tickets in that status are deleted",
+            "SLA clocks never pause"
+          ],
+          "answer": 1,
+          "explanation": "Pausing while waiting on the customer keeps the measure fair, since the agent cannot progress the work."
+        },
+        {
+          "id": "jira-u5-l2-e2",
+          "type": "short",
+          "prompt": "What is the name for a customer-facing form in a service desk that collects the information for one kind of ask?",
+          "accept": ["request type", "a request type", "request types"],
+          "answer": "Request type",
+          "explanation": "A request type is the customer-language form behind which a normal issue type and workflow sit."
+        },
+        {
+          "id": "jira-u5-l2-e3",
+          "type": "open",
+          "prompt": "Design two request types for the support portal of a pharmacist-scheduling product. For each give the name, the four fields you would require, and one SLA goal with a reason.",
+          "answer": "**Request type 1: Report a problem with a shift**\nRequired fields: pharmacy name, shift date and time with time zone, what you expected versus what happened, and a screenshot or attachment (optional but encouraged).\nSLA: time to first response 1 hour for shifts starting within 24 hours, because an unfilled emergency shift has direct patient-care impact.\n\n**Request type 2: Add or change a user account**\nRequired fields: pharmacy name, user's full name and role, the change requested (add, remove, change role), and requester's approver or manager.\nSLA: time to resolution 1 business day, since it is routine but blocks a person from working.\n\nForms ask for specifics so agents do not need to chase details.",
+          "rubric": [
+            "Two request types written in customer language",
+            "Four relevant required fields each",
+            "SLA goals tied to business impact",
+            "No personal health information requested"
+          ]
+        }
+      ]
+    }
+  ]
+}

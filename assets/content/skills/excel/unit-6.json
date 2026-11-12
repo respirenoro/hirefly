@@ -1,0 +1,168 @@
+{
+  "id": "excel-u6",
+  "title": "In the interview",
+  "summary": "What a timed Excel assessment looks like, how to describe your level honestly, and how to answer the common questions.",
+  "lessons": [
+    {
+      "id": "excel-u6-l1",
+      "title": "What Excel assessments look like",
+      "minutes": 8,
+      "body": "Employers use Excel tests to check that you can do routine analyst work accurately under time pressure. Formats vary, so be ready for any of these:\n\n- **Online timed test** (typically 20 to 60 minutes) with multiple-choice questions on functions, sometimes with a live spreadsheet.\n- **Practical file** you open and complete: clean a sheet, answer questions with formulas, build a pivot or chart.\n- **Take-home** workbook with a day or two to return it, plus a short note on your approach.\n- **Live screen share** where an interviewer watches you work and asks why.\n\nThe tasks are predictable. Expect most of these:\n\n| Task | What it tests |\n|---|---|\n| Clean a messy export | TRIM, Text to Columns, Remove Duplicates, types |\n| Conditional counts and totals | COUNTIFS, SUMIFS, AVERAGEIFS |\n| Label rows | IF, IFS |\n| Join two lists | VLOOKUP, INDEX/MATCH, XLOOKUP |\n| Summarise | pivot table, grouping, a chart |\n| Spot problems | duplicates, blanks, outliers, reconciliation |\n\n**A plan for a 45-minute practical**\n\n1. **Read everything first** (2 minutes). Note which tasks you can do quickly and which depend on others.\n2. **Duplicate the raw data** into a working sheet and leave the original alone.\n3. **Do the sure points first**, then the harder ones. If stuck for more than five minutes, mark the cell and move on.\n4. **Do not hard-code.** Use formulas and cell references, so a changed input updates the answer.\n5. **Sanity-check every result.** Does the pivot total equal a COUNTA? Is a percentage between 0 and 100? Is a rate between its group rates?\n6. **Spend the last five minutes** on tidy-up: clear headers, number formats, a chart title, and a short note listing assumptions and anything unfinished.\n\nIf data has an oddity, such as a blank date or a duplicated ID, say what you did about it rather than silently fixing it. Reviewers often value a stated assumption over a perfect formula. If the platform differs from desktop Excel (browser Excel or Google Sheets), some functions or shortcuts may be missing, so be ready with `INDEX/MATCH` instead of `XLOOKUP`.",
+      "keyPoints": [
+        "Expect cleaning, conditional totals, lookups, a pivot or chart and a check for oddities.",
+        "Read all tasks first, work on a copy and do the sure points first.",
+        "Use formulas, not typed numbers, and sanity-check every result.",
+        "State your assumptions about odd data.",
+        "Be ready with INDEX/MATCH if XLOOKUP is not available."
+      ],
+      "interviewAngle": "If an interviewer asks how you prepare for or approach a test, describe the plan above in your own words. It shows method, which counts as much as speed. Be honest about time: say you would rather leave a clearly noted gap than guess. Practise with a real dataset before the test.",
+      "exercises": [
+        {
+          "id": "excel-u6-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You are given a messy workbook and 45 minutes. What is the best first move?",
+          "choices": [
+            "Start at the first question and edit the original data as you go",
+            "Read all the tasks, then copy the raw data to a working sheet",
+            "Build the chart first, because it takes the longest",
+            "Delete rows that look odd"
+          ],
+          "answer": 1,
+          "explanation": "Reading everything lets you plan your time, and working on a copy keeps the raw data safe so you can always go back."
+        },
+        {
+          "id": "excel-u6-l1-e2",
+          "type": "mcq",
+          "prompt": "A pivot table's grand total shows 118 shifts but COUNTA on the ID column shows 120. What should you do?",
+          "choices": [
+            "Nothing; pivots are always right",
+            "Subtract 2 from the COUNTA answer",
+            "Investigate the mismatch, for example blank IDs, a stale pivot needing refresh, or filtered items, and note it",
+            "Delete the pivot and type 120"
+          ],
+          "answer": 2,
+          "explanation": "A mismatch is a signal. Common causes are an unrefreshed pivot, blank or hidden rows and a filter. Find the cause and state it rather than guess."
+        },
+        {
+          "id": "excel-u6-l1-e3",
+          "type": "open",
+          "prompt": "Describe how you would approach a 45-minute practical Excel test with five tasks: clean data, a SUMIFS table, a lookup, a pivot and a chart.",
+          "answer": "Read all five tasks first and note which are quick. Copy the raw data to a working sheet. Do the clean-up first because later tasks depend on it, then the SUMIFS table and the lookup using formulas and absolute references so nothing is hard-coded. Build the pivot from a Table and check its total against a COUNTA or SUMIFS. Add a clearly titled chart last. If stuck for about five minutes, move on and return. Check each result against a number I can verify, leave the last five minutes for formatting, and write a short note on assumptions and anything unfinished.",
+          "rubric": [
+            "Reads tasks first and works on a copy",
+            "Orders work sensibly, with cleaning before the dependent tasks",
+            "Uses formulas rather than hard-coded values",
+            "Includes a sanity check of results",
+            "Manages time and notes assumptions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u6-l2",
+      "title": "Describing your level honestly",
+      "minutes": 6,
+      "body": "Interviewers ask \"how good is your Excel?\" because job posts are vague and self-ratings are unreliable. The best answer is specific, true and easy to test.\n\nYour honest level is **moderate**. In plain terms that means:\n\n- You build pivot tables and use VLOOKUP.\n- You can write the common conditional formulas (SUMIFS, COUNTIFS, IF), clean data and make charts.\n- You are newly learning XLOOKUP and Power Query.\n- You have not written macros or VBA, and you should not call yourself advanced.\n\nWhy not round up? A claim of \"advanced\" invites a follow-up on array formulas, VBA or data models. When you cannot answer, you lose more credibility than you would have gained. A moderate claim with clear examples is believed, and a practical test will match it.\n\n**A shape that works**\n\n> Level, then evidence, then what is next.\n\nExample: \"I would say moderate. I use pivot tables to summarise data and VLOOKUP to join lists, and I write SUMIFS and COUNTIFS for conditional totals. I have been teaching myself XLOOKUP and Power Query. I have not used macros. At work most of my reporting, such as shift fill rate and cancellation reasons, was done in SQL, and Excel was how I checked and presented the results.\" Adjust the last sentence to be exactly true for you.\n\n**Common traps**\n\n- Rating yourself on a number out of ten. If asked, give a number and the reason: \"seven out of ten for everyday analysis, lower for automation.\"\n- Saying \"I can learn anything\" without a demonstration. Prefer \"here is how I learned XLOOKUP.\"\n- Claiming something you have only watched. If you only practised a feature, say \"I have practised\" rather than \"I use\".\n- Going silent on a gap. Naming a gap and a plan is a strength.\n\nIf a role needs more than you have, say what you would do in the first weeks: practise on their real data, ask for a template, and check results with a colleague.",
+      "keyPoints": [
+        "Your honest level is moderate: pivots, VLOOKUP, conditional formulas.",
+        "Use the shape: level, then evidence, then what you are learning next.",
+        "Do not claim advanced, macros or VBA.",
+        "Name gaps with a plan; it reads as self-aware, not weak.",
+        "Say \"practised\" for features you have not used on the job."
+      ],
+      "interviewAngle": "This is the answer you will give in almost every interview that mentions Excel. Practise saying it aloud in about 30 seconds. Make sure every example is something you have genuinely done, because a practical test and a follow-up question will check it.",
+      "exercises": [
+        {
+          "id": "excel-u6-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which answer to \"How good is your Excel?\" best matches an honest moderate level?",
+          "choices": [
+            "I am advanced; I can do anything in Excel.",
+            "I am an expert in macros and VBA.",
+            "I'm moderate. I build pivot tables, use VLOOKUP and SUMIFS, and I'm learning XLOOKUP and Power Query.",
+            "I only know the basics and I am not sure I can help."
+          ],
+          "answer": 2,
+          "explanation": "It states a level, gives concrete evidence and names what is still being learned. The others overclaim or undersell."
+        },
+        {
+          "id": "excel-u6-l2-e2",
+          "type": "mcq",
+          "prompt": "An interviewer asks, \"Have you written VBA macros?\" You have not. Which reply is best?",
+          "choices": [
+            "\"Yes, a few simple ones.\"",
+            "\"No, I haven't written macros. I've used Tables, pivots and formulas, and I'm learning Power Query for repeatable steps.\"",
+            "\"That's not important in Excel anymore.\"",
+            "\"I'd rather not answer.\""
+          ],
+          "answer": 1,
+          "explanation": "A plain no, followed by what you can do and what you are learning, keeps trust and shows direction."
+        },
+        {
+          "id": "excel-u6-l2-e3",
+          "type": "open",
+          "prompt": "Write your own 30-second answer to \"How would you rate your Excel skills?\" using the shape level, evidence, next. Only include things that are true for you.",
+          "answer": "I would say moderate. I build pivot tables to summarise data, use VLOOKUP to join lists, and write SUMIFS and COUNTIFS for conditional totals. I am learning XLOOKUP and Power Query, and I have not written macros or VBA. In my last role I did most reporting in SQL, and I used Excel pivot tables to organise our support tickets and find the pattern behind the repeat ones.",
+          "rubric": [
+            "States a moderate level (not advanced or expert)",
+            "Gives at least two concrete skills as evidence",
+            "Names XLOOKUP or Power Query as in-progress and does not claim VBA or macros",
+            "Is short enough to say in about 30 seconds"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u6-l3",
+      "title": "Common Excel interview questions",
+      "minutes": 8,
+      "body": "Most Excel interview questions fall into five groups. Prepare a short spoken answer for each, built on what you have really done.\n\n**1. Compare and choose.** \"VLOOKUP versus INDEX/MATCH versus XLOOKUP?\" Give the weakness of VLOOKUP (first column only, hard-coded column number, approximate match by default), the fix in INDEX/MATCH, and the convenience of XLOOKUP with its version limit. Say which you use daily (VLOOKUP) and which you are learning (XLOOKUP).\n\n**2. Fix a problem.** \"A formula returns #N/A. What do you do?\" Work through causes in order: hidden spaces, number versus text, missing exact-match argument, genuinely absent value. Name the tool for each (TRIM, VALUE, FALSE, IFNA).\n\n**3. Walk me through a process.** \"How do you build a report from raw data?\" Use a clear sequence: inspect and clean, Table, pivot, check the total, format and chart. This question is really about method.\n\n**4. Define a concept.** Typical items:\n\n| Question | Core of a good answer |\n|---|---|\n| Absolute vs relative reference | `$` locks the cell when copied |\n| Pivot table | summarises rows by category without formulas; needs refresh |\n| COUNT vs COUNTA vs COUNTIFS | numbers only / non-blanks / rows meeting conditions |\n| Remove duplicates risks | deletes data in place; work on a copy |\n| Data validation | restricts what can be typed, e.g. a dropdown |\n\n**5. Judgement.** \"How do you make sure your numbers are right?\" Say: cross-check a total another way, test on a few rows by hand, look for blanks and outliers, document assumptions. Mention a time a check caught an error, but only if it really happened.\n\n**Use your real work.** You reported shift fill rate, time to fill and cancellation reasons in SQL. You can connect it: \"The same questions in Excel would be a COUNTIFS or a pivot, and I check totals against the SQL result.\" Do not invent specific Excel projects you did not do.\n\nFinish each answer with the result or what you learned. If you do not know something, say so and describe how you would find out, for example by trying it on a small sample first.",
+      "keyPoints": [
+        "Prepare short answers for comparing, fixing, process, definition and judgement questions.",
+        "Know the weaknesses of VLOOKUP and which tool fixes each.",
+        "Explain how you verify numbers; method matters as much as the result.",
+        "Connect Excel answers to the reporting you really did in SQL.",
+        "Admit gaps and say how you would learn."
+      ],
+      "interviewAngle": "Practise each group aloud. In particular, rehearse the #N/A troubleshooting answer and the process answer, because they show practical habits. Use your actual SQL reporting as supporting evidence, and do not describe any Excel project that you cannot explain in detail if asked a follow-up.",
+      "exercises": [
+        {
+          "id": "excel-u6-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "An interviewer asks how you make sure your Excel numbers are right. Which answer is strongest?",
+          "choices": [
+            "\"I'm careful, so I don't usually make mistakes.\"",
+            "\"I check the total another way, such as a COUNTA or SUMIFS, spot-check rows by hand, look for blanks and outliers, and note my assumptions.\"",
+            "\"I ask someone else to check it.\"",
+            "\"I rely on Excel to be correct.\""
+          ],
+          "answer": 1,
+          "explanation": "Specific, repeatable checks show method. The other answers rely on trust or a vague claim of care."
+        },
+        {
+          "id": "excel-u6-l3-e2",
+          "type": "short",
+          "prompt": "Which function counts only the non-blank cells in a range: COUNT, COUNTA or COUNTBLANK?",
+          "accept": ["counta"],
+          "answer": "COUNTA",
+          "explanation": "COUNT counts numbers only, COUNTA counts all non-empty cells, and COUNTBLANK counts empty ones."
+        },
+        {
+          "id": "excel-u6-l3-e3",
+          "type": "open",
+          "prompt": "Give a 60-second spoken answer to \"What is the difference between VLOOKUP and XLOOKUP, and which do you use?\" Be honest about your own experience.",
+          "answer": "VLOOKUP searches the first column of a range and returns a value from a column number I count. It cannot look left, breaks if columns are inserted, and defaults to approximate match unless I pass FALSE. XLOOKUP separates the lookup and return ranges, so it can look in either direction, it uses exact match by default and has a built-in not-found argument. It does need Microsoft 365 or Excel 2021 or later. I use VLOOKUP regularly and I am newer to XLOOKUP, which I have been learning, and I would fall back on INDEX/MATCH if the Excel version did not support it.",
+          "rubric": [
+            "Names at least two limits of VLOOKUP",
+            "Names at least two advantages of XLOOKUP",
+            "Mentions the version requirement for XLOOKUP",
+            "Is honest that VLOOKUP is the daily tool and XLOOKUP is newer"
+          ]
+        }
+      ]
+    }
+  ]
+}

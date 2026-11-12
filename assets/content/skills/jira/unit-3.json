@@ -1,0 +1,155 @@
+{
+  "id": "jira-u3",
+  "title": "Finding things: filters, JQL and dashboards",
+  "summary": "Search Jira the way people who use it daily do, from basic filters to JQL with sprint functions and dates, then save and display the results.",
+  "lessons": [
+    {
+      "id": "jira-u3-l1",
+      "title": "JQL basics",
+      "minutes": 9,
+      "body": "**JQL** (Jira Query Language) is how you search issues precisely. A query is made of clauses joined by `AND` and `OR`, with an optional `ORDER BY` at the end. Each clause is `field operator value`.\n\n```jql\nproject = DISP AND issuetype = Bug AND status = \"In Progress\"\n```\n\nValues with spaces go in quotes. JQL also accepts single quotes. Keywords are not case sensitive, but being consistent makes queries readable.\n\nThe operators you use most:\n\n| Operator | Example |\n|---|---|\n| `=` and `!=` | `priority = High` |\n| `IN` and `NOT IN` | `status IN (\"To Do\", \"In Progress\")` |\n| `~` (contains text) | `summary ~ \"timezone\"` |\n| `IS EMPTY` and `IS NOT EMPTY` | `assignee IS EMPTY` |\n| `>`, `>=`, `<`, `<=` | `created >= -7d` |\n\nUseful fields: `project`, `issuetype`, `status`, `statusCategory`, `priority`, `assignee`, `reporter`, `labels`, `component`, `fixVersion`, `resolution`, `created`, `updated`, `resolved`, `duedate`, `sprint`, `text`.\n\nThe function `currentUser()` means whoever is running the search, so one saved filter works for everyone:\n\n```jql\nassignee = currentUser() AND statusCategory != Done ORDER BY priority DESC, updated DESC\n```\n\nParentheses control logic. `A AND B OR C` can surprise you, so write `A AND (B OR C)` when you mean it.\n\n```jql\nproject = DISP AND (labels = notifications OR component = Notifications) AND resolution = Unresolved\n```\n\n`ORDER BY` goes last and takes one or more fields with `ASC` or `DESC`. `ORDER BY priority DESC, created ASC` shows the most urgent first, and the oldest first among equals.\n\nThree habits help. Build the query in the advanced search view, since autocomplete suggests fields and values. Start broad, then add one clause at a time and check the count. Use `resolution = Unresolved` or `statusCategory != Done` to mean open, because individual status names change.\n\nThe basic filter builder is fine for simple searches, but JQL is the same language that filters, boards and dashboards use underneath.",
+      "keyPoints": [
+        "A JQL clause is field, operator, value, joined with AND or OR.",
+        "Use parentheses when mixing AND and OR.",
+        "currentUser() makes one filter work for any viewer.",
+        "ORDER BY goes at the end and can sort by several fields.",
+        "Add clauses one at a time and check the result count."
+      ],
+      "interviewAngle": "Interviewers sometimes ask you to describe or write a query on the spot. Say JQL comfortably covers basic and intermediate queries for you, and that you lean on autocomplete for edge cases. Do not claim deep expertise with advanced functions or plugins' extra functions.",
+      "exercises": [
+        {
+          "id": "jira-u3-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which JQL finds all unassigned bugs in project DISP?",
+          "choices": [
+            "project = DISP AND issuetype = Bug AND assignee ~ none",
+            "project = DISP AND issuetype = Bug AND assignee IS EMPTY",
+            "project = DISP AND issuetype = Bug AND assignee = currentUser()",
+            "project = DISP AND issuetype = Bug AND assignee IS NOT EMPTY"
+          ],
+          "answer": 1,
+          "explanation": "IS EMPTY matches a blank field. The other options search for a user named none, the current user, or assigned issues."
+        },
+        {
+          "id": "jira-u3-l1-e2",
+          "type": "short",
+          "prompt": "Which JQL function returns the person running the search?",
+          "accept": ["currentuser()", "currentuser"],
+          "answer": "currentUser()",
+          "explanation": "currentUser() lets one saved filter show each viewer their own issues."
+        },
+        {
+          "id": "jira-u3-l1-e3",
+          "type": "open",
+          "prompt": "Write JQL for: all open issues in project DISP that are either bugs or have the label notifications, highest priority first, then oldest first.",
+          "answer": "```jql\nproject = DISP AND statusCategory != Done AND (issuetype = Bug OR labels = notifications) ORDER BY priority DESC, created ASC\n```\n\n`resolution = Unresolved` is an acceptable alternative to `statusCategory != Done`. The parentheses are needed so the OR applies only to the type and label conditions.",
+          "rubric": [
+            "Restricts to project DISP",
+            "Excludes done work using statusCategory or resolution",
+            "Groups the OR with parentheses",
+            "Orders by priority DESC then created ASC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u3-l2",
+      "title": "Useful queries: sprints, dates and history",
+      "minutes": 9,
+      "body": "Once the basics are comfortable, a handful of functions cover most real needs.\n\n**Sprint functions** let you ask about sprints without naming them:\n\n```jql\nproject = DISP AND sprint in openSprints() ORDER BY rank\nproject = DISP AND sprint in closedSprints() AND statusCategory != Done\nproject = DISP AND sprint in futureSprints()\n```\n\nThe second query is a good retrospective check: it finds work that was in past sprints and never finished. To find issues in no sprint at all, use `sprint IS EMPTY`.\n\n**Relative dates.** `-7d` means seven days ago, and `-2w` two weeks ago. Date functions include `startOfDay()`, `startOfWeek()`, `startOfMonth()` and their `end` versions.\n\n```jql\ncreated >= -7d\nresolved >= startOfWeek()\nupdated <= -14d AND statusCategory != Done\nduedate < now() AND resolution = Unresolved\n```\n\nThe third finds stale open issues, which are good clean-up candidates. The fourth finds overdue work.\n\n**History.** JQL can look at how a field changed:\n\n```jql\nstatus CHANGED TO \"Done\" DURING (-7d, now())\nstatus WAS \"In Progress\" BEFORE -30d\n```\n\n`CHANGED` and `WAS` are available for several fields, including status, assignee and priority.\n\n**Text search.** `text ~ \"timezone\"` searches summary, description, comments and other text fields. Use `summary ~ \"...\"` when you only want titles. Search terms may be stemmed, so \"schedules\" can match \"schedule\".\n\n**Combining it into working queries for a dispatch team:**\n\n```jql\n-- bugs found by customers this month, still open\nproject = DISP AND issuetype = Bug AND labels = customer-reported AND created >= startOfMonth() AND resolution = Unresolved ORDER BY priority DESC\n\n-- what I finished this week\nassignee = currentUser() AND resolved >= startOfWeek() ORDER BY resolved DESC\n\n-- high priority bugs nobody owns\nproject = DISP AND issuetype = Bug AND priority IN (Highest, High) AND assignee IS EMPTY AND resolution = Unresolved\n```\n\nJQL has no comment syntax, so the `--` lines above are for reading here. Do not paste them into the search box.\n\nA caution: very broad queries on large projects can be slow. Narrow by project and a date range first.",
+      "keyPoints": [
+        "openSprints(), closedSprints() and futureSprints() query sprints without names.",
+        "Relative dates like -7d and functions like startOfWeek() keep filters evergreen.",
+        "CHANGED and WAS query history, such as status changes in a period.",
+        "text ~ searches many text fields; summary ~ searches only titles."
+      ],
+      "interviewAngle": "A strong answer to 'how did you find what you needed' names two or three real queries: open bugs for a release, stale tickets for clean-up, work finished this sprint. You can be upfront that you wrote intermediate JQL and checked the docs for anything exotic.",
+      "exercises": [
+        {
+          "id": "jira-u3-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which query finds open issues not updated in the last two weeks?",
+          "choices": [
+            "updated >= -2w AND resolution = Unresolved",
+            "updated <= -2w AND resolution = Unresolved",
+            "created <= -2w OR resolution = Done",
+            "sprint in closedSprints()"
+          ],
+          "answer": 1,
+          "explanation": "An update date at or before two weeks ago means no recent updates. The >= version finds recently updated issues."
+        },
+        {
+          "id": "jira-u3-l2-e2",
+          "type": "short",
+          "prompt": "Which JQL function returns issues in sprints that are currently running?",
+          "accept": ["opensprints()", "opensprints"],
+          "answer": "openSprints()",
+          "explanation": "Use `sprint in openSprints()` for active sprints. closedSprints() and futureSprints() cover past and planned ones."
+        },
+        {
+          "id": "jira-u3-l2-e3",
+          "type": "open",
+          "prompt": "Write two JQL queries for a pharmacy scheduling team: (1) issues resolved in the last 7 days that were bugs, newest first; (2) issues in the current sprint that are not done and have no assignee.",
+          "answer": "```jql\nproject = DISP AND issuetype = Bug AND resolved >= -7d ORDER BY resolved DESC\n```\n\n```jql\nproject = DISP AND sprint in openSprints() AND statusCategory != Done AND assignee IS EMPTY\n```\n\nThe first limits to bugs resolved in the last seven days and sorts by resolution date. The second uses openSprints() so it keeps working as sprints change.",
+          "rubric": [
+            "Query 1 filters on issue type Bug and a resolved date range",
+            "Query 1 sorts newest first with DESC",
+            "Query 2 uses openSprints() rather than a hard-coded sprint name",
+            "Query 2 combines not-done and assignee IS EMPTY"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u3-l3",
+      "title": "Saved filters and dashboards",
+      "minutes": 7,
+      "body": "A query you will run again should be saved as a **filter**. A saved filter has a name, an owner, and sharing settings that control who can see and use it. Good names say what the filter returns: `DISP - Open bugs by priority`, not `Sam's filter 2`.\n\nSaved filters do more than save typing:\n\n- **Boards** are built on filters. A board's contents come from its filter, and editing the filter changes what the board shows.\n- **Subscriptions** email the results on a schedule, for example every Monday to the team.\n- **Dashboard gadgets** can display a filter's results as a list, count or chart.\n- Others can reuse your filter in their own queries, so sharing sensibly pays off. Check sharing before relying on a filter someone else owns, since it can be changed or deleted by its owner.\n\nA **dashboard** is a page of gadgets. Gadgets that work well for a QA or product role:\n\n| Gadget | Shows | Good for |\n|---|---|---|\n| Filter results | A list of issues from a filter | The daily triage list |\n| Pie chart or two-dimensional filter statistics | Counts grouped by a field | Open bugs by priority or component |\n| Created vs resolved chart | Issues raised against issues closed over time | Whether the backlog is growing |\n| Sprint burndown or health gadgets | Current sprint progress | Standup and review |\n| Assigned to me | Your open work | Personal view |\n\nGadget names vary a little between Jira versions, so describe what a gadget shows if you cannot recall the label.\n\nA dispatch team might build a release-readiness dashboard with these filters:\n\n```jql\nproject = DISP AND fixVersion = \"2.4\" AND issuetype = Bug AND resolution = Unresolved\nproject = DISP AND fixVersion = \"2.4\" AND statusCategory = Done\n```\n\nThe first gadget is a list of release-blocking bugs, and the second counts what is done. Before a release meeting, the dashboard answers 'are we ready?' without anyone rebuilding queries.\n\nKeep dashboards small. Five clear gadgets beat twenty nobody reads. And agree who owns each filter, because dashboards break quietly when a filter is edited or its owner leaves.",
+      "keyPoints": [
+        "Save repeatable queries as named, shareable filters.",
+        "Boards, subscriptions and dashboard gadgets all run on filters.",
+        "A created-vs-resolved chart shows whether the backlog is growing or shrinking.",
+        "Keep dashboards small and give each filter an owner."
+      ],
+      "interviewAngle": "Describe a practical dashboard or saved filter you used, such as open bugs for the next release, rather than listing gadgets. If you only built filters and lists, say so. Building a dashboard is a reasonable thing to say you can do with the documentation open.",
+      "exercises": [
+        {
+          "id": "jira-u3-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A board suddenly shows fewer issues after a colleague edited a query. What most likely happened?",
+          "choices": [
+            "The board's underlying filter was changed",
+            "Jira deleted old issues automatically",
+            "The sprint ended",
+            "Dashboards and boards are unrelated"
+          ],
+          "answer": 0,
+          "explanation": "Boards read their issues from a filter, so editing that filter changes what the board shows."
+        },
+        {
+          "id": "jira-u3-l3-e2",
+          "type": "mcq",
+          "prompt": "Which gadget best shows whether the team is raising bugs faster than it closes them?",
+          "choices": ["Assigned to me", "Created vs resolved chart", "A list of the oldest ten issues", "Pie chart of assignees"],
+          "answer": 1,
+          "explanation": "The created vs resolved view compares inflow and outflow over time."
+        },
+        {
+          "id": "jira-u3-l3-e3",
+          "type": "open",
+          "prompt": "Design a small dashboard for the Monday triage meeting of a dispatch-software support team. List four gadgets, and for each say what filter or JQL it uses and what question it answers.",
+          "answer": "1. **Untriaged tickets (filter results):** `project = DISP AND status = \"To Do\" AND priority IS EMPTY`. Answers: what needs triage today?\n2. **Open bugs by priority (pie chart on a filter):** `project = DISP AND issuetype = Bug AND resolution = Unresolved`. Answers: how bad is the open bug picture?\n3. **High priority, no owner (filter results):** `project = DISP AND priority IN (Highest, High) AND assignee IS EMPTY AND resolution = Unresolved`. Answers: what urgent work has nobody on it?\n4. **Created vs resolved, last 30 days:** based on `project = DISP AND issuetype = Bug`. Answers: are we keeping up?\n\nEach filter is saved with a clear name and shared with the team.",
+          "rubric": [
+            "Four gadgets, each with a stated filter or JQL",
+            "Each gadget tied to a question the meeting needs answered",
+            "JQL is valid and uses sensible fields",
+            "Mentions saving and sharing filters or naming them clearly"
+          ]
+        }
+      ]
+    }
+  ]
+}

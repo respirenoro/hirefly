@@ -1,0 +1,217 @@
+{
+  "id": "ado-u8",
+  "title": "Queries, dashboards and keeping people informed",
+  "summary": "Query types, macros and a graded drill, dashboards that answer a decision, Analytics views, notifications and the wiki.",
+  "lessons": [
+    {
+      "id": "ado-u8-l1",
+      "title": "Queries in depth: types, grouping and macros",
+      "minutes": 10,
+      "body": "You met the basic query in unit 3. This lesson covers the parts that make queries do real work.\n\n**Three query types.**\n\n| Type | Returns | Use |\n|---|---|---|\n| Flat list | One row per work item | Bug lists, test case lists, \"what is open\" |\n| Tree of work items | Items in parent/child hierarchy | Feature with its stories and tasks |\n| Direct links | Items with the items they link to | Stories and their Tested By test cases; blocked work |\n\nOnly flat lists can be turned into charts and used in test plans as query-based suites (a query that selects Test Case items).\n\n**And/Or and grouping.** Rows combine with And or Or. Use the group (parentheses) control to make order explicit, like brackets in SQL. `State = Active And (Severity = 1 - Critical Or Priority = 1)` is different from the same rows without grouping.\n\n**Operators worth knowing.** `=`, `<>`, `In`, `Contains`, `Under` (for area and iteration path trees), `Was Ever` (the item had that value at any time, such as ever Active), and `[Field] = [Field]` comparisons.\n\n**Macros** make a saved query keep working:\n\n- `@Me` the signed-in user\n- `@Project` the current project\n- `@Today` and `@Today - 7` for relative dates\n- `@CurrentIteration` the team's current sprint (needs a team context)\n\nA saved query \"My open items\" with `Assigned To = @Me` works for everyone. A query with a fixed sprint name goes stale each sprint.\n\n**Columns and sorting** decide what you see and are saved with the query. **Folders**: My Queries is private; Shared Queries is visible to the team and can be used in dashboards and charts.\n\n**Same query in WIQL:**\n\n```sql\nSELECT [System.Id], [System.Title], [System.State], [Microsoft.VSTS.Common.Severity]\nFROM WorkItems\nWHERE [System.TeamProject] = @project\n  AND [System.WorkItemType] = 'Bug'\n  AND [System.State] IN ('New', 'Active')\n  AND [System.IterationPath] = @CurrentIteration\n  AND ([Microsoft.VSTS.Common.Severity] = '1 - Critical' OR [Microsoft.VSTS.Common.Priority] = 1)\nORDER BY [Microsoft.VSTS.Common.Severity] ASC\n```\n\nNotes: WIQL has no joins; `FROM WorkItems` returns items and `FROM workItemLinks` returns links. State names in the query are the exact names for your process (this one is Agile, where a Bug's open states are New and Active). Query results are limited (about 20,000 items), so filter rather than export everything.\n\n**Graded drill (do these in the query editor of your lab project):**\n\n1. All Bugs with Severity 1 - Critical or 2 - High that are not Closed.\n2. Stories in the current sprint that have no child Tasks (direct links, Child link).\n3. Stories that have no Tested By link (direct links query; \"Only return items that do not have matching links\").\n4. Bugs closed in the last 14 days.\n5. Active items assigned to nobody, sorted by priority.",
+      "keyPoints": [
+        "Flat, tree and direct-links queries answer different questions; only flat lists feed charts and query-based suites.",
+        "Group rows with parentheses when mixing And and Or.",
+        "@Me, @Today and @CurrentIteration keep saved queries from going stale.",
+        "WIQL is SELECT/FROM/WHERE/ORDER BY with no joins."
+      ],
+      "interviewAngle": "You may be asked 'how would you find stories with no test coverage?'. Say a direct-links query on Tested By with 'does not have matching links' and that you would save it as a shared query for the readiness check. If asked to write WIQL cold, say you build queries in the editor and can read WIQL, which is how your SQL background helps.",
+      "exercises": [
+        {
+          "id": "ado-u8-l1-e1",
+          "type": "mcq",
+          "prompt": "You need a list of user stories that have no linked test cases. Which query type fits?",
+          "choices": [
+            "Flat list on User Story only",
+            "Direct links query with the Tested By link and 'only return items that do not have matching links'",
+            "Tree query on Tasks",
+            "A chart"
+          ],
+          "answer": 1,
+          "explanation": "Missing links need a direct-links query that returns items without matches.",
+          "placement": true
+        },
+        {
+          "id": "ado-u8-l1-e2",
+          "type": "short",
+          "prompt": "Which macro returns the team's current sprint in a query?",
+          "accept": [
+            "@currentiteration",
+            "@current iteration"
+          ],
+          "answer": "@CurrentIteration",
+          "explanation": "It keeps saved sprint queries from going stale."
+        },
+        {
+          "id": "ado-u8-l1-e3",
+          "type": "mcq",
+          "prompt": "Which query type can you turn into a chart or use for a query-based test suite?",
+          "choices": [
+            "Tree of work items",
+            "Direct links",
+            "Flat list",
+            "All of them"
+          ],
+          "answer": 2,
+          "explanation": "Charts and query-based suites need flat lists."
+        },
+        {
+          "id": "ado-u8-l1-e4",
+          "type": "open",
+          "prompt": "Write the query rows (field, operator, value) for 'bugs closed in the last 14 days in the SOS area', then the WIQL WHERE clause.",
+          "answer": "Rows: Work Item Type = Bug; And Area Path Under Dispatch\\Notifications; And State = Closed; And Closed Date >= @Today - 14.\n\n```sql\nWHERE [System.TeamProject] = @project\n  AND [System.WorkItemType] = 'Bug'\n  AND [System.AreaPath] UNDER 'Dispatch\\Notifications'\n  AND [System.State] = 'Closed'\n  AND [Microsoft.VSTS.Common.ClosedDate] >= @Today - 14\n```",
+          "rubric": [
+            "Filters on type, area path (Under) and state",
+            "Uses a relative date with @Today",
+            "Writes valid WHERE syntax with AND",
+            "Uses Closed Date or equivalent"
+          ]
+        },
+        {
+          "id": "ado-u8-l1-e5",
+          "type": "open",
+          "prompt": "Describe how you would build drill items 2, 3 and 5 from the lesson in the query editor.",
+          "answer": "Item 2 (stories with no tasks): direct links query, top level User Story with Iteration Path = @CurrentIteration, link type Child, and the option 'Only return items that do not have matching links'. Item 3 (stories with no tests): direct links query, top level User Story, link type Tested By, filter 'Only return items that do not have matching links'. Item 5 (unassigned active work): flat list, State = Active And Assigned To = (empty), columns ID, Title, Priority, order by Priority ascending.",
+          "rubric": [
+            "Item 2 uses a tree or direct-links query for missing children",
+            "Item 3 uses Tested By with no matching links",
+            "Item 5 filters Assigned To empty and sorts by priority",
+            "Chooses the query type deliberately"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u8-l2",
+      "title": "Dashboards, charts and Analytics views",
+      "minutes": 9,
+      "body": "A **dashboard** is a page of widgets. Each widget shows a chart, a number, a query result or a set of links. Teams get a default dashboard and can add more; you pin charts and queries to them.\n\n**Who can do what.** Viewing a dashboard works for Stakeholders. Creating and editing needs at least Basic access and the right dashboard permission. That is why a customer's executive can read your dashboard without needing a paid seat.\n\n**Adding a widget:** open the dashboard, choose Edit, pick a widget from the catalog, configure it, then Done Editing. Widgets you will use as a PM or tester:\n\n| Widget | Shows | Source |\n|---|---|---|\n| Query tile | A count from a shared query (\"Open Sev 1 and 2 bugs\") | Query |\n| Chart for work items | Pie, column, stacked bar from a flat query | Query |\n| Sprint burndown, Velocity | Remaining work; points per sprint | Boards |\n| Cumulative flow | Work by state over time, shows bottlenecks | Analytics |\n| Test plan chart | Outcomes of a plan or suite | Test Plans |\n| Requirements quality | Pass rate per requirement from pipeline results | Pipelines |\n| Test results trend | Pass rate and duration of pipeline test runs | Pipelines |\n| Markdown | Static text, such as the exit criteria | You |\n\n**Design for a decision.** A good dashboard answers one question, for example \"Can we release Friday?\". Put the answer-bearing tiles at the top: open Sev 1 and 2 bugs (target 0), planned versus run test points, last pipeline run, burndown. Put text next to numbers saying what \"good\" looks like.\n\n**Analytics service and views.** Many widgets read from the Analytics service, a reporting store that updates from your work items and test results close to real time. **Analytics views** are saved, filtered slices of that data (for example \"SOS bugs, last 90 days\") that Power BI can read through the Azure DevOps connector. You can also pull the same data with OData queries. Be honest about this: building Power BI reports from it is something you are learning, not something you did at work; at work you used queries, charts and dashboards plus SQL.\n\n**Common traps.**\n\n- Charts built on a private query disappear for others. Save queries in Shared Queries first.\n- A \"burndown\" with no iteration dates or capacity set is empty.\n- Dashboards that show everything answer nothing.",
+      "keyPoints": [
+        "Anyone with Stakeholder access can view dashboards; creating or editing needs Basic or higher.",
+        "Widgets come from queries, Boards, Test Plans and Pipelines.",
+        "Build a dashboard around one decision and say what good looks like.",
+        "Analytics views feed Power BI; say honestly that you are learning that part."
+      ],
+      "interviewAngle": "'How did you report progress?' is easy to answer well here: shared queries, a chart or two, test progress and a sprint burndown, plus a sentence of interpretation in the review. If Power BI comes up, say you are building that skill on your own and that at work you did the equivalent with queries, SQL and Excel.",
+      "exercises": [
+        {
+          "id": "ado-u8-l2-e1",
+          "type": "mcq",
+          "prompt": "A customer executive with Stakeholder access needs to see your release dashboard. What can they do?",
+          "choices": [
+            "View it but not edit it",
+            "Edit it",
+            "Nothing; Stakeholders cannot open dashboards",
+            "Create their own queries on it"
+          ],
+          "answer": 0,
+          "explanation": "Stakeholders can view dashboards; creating and editing needs Basic.",
+          "placement": true
+        },
+        {
+          "id": "ado-u8-l2-e2",
+          "type": "mcq",
+          "prompt": "A pie chart widget is empty for your teammates but fine for you. Most likely cause?",
+          "choices": [
+            "The query is saved in My Queries",
+            "The sprint is over",
+            "Severity is missing",
+            "The widget catalog is full"
+          ],
+          "answer": 0,
+          "explanation": "A chart built on a private query is not visible to others; save it under Shared Queries."
+        },
+        {
+          "id": "ado-u8-l2-e3",
+          "type": "short",
+          "prompt": "What Azure DevOps reporting service stores data for Analytics views and many widgets?",
+          "accept": [
+            "analytics",
+            "analytics service"
+          ],
+          "answer": "Analytics service",
+          "explanation": "It is the reporting platform behind widgets and Analytics views."
+        },
+        {
+          "id": "ado-u8-l2-e4",
+          "type": "open",
+          "prompt": "List five tiles for a 'Can we release Friday?' dashboard and say what you would want each to show.",
+          "answer": "1. Query tile, open Sev 1 and 2 bugs: target 0. 2. Test plan chart: executed versus planned test points, target 100 percent of priority 1 and 2 cases. 3. Pipeline test results trend or last run status: green, with failures explained. 4. Sprint burndown: remaining work heading to zero or the unfinished stories named. 5. Markdown tile with exit criteria and the current recommendation (go / hold, with reasons).",
+          "rubric": [
+            "Includes open high-severity bugs",
+            "Includes test execution progress",
+            "Includes build/pipeline health",
+            "Includes a schedule measure",
+            "Says what good looks like"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u8-l3",
+      "title": "Notifications, following and the wiki",
+      "minutes": 8,
+      "body": "Three features that keep a team informed without constant messages.\n\n**Following.** You can follow a work item (the Follow control on the form) to get an email when it changes. Anyone mentioned with `@name` in a comment is notified, and you are automatically subscribed to items you create, are assigned or comment on. Following a Feature is a cheap way to watch an epic's progress without being its owner.\n\n**Notifications settings.** Your personal settings let you choose which events email you (assigned to you, mentioned, pull request reviews and build completions, among others). Team and project admins can add shared subscriptions, such as emailing the QA channel when a Severity 1 bug is created. Creating team subscriptions needs more than Contributor rights, so treat that as an admin request unless you were granted it.\n\nA tester's useful setup:\n\n- Follow the stories under test, so a late change to acceptance criteria reaches you.\n- Get mentioned or assigned on bugs you filed so you can verify the fix.\n- Mute noise from builds you do not own.\n\n**The wiki.** Every project can have a wiki of Markdown pages, with a page tree you can reorder. Two kinds: a project wiki you create in the web portal, or a wiki published from a folder in a Git repository. Pages are versioned. Useful for:\n\n- the test strategy and exit criteria\n- the environment and test-account guide\n- release notes and the UAT checklist\n- onboarding notes for new testers\n\nLink work items from a page by typing `#1234`. Pages support tables, code blocks and a Mermaid diagram block for simple flowcharts. Stakeholder access can read wiki pages but not repository README files.\n\nWhere each artifact belongs:\n\n| Content | Home |\n|---|---|\n| A single requirement and its criteria | The work item |\n| How we test here (strategy, exit criteria, environments) | Wiki |\n| The test steps and results | Test Plans |\n| A conversation about one item | Comment on the item, with @mention |\n\nFor the scheduling product, the knowledge-base rewrite you did for end users sits outside Azure DevOps, but an internal tester guide would live well in the wiki, and your habit of keeping docs where people look is the same.",
+      "keyPoints": [
+        "Follow an item or get @mentioned to be notified of changes.",
+        "Team-wide subscriptions usually need an admin.",
+        "The wiki holds how-we-test docs; work items hold the requirement; Test Plans holds steps and results.",
+        "Stakeholder access can read wiki pages."
+      ],
+      "interviewAngle": "This rarely gets asked directly, but it supports answers about documentation and communication: 'I kept the test strategy and UAT checklist in one findable place and linked it from the plan.' You can connect it to your end-user documentation work without claiming wiki administration.",
+      "exercises": [
+        {
+          "id": "ado-u8-l3-e1",
+          "type": "mcq",
+          "prompt": "You want to know whenever acceptance criteria change on the stories you are testing. What is the simplest approach?",
+          "choices": [
+            "Ask the developer to tell you",
+            "Follow the stories",
+            "Rerun the whole suite daily",
+            "Create a team subscription as a Contributor"
+          ],
+          "answer": 1,
+          "explanation": "Following an item emails you when it changes.",
+          "placement": true
+        },
+        {
+          "id": "ado-u8-l3-e2",
+          "type": "mcq",
+          "prompt": "Where does the test exit criteria document belong?",
+          "choices": [
+            "Inside every test case",
+            "The wiki, linked from the test plan",
+            "In a bug's Repro Steps",
+            "Nowhere; keep it in email"
+          ],
+          "answer": 1,
+          "explanation": "Process documents that apply across items belong in a findable shared place such as the wiki."
+        },
+        {
+          "id": "ado-u8-l3-e3",
+          "type": "short",
+          "prompt": "What character syntax in a comment notifies a person?",
+          "accept": [
+            "@",
+            "@name",
+            "at sign",
+            "@mention"
+          ],
+          "answer": "@name",
+          "explanation": "An @mention notifies the person."
+        },
+        {
+          "id": "ado-u8-l3-e4",
+          "type": "open",
+          "prompt": "Write a short message to a developer who asks to be 'kept in the loop' on SOS bugs, saying how they can do it themselves in Azure DevOps.",
+          "answer": "You do not need me for this. Open the SOS Feature and any bug and use Follow so you get an email on every change. If you want everything in the SOS area, ask the team admin to add a team notification for new Severity 1 and 2 bugs in that area path, or save a shared query 'Open SOS bugs' and add it to the team dashboard. I will also @mention you on any bug that needs your attention.",
+          "rubric": [
+            "Uses Follow",
+            "Mentions admin-level team subscription",
+            "Offers a shared query or dashboard tile",
+            "Mentions @mention"
+          ]
+        }
+      ]
+    }
+  ]
+}

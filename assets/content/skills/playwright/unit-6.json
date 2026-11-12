@@ -1,0 +1,140 @@
+{
+  "id": "pw-u6",
+  "title": "In the interview",
+  "summary": "Describing your Playwright experience honestly, explaining a test, handling common questions and a fix-the-test exercise.",
+  "lessons": [
+    {
+      "id": "pw-u6-l1",
+      "title": "Honest wording and explaining a test you wrote",
+      "minutes": 8,
+      "body": "**Say what is true, in plain words**\n\nFor this skill the accurate description is: you wrote basic end-to-end tests with Playwright, ran them in Azure DevOps Pipelines, and most of your QA work was manual. That is a good, useful answer for the roles you are targeting (QA analyst, UAT tester, support, product roles). It is not an automation engineer's answer, and trying to stretch it is what gets people caught by the first follow-up question.\n\nWording that works:\n\n- \"I have basic end-to-end automation experience. I taught myself Playwright and wrote tests for our core shift-request flow, which ran in our Azure DevOps pipeline. Most of my QA was manual, UAT and release testing with test cases in Azure DevOps Test Plans.\"\n- \"I can read and fix a failing test and use the report and trace to find out why it failed. I haven't designed a framework.\"\n- \"I'm comfortable with TypeScript at the level of writing and reading tests, not building applications.\"\n\nWording to avoid: \"automation engineer\", \"built our test framework\", \"extensive experience\", or naming tools you did not use (Selenium, Cypress, TestRail).\n\n**Explaining a test you wrote**\n\nInterviewers ask \"walk me through a test\". Use four beats:\n\n1. **What it protects.** \"It checks that a dispatcher can request an emergency shift and see it in the open list.\"\n2. **How it works.** \"It logs in, opens the new shift form, picks the pharmacy and time, submits, and asserts the shift appears.\"\n3. **A decision or problem.** \"It was flaky at first because I used a fixed wait; I switched to an assertion on the status text.\"\n4. **What it taught you.** \"I learned to pick locators by role and label so UI tweaks don't break it.\"\n\nPick one test and prepare it until you can explain it without notes. Know every line. Interviewers often ask about one specific line, such as why you used `getByRole` rather than a class selector.\n\n**If you don't remember details**\n\nBe straightforward: \"I don't remember the exact syntax, but I'd start with codegen to get the locator and then check it.\" Reasoning about the approach counts for more than recalling syntax.",
+      "keyPoints": [
+        "Describe your level honestly: basic automation, mostly manual QA, tests ran in Azure Pipelines.",
+        "Avoid titles and tools you did not hold or use.",
+        "Explain a test in four beats: what it protects, how it works, a problem, what you learned.",
+        "Prepare one test thoroughly and know every line."
+      ],
+      "interviewAngle": "This is the core interview use of the module. Practise saying the honest summary in two sentences. Then practise the four-beat walkthrough aloud with one real test, ideally the one you remember best. If you cannot recall the code, describe the flow and the assertion, and say what you'd use to rebuild it.",
+      "exercises": [
+        {
+          "id": "pw-u6-l1-e1",
+          "type": "mcq",
+          "prompt": "Which statement is the best honest summary of your Playwright experience?",
+          "choices": [
+            "\"I'm an automation engineer who built our test framework.\"",
+            "\"I have basic end-to-end experience: I wrote tests for our core shift flow that ran in our Azure pipeline; most of my QA was manual.\"",
+            "\"I know Playwright, Cypress and Selenium well.\"",
+            "\"I've only watched tutorials, so I can't help with tests.\""
+          ],
+          "answer": 1,
+          "explanation": "It claims what you did, names the pipeline context and states the manual majority without underselling or overclaiming.",
+          "placement": true
+        },
+        {
+          "id": "pw-u6-l1-e2",
+          "type": "mcq",
+          "prompt": "What is the strongest fourth beat when explaining a test you wrote?",
+          "choices": [
+            "A list of every command in the file",
+            "What you learned or would change",
+            "An apology for it being basic",
+            "A comparison with a competitor product"
+          ],
+          "answer": 1,
+          "explanation": "Ending on a lesson shows judgment and growth, which interviewers value more than recital."
+        },
+        {
+          "id": "pw-u6-l1-e3",
+          "type": "open",
+          "prompt": "Write a spoken answer (about 100 words) to: \"Tell me about your experience with test automation.\" Be honest about the level.",
+          "answer": "I have basic end-to-end automation experience. At a small software company with scheduling and dispatch software, most of my QA was manual: UAT, release testing and managing test cases in Azure DevOps Test Plans. I also taught myself Playwright with TypeScript and wrote tests for our core flow, where a dispatcher requests a shift, and they ran in our Azure DevOps pipeline. I can read the report and the trace to work out why a test failed, and I've fixed brittle locators and removed fixed waits. I haven't designed a framework, and I'd see myself as a tester who can automate the basics, not an automation engineer.",
+          "rubric": [
+            "Says basic and manual-heavy",
+            "Names the pipeline context accurately (Azure DevOps)",
+            "Gives one concrete thing done (core flow tests, reading reports/traces)",
+            "States what they have not done, no overclaiming"
+          ]
+        },
+        {
+          "id": "pw-u6-l1-e4",
+          "type": "open",
+          "prompt": "Prepare a four-beat walkthrough (what it protects, how it works, a problem, what you learned) for a test that checks a dispatcher can cancel a shift with a reason. Write it as you would speak it.",
+          "answer": "It protects the cancellation path, because cancelled shifts and their reasons feed our reporting, so if the form broke we'd lose that data. The test logs in as a dispatcher, opens an open shift, clicks \"Cancel shift\", picks a reason from a dropdown, confirms, and then checks that the shift shows \"Cancelled\" with that reason. A problem I hit: it was flaky because the status updated after a server call and I'd used a fixed wait. I replaced the wait with an assertion on the \"Cancelled\" text, which retries until it appears. What I learned is to wait on the thing I care about and to find controls by role and label so small layout changes don't break the test.",
+          "rubric": [
+            "Starts with what the test protects and why",
+            "Describes the steps and an assertion on the outcome",
+            "Includes a real kind of problem and its fix",
+            "Ends with a lesson"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u6-l2",
+      "title": "Common questions and a practical test",
+      "minutes": 10,
+      "body": "**Questions you should expect**\n\n- \"How do you choose locators?\" Role first, then label, text, test id; avoid long CSS and XPath because they break when markup changes.\n- \"What causes flaky tests and what do you do?\" Timing, shared data, order dependence, environment, real race conditions. Read the trace, fix the cause, quarantine with a ticket if needed.\n- \"What would you automate first?\" A small smoke set of high-risk, frequently used paths.\n- \"How do your tests run in CI?\" Install dependencies and browsers, run headless, publish JUnit and the HTML report even on failure.\n- \"Manual or automated?\" Both; automate stable repeated checks, keep exploratory and new-feature testing manual.\n\n**The practical exercise**\n\nRoles that mention automation may give you a short failing test and ask you to read it and fix it, or to write a small test against a demo site in 30 to 45 minutes. Approach:\n\n1. Read the whole test before touching it. Say what it is meant to check.\n2. Run it if you can and read the error.\n3. Look for the usual suspects: missing `await`, a brittle locator, a fixed wait, a weak or missing assertion, a hard-coded URL.\n4. Fix one thing at a time and explain each change aloud.\n\nHere is the kind of test you might be handed:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('assign pharmacist', async ({ page }) => {\n  page.goto('http://localhost:3000/shifts/1042');\n  await page.locator('div.panel > div:nth-child(3) > button.btn').click();\n  await page.waitForTimeout(3000);\n  expect(page.getByText('Filled')).toBeVisible();\n});\n```\n\nSpot four problems: `goto` is not awaited; the locator depends on layout and class; the sleep guesses at timing; and the assertion has no `await`, so the test can end before the check finishes (in Playwright 1.65 it failed with a confusing 'Test ended' message; older or different setups may not). In addition, the hard-coded host belongs in `baseURL`.\n\nThe fixed version:\n\n```ts\ntest('dispatcher assigns a pharmacist to an open shift', async ({ page }) => {\n  await page.goto('/shifts/1042');\n  await page.getByRole('button', { name: 'Assign' }).click();\n  await expect(page.getByText('Filled')).toBeVisible();\n});\n```\n\n**Writing from scratch**\n\nWrite the simplest path first and get it green, then add assertions and structure. Narrate your choices. If you get stuck, say what you would check next (codegen for the locator, the trace for the failure). Interviewers watch your process more than your typing.",
+      "keyPoints": [
+        "Prepare short answers on locators, flakiness, first automation targets, CI and manual versus automated.",
+        "In a fix-the-test task, read first, run, then look for missing await, brittle locators, sleeps and weak assertions.",
+        "Change one thing at a time and say why.",
+        "Narrate your process; being stuck with a clear next step is acceptable."
+      ],
+      "interviewAngle": "A practical test is the place where honest basic skill is enough. Do not try to impress with advanced patterns. Show the habits: awaiting everything, role locators, retrying assertions, a clear test name. If you are given a framework you don't know, say so and ask where the tests and config live.",
+      "exercises": [
+        {
+          "id": "pw-u6-l2-e1",
+          "type": "mcq",
+          "prompt": "In the test `expect(page.getByText('Filled')).toBeVisible();` (no `await`), what is the problem?",
+          "choices": [
+            "The locator is invalid",
+            "The assertion is not awaited, so the test can finish before it is checked",
+            "`toBeVisible` does not exist",
+            "`getByText` requires a role"
+          ],
+          "answer": 1,
+          "explanation": "Web-first assertions return promises. Without `await`, a failure may be unhandled and the test may pass or finish early.",
+          "placement": true
+        },
+        {
+          "id": "pw-u6-l2-e2",
+          "type": "mcq",
+          "prompt": "You are given a failing test in an interview. What do you do first?",
+          "choices": [
+            "Rewrite it entirely",
+            "Read the whole test, say what it should check and run it to read the error",
+            "Add `waitForTimeout(10000)`",
+            "Tell them it is not your test"
+          ],
+          "answer": 1,
+          "explanation": "Understanding intent and reading the actual error beats guessing; it also shows the process the interviewer wants to see."
+        },
+        {
+          "id": "pw-u6-l2-e3",
+          "type": "open",
+          "prompt": "Fix this test and list each change you made and why:\n\n```ts\ntest('request shift', async ({ page }) => {\n  page.goto('http://localhost:3000/shifts/new');\n  await page.locator('#f1').fill('Maple Street Pharmacy');\n  await page.locator('form > button').click();\n  await page.waitForTimeout(2000);\n  expect(page.getByText('Shift requested')).toBeVisible();\n});\n```\n\nThe field is labelled \"Pharmacy\" and the button \"Request shift\".",
+          "answer": "```ts\ntest('dispatcher can request a shift', async ({ page }) => {\n  await page.goto('/shifts/new');\n  await page.getByLabel('Pharmacy').fill('Maple Street Pharmacy');\n  await page.getByRole('button', { name: 'Request shift' }).click();\n  await expect(page.getByText('Shift requested')).toBeVisible();\n});\n```\n\nChanges:\n1. Added `await` to `goto`, so the page loads before the next step.\n2. Replaced `#f1` and `form > button` with label and role locators, which survive markup changes.\n3. Removed `waitForTimeout`; the assertion retries until the message appears.\n4. Added `await` to `expect`, so the assertion actually gates the test.\n5. Used a relative URL, relying on `baseURL` in the config, and gave the test a behaviour-style name.\n\nIf the Pharmacy field is a dropdown rather than a text input, I'd use `selectOption` instead of `fill`.",
+          "rubric": [
+            "Awaits goto and expect",
+            "Uses getByLabel and getByRole",
+            "Removes the fixed sleep",
+            "Explains each change",
+            "Uses relative URL/baseURL"
+          ]
+        },
+        {
+          "id": "pw-u6-l2-e4",
+          "type": "open",
+          "prompt": "An interviewer asks: \"A test passes on your machine but fails in CI. What do you check?\" Answer in six to eight sentences.",
+          "answer": "First I'd open the report and trace from the CI run to see what the page actually looked like at the failing step, rather than guessing. Then I'd compare environments: CI is headless, Linux, slower, with a different screen size, and it may point at a different base URL or data. I'd check for fixed waits or assertions that are not awaited, since slow machines expose those. I'd check whether the test depends on data that exists locally but not in the test environment, or on a login that did not complete. I'd also try running it locally with the CI settings (`CI=true`, same base URL). If it's a timing issue I'd fix the condition being waited on; if it's data I'd create what the test needs; if it points to a bug I'd raise a ticket with the trace attached.",
+          "rubric": [
+            "Starts with the report/trace",
+            "Names environment differences (headless, slower, data, URL, login)",
+            "Looks for sleeps and unawaited calls",
+            "Ends with fix, data or bug ticket"
+          ]
+        }
+      ]
+    }
+  ]
+}

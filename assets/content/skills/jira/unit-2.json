@@ -1,0 +1,164 @@
+{
+  "id": "jira-u2",
+  "title": "Boards, backlog and sprints",
+  "summary": "How teams plan and see their work: Scrum and Kanban boards, ordering the backlog, estimating, and reading sprint reports.",
+  "lessons": [
+    {
+      "id": "jira-u2-l1",
+      "title": "Scrum boards and Kanban boards",
+      "minutes": 7,
+      "body": "A **board** is a visual view of issues, organized in columns that map to workflow statuses. The same issues can appear on several boards. Jira offers two main board types, and they suit different ways of working.\n\n| | Scrum board | Kanban board |\n|---|---|---|\n| Rhythm | Fixed-length sprints (often two weeks) | Continuous flow, no sprints |\n| Planning | Pick work from the backlog into a sprint | Pull the next item when capacity opens |\n| Focus | Commitment for a sprint, then review | Limiting work in progress |\n| Typical use | Product development with planned releases | Support queues, operations, maintenance |\n| Reports | Sprint report, burndown, velocity | Cumulative flow, control chart |\n\nOn a Scrum board you normally see a **Backlog** view (all unstarted work, plus sprints you are planning) and an **Active sprint** view (the columns for the running sprint). On a Kanban board you see one set of columns, and you can set a **WIP limit** on a column. A WIP limit is a cap such as three issues In Progress. When the column goes over the limit, Jira highlights it, which nudges the team to finish work before starting more.\n\nColumns are not the same thing as statuses. A column can hold one or more statuses. For example, a column named Testing might hold both In QA and Ready for UAT.\n\nA quick-filter row along the top lets you narrow the board to your own issues or to bugs only, and swimlanes can group by assignee, epic, or priority. These are conveniences for standup.\n\nFor a team like a small dispatch-software company, two-week sprints on a Scrum board fit planned features. A support team handling incoming customer tickets might prefer Kanban, since work arrives unpredictably and does not fit neatly into a sprint. Many teams run both: Scrum for the product team, Kanban for support.\n\nWhen you use a board in a standup, walk it right to left. Start with items closest to Done and ask what is needed to finish them. Doing so encourages finishing over starting.",
+      "keyPoints": [
+        "Scrum boards use time-boxed sprints; Kanban boards use continuous flow.",
+        "WIP limits cap work in progress on a Kanban column.",
+        "Columns map to statuses, and one column can hold several statuses.",
+        "Walking a board from right to left in standup pushes work toward done."
+      ],
+      "interviewAngle": "Say which board type you used and why. For a two-week sprint team, a Scrum board. If you have no Kanban experience, say you understand the model (flow, WIP limits) and that support-style work fits it, rather than claiming you ran one.",
+      "exercises": [
+        {
+          "id": "jira-u2-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which statement best describes a Kanban board compared with a Scrum board?",
+          "choices": [
+            "Kanban requires two-week sprints and story points",
+            "Kanban uses continuous flow and can limit work in progress per column",
+            "Kanban cannot show columns",
+            "Kanban boards cannot contain bugs"
+          ],
+          "answer": 1,
+          "explanation": "Kanban focuses on continuous flow and WIP limits. Sprints and sprint reports belong to Scrum."
+        },
+        {
+          "id": "jira-u2-l1-e2",
+          "type": "mcq",
+          "prompt": "A column called Testing holds both 'In QA' and 'Ready for UAT'. What does this show?",
+          "choices": ["The workflow has only one status", "A column can hold more than one status", "Jira has a bug", "The board must be a Kanban board"],
+          "answer": 1,
+          "explanation": "Columns are a board concept and map to one or more workflow statuses."
+        },
+        {
+          "id": "jira-u2-l1-e3",
+          "type": "open",
+          "prompt": "A support team receives about 30 customer-reported issues a day about schedules and notifications. Would you set up a Scrum board or a Kanban board for them? Give your choice and two reasons, and name one setting you would use.",
+          "answer": "I would use a Kanban board.\n\nReasons: the work arrives unpredictably, so a fixed sprint commitment would be broken constantly. And the goal is steady throughput and fast response, not delivering a planned scope.\n\nI would set a WIP limit on the In Progress column, for example one or two issues per agent, so the team finishes before pulling more. I might also add a Waiting for Customer column so blocked tickets do not look like active work.",
+          "rubric": [
+            "Chooses Kanban with reasoning tied to unpredictable inflow",
+            "Gives at least two distinct reasons",
+            "Names a Kanban feature such as a WIP limit or extra column",
+            "Does not rely on sprint concepts for the support team"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u2-l2",
+      "title": "Backlog ordering, estimation and sprints",
+      "minutes": 8,
+      "body": "The **backlog** is the ordered list of work that has not been started. Order is a decision: the item at the top is the next thing the team should do. In Jira's backlog view you drag issues up or down to rank them, and that ranking is what the team sees.\n\nA healthy backlog has a clear shape. The top items are small, understood and ready: they have a clear description and acceptance criteria. Further down, items are larger and vaguer, which is fine, because you refine them as they approach the top. A backlog of 400 unranked tickets is a warning sign. Clean-up means closing what will never be done, rather than leaving it to rot.\n\n**Estimation** gives the team a rough sense of size so they can plan. Common approaches:\n\n- **Story points**: a relative number (often 1, 2, 3, 5, 8) that blends effort, complexity and uncertainty. A 5 is about more than a 3, not an exact number of hours.\n- **Hours**: an estimate of time, less common for stories.\n- **T-shirt sizes**: S, M, L as a rough first pass.\n\nPlanning poker is a common way to reach story points: each person reveals a number at the same time, and the team discusses outliers. The conversation matters more than the number.\n\nA **sprint** is a fixed period, often two weeks. The flow of a sprint:\n\n```text\nRefine backlog -> Sprint planning (choose goal and issues)\n-> Start sprint -> Daily standups -> Sprint review\n-> Retrospective -> Complete sprint\n```\n\nWhen you **start a sprint**, you set a name, dates and ideally a sprint goal, such as: Pharmacists get a notification within one minute of being assigned a shift. When you **complete a sprint**, Jira asks what to do with unfinished issues: move them to the next sprint or back to the backlog. Unfinished work is information, not failure. Look at why it slipped.\n\nA careful planner does not fill a sprint to the brim. Leave room for bugs, support questions and review. Planning to 100% capacity guarantees a missed sprint.",
+      "keyPoints": [
+        "Backlog order is a decision; the top items must be ready and small.",
+        "Story points are relative size, not hours.",
+        "A sprint has a goal, dates and a set of issues; unfinished work is moved or returned to the backlog.",
+        "Leave capacity for bugs and interruptions."
+      ],
+      "interviewAngle": "You owned the product backlog and ran two-week sprint planning, so you can speak to this directly. Say how you decided order, how the team estimated, and what you did with unfinished work. Do not claim a Scrum Master title or certification. You ran the events as the project manager.",
+      "exercises": [
+        {
+          "id": "jira-u2-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What do story points represent?",
+          "choices": [
+            "An exact number of hours of work",
+            "A relative measure of size, including effort, complexity and uncertainty",
+            "The number of people assigned",
+            "The priority of the issue"
+          ],
+          "answer": 1,
+          "explanation": "Story points are a relative size. They are not hours and not priority."
+        },
+        {
+          "id": "jira-u2-l2-e2",
+          "type": "mcq",
+          "prompt": "At the end of a sprint, three stories are not finished. What is the most sensible first step?",
+          "choices": [
+            "Delete them from Jira",
+            "Mark them Done so the sprint looks successful",
+            "Understand why they slipped, then move them to the next sprint or backlog",
+            "Change their story points to zero"
+          ],
+          "answer": 2,
+          "explanation": "Unfinished work is a signal. Find the cause, then decide where each item belongs. Marking unfinished work Done corrupts reports."
+        },
+        {
+          "id": "jira-u2-l2-e3",
+          "type": "open",
+          "prompt": "Write a sprint goal for a two-week sprint whose planned stories are: show the shift time in the pharmacist's local time zone, send a push notification when a shift is assigned, and fix a bug where filled shifts reappear as open. Then list in one or two sentences what you would leave out to keep capacity for surprises.",
+          "answer": "**Sprint goal:** Pharmacists always see correct local shift times and get notified immediately when a shift is assigned, and filled shifts no longer reappear as open.\n\n**Capacity:** I would plan to roughly 80 percent of the team's usual velocity and leave one or two small, low-priority stories out of the committed scope, so there is room for urgent bugs from customers and for review and testing time.",
+          "rubric": [
+            "Goal is outcome-focused, not a list of ticket ids",
+            "Covers the three planned items in one sentence",
+            "Mentions leaving capacity or buffer",
+            "Does not promise 100 percent utilization"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u2-l3",
+      "title": "Sprint reports and burndown",
+      "minutes": 7,
+      "body": "Jira produces reports from sprint data. As a reader, you need to know what each report answers and what it cannot tell you.\n\n**Sprint report.** Lists what was completed, what was not completed, and what was added after the sprint started. The scope-change list is the most revealing part. A sprint that gained eight issues mid-way was not really the sprint planned.\n\n**Burndown chart.** Plots remaining work (usually story points) against time. A reference line shows the ideal pace from the sprint's starting total down to zero on the last day. How to read it:\n\n| What you see | Likely meaning |\n|---|---|\n| Actual line stays above the ideal line | The team is behind pace |\n| A long flat stretch, then a sharp drop | Work was not finished until late, or stories are too large to finish in pieces |\n| The line jumps up mid-sprint | Scope was added |\n| The line ends well above zero | Unfinished work at sprint end |\n\nA burndown is a conversation starter, not a verdict. A flat line can mean the team was blocked, or that issues were big and finished together. Ask before concluding.\n\n**Velocity chart.** Shows committed versus completed points per sprint over time. Use it to plan realistically: if the team completes 28 to 34 points per sprint, committing 50 is wishful. Never compare velocity between teams, because points are relative to each team's own scale.\n\n**Control chart and cumulative flow diagram** appear for Kanban and show how long issues take to move through and where work piles up. A widening band in a status on the cumulative flow diagram signals a bottleneck.\n\nIn a retrospective, bring one or two of these views and ask a question, for example: Why did scope grow in the middle of the sprint? Charts support the discussion, but the team's own explanations give the answers.\n\nReports are only as good as the data. If people leave tickets in the wrong status, or never close finished ones, the burndown lies.",
+      "keyPoints": [
+        "The sprint report shows completed, incomplete and added issues.",
+        "A burndown plots remaining work against an ideal line; scope changes show as upward jumps.",
+        "Velocity helps with realistic planning and is not for comparing teams.",
+        "Reports are only trustworthy if statuses are kept accurate."
+      ],
+      "interviewAngle": "A common question is how you tracked progress. Say you used the sprint board in standup and the sprint report and burndown in the retrospective, and that you treated the charts as prompts for questions. Be honest if you did not use velocity or cumulative flow in detail.",
+      "exercises": [
+        {
+          "id": "jira-u2-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "On a burndown chart, the actual line jumps upward on day 6. What is the most likely explanation?",
+          "choices": [
+            "The team finished work faster than planned",
+            "Scope was added to the sprint",
+            "The sprint ended early",
+            "Story points were converted to hours"
+          ],
+          "answer": 1,
+          "explanation": "Remaining work goes up when issues or estimates are added. The sprint report's scope-change list will confirm."
+        },
+        {
+          "id": "jira-u2-l3-e2",
+          "type": "mcq",
+          "prompt": "Why should you avoid comparing velocity between two teams?",
+          "choices": [
+            "Velocity is secret by policy",
+            "Story points are relative to each team's own scale",
+            "Velocity only applies to Kanban",
+            "Jira cannot calculate it for more than one team"
+          ],
+          "answer": 1,
+          "explanation": "One team's 5 is not another team's 5, so the totals are not comparable."
+        },
+        {
+          "id": "jira-u2-l3-e3",
+          "type": "open",
+          "prompt": "Your burndown stays flat for the first eight days of a ten-day sprint, then drops sharply. Write what you would say in the retrospective: two possible causes and one question or experiment for each.",
+          "answer": "A flat line followed by a sharp drop means most stories were completed at the end rather than steadily.\n\n**Possible cause 1: stories were too large.** Several big stories all reached Done together. Question: could we split these into smaller stories so something finishes every day or two?\n\n**Possible cause 2: work waited for testing or review.** Items sat in review or QA until late. Question: can we agree a daily review slot, or test stories as they are finished instead of in a batch at the end?\n\nI would also check whether statuses were updated promptly, because a flat line can come from tickets that were done but not moved.",
+          "rubric": [
+            "Describes what the shape of the chart means",
+            "Gives two plausible, different causes",
+            "Pairs each cause with a question or experiment",
+            "Considers that the data itself may be stale"
+          ]
+        }
+      ]
+    }
+  ]
+}

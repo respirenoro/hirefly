@@ -1,0 +1,162 @@
+{
+  "id": "power-bi-u9",
+  "title": "Report design, interactivity and performance",
+  "summary": "Plan a readable page, add bookmarks and tooltips, and know the basics of making a report fast.",
+  "lessons": [
+    {
+      "id": "power-bi-u9-l1",
+      "title": "Designing the dashboard page",
+      "minutes": 8,
+      "body": "Sketch before you build. On paper or in a slide, draw the page with boxes for each visual and write the question each one answers. For operations managers reading the shift fill-rate page, the questions are: how are we doing, is it getting better, where is it weak, and why do shifts fail.\n\n**A page plan for the practice data**\n\n| Zone | Visual | Field(s) | Question |\n|---|---|---|---|\n| Top | 4 cards | Fill Rate 88.9%, Total Shifts 1,019, Cancel Rate 16.8%, Avg Hours to Fill 9.52 | How are we doing? |\n| Middle left | Line | Fill Rate by `Dates[YearMonth]` | Is it improving? |\n| Middle right | Bar, sorted | Fill Rate by `Pharmacies[state]` | Where is it weak? |\n| Bottom left | Bar | Cancelled Shifts by `cancel_reason` | Why do shifts fail? |\n| Bottom right | Column | Avg Hours to Fill, emergency versus standard | Does the alert help? |\n| Side | Slicers | Month, state, emergency | |\n\n**Build habits**\n\n- Use the View tab: turn on Gridlines and Snap to grid; align visuals with Format > Align.\n- Apply a **theme** (View > Themes, or a JSON file) so colours and fonts are set once. Keep a main colour and one highlight colour.\n- Write **titles that state the finding** or the metric and period; add a subtitle for the definition (\"filled time present / all requests\").\n- **Sort** bars by value and the month axis chronologically (use `YearMonth`, or sort by the month number).\n- **Hide the noise**: remove gridlines, repeated axis titles and the legend when there is one series.\n- Add **alt text** to key visuals (Format > General > Alt text), set a logical **tab order** in the Selection pane and check **contrast**. Do not use colour as the only signal.\n- Make a **mobile layout** (View > Mobile layout) only if phones matter to the audience.\n- Add a small text box with the data source, date range, and refresh time. Note that October holds a single shift and December 2025 only four.\n\n**Test it.** Show the page to someone for five seconds and ask what they remember. Click every slicer and visual to check that no interaction produces a nonsense number. Compare the cards with the expected values from the measures lesson.\n\nA page that cannot be read in 10 seconds has too much on it. Move extra detail to a drill-through page.",
+      "keyPoints": [
+        "Plan the page on paper: one question per visual.",
+        "Use a theme, a grid, and titles that state the finding.",
+        "Add alt text, tab order and sufficient contrast.",
+        "Note the data range and partial months on the page."
+      ],
+      "interviewAngle": "When asked how you design a dashboard, start with the audience and the decision, then the layout you sketched. You wrote requirements and documentation for real users, which is a genuine strength; the dashboard itself is a practice project.",
+      "exercises": [
+        {
+          "id": "power-bi-u9-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which title is best for the line chart of fill rate by month?",
+          "choices": [
+            "Fill rate held above 88% until September, when 20 open shifts pulled it down",
+            "Fill Rate by YearMonth",
+            "Chart 1",
+            "Everything about fill rate over time"
+          ],
+          "answer": 0,
+          "explanation": "A strong title states the finding and gives the reader the point before they study the chart."
+        },
+        {
+          "id": "power-bi-u9-l1-e2",
+          "type": "short",
+          "prompt": "Which pane do you use to set the tab order and layer visuals? (Two words.)",
+          "accept": [
+            "selection pane",
+            "selection"
+          ],
+          "answer": "Selection pane",
+          "explanation": "View > Selection pane lists visuals, controls order and visibility."
+        },
+        {
+          "id": "power-bi-u9-l1-e3",
+          "type": "open",
+          "prompt": "You have four cards, one line chart, two bar charts and three slicers on one page. How would you decide what to cut or move?",
+          "answer": "For each visual, write the question it answers and who needs it. Keep the headline cards, the trend and one breakdown that supports the decision. Move detail such as pharmacy-level tables to a drill-through page, and merge slicers into a few (month, state). Align to a grid, limit colours, and test with a five-second view: if the viewer cannot state the main message, remove more.",
+          "rubric": [
+            "Ties each visual to a question",
+            "Moves detail to drill-through",
+            "Limits slicers and colours",
+            "Uses a quick reader test"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u9-l2",
+      "title": "Bookmarks, tooltips, buttons and sync slicers",
+      "minutes": 9,
+      "body": "These features turn a page into a guided report. Learn them after the basics, and use each only when it helps a reader.\n\n**Bookmarks** (View > Bookmarks) save the state of a page: filters, slicers, visibility of visuals. Use them to switch views. Example: a button group \"Emergency\" and \"Standard\" that toggles a card between Emergency Avg Hours (1.26) and Standard Avg Hours (11.29). Steps:\n\n1. Put both cards on the page, one over the other, and name them in the **Selection pane**.\n2. Hide the standard card, then Add a bookmark called \"Emergency view\". Untick **Data** if you do not want it to change slicers.\n3. Show the standard card, hide the emergency one and add \"Standard view\".\n4. Insert > Buttons; in Action set Type to Bookmark and choose the bookmark.\n\nTest by clicking each button in Reading view (Ctrl+click in Desktop).\n\n**Buttons** can also navigate between pages, go back, or clear slicers. Bookmarks plus buttons make a navigation bar.\n\n**Tooltips.** Create a small page, set its Page size to Tooltip and turn on Allow use as tooltip in Page information. Put a mini visual on it, such as cancellations by reason for a state. In the chart's Format pane, set Tooltips to Report page and choose it. Hovering the FL bar then shows FL's reasons.\n\n**Sync slicers** (View > Sync slicers) apply one slicer choice across several pages, so a state selected on the summary stays on the detail page.\n\n**Drill-through** gives a per-pharmacy page. Right-click a pharmacy and choose Drill through. Add a back button so users can return.\n\n**Edit interactions** (Format > Edit interactions) stops one visual filtering another, for example so the monthly trend ignores a click on the state bar.\n\n**Cautions**\n\n- Hidden visuals still exist and still run queries; bookmarks that hide visuals do not secure data. Use row-level security for that.\n- Too many bookmarks make a report hard to maintain; name them clearly.\n- Always set the report to open in a sensible default state and check after republishing.\n- Mobile readers may not have the same interactions.",
+      "keyPoints": [
+        "Bookmarks capture filters and visibility; buttons trigger them.",
+        "Report-page tooltips show a mini-visual on hover.",
+        "Sync slicers carry a selection across pages.",
+        "Hiding a visual is not security."
+      ],
+      "interviewAngle": "These features are not entry-level requirements. If you mention them, say you built them on the practice dashboard, such as a bookmark toggle between emergency and standard views, and be ready to explain how you tested them.",
+      "exercises": [
+        {
+          "id": "power-bi-u9-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You hide a visual with a bookmark so managers cannot see sensitive rows. Is that secure?",
+          "choices": [
+            "No; hidden visuals can be shown again, so use row-level security for restricting data",
+            "Yes, bookmarks encrypt hidden visuals",
+            "Yes, if the report is in Reading view",
+            "Yes, if you also delete the slicers"
+          ],
+          "answer": 0,
+          "explanation": "Bookmarks only change presentation. Row-level security restricts the data itself."
+        },
+        {
+          "id": "power-bi-u9-l2-e2",
+          "type": "short",
+          "prompt": "Which pane do you use to name visuals and set which ones a bookmark shows? (Two words.)",
+          "accept": [
+            "selection pane"
+          ],
+          "answer": "Selection pane",
+          "explanation": "The Selection pane controls names and visibility."
+        },
+        {
+          "id": "power-bi-u9-l2-e3",
+          "type": "open",
+          "prompt": "Describe how you would build a toggle between emergency and standard average hours on the practice dashboard.",
+          "answer": "Create two measures, Emergency Avg Hours (1.26) and Standard Avg Hours (11.29), each on its own card. Stack the cards, name them in the Selection pane, and hide one. Save a bookmark per view (Emergency view and Standard view), turn off Data if slicers should not change, add two buttons with the Bookmark action, and test in Reading view.",
+          "rubric": [
+            "Two measures or cards",
+            "Uses the Selection pane to show or hide",
+            "Creates bookmarks and buttons",
+            "Tests the interaction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u9-l3",
+      "title": "Performance basics",
+      "minutes": 8,
+      "body": "A slow report loses readers. Learn the simple causes and the tools that find them. The practice data is tiny, so you will not feel the problems, but the habits are what interviewers ask about.\n\n**Find the slow part.** View > **Performance analyzer** > Start recording, then interact with the page. It lists each visual with time for DAX query, visual display and other. Copy a query to the **DAX query view** to run and tune it.\n\n**Usual fixes, from the model outwards**\n\n1. **Remove unneeded rows and columns** in Power Query. Fewer columns and rows give a smaller model that loads faster.\n2. **Use a star schema.** Narrow fact tables, dimensions for descriptive text, one-to-many relationships, single-direction filters.\n3. **Reduce cardinality.** A datetime such as `requested_at` has a different value for almost every row and compresses badly. Split it into a date and, if needed, a separate time column, and hide the original. Text columns with unique values, such as free-text ticket titles, cost memory; drop them unless used.\n4. **Prefer measures to calculated columns** for aggregates, and push row-level calculations into Power Query where possible.\n5. **Turn off Auto date/time** (File > Options > Data Load > Time intelligence) when you have a proper date table; it creates hidden date tables per date column.\n6. **Fewer visuals per page.** Every visual runs queries. Around eight, plus slicers, is plenty.\n7. **Simplify slicers and cross-filtering**; a slicer with thousands of values or many two-way interactions is expensive.\n8. **Choose the mode carefully.** Import is fastest for visuals. DirectQuery keeps data live but each visual queries the source. Aggregations and incremental refresh exist for large models; know the names.\n\n**Query folding.** Against a database source, Power Query turns your steps into one SQL query on the server. Right-click a step and check View Native Query. Do foldable steps (filters, column removal) first; a step that breaks folding makes later steps run locally.\n\n**A scenario answer.** \"A report with 12 visuals takes 30 seconds to load. What do you do?\" Record with Performance analyzer, find the slowest visual and the slowest DAX, then remove unused columns, reduce cardinality, simplify measures and cut visuals.",
+      "keyPoints": [
+        "Use Performance analyzer and DAX query view to find the slow visual.",
+        "Remove columns, split datetimes, use a star schema, avoid calculated columns.",
+        "Turn off Auto date/time when you have a date table.",
+        "Import is fast; DirectQuery queries the source every time."
+      ],
+      "interviewAngle": "Performance is a common scenario question. Give an ordered answer: measure first, then model fixes, then visuals. Say that you know the tools and have applied the basics (removing columns, a star schema) on a small practice model, not tuned a large production one.",
+      "exercises": [
+        {
+          "id": "power-bi-u9-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A report is slow. What is the first thing to do?",
+          "choices": [
+            "Record with Performance analyzer to find the slowest visual and query",
+            "Convert every measure to a calculated column",
+            "Switch every table to DirectQuery",
+            "Add more visuals to spread the load"
+          ],
+          "answer": 0,
+          "explanation": "Measure before changing anything; the tool shows whether DAX, the visual or something else is slow."
+        },
+        {
+          "id": "power-bi-u9-l3-e2",
+          "type": "short",
+          "prompt": "Which Power Query feature turns your steps into a single query run at the database source? (Two words.)",
+          "accept": [
+            "query folding",
+            "folding"
+          ],
+          "answer": "Query folding",
+          "explanation": "Folding pushes steps to the source so less data is moved."
+        },
+        {
+          "id": "power-bi-u9-l3-e3",
+          "type": "open",
+          "prompt": "Explain why a datetime column such as requested_at hurts model size and what you would do.",
+          "answer": "A datetime has an almost unique value on every row (down to the second), so it has very high cardinality and compresses poorly. I would add a date-only column for the relationship to the date table, add a separate hour or time column only if needed, and hide or remove the original datetime. I would check the model size before and after.",
+          "rubric": [
+            "High cardinality compresses poorly",
+            "Splits date and time",
+            "Hides or removes the original",
+            "Mentions checking the result"
+          ]
+        }
+      ]
+    }
+  ]
+}

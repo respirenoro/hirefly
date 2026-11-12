@@ -1,0 +1,109 @@
+{
+  "id": "excel-u11",
+  "title": "Timed-assessment drill",
+  "summary": "Twenty-six short tasks on the practice data, with answers, in the style of timed Excel tests.",
+  "lessons": [
+    {
+      "id": "excel-u11-l1",
+      "title": "Timed drill A: count, clean and look up (13 tasks)",
+      "minutes": 25,
+      "body": "Open `shifts.csv`, `pharmacies.csv` and `pharmacists.csv` from the practice data, make Tables, and time yourself. Aim for 90 seconds a task. Write the formula, then compare with the answer. Do not look first.\n\n| # | Task | Expected answer |\n|---|---|---|\n| 1 | How many shift rows are there? | 1019 |\n| 2 | How many have status `completed`? | 828 |\n| 3 | Completed as a percentage of all, one decimal | 81.3% |\n| 4 | How many were cancelled with reason `pharmacist cancelled`? | 54 |\n| 5 | How many shifts have no `filled_at`? (COUNTBLANK) | 113 |\n| 6 | How many are emergency shifts (`is_emergency` = 1)? | 184 |\n| 7 | Emergency shifts that were cancelled | 33 |\n| 8 | How many shifts belong to pharmacy_id 35? | 35 |\n| 9 | Shifts requested in March 2026 | 105 |\n| 10 | Add `hours_to_fill`, blank when unfilled. Average, two decimals | 9.52 |\n| 11 | How many filled shifts took more than 24 hours? | 12 |\n| 12 | Pharmacy name and state for shift 1001 (lookup by pharmacy_id) | Pinecrest Community Pharmacy #132, FL |\n| 13 | With a state helper column, how many shifts are in FL? | 537 |\n\n**Answer keys.** Task 3: `=COUNTIFS(tblShifts[status],\"completed\")/ROWS(tblShifts[id])`. Task 5: `=COUNTBLANK(tblShifts[filled_at])`. Task 7: `=COUNTIFS(tblShifts[status],\"cancelled\",tblShifts[is_emergency],1)`. Task 9 uses the date interval from the dates lesson. Task 10 needs the blank guard from the errors lesson. Task 12: `=XLOOKUP(32, tblPharmacies[id], tblPharmacies[name])` or `=VLOOKUP(32, A:D, 2, FALSE)` for the state in column 4. Task 13: add `=VLOOKUP([@pharmacy_id], tblPharmacies, 4, FALSE)` to the shifts Table, then COUNTIFS.\n\n**How to use the drill**\n\n- If you miss a figure, find out why before moving on. Usual causes are a hidden space, a text number, a date compared as text, or a range that is too short.\n- Repeat the set later without the answers, and note your time per task.\n- If a task takes five minutes in a real test, write what you tried in a cell note and move on.\n\nEvery answer here is checkable another way, which is the habit to build: task 1 against the status counts (828 + 171 + 20 = 1019), task 13 against the other states (537 + 340 + 85 + 57 = 1019).",
+      "keyPoints": [
+        "Time yourself; about 90 seconds a task.",
+        "Check each answer another way: status counts add to 1019.",
+        "Guard blank filled_at before date arithmetic.",
+        "When stuck for five minutes, note it and move on."
+      ],
+      "interviewAngle": "A timed test is mostly these tasks. Say how you prepared: \"I practised on a 1,019-row dataset and checked totals two ways.\" Be honest that these are practice drills, not job experience.",
+      "exercises": [
+        {
+          "id": "excel-u11-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In a timed test you meet a task that is taking too long after five minutes. What is the best action?",
+          "choices": [
+            "Leave a short note of what you tried, move to the next task, and return if time remains",
+            "Keep going until it works",
+            "Guess a hard-coded value so the cell is not blank",
+            "Delete the task data"
+          ],
+          "answer": 0,
+          "explanation": "Points come from finished tasks. A noted gap is better than a hard-coded guess."
+        },
+        {
+          "id": "excel-u11-l1-e2",
+          "type": "short",
+          "prompt": "In the practice data, how many shifts have status completed? (Number only.)",
+          "accept": [
+            "828"
+          ],
+          "answer": "828",
+          "explanation": "828 completed, 171 cancelled and 20 open make 1019."
+        },
+        {
+          "id": "excel-u11-l1-e3",
+          "type": "open",
+          "prompt": "Task 13 asks how many shifts are in Florida, but shifts has only pharmacy_id. Describe your method and the check on your answer.",
+          "answer": "Add a state column to the shifts Table with a lookup on pharmacy_id into the pharmacies Table (`=VLOOKUP([@pharmacy_id],tblPharmacies,4,FALSE)` or XLOOKUP). Then `=COUNTIFS(tblShifts[state],\"FL\")` gives 537. Check: FL 537 + GA 340 + SC 85 + AL 57 = 1019, and there are no #N/A values in the state column.",
+          "rubric": [
+            "Adds a lookup helper column",
+            "Counts with COUNTIFS to get 537",
+            "Reconciles states to 1019",
+            "Looks for #N/A"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u11-l2",
+      "title": "Timed drill B: summarise, chart and present (13 tasks)",
+      "minutes": 25,
+      "body": "Same rules: Tables, a timer, answers hidden until you finish. Use `tickets.csv` (734 rows) and `shifts.csv`.\n\n| # | Task | Expected answer |\n|---|---|---|\n| 14 | Tickets per category (pivot) | Access 123, Bug 184, Data fix 100, Feature request 122, How do I 205 |\n| 15 | Tickets with severity critical | 23 |\n| 16 | Tickets with severity high or critical (one formula) | 105 |\n| 17 | Tickets still `open` | 9 |\n| 18 | \"How do I\" tickets, January to April, then May to September | 151 and 54 |\n| 19 | Average \"How do I\" tickets per month before and after May | 37.75 and 10.8 |\n| 20 | Average hours to close, all closed tickets | 28.63 |\n| 21 | Average hours to fill: emergency versus non-emergency | 1.26 and 11.29 |\n| 22 | Emergency shifts only: average hours to fill requested before June versus June onward | 1.70 (94 shifts) and 0.64 (66) |\n| 23 | Cancelled shifts: share of each reason | no coverage 38.0%, pharmacist cancelled 31.6%, pharmacy cancelled 30.4% |\n| 24 | Fill rate (filled_at present) by state | FL 89.6%, GA 88.5%, SC 87.1%, AL 87.7% |\n| 25 | Highlight every cancelled row; how many rows are highlighted? | 171 |\n| 26 | Chart the monthly \"How do I\" counts and write the title | line chart; \"How do I tickets fell about 71% after May\" |\n\n**Hints.** Task 16: `=COUNTIFS(sev,\"high\")+COUNTIFS(sev,\"critical\")`, not one COUNTIFS with both words. Task 20 needs a `hours_to_close` helper with the blank guard (9 tickets are open); the average runs over 725 closed tickets. Task 22 uses AVERAGEIFS with two date criteria on `requested_at` plus the emergency flag and a non-blank `filled_at` (use the helper column). Task 23 is a pivot with Show Values As % of Grand Total after filtering status to cancelled. Task 25 is the rule `=$G2=\"cancelled\"` on the whole row, with status in column G.\n\n**Then finish like a professional (about 3 minutes).** Freeze the header row, format percentages, give each chart a headline title, set a print area, and write two lines of assumptions: how you treated blank dates and that October is partial.\n\n**Score yourself.** 20 or more correct without help is solid for an analyst assessment. Below 15, redo the lessons for the tasks you missed. The tasks cover what timed tests for analyst and operations roles usually ask: counts and conditional sums, lookups, dates, a pivot, a chart and clean presentation.",
+      "keyPoints": [
+        "Pivots, AVERAGEIFS and Show Values As solve most summary tasks.",
+        "Use a helper column with a blank guard for durations.",
+        "Finish with formats, a headline chart title and a note of assumptions.",
+        "Redo missed tasks later without the answers."
+      ],
+      "interviewAngle": "If you are asked to talk through a practical test, use this drill as your example of preparation and describe the checks: totals two ways, blanks handled, assumptions noted. Do not present the practice data as work you did.",
+      "exercises": [
+        {
+          "id": "excel-u11-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You must count tickets with severity high or critical. Which approach is correct?",
+          "choices": [
+            "Add two COUNTIFS, one for \"high\" and one for \"critical\"",
+            "One COUNTIFS with \"high\" and \"critical\" as two criteria on the same range",
+            "COUNTIFS with the criterion \"high critical\"",
+            "COUNT on the severity column"
+          ],
+          "answer": 0,
+          "explanation": "Two criteria on the same range inside one COUNTIFS combine with AND, so none match. Add two COUNTIFS or use SUM(COUNTIFS(..., {\"high\",\"critical\"}))."
+        },
+        {
+          "id": "excel-u11-l2-e2",
+          "type": "short",
+          "prompt": "How many tickets in the practice data are still open? (Number only.)",
+          "accept": [
+            "9"
+          ],
+          "answer": "9",
+          "explanation": "725 closed and 9 open make 734."
+        },
+        {
+          "id": "excel-u11-l2-e3",
+          "type": "open",
+          "prompt": "Task 22 asks for the average hours to fill emergency shifts before and after June. Describe your method and the result, and say what you would add to the chart title.",
+          "answer": "Create hours_to_fill with a blank guard and keep only emergency shifts (is_emergency = 1) with a filled time. Use AVERAGEIFS with requested_at < DATE(2026,6,1) and again with >= DATE(2026,6,1). Before June the average is 1.70 hours (94 shifts), from June 0.64 hours (66 shifts), a drop of about 62%. A chart title could read \"Emergency shifts fill in under 40 minutes since June\", and I would note that the practice data is fictional and that the timing matches the alert feature, which does not prove the cause.",
+          "rubric": [
+            "Handles blanks and emergency flag",
+            "Uses date criteria on both sides of June",
+            "Gives 1.70 and 0.64",
+            "Title states the finding with a caution"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,432 @@
+{
+  "id": "tp-u8",
+  "title": "Test design techniques",
+  "summary": "Equivalence partitioning, boundaries, decision tables, state transitions, scenarios and exploratory charters, each with a graded drill on the scheduling product.",
+  "lessons": [
+    {
+      "id": "tp-u8-l1",
+      "title": "Equivalence partitioning: graded drill",
+      "minutes": 10,
+      "body": "Equivalence partitioning (EP) splits input values into groups the system should treat the same. You test one value per group. ISTQB lists it as a core black-box technique. Valid and invalid partitions both count.\n\nMethod: (1) find the input and its rule, (2) list partitions, valid and invalid, (3) pick one representative per partition, (4) write one case per representative, covering several valid partitions only if they are independent. Coverage = partitions tested divided by partitions identified.\n\n**Worked example.** Rule: a pharmacist can set a travel radius of 1 to 50 miles (whole numbers).\n\n| Partition | Representative | Expected |\n|---|---|---|\n| Below 1 (0 or negative) | 0 | Rejected |\n| 1 to 50 | 20 | Accepted |\n| Above 50 | 75 | Rejected |\n| Not a number | \"ten\" | Rejected with message |\n| Not whole | 2.5 | Rejected or rounded per rule |\n| Empty | blank | Default or message per rule |\n\nFour to six cases cover what would otherwise be 50 or more. The last three partitions come from asking \"what else could a user type?\", which is where many real bugs hide.\n\n**Drill (answer in the exercises).**\n\n1. Level 1: an SOS radius selector has fixed options 5, 10 and 25 miles. List partitions.\n2. Level 2: pharmacy staff count on a request: 1 to 10 pharmacists needed. Partitions?\n3. Level 3: a shift can be cancelled with no penalty if more than 24 hours before start, a fee applies within 24 hours to 2 hours, and cancellation under 2 hours is not allowed. Partitions and expected results.\n\nCommon mistakes: forgetting invalid partitions, testing two values from the same partition and calling it extra coverage, and treating different rules as one partition.",
+      "keyPoints": [
+        "Partition inputs into groups treated the same; test one representative from each.",
+        "Include invalid partitions: out of range, wrong type, empty.",
+        "More values from the same partition add little.",
+        "Coverage is partitions tested over partitions identified."
+      ],
+      "interviewAngle": "Expect 'how do you decide which inputs to test?'. Answer with partitions and boundaries on a real field, like the SOS radius or hours-until-shift rule. ISTQB names this technique, so use its vocabulary (partition, representative value, valid and invalid) without claiming certification.",
+      "exercises": [
+        {
+          "id": "tp-u8-l1-e1",
+          "type": "mcq",
+          "prompt": "A field accepts ages 18 to 65. Using EP, how many partitions at minimum (valid and invalid by range only)?",
+          "choices": [
+            "1",
+            "2",
+            "3",
+            "5"
+          ],
+          "answer": 2,
+          "explanation": "Below 18, 18 to 65, above 65.",
+          "placement": true
+        },
+        {
+          "id": "tp-u8-l1-e2",
+          "type": "mcq",
+          "prompt": "Which test set is redundant under EP for a 1 to 50 radius?",
+          "choices": [
+            "0, 20, 75",
+            "10, 20, 30",
+            "1, 50, 51",
+            "20, 75, ten"
+          ],
+          "answer": 1,
+          "explanation": "10, 20 and 30 all come from the same valid partition; they add no coverage."
+        },
+        {
+          "id": "tp-u8-l1-e3",
+          "type": "short",
+          "prompt": "What do you call the single value chosen to stand for a partition?",
+          "accept": [
+            "representative",
+            "representative value"
+          ],
+          "answer": "representative",
+          "explanation": "One representative per equivalence partition."
+        },
+        {
+          "id": "tp-u8-l1-e4",
+          "type": "open",
+          "prompt": "Level 1: list the partitions and cases for an SOS radius selector with options 5, 10 and 25 miles where the request can also be edited by an API call.",
+          "answer": "Valid partitions: each option is its own valid class because each has a defined behaviour (5, 10, 25) since the number of pharmacists alerted differs. Invalid partitions via the API: a radius not in the list (for example 15), zero or negative, non-numeric, blank. Cases: 5, 10, 25 (expect those counts); 15 (rejected); 0 (rejected); 'abc' (rejected, clear error); blank (rejected or default 10 per spec).",
+          "rubric": [
+            "Treats each fixed option as a partition",
+            "Adds invalid partitions for API input",
+            "States expected results",
+            "Notes where the spec is ambiguous"
+          ]
+        },
+        {
+          "id": "tp-u8-l1-e5",
+          "type": "open",
+          "prompt": "Level 3: cancellation rule: more than 24 hours before start is free, 2 to 24 hours has a fee, under 2 hours is blocked. Give partitions, representatives and expected results, and flag a boundary question.",
+          "answer": "Partitions: >24h (representative 48h): cancelled, no fee. 2h to 24h (representative 10h): cancelled, fee applied. <2h (representative 1h): cancel blocked with message. Invalid: shift already started or past (representative -1h): blocked; shift already cancelled: blocked; not owned by user: forbidden. Boundary question to raise: what happens at exactly 24h and exactly 2h? The rule wording 'more than 24' and 'under 2' leaves 2h and 24h to the middle partition; confirm with the product owner. Boundary tests follow in the next lesson.",
+          "rubric": [
+            "Three valid partitions with representatives",
+            "Invalid and state-based partitions",
+            "Expected results given",
+            "Spots the boundary ambiguity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u8-l2",
+      "title": "Boundary value analysis: graded drill",
+      "minutes": 10,
+      "body": "Defects cluster at the edges of ranges: off-by-one errors and `<` versus `<=`. Boundary value analysis (BVA) adds the edge values to equivalence partitioning. ISTQB describes two-value BVA (each boundary and its nearest value in the neighbouring partition) and three-value BVA (the boundary and both neighbours).\n\nFor an ordered range from `min` to `max`:\n\n| Approach | Values for 1 to 50 |\n|---|---|\n| Two-value | 0, 1, 50, 51 |\n| Three-value | 0, 1, 2, 49, 50, 51 |\n\nThree-value finds more defects but costs more cases. Use two-value when time is tight, three-value for high-risk fields.\n\nBoundaries apply to more than numbers: lengths (a note field with 500 characters maximum: 0, 1, 499, 500, 501), counts (1 to 10 pharmacists), dates and times (shift starts in 1 to 72 hours: 59 minutes, 1 hour, 72 hours, 73 hours), file sizes, and list lengths (zero results, one result, a full page).\n\n**Worked example.** The SOS rule: request allowed for shifts starting in 1 to 72 hours. Two-value BVA with minutes: 59 min, 60 min, 72h 00 min, 72h 01 min. Time boundaries add a wrinkle: what is the reference clock, and when is it evaluated, at click or at submit? Ask, or test both.\n\n**Drill.**\n\n1. Level 1: radius 1 to 50 miles. List two-value boundaries.\n2. Level 2: staff needed 1 to 10; decimal not allowed. Three-value values.\n3. Level 3: cancellation: free more than 24h; fee 2h to 24h; blocked under 2h. Boundary values and the risk of ambiguity.\n4. Level 4: note field 500 characters including spaces; pasted text with emoji; where could characters count differently from bytes?\n\nCombine with EP: EP chooses partitions, BVA picks which values inside them. A tester who only tests the middle misses the bugs.",
+      "keyPoints": [
+        "Bugs cluster at range edges; test just inside and just outside each boundary.",
+        "Two-value BVA uses boundary plus nearest outside value; three-value adds the inside neighbour.",
+        "Boundaries apply to lengths, counts, dates and result lists.",
+        "Clarify inclusive versus exclusive edges before you test."
+      ],
+      "interviewAngle": "A favourite whiteboard question: 'test a field that accepts 1 to 100'. Say partitions first, then boundaries 0, 1, 100, 101 (and 2 and 99 if risk is high), then non-numeric and blank. Mention that you would ask whether the limits are inclusive.",
+      "exercises": [
+        {
+          "id": "tp-u8-l2-e1",
+          "type": "mcq",
+          "prompt": "A field accepts 1 to 100. Which set is the two-value BVA set?",
+          "choices": [
+            "1, 50, 100",
+            "0, 1, 100, 101",
+            "0, 1, 2, 99, 100, 101",
+            "-1, 0, 101, 102"
+          ],
+          "answer": 1,
+          "explanation": "Each boundary with its nearest value in the neighbouring partition.",
+          "placement": true
+        },
+        {
+          "id": "tp-u8-l2-e2",
+          "type": "mcq",
+          "prompt": "Why add 'test at exactly 24 hours' for the cancellation rule?",
+          "choices": [
+            "The date picker is old",
+            "Edge values are where comparison operators and off-by-one errors fail",
+            "Because 24 is a round number",
+            "It replaces EP"
+          ],
+          "answer": 1,
+          "explanation": "< versus <= bugs show at the boundary."
+        },
+        {
+          "id": "tp-u8-l2-e3",
+          "type": "short",
+          "prompt": "How many values does three-value BVA use per boundary?",
+          "accept": [
+            "3",
+            "three"
+          ],
+          "answer": "3",
+          "explanation": "The boundary and its two neighbours."
+        },
+        {
+          "id": "tp-u8-l2-e4",
+          "type": "open",
+          "prompt": "Level 2: staff needed is a whole number from 1 to 10. Write the three-value BVA list with expected results.",
+          "answer": "Values: 0 (rejected), 1 (accepted), 2 (accepted), 9 (accepted), 10 (accepted), 11 (rejected). Extra invalid partitions from EP: 5.5 (rejected), 'abc' (rejected), blank (message), -1 (rejected).",
+          "rubric": [
+            "0, 1, 2 at the low end",
+            "9, 10, 11 at the high end",
+            "Expected results for each",
+            "Adds non-numeric/decimal cases"
+          ]
+        },
+        {
+          "id": "tp-u8-l2-e5",
+          "type": "open",
+          "prompt": "Level 4: a note field allows 500 characters. Give the boundary tests and one question about counting.",
+          "answer": "Boundary tests: 0 chars (empty accepted or not per rule), 1, 499, 500, 501. Test also 500 characters of plain text, 500 with spaces and line breaks, and pasted text with emoji or accented characters. Counting question: does the limit count characters, UTF-16 code units or bytes? An emoji may count as 2 or more, so the same text can pass in one layer and be cut in another (UI, API, database column). Verify what is stored and displayed, not only that the form submits.",
+          "rubric": [
+            "Tests 499, 500, 501",
+            "Tests empty and 1",
+            "Tries non-plain text",
+            "Raises the character-versus-byte question"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u8-l3",
+      "title": "Decision tables",
+      "minutes": 9,
+      "body": "When the outcome depends on a combination of conditions, a **decision table** lists every combination and the expected result. Each column is a rule and becomes at least one test case. ISTQB includes it as a black-box technique.\n\n**Example.** SOS alert eligibility: a pharmacist is alerted only if they hold a licence valid in the pharmacy's state, are Available, and are inside the radius.\n\n| Condition | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 |\n|---|---|---|---|---|---|---|---|---|\n| Licence valid in state | Y | Y | Y | Y | N | N | N | N |\n| Status Available | Y | Y | N | N | Y | Y | N | N |\n| Inside radius | Y | N | Y | N | Y | N | Y | N |\n| **Alert sent** | **Yes** | No | No | No | No | No | No | No |\n\nThree conditions give 2^3 = 8 rules. Seven rules lead to no alert, which is the value of the table: it forces you to think about all combinations, and you may find the spec silent on some (what if the status is Busy but the licence is valid and the shift is critical?).\n\n**Collapsing.** If a condition does not matter in some rules, combine them with a dash. When the licence is invalid, nothing else matters: R5 to R8 collapse into one rule `N - -` giving four rules in total. Collapse only when the spec supports it; if unsure, test the long form.\n\n**Steps.** (1) List conditions and actions. (2) Count combinations. (3) Fill the table. (4) Collapse. (5) Check for impossible combinations. (6) Write one test per column. (7) Review with the product owner for missing rules.\n\n**Drill.**\n\n1. Level 1: a manager can cancel a shift only if they own it and it has not started. Build the table.\n2. Level 2: discount or fee logic: shift cancelled by the pharmacy with fee if under 24 hours, waived if the shift was an emergency request or the pharmacist cancelled first. Build and collapse.\n3. Level 3: SOS rule above, plus a fourth condition, `pharmacy has SOS enabled`. How many rules before and after collapsing?",
+      "keyPoints": [
+        "A decision table lists condition combinations and the expected action for each.",
+        "n yes/no conditions give 2^n rules before collapsing.",
+        "Collapse only when a condition truly does not matter, and confirm with the spec.",
+        "Tables expose missing or contradictory requirements."
+      ],
+      "interviewAngle": "'How would you test business rules with several conditions?' Say you list conditions and outcomes in a table, test each rule, and use the gaps in the table to ask the product owner questions. Eligibility and cancellation fee rules in the scheduling product are good examples.",
+      "exercises": [
+        {
+          "id": "tp-u8-l3-e1",
+          "type": "mcq",
+          "prompt": "A rule has 4 yes/no conditions. How many columns does the uncollapsed decision table have?",
+          "choices": [
+            "4",
+            "8",
+            "16",
+            "32"
+          ],
+          "answer": 2,
+          "explanation": "2^4 = 16.",
+          "placement": true
+        },
+        {
+          "id": "tp-u8-l3-e2",
+          "type": "mcq",
+          "prompt": "What is the main benefit besides test cases?",
+          "choices": [
+            "It exposes combinations the spec never addressed",
+            "It replaces exploratory testing",
+            "It shortens the test run",
+            "It records bug severity"
+          ],
+          "answer": 0,
+          "explanation": "Gaps and contradictions in the requirement become visible."
+        },
+        {
+          "id": "tp-u8-l3-e3",
+          "type": "short",
+          "prompt": "How many rules does a table for 3 yes/no conditions have before collapsing?",
+          "accept": [
+            "8",
+            "eight"
+          ],
+          "answer": "8",
+          "explanation": "2^3."
+        },
+        {
+          "id": "tp-u8-l3-e4",
+          "type": "open",
+          "prompt": "Level 1: Build the decision table for 'a manager can cancel a shift only if they own it and it has not started'.",
+          "answer": "Conditions: Owns shift (Y/N), Shift not started (Y/N). Rules: Y,Y: cancel allowed. Y,N: blocked (already started). N,Y: blocked (not owner, forbidden). N,N: blocked. Four rules, four tests. The two N-owner rules could collapse to `N -` : blocked, but I would keep one case checking a non-owner on a not-started shift to confirm authorization is enforced server-side.",
+          "rubric": [
+            "Two conditions and four rules",
+            "Only one rule allows",
+            "Notes collapsing option",
+            "States expected action"
+          ]
+        },
+        {
+          "id": "tp-u8-l3-e5",
+          "type": "open",
+          "prompt": "Level 3: add the condition 'pharmacy has SOS enabled' to the alert table. How many rules before and after collapsing, and which tests would you still run?",
+          "answer": "Before collapsing: 4 conditions, 16 rules. After collapsing: if SOS is not enabled, nothing else matters (1 rule). If enabled, invalid licence collapses to 1 rule. Only one of the 16 rules sends an alert (SOS on, licence valid, Available, inside radius). Collapsed: SOS off: no alert (1); SOS on, licence invalid: no alert (1); SOS on, licence valid, not available: no alert (1); available, outside radius: no (1); available, inside radius: alert (1). Five rules. Still run a couple of long-form cases (SOS on, valid, available, boundary radius) because collapsing assumes independence the code may not honour.",
+          "rubric": [
+            "16 before",
+            "Collapses to about 5 with reasoning",
+            "Identifies the one alerting rule",
+            "Cautions about assuming independence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u8-l4",
+      "title": "State transition testing",
+      "minutes": 9,
+      "body": "Some features behave differently depending on the state they are in. **State transition testing** models states, events that move between them, and which transitions are valid or invalid.\n\n**Example.** A shift request lifecycle in the scheduling product:\n\n```\nOpen --accept--> Filled --complete--> Completed\nOpen --cancel--> Cancelled\nFilled --cancel--> Cancelled\nFilled --pharmacist drops--> Open\n```\n\nAs a table (rows are states, columns are events), with a dash for 'not allowed':\n\n| State | accept | complete | cancel | pharmacist drops |\n|---|---|---|---|---|\n| Open | Filled | - | Cancelled | - |\n| Filled | - | Completed | Cancelled | Open |\n| Completed | - | - | - | - |\n| Cancelled | - | - | - | - |\n\nISTQB coverage levels: **all states** (visit each), **valid transitions** (take each arrow, 0-switch), and **all transitions** including attempts at invalid ones. Tests that try forbidden events (cancel a Completed shift, accept a Cancelled one) are where real defects show, such as two pharmacists accepting the same SOS.\n\n**Write tests as paths.** Path A: Open, accept, Filled, complete, Completed. Path B: Open, accept, Filled, drops, Open, accept (second pharmacist), Filled. Path C: Open, cancel, Cancelled, accept attempt: expected rejected with message.\n\nAlso test **the same event twice** (double click), and **concurrent events** (two accepts at once): the last is the SOS race condition.\n\nIn Azure DevOps itself, the default workflows allow any-to-any state changes, so a work item is not a good example of enforced transitions unless a rule is added.\n\n**Drill.**\n\n1. Level 1: draw states and transitions for a pharmacist login with lockout after 5 failed attempts.\n2. Level 2: list the invalid transitions for the shift table and write three tests.\n3. Level 3: SOS alert states: Created, Sent, Accepted, Expired (10 min), Cancelled. List valid transitions and the three most valuable negative tests.",
+      "keyPoints": [
+        "Model states, events and transitions; test valid paths and forbidden attempts.",
+        "Coverage levels: all states, valid transitions, all transitions.",
+        "Repeat and concurrent events find race conditions such as double acceptance.",
+        "Default Azure DevOps work item workflows are any-to-any, so do not use them as a transition example."
+      ],
+      "interviewAngle": "Offer this when asked about complex features: 'For the shift lifecycle I would model open, filled, completed and cancelled, then try the forbidden transitions, like accepting a cancelled shift, and two people accepting at once.' It shows technique and domain.",
+      "exercises": [
+        {
+          "id": "tp-u8-l4-e1",
+          "type": "mcq",
+          "prompt": "Which test is most valuable under state transition testing for the shift lifecycle?",
+          "choices": [
+            "Accept an open shift",
+            "Try to accept a Cancelled shift",
+            "Check the page title",
+            "Cancel an open shift twice with a pause"
+          ],
+          "answer": 1,
+          "explanation": "Invalid transition attempts expose missing guards.",
+          "placement": true
+        },
+        {
+          "id": "tp-u8-l4-e2",
+          "type": "mcq",
+          "prompt": "What does 0-switch coverage mean in ISTQB terms?",
+          "choices": [
+            "Every state visited",
+            "Every valid single transition covered",
+            "All sequences of two transitions",
+            "Only invalid transitions"
+          ],
+          "answer": 1,
+          "explanation": "0-switch covers each single transition; 1-switch covers sequences of two."
+        },
+        {
+          "id": "tp-u8-l4-e3",
+          "type": "short",
+          "prompt": "What two-word term describes two users accepting the same SOS simultaneously?",
+          "accept": [
+            "race condition"
+          ],
+          "answer": "race condition",
+          "explanation": "A concurrency defect where order of events decides the outcome."
+        },
+        {
+          "id": "tp-u8-l4-e4",
+          "type": "open",
+          "prompt": "Level 3: SOS alert states Created, Sent, Accepted, Expired, Cancelled. Expiry is 10 minutes. List valid transitions and the three most valuable negative tests.",
+          "answer": "Valid: Created, send, Sent. Sent, accept, Accepted. Sent, timeout at 10 min, Expired. Created or Sent, manager cancels, Cancelled. Accepted, manager cancels, Cancelled (if allowed by spec). Negative tests: (1) accept after expiry, expected rejected with 'request expired' and the shift stays unassigned. (2) Two pharmacists accept within the same second, only one gets Accepted and the other is told it is filled. (3) Manager cancels after acceptance, the pharmacist is notified and no further alerts go out. Also test cancelling twice and accepting a Cancelled request.",
+          "rubric": [
+            "Lists valid transitions",
+            "Includes accept after expiry",
+            "Includes concurrent acceptance",
+            "Includes cancel after accept with notification"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u8-l5",
+      "title": "Use-case and scenario testing, error guessing and checklists",
+      "minutes": 8,
+      "body": "Techniques above test pieces. Real users string pieces into **scenarios**, and some defects only an experienced tester guesses.\n\n**Use-case / scenario testing.** A use case is a sequence of actor actions and system responses leading to a goal, with a main flow and alternate or exception flows. Tests cover the main flow and each alternate flow.\n\nUse case: *Manager requests emergency coverage.*\n\n- Main flow: sign in, create SOS, choose radius 10, send, a pharmacist accepts, manager sees Filled.\n- Alternate A: nobody accepts within 10 minutes, request expires, manager is offered to widen radius.\n- Alternate B: manager cancels before anyone accepts.\n- Exception: the network drops after Send.\n- Exception: manager's session expires on the form.\n\nEach flow is a test (or a few). Scenario tests catch integration gaps that field-level tests miss, which is why UAT is scenario-based.\n\n**Error guessing.** Using experience to guess where defects are, then testing there. No formal rules, but a checklist helps: empty and very long input, special characters, double submit, back button after submit, two tabs open, different time zone, daylight saving change, expired session, slow network, deleted referenced record, permission differences, duplicate records.\n\n**Checklist-based testing.** A reusable list of conditions to check, such as a pre-release checklist (\"sign in, send SOS, accept, cancel, export report\"). It is lighter than cases and good for regression sanity.\n\n**Where each fits.**\n\n| Technique | Best for |\n|---|---|\n| EP and BVA | Input fields and ranges |\n| Decision table | Combined business rules |\n| State transition | Lifecycles |\n| Use case / scenario | End-to-end flows and UAT |\n| Error guessing, checklists, exploratory | Finding what scripts miss |\n\n**Drill.**\n\n1. Level 1: list the alternate and exception flows for 'pharmacist accepts an SOS request'.\n2. Level 2: write a ten-item error-guessing checklist for the scheduling product's shift form.\n3. Level 3: turn the use case above into five test case titles in priority order.",
+      "keyPoints": [
+        "Use cases give a main flow plus alternate and exception flows; each becomes tests.",
+        "Error guessing applies experience; keep a checklist of known risky inputs.",
+        "Scenario tests are the basis of UAT.",
+        "Choose the technique to fit the feature: fields, rules, lifecycle or flow."
+      ],
+      "interviewAngle": "When asked 'what techniques do you use', name them with an example each: partitions and boundaries on fields, decision tables on rules, state transitions on the shift lifecycle, scenarios for UAT, and exploratory testing for the rest. Do not claim to be a formal ISTQB-certified tester.",
+      "exercises": [
+        {
+          "id": "tp-u8-l5-e1",
+          "type": "mcq",
+          "prompt": "Which technique best fits 'the customer's staff run through a normal day of filling shifts'?",
+          "choices": [
+            "Boundary value analysis",
+            "Use-case / scenario testing",
+            "Decision tables",
+            "Statement coverage"
+          ],
+          "answer": 1,
+          "explanation": "End-to-end user goals are scenarios.",
+          "placement": true
+        },
+        {
+          "id": "tp-u8-l5-e2",
+          "type": "mcq",
+          "prompt": "Error guessing is best described as:",
+          "choices": [
+            "Random clicking",
+            "Testing based on experience about where defects tend to be",
+            "A coverage metric",
+            "Automated fuzzing"
+          ],
+          "answer": 1,
+          "explanation": "It is experience-based and benefits from a written checklist."
+        },
+        {
+          "id": "tp-u8-l5-e3",
+          "type": "short",
+          "prompt": "What do you call a reusable list of things to verify, lighter than full test cases?",
+          "accept": [
+            "checklist",
+            "a checklist"
+          ],
+          "answer": "checklist",
+          "explanation": "Checklist-based testing."
+        },
+        {
+          "id": "tp-u8-l5-e4",
+          "type": "open",
+          "prompt": "Level 2: write a ten-item error-guessing checklist for the shift request form.",
+          "answer": "1. Empty required fields. 2. Start time in the past. 3. End before start. 4. Shift spanning midnight and a daylight saving change. 5. Very long note with emoji. 6. Double click on Submit (duplicate request). 7. Back button after submit and resubmit. 8. Two tabs editing the same shift. 9. Session expiry while filling the form. 10. Pharmacy with no pharmacists nearby (empty result). Bonus: user without permission posting the same request through the API.",
+          "rubric": [
+            "Ten distinct items",
+            "Includes time and date edge cases",
+            "Includes duplicate-submit/concurrency",
+            "Includes session or permission"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u8-l6",
+      "title": "Exploratory testing and charters",
+      "minutes": 9,
+      "body": "Exploratory testing is simultaneous learning, test design and execution. It is not random: it is guided by a **charter** and bounded by a time box. ISTQB lists it as an experience-based technique, best when specifications are thin or time is short and as a complement to scripted tests.\n\n**Charter template (session-based testing).**\n\n> Explore **[area / feature]** with **[resources, data, tools]** to discover **[information, risks, defects]**.\n\nExamples:\n\n- Explore the SOS request form with unusual radius, time and note inputs to discover validation gaps.\n- Explore alert delivery with pharmacists in different statuses and states to discover who is wrongly alerted.\n- Explore the shift list on a mobile browser with slow network to discover layout and loading problems.\n\n**A session.** 60 to 90 minutes, one charter, one tester. Keep notes: what you tried, what you found (bugs, questions, ideas for scripted tests), and how the time split between setup, testing and investigating. A short **debrief** with a lead reviews findings and decides new charters.\n\n**Heuristics to steer.** Examples: vary the data (boundaries, long, empty), vary the sequence (back, repeat, skip), vary the environment (browser, device, time zone), follow the money or the harm (what would hurt the pharmacy most?), and compare with a similar feature.\n\n**In Azure DevOps.** The Test & Feedback browser extension supports exploratory sessions: it captures screenshots, screen recordings and notes as you explore, and files bugs or tasks linked to the work item you are exploring (Connected mode) or exports an HTML report (Standalone mode). Sessions do not need a test plan or suite. The next unit shows the tool.\n\n**What to record for credibility.** Charter, date, build, duration, notes, bugs raised with IDs, areas not covered. Exploratory testing does not mean undocumented.\n\n**Drill.**\n\n1. Level 1: write a charter for 'edit a filled shift'.\n2. Level 2: write three charters for the SOS release and order them by risk.\n3. Level 3: after a 60-minute session you found two bugs and three questions. Write the debrief note in five lines.",
+      "keyPoints": [
+        "A charter states the area, resources and the information you seek; sessions are time-boxed.",
+        "Exploratory testing complements scripted tests and is documented through notes and bug links.",
+        "Use heuristics: vary data, sequence and environment, and follow the harm.",
+        "Test & Feedback captures evidence and links bugs to the work item being explored."
+      ],
+      "interviewAngle": "Say you used exploratory sessions after scripted cases passed, to hunt for what scripts miss, and that you recorded charters and findings. Do not describe it as 'just clicking around'. Mention the charter format and a time box.",
+      "exercises": [
+        {
+          "id": "tp-u8-l6-e1",
+          "type": "mcq",
+          "prompt": "Which is a good exploratory charter?",
+          "choices": [
+            "Test the system",
+            "Explore the SOS form with odd radius and time inputs to discover validation gaps",
+            "Click every button",
+            "Run test case 55"
+          ],
+          "answer": 1,
+          "explanation": "A charter names an area, how to explore and the information sought.",
+          "placement": true
+        },
+        {
+          "id": "tp-u8-l6-e2",
+          "type": "mcq",
+          "prompt": "What distinguishes exploratory testing from ad hoc testing?",
+          "choices": [
+            "Nothing",
+            "A charter, time box and notes",
+            "It uses a different tool",
+            "It is automated"
+          ],
+          "answer": 1,
+          "explanation": "Structure and documentation separate them."
+        },
+        {
+          "id": "tp-u8-l6-e3",
+          "type": "short",
+          "prompt": "What is the review meeting after an exploratory session called?",
+          "accept": [
+            "debrief",
+            "a debrief"
+          ],
+          "answer": "debrief",
+          "explanation": "A session debrief reviews findings and sets the next charters."
+        },
+        {
+          "id": "tp-u8-l6-e4",
+          "type": "open",
+          "prompt": "Level 2: write three exploratory charters for the SOS release and order them by risk, with one line on why.",
+          "answer": "1. Explore alert recipient selection with pharmacists in every status, state and distance to discover people wrongly alerted or missed (highest risk: wrong recipients in an emergency). 2. Explore accept and cancel races with two pharmacists and a manager acting at once to discover double acceptance or lost updates (high: assignment integrity). 3. Explore the SOS form on mobile browsers and poor networks to discover usability and timeout problems (medium: delays and errors but recoverable).",
+          "rubric": [
+            "Charters follow the template",
+            "Ordered by risk with reasons",
+            "Cover different risk types",
+            "Specific to the product"
+          ]
+        }
+      ]
+    }
+  ]
+}

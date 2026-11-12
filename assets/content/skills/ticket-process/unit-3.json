@@ -1,0 +1,161 @@
+{
+  "id": "ticket-u3",
+  "title": "Writing a ticket a developer can act on",
+  "summary": "The parts of a good bug report, before-and-after rewrites, and the difference between a bug and a feature request.",
+  "lessons": [
+    {
+      "id": "ticket-u3-l1",
+      "title": "Anatomy of a good bug report",
+      "minutes": 8,
+      "body": "A developer opens your ticket with one question: can I see this happen? Everything in a good bug report serves that.\n\n| Part | What goes in it | Why |\n|---|---|---|\n| Title | Where, what, and the symptom, in one line | Searchable and scannable |\n| Environment | Build or version, platform, browser or device, user role, time zone, test or production | Many bugs only happen in one setting |\n| Steps to reproduce | Numbered, specific, starting from a known state | Lets anyone repeat it |\n| Expected result | What should happen, ideally referencing a requirement | The standard to judge by |\n| Actual result | What did happen, including exact error text | The gap is the bug |\n| Evidence | Screenshot, screen recording, log excerpt, ids | Proof, and clues |\n| Impact | Who is affected, how many, workaround, deadline | Priority |\n| Frequency | Always, sometimes, once | Guides the investigation |\n\n**A complete example:**\n\n```text\nTitle: Schedule shows filled shift one hour late for pharmacists in Arizona\n\nEnvironment: Web app 2.3.1, Chrome, production, dispatcher role.\nPharmacist time zone: America/Phoenix.\n\nSteps:\n1. Log in as a dispatcher.\n2. Create a shift at Pharmacy 118 for 2026-11-12 09:00 local pharmacy time (Eastern).\n3. Assign the shift to pharmacist P-2044 (time zone Arizona).\n4. Open the pharmacist's schedule view.\n\nExpected: Shift shows at 07:00 Arizona time.\nActual: Shift shows at 08:00 Arizona time.\n\nFrequency: Always, for Arizona pharmacists. Not reproduced for Pacific time.\nEvidence: Screenshot attached. Shift id 4821.\nImpact: 3 Arizona pharmacists affected this week. Workaround: dispatcher tells them the correct time by phone. Next affected shift is tomorrow.\n```\n\nNotice what is absent: no opinions about the cause, no blame, and no 'it just doesn't work'. If you have a theory, add it at the end as 'Possible cause:' and label it as a guess.\n\nA few details save the most time:\n\n1. **Use exact words.** Copy error messages instead of paraphrasing.\n2. **Include ids** such as shift, pharmacist and pharmacy ids, but never put real patient or other protected health information in a ticket.\n3. **One problem per ticket.** If you find three, write three and link them.\n4. **State the starting state.** 'Logged in as dispatcher with one open shift' beats 'open a shift'.\n\nA title formula that works: [Area] + [what is wrong] + [condition]. 'Notifications: no push sent for shifts assigned after 6 PM Central.'",
+      "keyPoints": [
+        "A good report lets a developer see the problem happen.",
+        "Include title, environment, steps, expected, actual, evidence, impact and frequency.",
+        "Separate observations from guesses.",
+        "One problem per ticket, exact error text, and no protected health information."
+      ],
+      "interviewAngle": "A frequent test is 'write a bug report from this description'. Use this structure out loud or on paper. Mention that you wrote tickets for developers daily and that UAT bugs you found followed the same format, with evidence attached.",
+      "exercises": [
+        {
+          "id": "ticket-u3-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is the best bug ticket title?",
+          "choices": [
+            "Schedule broken",
+            "Please fix ASAP!!!",
+            "Schedule: filled shift shows one hour late for Arizona pharmacists",
+            "Bug in app"
+          ],
+          "answer": 2,
+          "explanation": "It names the area, the symptom and the condition, so it is searchable and scannable."
+        },
+        {
+          "id": "ticket-u3-l1-e2",
+          "type": "mcq",
+          "prompt": "Which of these does NOT belong in a bug report?",
+          "choices": [
+            "Exact error message text",
+            "A pharmacist's real patient prescription details",
+            "The build version",
+            "Numbered steps to reproduce"
+          ],
+          "answer": 1,
+          "explanation": "Protected health information does not belong in tickets. Use ids and test data."
+        },
+        {
+          "id": "ticket-u3-l1-e3",
+          "type": "open",
+          "prompt": "Write a complete bug report from this description: 'A dispatcher says that when she cancels a shift and enters a cancellation reason, the reason is not saved. Later the report shows the reason blank. It happened on Monday for two shifts at one pharmacy. It works when she cancels from the shift detail page but not from the list view.' Invent minor details you need and mark them as assumed.",
+          "answer": "**Title:** Cancel from shift list view does not save cancellation reason\n\n**Environment:** Web app (version to confirm), Chrome (assumed), production, dispatcher role.\n\n**Steps:**\n1. Log in as a dispatcher.\n2. Open the shifts list view.\n3. Select an open shift and choose Cancel.\n4. Enter a cancellation reason (for example, 'Pharmacy closed') and confirm.\n5. Open the cancellation report, or the shift record.\n\n**Expected:** The cancellation reason is stored and shown on the shift and in reports.\n**Actual:** The shift is cancelled, but the reason is blank.\n\n**Frequency:** Reported twice on Monday, same pharmacy. Not seen when cancelling from the shift detail page.\n**Evidence:** Need shift ids from the reporter; screenshot of blank reason to be attached.\n**Impact:** Cancellation reasons are missing from reporting for affected shifts. Workaround: cancel from the detail page.\n\n**Open questions:** Does it happen for other pharmacies? Which build?",
+          "rubric": [
+            "Title names the area, symptom and condition (list view)",
+            "Steps are numbered and specific, starting from a known state",
+            "Expected and actual are separated",
+            "Records the difference between list view and detail page",
+            "Includes impact, workaround and open questions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u3-l2",
+      "title": "Rewriting bad tickets",
+      "minutes": 8,
+      "body": "The fastest way to learn ticket writing is to fix bad ones. Here are three before-and-after pairs from dispatch software. The 'before' versions are the kind you receive.\n\n**1. The vague complaint**\n\nBefore:\n\n```text\nTitle: Notifications not working\nBody: Pharmacists aren't getting notified. Please fix, this is urgent!!\n```\n\nProblems: no scope, no example, no environment, no way to reproduce, urgency without reason.\n\nAfter:\n\n```text\nTitle: No push notification when shift assigned after 6 PM Central (4 pharmacies)\nEnvironment: Production, mobile app 3.1 (iOS and Android), dispatcher web 2.3.1\nSteps: 1. As a dispatcher, assign shift 4830 to pharmacist P-2044 at 6:15 PM Central.\n       2. Check the pharmacist's phone for a notification.\nExpected: Push notification within 1 minute.\nActual: No notification; no entry in the notification log.\nFrequency: 6 of 6 attempts after 6 PM; assignments earlier in the day send normally.\nImpact: 2 emergency shifts at risk tomorrow. Workaround: phone call.\n```\n\n**2. The solution disguised as a bug**\n\nBefore: `Add a dropdown for cancellation reasons.`\n\nIt is a solution to an unstated problem. After: `Cancellation reasons are free text, so reports can't group them. Users need a consistent way to record why a shift was cancelled.` Now the team can decide whether a dropdown is the best answer. This is a story, covered in the next lessons.\n\n**3. The pile-up**\n\nBefore: `Times are wrong, the list is slow, and the email has a typo. Also can we have dark mode.`\n\nFour unrelated items in one ticket. After: four tickets, each with one problem, linked to the original message. One is a bug (times), one performance (list), one cosmetic (typo), one feature request (dark mode).\n\n**A rewrite checklist:**\n\n1. Can a stranger reproduce it from this alone?\n2. Is there exactly one problem?\n3. Does the title say where and what?\n4. Are expected and actual both stated?\n5. Is the impact clear, with a number if possible?\n6. Are guesses labeled as guesses?\n7. Is there a request that explains the urgency, rather than just 'ASAP'?\n\nWhen you rewrite a customer's ticket, keep their original text at the bottom as a quote. You are translating, not erasing their voice.",
+      "keyPoints": [
+        "Replace vague complaints with environment, steps, expected, actual and impact.",
+        "Turn 'add X' requests into the underlying problem before deciding on a solution.",
+        "Split multi-problem tickets into linked single-problem tickets.",
+        "Keep the customer's original words in the ticket."
+      ],
+      "interviewAngle": "Interviewers may hand you a bad ticket and ask you to improve it. Walk through the checklist aloud, then write the rewrite. Say that you turned customer messages into developer-ready tickets in your last role, and that you preserved the original message for traceability.",
+      "exercises": [
+        {
+          "id": "ticket-u3-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A ticket says: 'Times are wrong, the list is slow, and the email has a typo.' What should you do?",
+          "choices": [
+            "Keep it as one ticket and assign it to one developer",
+            "Split it into separate linked tickets, one problem each",
+            "Close it as invalid",
+            "Rewrite it into one sentence"
+          ],
+          "answer": 1,
+          "explanation": "Separate problems have different owners, severity and timelines, so each deserves its own ticket."
+        },
+        {
+          "id": "ticket-u3-l2-e2",
+          "type": "mcq",
+          "prompt": "A ticket reads: 'Add a dropdown for cancellation reasons.' What is the first thing to establish?",
+          "choices": [
+            "Which developer will build the dropdown",
+            "What problem the dropdown is meant to solve",
+            "The color of the dropdown",
+            "Whether the dropdown is a bug"
+          ],
+          "answer": 1,
+          "explanation": "Knowing the underlying problem lets the team choose the best solution, which may not be a dropdown."
+        },
+        {
+          "id": "ticket-u3-l2-e3",
+          "type": "open",
+          "prompt": "Rewrite this ticket: 'Title: Shifts disappear. Body: My pharmacist said she can't see her shift. Please fix NOW, we are losing money.' Produce a developer-ready version, and list the questions you would send back to the reporter for details you cannot invent.",
+          "answer": "**Title:** Pharmacist cannot see assigned shift on schedule (pharmacist and shift ids to confirm)\n\n**Environment:** To confirm: web or mobile, app version, pharmacist's time zone, production.\n\n**Steps (provisional):**\n1. Dispatcher assigns a shift to the pharmacist.\n2. Pharmacist opens their schedule for the shift date.\n\n**Expected:** The assigned shift appears at the correct local time.\n**Actual:** The shift is not shown to the pharmacist (reporter says).\n\n**Frequency:** Unknown. **Impact:** Pharmacist may miss the shift; the reporter says it is costing the business money. Workaround: tell the pharmacist by phone.\n\n**Questions for the reporter:**\n1. What is the shift id, date and time, and the pharmacist's name or id?\n2. Does the dispatcher see the shift as assigned to her?\n3. Is the pharmacist using the app or the web, and which time zone is she in?\n4. Is it one pharmacist or several, and when did it start?\n\nOriginal message kept below as a quote.",
+          "rubric": [
+            "Title names the area and symptom",
+            "Separates what is known from what must be confirmed",
+            "Does not invent facts",
+            "Lists targeted questions for the reporter",
+            "Keeps urgency tied to a concrete impact"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u3-l3",
+      "title": "Bugs versus feature requests",
+      "minutes": 7,
+      "body": "Customers say 'bug' for anything that bothers them. Sorting reports correctly matters because bugs and features follow different paths. Bugs are fixed against an existing standard. Features compete for a place in the backlog.\n\n**Simple test:** compare the behavior with what was agreed or documented.\n\n| Situation | Type |\n|---|---|\n| The product does not behave as designed or documented | Bug |\n| The product behaves as designed, but users want it different | Feature request or change request |\n| The product is working but unclear, so users misuse it | Documentation or usability issue |\n| A user does not know how to do something that exists | Support question |\n| Something worked before and stopped | Regression, a type of bug |\n\nExamples from dispatch software:\n\n- A filled shift reappears as open. Bug.\n- Dispatchers want to see shifts grouped by pharmacy chain. Feature request.\n- Pharmacists cannot find where to set their travel radius, though the setting exists. Support question, and a documentation or UI-improvement ticket.\n- The SOS alert goes to pharmacists 50 miles away although the setting is 20 miles. Bug.\n\nThe edge cases are where you use judgment. If the requirements never said what should happen, is the behavior a bug? A practical approach: if a reasonable user would call the behavior wrong and it harms their work, treat it as a bug, and write down the expected behavior as you propose it. Then confirm with the product owner.\n\n**How to respond to a feature request.** Do not say yes or no on the spot, and never promise a date. Say it has been recorded, ask what problem it would solve and how often it happens, and explain how requests are reviewed. Capture:\n\n1. The problem in the user's words.\n2. Who has it and how often.\n3. What they do today.\n4. How much it matters, for example time lost per week.\n\nThen it goes into the backlog for the product owner to weigh against other work. Group similar requests. Ten tickets asking for different versions of 'better filtering' are one theme.\n\nLabeling something a bug that is really a feature inflates your bug counts and lets customers expect it for free. Labeling a bug as a feature request makes it wait. Be honest in both directions.",
+      "keyPoints": [
+        "Compare behavior with what was designed or documented to decide bug versus feature.",
+        "A regression is something that worked before and stopped.",
+        "Do not promise feature requests; capture the problem, who has it and how often.",
+        "Group similar requests into themes for the product owner."
+      ],
+      "interviewAngle": "You owned the backlog and proposed and scoped the SOS alert feature, so you can talk about feature requests first-hand. Describe how you separated customer wants from bugs, captured the underlying problem, and let priority be decided with the team rather than promising anything yourself.",
+      "exercises": [
+        {
+          "id": "ticket-u3-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Dispatchers ask to group shifts by pharmacy chain. The product currently works as designed and has no grouping. What is this?",
+          "choices": ["A critical bug", "A feature request", "A regression", "A duplicate"],
+          "answer": 1,
+          "explanation": "The product behaves as designed, and users want new behavior. That is a feature request."
+        },
+        {
+          "id": "ticket-u3-l3-e2",
+          "type": "short",
+          "prompt": "What is the term for a bug where something that worked in an earlier version has stopped working?",
+          "accept": ["regression", "a regression"],
+          "answer": "Regression",
+          "explanation": "A regression is a previously working behavior that has been broken, often by a recent change."
+        },
+        {
+          "id": "ticket-u3-l3-e3",
+          "type": "open",
+          "prompt": "A customer writes: 'Your software is broken, I can't see only the shifts for my three pharmacies. I have to scroll through everyone's.' Decide whether this is a bug or a feature request, justify it, and write the customer reply and the ticket summary you would create.",
+          "answer": "**Decision:** Likely a feature request (or a permissions or filter question), not a bug, because I need to check whether the product is meant to filter by pharmacy. First I would check the documentation and whether a filter exists. If a pharmacy filter exists and is not working, it is a bug. If it does not exist, it is a feature request.\n\n**Reply:** Thanks for explaining. I'm checking whether there's a way to filter by your three pharmacies today. If there isn't, I'll record this as a request so the product team can review it. Could you tell me roughly how many shifts you scroll through and how often you do it? That helps us judge how much it matters.\n\n**Ticket (if no filter exists):** Feature request: filter shift list to selected pharmacies. Problem: managers of multiple pharmacies must scroll through all shifts. Who: pharmacy managers with several locations. Frequency: daily (to confirm). Current workaround: manual scrolling. Value: time saved per day (to confirm).",
+          "rubric": [
+            "Decides by comparing with intended behavior, not by the customer's word 'broken'",
+            "Checks whether a filter exists before concluding",
+            "Reply makes no promise or date",
+            "Captures problem, who, how often, and current workaround"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "id": "doc-u11",
+  "title": "Templates and a writing-sample workshop",
+  "summary": "Six reusable templates, then three portfolio pieces about the scheduling product, graded against checklists.",
+  "lessons": [
+    {
+      "id": "doc-u11-l1",
+      "title": "Six document templates you can reuse",
+      "minutes": 10,
+      "body": "A template removes blank-page time and makes every article predictable. Atlassian's knowledge base guidance offers how-to and troubleshooting templates for the same reason. Keep your own six, trimmed to what each reader needs. Fill in the angle-bracket parts.\n\n**1. How-to**\n\n```text\n<Verb> <thing>\nOne sentence: what this lets you do.\nBefore you start: <role, access, information>\n1. <One action.>\n2. <One action.> <Result the reader sees.>\nResult: <what is now true>\nIf something goes wrong: <link>\nRelated: <links>\n```\n\n**2. Troubleshooting**\n\n```text\n<Symptom in the user's words>\nApplies to: <role, version>\nQuick check: <the most common cause and fix>\nCauses and fixes:\n  Cause 1 -> steps. Cause 2 -> steps.\nStill not working? Contact support with: <details to include>.\n```\n\n**3. Reference**\n\n```text\n<Noun> reference\nApplies to version: <x>\n| Name | What it is | Values or range | Default | Notes |\nRelated how-tos: <links>\n```\n\n**4. Release notes**\n\n```text\nVersion <n> (<date>)\nNew / Improved / Fixed / Known issues / Action needed\nEach bullet: benefit first, one or two lines, link for more.\n```\n\n**5. Requirements (one page)**\n\n```text\nProblem and who has it\nGoal and how we will know (measure)\nScope: in / out\nUser stories with acceptance criteria (Given/When/Then)\nNon-functional needs (speed, privacy, reliability)\nOpen questions and owners\nGlossary\n```\n\n**6. SOP**\n\n```text\nPurpose / Owner / Applies to / Last reviewed\nRoles\nSteps (numbered, one action, who does it)\nExceptions and escalation\nRecords kept\n```\n\n**How to use a template**\n\n1. Copy it, never edit the original.\n2. Delete any heading you do not need; a short article is fine.\n3. Fill the **first line** and the **result** first. If you can't write them, you don't yet know what the article is for.\n4. Run the style checklist: verb-first title, active voice, one action per step, bold labels, descriptive links.\n\n**Store them** where writers will find them, in the knowledge base tool's template feature if it has one.\n\n**Templates are scaffolding, not a cage.** If the content does not fit, change the content, or choose a different document type.",
+      "keyPoints": [
+        "Six reusable templates: how-to, troubleshooting, reference, release notes, requirements, SOP.",
+        "Copy a template, delete unneeded headings, and fill the title line and the result first.",
+        "Run a style checklist before publishing.",
+        "Templates support consistency; they do not replace judgement about the reader."
+      ],
+      "interviewAngle": "Offer your templates as a portfolio piece: \"here are the six I use\". It shows you work from a system. State that you built them from the articles you wrote and from published templates, not that you inherited a team standard.",
+      "exercises": [
+        {
+          "id": "doc-u11-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which sections belong in a troubleshooting template?",
+          "choices": [
+            "Symptom title, quick check, causes with fixes, when to contact support",
+            "A glossary of unrelated terms",
+            "Roadmap and pricing",
+            "Company history and mission"
+          ],
+          "answer": 0,
+          "explanation": "It starts from what the reader sees and leads to a fix or an escalation."
+        },
+        {
+          "id": "doc-u11-l1-e2",
+          "type": "mcq",
+          "prompt": "Which template has columns for name, values or range, and default?",
+          "choices": [
+            "How-to",
+            "Release notes",
+            "Reference",
+            "SOP"
+          ],
+          "answer": 2,
+          "explanation": "Reference tables carry the facts to look up."
+        },
+        {
+          "id": "doc-u11-l1-e3",
+          "type": "short",
+          "prompt": "Which part of a how-to template says what is now true after the steps? (One word.)",
+          "accept": [
+            "result"
+          ],
+          "answer": "result",
+          "explanation": "State the outcome so the reader can confirm success."
+        },
+        {
+          "id": "doc-u11-l1-e4",
+          "type": "mcq",
+          "prompt": "What should you fill in first when using a template?",
+          "choices": [
+            "The footer",
+            "The title line and the result",
+            "The related links",
+            "The glossary"
+          ],
+          "answer": 1,
+          "explanation": "If you cannot write them, you don't yet know the article's purpose."
+        },
+        {
+          "id": "doc-u11-l1-e5",
+          "type": "open",
+          "prompt": "Fill in the how-to template for \"Send an emergency request\" in about 120 words. Invent plausible screen names and mark them as examples.",
+          "answer": "Send an emergency request\nUse this when a pharmacy needs a pharmacist urgently.\nBefore you start: you need the Dispatcher role and the pharmacy name.\n1. Open **Shifts** and select **New shift**.\n2. Choose the pharmacy and the start time.\n3. Select **Emergency**.\n4. Select **Send request**. The system alerts nearby pharmacists.\nResult: the shift appears in the open list with status Open and an Emergency tag.\nIf something goes wrong: see \"A pharmacist is not receiving alerts\".\nRelated: Shift statuses; Alert distance.\n(Screen names are examples; confirm against the product.)",
+          "rubric": [
+            "Verb-first title and one-line purpose",
+            "Before you start",
+            "Numbered one-action steps with bold labels",
+            "Result line",
+            "Links to troubleshooting and reference"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u11-l2",
+      "title": "Workshop: three portfolio pieces about the scheduling product",
+      "minutes": 12,
+      "body": "A portfolio piece answers \"show me what you can do.\" Make three short ones about the scheduling product, using fictional detail and no customer data. Together they show a procedure, a problem-solving page and communication to users.\n\n**Piece 1: a how-to article, \"Cancel a shift and record the reason\"**\n\nChecklist (self-grade each):\n\n- [ ] Verb-first title with the words users search.\n- [ ] One-sentence purpose.\n- [ ] \"Before you start\" with role and information.\n- [ ] 7 or fewer numbered steps, one action each, interface labels bold.\n- [ ] A branch for a shift that already has a pharmacist.\n- [ ] A result line.\n- [ ] A link to a troubleshooting article.\n\n**Piece 2: a troubleshooting article, \"A pharmacist is not receiving shift alerts\"**\n\n- [ ] Title is the symptom in the user's words.\n- [ ] A quick check first (the most common cause).\n- [ ] Three to five causes in the order of likelihood, each with a fix.\n- [ ] Plain words; no blame.\n- [ ] A last section: what to send to support (pharmacist name, shift number, time).\n\n**Piece 3: release notes for version 2.4**\n\nUse the tickets: add SOS request button; cancel dialog requires a reason; fix reminders an hour late in one region; internal refactor of the alert queue.\n\n- [ ] Four categories in a fixed order.\n- [ ] Benefit-first wording; fix described by symptom.\n- [ ] Internal ticket left out.\n- [ ] Action needed line for dispatchers.\n- [ ] No ticket codes.\n\n**Process for each**\n\n1. Write the title and result first.\n2. Draft fast, then run the clarity checks from the drills: active voice, filler, pronouns, parallel steps.\n3. Ask someone to follow the how-to cold and note where they stall.\n4. Fix, re-read headings only, and cut 10 percent.\n5. Save as PDF or Markdown with a short note: audience, goal, what you would measure.\n\n**Present them**\n\nAdd a one-line caption to each: who it is for and what result you would look for (\"fewer 'how do I cancel' tickets\"). Keep it to one page each. Remove anything real or confidential.\n\n**What to say about them in an interview**\n\n\"These are fictional, based on the product I supported. I wrote them to show how I structure a procedure, a troubleshooting page and user-facing release notes.\"",
+      "keyPoints": [
+        "Three pieces: a how-to, a troubleshooting article and release notes, all fictional and about the same product.",
+        "Grade each against a checklist, then test the how-to on someone new.",
+        "Add a caption stating audience, goal and what you would measure.",
+        "Remove customer data; say plainly that they are samples."
+      ],
+      "interviewAngle": "Bring the three pieces to interviews for support, BA, product and implementation roles. Say they are fictional samples that show your method, based on real work you did on the knowledge base.",
+      "exercises": [
+        {
+          "id": "doc-u11-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is a sound way to test your how-to before showing it?",
+          "choices": [
+            "Run a spelling check only",
+            "Read it twice yourself",
+            "Add more screenshots",
+            "Ask someone new to the product to follow it cold and note where they stall"
+          ],
+          "answer": 3,
+          "explanation": "Hesitation points reveal unclear steps."
+        },
+        {
+          "id": "doc-u11-l2-e2",
+          "type": "mcq",
+          "prompt": "What should the three portfolio pieces avoid?",
+          "choices": [
+            "A clear title",
+            "A caption",
+            "A result line",
+            "Real customer data or confidential details"
+          ],
+          "answer": 3,
+          "explanation": "Use fictional detail."
+        },
+        {
+          "id": "doc-u11-l2-e3",
+          "type": "short",
+          "prompt": "What line should each portfolio piece have saying who it is for and what result you would look for? (One word.)",
+          "accept": [
+            "caption"
+          ],
+          "answer": "caption",
+          "explanation": "A caption frames the piece for the reader."
+        },
+        {
+          "id": "doc-u11-l2-e4",
+          "type": "mcq",
+          "prompt": "Which belongs in the release-notes piece?",
+          "choices": [
+            "Benefit-first bullets and an Action needed line",
+            "Every internal ticket code",
+            "A list of all developers",
+            "Root-cause code details"
+          ],
+          "answer": 0,
+          "explanation": "User-facing notes lead with benefit and say who must act."
+        },
+        {
+          "id": "doc-u11-l2-e5",
+          "type": "open",
+          "prompt": "Pick one of the three pieces and write the caption (audience, goal, measure) and the self-grade: which three checklist items you are most likely to miss and how you will check them.",
+          "answer": "Piece 2, troubleshooting. Caption: For dispatchers whose pharmacists say they got no alert; goal: fix it without a ticket; measure: tickets tagged 'alerts' and searches for 'not receiving alerts'. Likely misses: (1) causes in order of likelihood, so I'll check against the ticket categories; (2) plain words with no blame, which I'll check by reading each sentence aloud as the dispatcher; (3) the 'what to send to support' list, which I'll check by asking a colleague whether they could act on it.",
+          "rubric": [
+            "Caption has audience, goal and measure",
+            "Three realistic checklist risks",
+            "A concrete check for each"
+          ]
+        }
+      ]
+    }
+  ]
+}

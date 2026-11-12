@@ -1,0 +1,171 @@
+{
+  "id": "power-bi-u2",
+  "title": "Data modelling",
+  "summary": "Organise tables as a star schema, connect them with relationships, and add a proper date table.",
+  "lessons": [
+    {
+      "id": "power-bi-u2-l1",
+      "title": "Fact and dimension tables: the star schema",
+      "minutes": 9,
+      "body": "A flat spreadsheet repeats information on every row: the pharmacy name, region and address next to each shift. That is fine for 50 rows and a headache for 500,000. Power BI works best with a **star schema**: a central **fact** table surrounded by **dimension** tables.\n\n- A **fact table** records events or measurements, one row per event. It holds keys pointing to dimensions, plus numbers to count or add up.\n- A **dimension table** describes things you group or filter by: who, what, where, when. It has one row per thing and a unique key.\n\nFor the scheduling data:\n\n**Fact: `Shifts`** (one row per shift request)\n\n| shift_id | pharmacy_id | pharmacist_id | request_date | status | cancel_reason | minutes_to_fill |\n|---|---|---|---|---|---|---|\n| 1 | 101 | 11 | 2026-03-03 | Filled | | 45 |\n| 2 | 101 | | 2026-03-03 | Cancelled | No pharmacist | |\n| 3 | 102 | 12 | 2026-03-04 | Filled | | 90 |\n\n**Dimension: `Pharmacies`**\n\n| pharmacy_id | pharmacy_name | region |\n|---|---|---|\n| 101 | Eastside | East |\n| 102 | Harbor | South |\n\nOther dimensions are `Pharmacists` (pharmacist_id, name, home_state) and `Dates` (one row per calendar day). Drawn as a picture, `Shifts` sits in the middle and each dimension connects to it like the points of a star.\n\n**Grain.** Decide what one row of the fact table means before you build anything. Here: one row per shift request. If a different table were one row per assignment, it would have a different grain. Mixing grains in one table causes double counting.\n\n**Why it helps**\n\n- A region name is stored once, so correcting it is one change.\n- Slicers on dimension fields filter the fact table cleanly.\n- DAX measures stay simple, and reports are faster than on a wide flat table.\n- Adding a new view, say by pharmacist, only needs a relationship.\n\n**Rule of thumb.** Put numbers and event details in facts, descriptive text in dimensions. Descriptive fields repeated in the fact table (pharmacy name, region) usually belong in a dimension. This is the same normalisation instinct you use when writing SQL joins, applied for reporting rather than for a transactional database. You do not need to design databases for this; you just need to shape data so reports are correct.",
+      "keyPoints": [
+        "A star schema has a central fact table and surrounding dimension tables.",
+        "Facts: one row per event, with keys and numbers. Dimensions: one row per thing, with descriptive fields.",
+        "Decide the grain, what one fact row means, before building.",
+        "Moving descriptive text into dimensions keeps data consistent and measures simple.",
+        "This resembles the joins you write in SQL, shaped for reporting."
+      ],
+      "interviewAngle": "\"What is a star schema?\" is the classic modelling question for Power BI. Use your scheduling data: shifts as the fact, pharmacies, pharmacists and dates as dimensions. Be careful to describe this as the way you would shape reporting data. Do not suggest you have designed or administered production databases.",
+      "exercises": [
+        {
+          "id": "power-bi-u2-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In a scheduling model, which table is the fact table?",
+          "choices": [
+            "Pharmacies (one row per pharmacy)",
+            "Shifts (one row per shift request)",
+            "Dates (one row per day)",
+            "Pharmacists (one row per pharmacist)"
+          ],
+          "answer": 1,
+          "explanation": "Shifts records events that happen repeatedly and carries keys to the other tables. The rest describe things and are dimensions."
+        },
+        {
+          "id": "power-bi-u2-l1-e2",
+          "type": "short",
+          "prompt": "What word describes what a single row of a fact table represents, such as one row per shift request?",
+          "accept": [
+            "grain"
+          ],
+          "answer": "grain",
+          "explanation": "The grain is the level of detail of a fact table row."
+        },
+        {
+          "id": "power-bi-u2-l1-e3",
+          "type": "open",
+          "prompt": "You receive one flat table with columns shift_id, pharmacy_name, region, pharmacist_name, request_date, status, minutes_to_fill. Sketch a star schema for it: name the fact table and its grain, the dimension tables, and the key columns.",
+          "answer": "Fact table `Shifts` with the grain of one row per shift request: shift_id, pharmacy_id, pharmacist_id, request_date, status, minutes_to_fill. Dimension `Pharmacies` (pharmacy_id as key, pharmacy_name, region). Dimension `Pharmacists` (pharmacist_id as key, pharmacist_name). Dimension `Dates` (date as key, year, month and so on). Relationships go from each dimension key to the matching column in Shifts.",
+          "rubric": [
+            "Identifies Shifts as the fact table with a stated grain",
+            "Creates Pharmacies and Pharmacists dimensions with unique keys",
+            "Includes a Dates dimension",
+            "Moves descriptive text (names, region) out of the fact table"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u2-l2",
+      "title": "Relationships",
+      "minutes": 8,
+      "body": "A **relationship** tells Power BI how two tables connect, so a filter on one table affects the other. It replaces the `JOIN ... ON` you would write in SQL, and it is created once rather than in every query.\n\nOpen **Model view**. Each table is a box; drag `pharmacy_id` from `Pharmacies` onto `pharmacy_id` in `Shifts`, or use Manage Relationships. Power BI often detects matching names automatically.\n\n**Cardinality.** For a dimension and a fact, the relationship is **one-to-many** (1:*): one pharmacy has many shifts. The \"one\" side must have unique values in the key column. Many-to-many relationships exist but cause confusion; avoid them while learning.\n\n**Cross-filter direction.** Filters flow from the one side (dimension) to the many side (fact). Selecting \"Harbor\" in a slicer on `Pharmacies` filters `Shifts` to Harbor rows. The default is single direction, which is what you want most of the time. Bi-directional filtering exists but can create ambiguity and slow reports, so use it only with a reason.\n\n**Why that matters for the numbers.**\n\n| pharmacy_name (from Pharmacies) | Shifts (count from fact) |\n|---|---|\n| Eastside | 2 |\n| Harbor | 3 |\n| Lakeview | 1 |\n\nBecause the pharmacy name comes from the dimension, the relationship filters the fact table's rows, and `COUNTROWS(Shifts)` returns the right figure per pharmacy.\n\n**Active and inactive.** Between two tables only one relationship can be active at a time. A shift has a request date and may also have a filled date. Both can link to `Dates`, but one stays inactive (a dashed line) and is used on demand by a measure with `USERELATIONSHIP`, a DAX function you can learn later. A common starting point is to relate on request date and mention the choice in notes.\n\n**Check your relationships**\n\n- Key columns should have the same data type on both sides.\n- Nulls or unmatched keys in the fact table show up as a blank row in the dimension. A blank pharmacy in a visual means shifts exist whose pharmacy_id is not in `Pharmacies`.\n- A relationship line shows `1` and `*` at the ends. If it shows `*` at both, you have a many-to-many link to fix.\n\nWhen a visual shows the same total for every row, the usual cause is a missing or wrong relationship. Check Model view first.",
+      "keyPoints": [
+        "A relationship replaces a SQL JOIN and is set once in Model view.",
+        "Dimension to fact is one-to-many; the one side must be unique.",
+        "Filters flow from the dimension (one) to the fact (many) in single direction.",
+        "Only one relationship between two tables can be active; others are used on demand.",
+        "Same total on every row usually means a missing relationship."
+      ],
+      "interviewAngle": "Link relationships to joins: \"it is like defining the join once for the whole model, and filters flow from the dimension to the fact\". Be ready to say what one-to-many means and why single-direction filtering is the safe default. As a beginner, saying you avoid many-to-many and bi-directional links until you need them is honest and sensible.",
+      "exercises": [
+        {
+          "id": "power-bi-u2-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You pick Harbor in a slicer built from the Pharmacies table, and the Shifts table is filtered to Harbor rows. Which relationship setup makes this work?",
+          "choices": [
+            "One-to-many from Pharmacies (one) to Shifts (many), single direction",
+            "One-to-many from Shifts (one) to Pharmacies (many), single direction",
+            "No relationship is needed; Power BI matches names",
+            "Many-to-many in both directions"
+          ],
+          "answer": 0,
+          "explanation": "Filters flow from the one side (dimension) to the many side (fact). Pharmacies has a unique pharmacy_id, Shifts has many rows per pharmacy."
+        },
+        {
+          "id": "power-bi-u2-l2-e2",
+          "type": "short",
+          "prompt": "What cardinality describes a relationship between the Pharmacies dimension and the Shifts fact table? (For example, one-to-one or many-to-many.)",
+          "accept": [
+            "one-to-many",
+            "one to many",
+            "1:*",
+            "one-to-many (1:*)",
+            "1-to-many",
+            "1 to many"
+          ],
+          "answer": "one-to-many",
+          "explanation": "One pharmacy row relates to many shift rows."
+        },
+        {
+          "id": "power-bi-u2-l2-e3",
+          "type": "open",
+          "prompt": "A matrix of pharmacy_name and count of shifts shows 6 for every pharmacy. What is the most likely cause and how would you check and fix it?",
+          "answer": "The Pharmacies and Shifts tables are probably not related, so the pharmacy filter does not reach the fact table and every row shows the full count of 6. Open Model view, check whether there is a relationship from Pharmacies[pharmacy_id] to Shifts[pharmacy_id], and create it as one-to-many with single-direction filtering. Also check the key columns have the same data type, and that the pharmacy names in the matrix come from the Pharmacies table.",
+          "rubric": [
+            "Identifies a missing or wrong relationship",
+            "Checks Model view",
+            "Creates a one-to-many relationship from the dimension key to the fact key",
+            "Mentions matching data types or using the dimension field"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u2-l3",
+      "title": "The date table",
+      "minutes": 8,
+      "body": "Almost every report slices by time. A dedicated **date table** gives you correct months, years and quarters, and it is required for DAX time intelligence (next unit).\n\nThe date table must:\n\n- have **one row per day**, with no gaps, from before your first date to after your last;\n- have a column of type Date with **unique** values;\n- be related to the fact table on a date column.\n\nShift timestamps include a time, such as `2026-03-03 08:00`. A relationship on a date and time would never match a date-only key, so in Power Query add a column that keeps only the **date** of `requested_at` (Add Column > Date > Date Only) and relate on that.\n\n**Creating it with DAX.** On the Modeling tab choose New Table and enter:\n\n```text\nDates =\nADDCOLUMNS(\n    CALENDAR(DATE(2025, 1, 1), DATE(2026, 12, 31)),\n    \"Year\", YEAR([Date]),\n    \"MonthNum\", MONTH([Date]),\n    \"Month\", FORMAT([Date], \"MMM\")\n)\n```\n\n`CALENDAR(start, end)` returns one row per day in a column named Date. `ADDCOLUMNS` adds the year, month number and month name beside it. A shorter option is `CALENDARAUTO()`, which spans the dates found in your model, but a fixed range is more predictable.\n\nThe result starts like this:\n\n| Date | Year | MonthNum | Month |\n|---|---|---|---|\n| 2025-01-01 | 2025 | 1 | Jan |\n| 2025-01-02 | 2025 | 1 | Jan |\n| 2025-01-03 | 2025 | 1 | Jan |\n\n**Three finishing steps**\n\n1. **Sort Month by MonthNum.** Text months sort alphabetically (Apr, Aug, Dec) unless you select the `Month` column, choose Column tools > Sort by column, and pick `MonthNum`.\n2. **Mark as date table.** Right-click the table, choose Mark as date table, and select the Date column. This tells DAX which table to use for time functions.\n3. **Create the relationship.** `Dates[Date]` (one) to `Shifts[request_date]` (many).\n\nThen use fields from `Dates`, not the date field in `Shifts`, on axes and slicers. Power BI has an automatic date hierarchy for every date column, but it creates hidden tables for each one and hides the logic. Many modellers switch off Auto date/time in options and use one explicit table instead.\n\nIf a month chart shows the wrong order or gaps, check the sort-by column and whether the date table covers the full range.",
+      "keyPoints": [
+        "A date table has one row per day, unique dates and no gaps.",
+        "Relate on a date-only column, not a timestamp.",
+        "CALENDAR plus ADDCOLUMNS builds a date table in DAX.",
+        "Sort Month by MonthNum and Mark as date table.",
+        "Use the date table's fields on axes and slicers."
+      ],
+      "interviewAngle": "Mention that a separate date table is standard practice and necessary for time intelligence. If the interviewer asks how you built it, you can describe CALENDAR and the sort-by-column fix. As a learner, say you followed the standard pattern in your practice project rather than implying lots of production experience.",
+      "exercises": [
+        {
+          "id": "power-bi-u2-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why create a separate date table instead of using the date column in the Shifts table?",
+          "choices": [
+            "To make the file smaller; it is never needed for anything else",
+            "It gives one row per day with year and month columns and enables time intelligence functions",
+            "Because Power BI cannot read date columns in fact tables",
+            "To store the shift status by date"
+          ],
+          "answer": 1,
+          "explanation": "A complete, unique, gap-free date table with calendar attributes is required for DAX time intelligence and consistent month and year slicing."
+        },
+        {
+          "id": "power-bi-u2-l3-e2",
+          "type": "short",
+          "prompt": "Which DAX function generates a table with one row for every date between a start and end date?",
+          "accept": [
+            "calendar",
+            "calendar()",
+            "calendarauto",
+            "calendarauto()"
+          ],
+          "answer": "CALENDAR",
+          "explanation": "CALENDAR(start, end) creates the list of dates; CALENDARAUTO picks the range from your data."
+        },
+        {
+          "id": "power-bi-u2-l3-e3",
+          "type": "open",
+          "prompt": "Describe how you would add a proper date table to the shifts model, from creating it to connecting it, and say what you do so months appear in calendar order (Jan, Feb, Mar) instead of alphabetical order.",
+          "answer": "Create a calculated table with DAX, for example Dates = ADDCOLUMNS(CALENDAR(DATE(2025,1,1), DATE(2026,12,31)), \"Year\", YEAR([Date]), \"MonthNum\", MONTH([Date]), \"Month\", FORMAT([Date], \"MMM\")). Make sure Shifts has a date-only column (request_date). Mark Dates as a date table using the Date column, and relate Dates[Date] (one) to Shifts[request_date] (many). Select the Month column and set Sort by column to MonthNum so months appear in calendar order.",
+          "rubric": [
+            "Builds the table with CALENDAR (or CALENDARAUTO) and calendar columns",
+            "Relates date table to the fact's date-only column as one-to-many",
+            "Marks it as a date table",
+            "Sorts Month by MonthNum"
+          ]
+        }
+      ]
+    }
+  ]
+}

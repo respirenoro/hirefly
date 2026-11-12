@@ -1,0 +1,140 @@
+{
+  "id": "sql-u6",
+  "title": "In the interview",
+  "summary": "Explain queries aloud, work through a live SQL test calmly, recognise the common question types, and describe your self-taught SQL honestly.",
+  "lessons": [
+    {
+      "id": "sql-u6-l1",
+      "title": "Explaining queries aloud and surviving a live SQL test",
+      "minutes": 10,
+      "body": "A live SQL test is mostly a communication test. The interviewer wants to see how you think, so silence hurts more than a small syntax slip. Use the same five steps every time.\n\n1. Restate and clarify. Say what one row of the result should be, and ask about definitions. 'Fill rate: shifts with a fill time divided by all requested shifts?' Ask about NULLs and which database dialect they use.\n2. Name the tables and how they connect. 'Shifts holds the data. I only need shifts, so no join.'\n3. Build in layers. Write the FROM and WHERE first, then GROUP BY, then calculated columns. Say what each layer does.\n4. Narrate as you type, briefly. Explain choices, not every keyword.\n5. Check. Compare the result to a few rows by hand, think about NULLs, and confirm the row count makes sense.\n\nTake this task: show the fill rate for each pharmacy, but only pharmacies with at least 3 requested shifts.\n\n```sql\nSELECT pharmacy_id,\n       COUNT(*) AS requested,\n       ROUND(100.0 * COUNT(filled_at) / COUNT(*), 1) AS fill_rate_pct\nFROM shifts\nGROUP BY pharmacy_id\nHAVING COUNT(*) >= 3\nORDER BY pharmacy_id;\n```\n\nOn the sample data it returns two rows: pharmacy 1 with 3 requested and 66.7, and pharmacy 2 with 3 requested and 66.7. Pharmacy 3 has only 2 shifts and is filtered out.\n\nA spoken explanation might be: 'Each row in the result is a pharmacy. I group the shifts by pharmacy and count them. Fill rate is shifts that have a fill time over all shifts, so I count the filled_at column, which skips NULLs, and divide by the row count. I multiply by 100.0 so it is not integer division. The at-least-3 rule applies after grouping, so it goes in HAVING, not WHERE. Last, I would sanity-check pharmacy 1 by hand: 2 of its 3 shifts are filled, which is 66.7.'\n\nTraps that live tests set on purpose: NULL comparisons, integer division, HAVING versus WHERE, a join that duplicates rows, and an INNER JOIN that silently drops unmatched rows. Name the trap out loud when you avoid it.\n\nIf you get stuck, keep talking. Say what you want the query to do, write the part you are sure of, and use plain words for the rest: 'I would extract the month here; in T-SQL I think it is DATEFROMPARTS, and I would confirm the exact syntax.' Asking whether you may look up a function is normal. Fix errors calmly and say what you changed. Accuracy and clear thinking beat speed.\n\nIf you can, practise in the real format: type queries on a shared screen or plain editor, with no autocomplete.",
+      "keyPoints": [
+        "Restate the question, define the row and the metric, and ask about NULLs and dialect.",
+        "Build the query in layers and narrate your choices.",
+        "Check the result by hand against a few rows.",
+        "Name the trap you are avoiding: NULL, integer division, WHERE versus HAVING, join duplication.",
+        "If stuck, say what you want and keep going; do not go silent."
+      ],
+      "interviewAngle": "Practise saying queries aloud, not just writing them. A calm 'here is what I would do, and here is what I would double-check' reads as reliable. If you hit a syntax gap, say so plainly: 'I know the logic; I would check the exact function.' That is honest for a self-taught person and still shows competence.",
+      "exercises": [
+        {
+          "id": "sql-u6-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You are given a live SQL question. What is the best first move?",
+          "choices": [
+            "Start typing immediately to save time.",
+            "Stay silent until you have the full query.",
+            "Restate the question, say what one row of the result is, and clarify definitions and NULL handling.",
+            "Ask the interviewer to write the query for you."
+          ],
+          "answer": 2,
+          "explanation": "Clarifying the grain and the metric definition prevents the most common mistakes and shows how you think. Talking through your plan is also what the interviewer is assessing."
+        },
+        {
+          "id": "sql-u6-l1-e2",
+          "type": "short",
+          "prompt": "In the lesson's fill-rate-by-pharmacy query with `HAVING COUNT(*) >= 3`, how many rows come back on the sample data? Answer with a number.",
+          "accept": [
+            "2",
+            "two"
+          ],
+          "answer": "2",
+          "explanation": "Pharmacies 1 and 2 each have 3 shifts. Pharmacy 3 has only 2, so HAVING removes it."
+        },
+        {
+          "id": "sql-u6-l1-e3",
+          "type": "mcq",
+          "prompt": "Partway through a live test you cannot remember the exact function for the first day of the month. What is the best response?",
+          "choices": [
+            "Stop and say nothing until you remember it.",
+            "Say what you need ('truncate the date to the month'), write the rest of the query, and note you would confirm the exact function.",
+            "Give up on the question.",
+            "Pretend you remember it and guess silently."
+          ],
+          "answer": 1,
+          "explanation": "Interviewers know people look up syntax. Stating the intent and keeping moving shows your reasoning, and being open about the gap is honest."
+        },
+        {
+          "id": "sql-u6-l1-e4",
+          "type": "open",
+          "prompt": "Write what you would say aloud (6 to 8 sentences) while explaining this query, covering what one row is, the calculation, the clause choices and a check:\n\n```sql\nSELECT pharmacy_id,\n       ROUND(100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)\n             / COUNT(*), 1) AS cancel_rate_pct\nFROM shifts\nGROUP BY pharmacy_id;\n```",
+          "answer": "Each row in the result is one pharmacy, so I group the shifts by pharmacy_id. The cancellation rate is cancelled shifts divided by all shifts for that pharmacy. To count the cancelled ones, I use a CASE expression that gives each cancelled row a 1 and every other row a 0, then SUM those. I divide by COUNT(*), which is all of the pharmacy's shifts. I multiply by 100.0 rather than 100 so it is decimal division and not integer division, which would round to zero. ROUND to one decimal makes it readable. There is no filter on status in WHERE, because the other statuses are needed for the denominator. To check it, I would take pharmacy 2: it has 3 shifts and 2 are cancelled, so I expect 66.7.",
+          "rubric": [
+            "States that each result row is one pharmacy and the data is grouped by pharmacy_id",
+            "Explains the numerator (CASE with SUM) and the denominator (COUNT(*))",
+            "Mentions 100.0 to avoid integer division",
+            "Explains why status is not filtered in WHERE, and gives a concrete check such as pharmacy 2 at 66.7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sql-u6-l2",
+      "title": "Common question types and honest wording",
+      "minutes": 10,
+      "body": "Most SQL interview questions for analyst, QA and operations roles fall into a few types. Know the shape of each.\n\n| Type | Example | Skills tested |\n|---|---|---|\n| Write from a description | Cancellation rate by pharmacy | WHERE, GROUP BY, rates |\n| Read and predict | What does this query return? | NULLs, joins, HAVING |\n| Find the bug | Total is too high after a join | Join keys, fan-out |\n| Unmatched rows | Pharmacies with no shifts | LEFT JOIN, anti-join |\n| Latest or top row per group | Most recent shift per pharmacy | ROW_NUMBER |\n| Concept questions | WHERE vs HAVING; INNER vs LEFT | Vocabulary with examples |\n\nHere is a top-N-per-group variation. Find each pharmacy's second most recent shift:\n\n```sql\nWITH ranked AS (\n  SELECT id, pharmacy_id,\n         ROW_NUMBER() OVER (PARTITION BY pharmacy_id\n                            ORDER BY requested_at DESC) AS rn\n  FROM shifts\n)\nSELECT id, pharmacy_id\nFROM ranked\nWHERE rn = 2\nORDER BY pharmacy_id;\n```\n\nThe result is shift 102 for pharmacy 1 (after 107), shift 104 for pharmacy 2 (after 108) and shift 105 for pharmacy 3 (after 106). Change the number and you change the rank; that is the whole trick.\n\nThe Interview problem set unit gives you 16 graded problems of these types to practise against the practice data.\n\nConcept questions deserve one-sentence answers with an example. 'WHERE filters rows before grouping; HAVING filters groups after.' 'An INNER JOIN keeps only matches; a LEFT JOIN keeps every left row and fills NULL where there is no match.' 'COUNT(*) counts rows; COUNT(column) skips NULLs.'\n\nPractical tests and take-homes for QA, BA and operations roles are usually a small dataset, often a few tables or a spreadsheet, plus questions such as: how many records meet a condition, what is a rate by group, which records are missing or duplicated, and does this report total match the data. Expect to explain the answer in writing. State assumptions, show the query, show the result, and note anything odd in the data. That is the same habit as writing up a bug.\n\nNow the honest wording. You are self-taught at retrieval and reporting. That is a real, useful skill, and it does not need decoration.\n\n| Say | Do not say |\n|---|---|\n| 'I taught myself SQL and used it for retrieval and reporting.' | 'I am an SQL expert.' |\n| 'I can write joins, grouping, date logic and CTEs, and I am building my window function skills.' | 'I have advanced analytics experience.' |\n| 'I have not designed or administered databases.' | 'I designed our database schema.' |\n| 'I am not certified; here is how I use it.' | Anything implying a SQL certification. |\n\nIf you do not know something, say 'I have not used that, but here is how I would approach it.' Interviewers value an accurate self-assessment over a bluff, and a bluff is easy to expose with one follow-up question.",
+      "keyPoints": [
+        "Common types: write from description, read and predict, find the bug, unmatched rows, top row per group, concepts.",
+        "Second-latest per group is the same ROW_NUMBER pattern with rn = 2.",
+        "Give one-sentence concept answers with a small example.",
+        "Take-homes reward stated assumptions, shown queries and noticed oddities.",
+        "Claim retrieval and reporting, self-taught; never database design, administration or certification."
+      ],
+      "interviewAngle": "The how-would-you-rate-your-SQL question is nearly guaranteed. A solid answer names what you did (retrieval and reporting of shift fill rate, time to fill, cancellations and assignments), says you are self-taught, and says what you have not done (design or administration). Then offer to demonstrate. That is accurate, and it stands up to follow-up questions.",
+      "exercises": [
+        {
+          "id": "sql-u6-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "An interviewer asks how you would rate your SQL. Which answer is accurate and safe for your background?",
+          "choices": [
+            "Expert. I have designed and administered production databases.",
+            "Advanced. I hold a SQL certification.",
+            "Intermediate for retrieval and reporting, self-taught: joins, grouping, dates and CTEs. I have not designed or administered databases.",
+            "Beginner. I only know SELECT."
+          ],
+          "answer": 2,
+          "explanation": "It matches your real level, names real strengths and states the limits. Overclaiming invites a follow-up you cannot answer, and underselling hides what you can do."
+        },
+        {
+          "id": "sql-u6-l2-e2",
+          "type": "short",
+          "prompt": "Which window function numbers rows 1, 2, 3 within each group, used for latest-row-per-group questions? Answer with the function name.",
+          "accept": [
+            "row_number",
+            "row_number()",
+            "row number"
+          ],
+          "answer": "ROW_NUMBER",
+          "explanation": "ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...) numbers rows within each partition; filtering on 1 gives the latest, and 2 gives the second latest."
+        },
+        {
+          "id": "sql-u6-l2-e3",
+          "type": "mcq",
+          "prompt": "Using the lesson's second-most-recent query (`rn = 2`, newest first), which shift id is returned for pharmacy 3? Pharmacy 3 has shifts 105 (requested 2026-04-01) and 106 (requested 2026-04-04).",
+          "choices": [
+            "106",
+            "105",
+            "104",
+            "No row, because pharmacy 3 has only one shift"
+          ],
+          "answer": 1,
+          "explanation": "Newest first, 106 is row number 1 and 105 is row number 2. Pharmacy 3 has two shifts, so a row with rn = 2 exists."
+        },
+        {
+          "id": "sql-u6-l2-e4",
+          "type": "open",
+          "prompt": "Draft a spoken answer of 60 to 90 words to 'How would you rate your SQL, and what have you used it for?' Use your real background: SQL for retrieval and reporting of shift fill rate, average time to fill, cancellation rates and reasons, and assignments completed per month. Be honest about being self-taught and about what you have not done.",
+          "answer": "I would call it intermediate for retrieval and reporting, and I am self-taught. In my last role I used SQL to pull shift fill rate, average time to fill, cancellation rates by reason and assignments completed per month. That means filtering, grouping, joins, date logic, and being careful with NULLs and rates. I use CTEs and I am building my window function skills. I have not designed or administered databases, so I would not claim that. If you like, I can talk through a query now and explain how I would check the result.",
+          "rubric": [
+            "Gives an honest level (intermediate, retrieval and reporting) and says self-taught",
+            "Names at least two of the real metrics: fill rate, time to fill, cancellation rates and reasons, assignments per month",
+            "States a limit, such as no database design or administration and no certification",
+            "Stays within roughly 60 to 90 words, in first person and spoken style"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "id": "doc-u4",
+  "title": "Process documentation",
+  "summary": "SOPs, workflows described in text, decision records, meeting notes that produce action and release notes written for users.",
+  "lessons": [
+    {
+      "id": "doc-u4-l1",
+      "title": "SOPs, workflows in text and decision records",
+      "minutes": 9,
+      "body": "**SOPs: the same way every time**\n\nA standard operating procedure describes how staff do a process consistently. It suits work where errors cost something or where several people do the same job. Keep the structure fixed:\n\n```text\nSOP: Handle an urgent shift request outside business hours\nOwner: Support lead          Version: 1.2          Reviewed: 2026-09-01\n\nPurpose\nMake sure urgent requests are acknowledged within 15 minutes.\n\nApplies to\nSupport agents on the after-hours rota.\n\nSteps\n1. Confirm the request has the pharmacy name, start time and contact number.\n   If anything is missing, reply to the requester and ask.\n2. Create the shift in the system and mark it Emergency.\n3. Check the alert was sent. If not, see the runbook \"Alerts not sending\".\n4. Reply to the requester with the shift ID.\n5. If no pharmacist has accepted after 30 minutes, escalate to the on-call coordinator.\n\nRecords\nLog the case with the shift ID.\n```\n\nThe 15 and 30 minute figures are examples; real values come from the business.\n\nAn SOP names an owner, a version and a review date. A procedure with no owner is out of date within months.\n\n**Describing workflows in text**\n\nA diagram is useful, but you should be able to describe the flow in words so it can be reviewed, versioned and read by a screen reader. Use numbered steps with decision points spelled out:\n\n```text\n1. Coordinator submits a shift request.\n2. System checks availability.\n   - If pharmacists are available: alert them (go to 3).\n   - If none: show \"No pharmacists found\" and offer to widen the distance (go to 5).\n3. A pharmacist accepts.\n4. System assigns them and notifies the coordinator. End.\n5. Coordinator widens the distance or calls the pharmacy. End.\n```\n\nWriting it this way exposes gaps (\"what if two accept at once?\") before anyone builds anything. Draw the diagram afterwards if it helps.\n\n**Decision records**\n\nTeams forget why they decided things. A short decision record keeps the reasoning:\n\n```text\nDecision: Alerts go to pharmacists within a set distance, not a list we choose by hand.\nDate: 2026-03-10\nContext: Manual selection was slow and relied on memory.\nOptions: (A) manual list, (B) distance-based, (C) all pharmacists.\nDecision: B, because it is faster than A and avoids alerting everyone (C).\nConsequences: Distance needs a sensible default and an override.\nDecided by: Product owner, with the customer's operations lead.\n```\n\nContext, options, choice, reason, consequences. Six months later this answers \"why does it work like that?\" without a meeting.",
+      "keyPoints": [
+        "An SOP has purpose, scope, numbered steps, owner, version and review date.",
+        "Describe workflows in text with decision points before drawing them.",
+        "Decision records capture context, options, choice, reason and consequences.",
+        "Documents without owners go stale."
+      ],
+      "interviewAngle": "You do not need to claim formal SOP writing. You can talk about documenting how the team handled releases and requests, writing test cases and release steps, and recording decisions in tickets and sprint notes. If asked for an SOP in a test, give it a purpose, steps, and an owner/review date, and ask about unknowns.",
+      "exercises": [
+        {
+          "id": "doc-u4-l1-e1",
+          "type": "mcq",
+          "prompt": "Which element is most important to stop an SOP going stale?",
+          "choices": [
+            "A long introduction",
+            "A named owner and a review date",
+            "Screenshots on every step",
+            "A formal font"
+          ],
+          "answer": 1,
+          "explanation": "Someone must be responsible for updating it, and a review date makes the check routine.",
+          "placement": true
+        },
+        {
+          "id": "doc-u4-l1-e2",
+          "type": "mcq",
+          "prompt": "What is the main benefit of writing a workflow as numbered text with decision points before drawing it?",
+          "choices": [
+            "It looks more professional",
+            "It exposes gaps such as unhandled cases and can be reviewed and versioned as text",
+            "It is shorter than a diagram",
+            "Diagrams are not allowed"
+          ],
+          "answer": 1,
+          "explanation": "Spelling out each decision forces the missing cases to surface."
+        },
+        {
+          "id": "doc-u4-l1-e3",
+          "type": "mcq",
+          "prompt": "A decision record should include which of these?",
+          "choices": [
+            "Only the final choice",
+            "Context, options considered, the choice, the reason and consequences",
+            "Meeting attendees only",
+            "A list of tickets"
+          ],
+          "answer": 1,
+          "explanation": "Reasons and options are what readers need later; the choice alone invites re-arguing."
+        },
+        {
+          "id": "doc-u4-l1-e4",
+          "type": "open",
+          "prompt": "Write a decision record for: the team decided that a cancelled shift must always have a reason recorded, after considering making it optional or only required for emergency shifts. Use headings decision, date, context, options, decision rationale, consequences and decided by.",
+          "answer": "**Decision:** A reason is required whenever a shift is cancelled.\n**Date:** 2026-05-12\n**Context:** Many cancelled shifts had no reason, so managers could not report why cancellations happened.\n**Options:** (A) Optional reason. (B) Required only for emergency shifts. (C) Required for every cancellation.\n**Rationale:** (A) produced incomplete data. (B) covers only part of the problem and adds a rule to remember. (C) is simplest and gives complete reporting data.\n**Consequences:** The cancel form needs a reason list and an Other option with a note. Existing cancelled shifts show 'Not recorded'. Coordinators spend a few extra seconds per cancellation.\n**Decided by:** Product owner, after review with the customer's operations lead.",
+          "rubric": [
+            "Clear one-line decision",
+            "Context and at least two options",
+            "Rationale explains why each was rejected or chosen",
+            "Consequences include trade-offs",
+            "Names who decided"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u4-l2",
+      "title": "Meeting notes that produce action, and release notes for users",
+      "minutes": 9,
+      "body": "**Meeting notes**\n\nNotes are useful only if people act on them. Keep them short and organised around outcomes, not a transcript.\n\n```text\nSprint review: SOS alert\nDate: 2026-11-04   Attendees: Product, Dev, QA, Support\n\nDecisions\n- Alerts will go to pharmacists within 25 miles by default.\n- Decline responses are included in the first release.\n\nActions\n- Draft acceptance criteria for decline flow. Owner: PM. Due: Thu.\n- Confirm default distance with customer. Owner: Product. Due: Fri.\n- Update the KB article on alerts. Owner: Support. Due: release day.\n\nOpen questions\n- Can a pharmacist un-decline? (Owner: Product)\n```\n\nEvery action has one owner and a date. Decisions are separate from discussion. Send the notes the same day while people remember. If you take notes in a team meeting, ask to read the actions back before closing.\n\n**Release notes written for users**\n\nRelease notes are not a commit log. Users want to know what changed for them and whether they must do anything.\n\n*Poor:*\n\"Refactored notification service; fixed bug in cancel handler (SD-1182).\"\n\n*Better:*\n\"**Cancellation reasons are now required.** When you cancel a shift, you choose a reason. This helps your team see why shifts are cancelled. Existing cancelled shifts show 'Not recorded'.\"\n\n**Structure**\n\n```text\nRelease 2026.11 (14 November)\n\nNew\n- Pharmacists can decline a shift alert, and coordinators can see the response.\n\nImproved\n- The shift list loads faster when you have many open shifts.\n\nFixed\n- Cancelled shifts no longer appear in the Open filter.\n\nWhat you need to do\n- Nothing. Coordinators will see a new Reason field when cancelling a shift.\n```\n\nRelease dates and numbers here are examples.\n\n**Writing tips**\n\n- Lead with the benefit or effect, then the detail.\n- Use the same names as on screen and in the glossary.\n- Group by New / Improved / Fixed, and put anything users must act on first or in its own section.\n- Skip internal ticket numbers and technical detail in user-facing notes. Keep them in an internal version if useful.\n- Link to the updated article or guide.\n\nWriting release notes also forces a check: if you cannot explain the change simply, the feature or its story may be unclear. Raise it before release.",
+      "keyPoints": [
+        "Meeting notes: decisions, actions with owner and date, open questions.",
+        "Send notes promptly and read actions back.",
+        "Release notes explain user effect and any required action, not code changes.",
+        "Group by new, improved, fixed and link to updated guides."
+      ],
+      "interviewAngle": "You wrote release communications as part of running UAT and release testing, so you can speak to this. A common test is to turn a list of tickets into release notes. Show that you lead with user effect, drop internal detail, and flag anything users must do. Don't invent tickets you did not work on.",
+      "exercises": [
+        {
+          "id": "doc-u4-l2-e1",
+          "type": "mcq",
+          "prompt": "Which release note entry is written for users?",
+          "choices": [
+            "Refactored notification service.",
+            "Fixed null pointer in cancel handler (SD-1182).",
+            "Cancelled shifts no longer appear in the Open filter.",
+            "Updated dependencies."
+          ],
+          "answer": 2,
+          "explanation": "It states what the user sees change; the others describe internal work.",
+          "placement": true
+        },
+        {
+          "id": "doc-u4-l2-e2",
+          "type": "mcq",
+          "prompt": "What must every action item in meeting notes have?",
+          "choices": [
+            "A priority label",
+            "One owner and a due date",
+            "A ticket number",
+            "An attendee list"
+          ],
+          "answer": 1,
+          "explanation": "Without a single owner and date, actions are not reliably done."
+        },
+        {
+          "id": "doc-u4-l2-e3",
+          "type": "mcq",
+          "prompt": "Where should 'what you need to do' appear in release notes?",
+          "choices": [
+            "Hidden at the end of the last paragraph",
+            "In its own clearly labelled section, near the top if action is required",
+            "Nowhere; users will figure it out",
+            "Only in the developer notes"
+          ],
+          "answer": 1,
+          "explanation": "Required action is the part users most need to see."
+        },
+        {
+          "id": "doc-u4-l2-e4",
+          "type": "open",
+          "prompt": "Turn these internal tickets into user-facing release notes grouped as New, Improved, Fixed, with a 'What you need to do' section. SD-201: add decline button to alert screen and API endpoint. SD-207: optimise shift list query, cut load from 4 s to 1 s on large accounts. SD-210: fix bug where cancelled shifts showed in Open filter. SD-212: add required cancel_reason field to cancel form.",
+          "answer": "**Release notes: November**\n\n**New**\n- **Decline a shift alert.** Pharmacists can now decline an alert, and coordinators can see who declined.\n- **Cancellation reasons.** When you cancel a shift, you now choose a reason, so your team can see why shifts are cancelled.\n\n**Improved**\n- **Faster shift list.** The shift list loads faster on accounts with many shifts.\n\n**Fixed**\n- Cancelled shifts no longer appear when you filter for Open shifts.\n\n**What you need to do**\n- Coordinators: when you cancel a shift, you will need to choose a reason before you can confirm.\n- Nothing else is needed.",
+          "rubric": [
+            "Grouped New/Improved/Fixed",
+            "User-facing wording with no ticket numbers or technical terms",
+            "Benefit leads each item",
+            "Clear what users must do",
+            "Includes all four tickets accurately (without inventing figures)"
+          ]
+        }
+      ]
+    }
+  ]
+}

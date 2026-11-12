@@ -1,0 +1,140 @@
+{
+  "id": "tp-u11",
+  "title": "Risk, regression and UAT",
+  "summary": "Choosing what to test, selecting regression sets, and running UAT through to sign-off.",
+  "lessons": [
+    {
+      "id": "tp-u11-l1",
+      "title": "Risk-based testing and regression selection",
+      "minutes": 10,
+      "body": "You cannot test everything, so you choose. **Risk-based testing** ranks what to test by risk, where risk is the likelihood of failure multiplied by the impact if it fails. ISTQB distinguishes **product risks** (the software may fail in a way that hurts users) from **project risks** (the schedule, people, environments). Test prioritisation addresses product risk.\n\n**A simple scoring method.** Score likelihood and impact from 1 (low) to 3 (high) and multiply.\n\n| Area | Likelihood | Impact | Score | Test depth |\n|---|---|---|---|---|\n| SOS alert recipient selection (new code) | 3 | 3 | 9 | Full: scripted + exploratory |\n| Accept and assign (changed) | 2 | 3 | 6 | Scripted + concurrency |\n| Shift list filters (unchanged) | 1 | 2 | 2 | Smoke only |\n| Report export (touched indirectly) | 2 | 2 | 4 | Reconciliation check |\n| Help page wording | 1 | 1 | 1 | Skim |\n\nLikelihood rises with new or changed code, complexity, many integrations, past defects, and rushed development. Impact rises with patient or pharmacy harm (a missed emergency fill), money, legal exposure and number of users.\n\n**Regression selection.** After a change, choose existing cases to rerun:\n\n1. Always the smoke set.\n2. Cases for the changed feature and what shares its data or code (impact analysis: read the PR's changed files).\n3. Cases linked to bugs fixed in this release.\n4. High-risk core flows, even if untouched.\n5. Skip or sample low-risk, stable areas, and say so.\n\nUse tags and queries (Priority 1, tagged `regression`, area path) to pick sets. Keep the regression suite alive: add a case for every escaped defect and retire cases that no longer match the product.\n\n**When time is cut in half.** Drop depth, not honesty. Run risk 9 and 6 areas, smoke the rest, and report the untested list with the risk accepted.\n\n**Drill.**\n\n1. Level 1: score five areas of the shift form for a release changing only the cancellation reason list.\n2. Level 2: the PR for the SOS radius story also changes how distance is calculated. Name three regression areas you add.\n3. Level 3: you have one day and 120 cases. Describe your selection and report.",
+      "keyPoints": [
+        "Risk is likelihood times impact; test deepest where the score is highest.",
+        "Regression selection uses the change, shared code, fixed bugs and core flows.",
+        "Keep regression alive: add cases for escaped defects.",
+        "Under time pressure cut depth and report what was not tested."
+      ],
+      "interviewAngle": "'How do you prioritise?' is asked in almost every QA interview. Give the likelihood-times-impact idea, a real example of the highest-risk area (SOS alerts), and the sentence 'I tell stakeholders what I did not test'.",
+      "exercises": [
+        {
+          "id": "tp-u11-l1-e1",
+          "type": "mcq",
+          "prompt": "Which area deserves the deepest testing?",
+          "choices": [
+            "A new feature that alerts pharmacists in emergencies",
+            "Footer link colour",
+            "An unchanged help page",
+            "A rarely used admin report with no changes"
+          ],
+          "answer": 0,
+          "explanation": "New code with severe impact has the highest risk.",
+          "placement": true
+        },
+        {
+          "id": "tp-u11-l1-e2",
+          "type": "mcq",
+          "prompt": "The PR changes the distance calculation. Which regression area is most relevant?",
+          "choices": [
+            "Any feature that uses distance, such as pharmacist search and radius filters",
+            "Login page layout",
+            "Printing",
+            "None"
+          ],
+          "answer": 0,
+          "explanation": "Impact analysis follows shared code and data."
+        },
+        {
+          "id": "tp-u11-l1-e3",
+          "type": "short",
+          "prompt": "Risk is the product of likelihood and what?",
+          "accept": [
+            "impact"
+          ],
+          "answer": "impact",
+          "explanation": "Likelihood times impact."
+        },
+        {
+          "id": "tp-u11-l1-e4",
+          "type": "open",
+          "prompt": "Level 3: one day, 120 cases, a release that changes SOS alerts and the cancel reason list. Describe your selection and what you tell the product owner at the end.",
+          "answer": "Plan: smoke (6 cases) first, 30 minutes. Then SOS alert cases and concurrency (about 35 cases) as risk 9. Cancel reason cases (about 10) as risk 6. Core regression of assignment and notifications (about 25 high-priority cases). Spot checks of reports and filters (about 10, risk 2 to 4) as time allows. That is about 85 of 120. Not run: low-risk list and cosmetic cases (about 35). Report: executed 85, passed N, failed with bug IDs, 35 not run because of time with a low-risk assessment; recommendation conditional on no open Severity 1 or 2; the owner may accept the untested list or extend testing by half a day.",
+          "rubric": [
+            "Smoke first",
+            "Highest-risk areas first",
+            "Sizes the selection to time",
+            "Lists what was not run",
+            "Gives a recommendation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u11-l2",
+      "title": "UAT planning, execution and sign-off",
+      "minutes": 10,
+      "body": "User acceptance testing checks that the software supports real work, by the people who do it. In your last role the customer's staff ran UAT; you prepared and tracked it.\n\n**Planning (a week or more before).**\n\n1. **Scope**: which stories or workflows. Use business scenarios, not screens.\n2. **Testers**: named customer staff with the right roles, and access. Assigning testers and inviting them by email is a Test Plans feature, and preparing UAT needs Basic + Test Plans for you; the testers need at least Basic to execute. Check seats and access before the session; a tester who cannot open the Runner wastes the day.\n3. **Environment and data**: a stable UAT environment, a build frozen for the session, realistic data (fake pharmacies and pharmacists, never real personal data).\n4. **Scripts**: short, in business language, with preconditions, test accounts and expected outcomes.\n5. **Entry criteria**: system testing finished, no open Severity 1 or 2, environment verified.\n6. **Exit criteria and sign-off rule**: who signs, what counts as pass (for example all priority 1 scenarios pass, no open Severity 1 or 2, agreed list of accepted issues).\n7. **Schedule and support**: a channel for questions, a daily triage meeting.\n\n**Running it.** Brief testers for 15 minutes: how to run a case, how to mark an outcome, how to raise a bug from a failed step, and what is out of scope. Be available. Triage new findings daily into: defect against agreed criteria (bug), new idea (backlog story), misunderstanding (answer and update the help article).\n\n**Findings are not all bugs.** Treat UAT bugs by severity and decide fixes for this release or a later one with the product owner.\n\n**Sign-off.** A short record: build number, scope, results (passed, failed, not run), open issues accepted, named signer, date. Keep it with the plan, for example attached to the plan's overview or the wiki, and mention the run IDs.\n\n| Done by testers | Done by business users |\n|---|---|\n| Find defects against specs | Confirm fit for real work |\n| Technical scripts | Scenario scripts in their words |\n| System/integration environments | UAT environment |\n\n**Risks.** Users not available, environment changes mid-session, scripts too long, scope creep disguised as defects, and sign-off pressure from the calendar.",
+      "keyPoints": [
+        "UAT uses business scenarios, named customer testers, a frozen build and realistic fake data.",
+        "Preparing UAT needs Basic + Test Plans; testers need at least Basic to execute.",
+        "Triage findings into bugs, new stories and misunderstandings.",
+        "Sign-off records build, scope, results, accepted issues, signer and date."
+      ],
+      "interviewAngle": "You ran UAT, so expect depth. Structure the answer: scope, testers and access, environment and data, scripts, triage, sign-off. Mention one real friction (environment or availability) and what you changed. Do not claim UAT removed the need for your own testing first.",
+      "exercises": [
+        {
+          "id": "tp-u11-l2-e1",
+          "type": "mcq",
+          "prompt": "Which access level do customer UAT testers need at minimum to execute assigned cases and mark outcomes?",
+          "choices": [
+            "Stakeholder",
+            "Basic",
+            "Project Administrator",
+            "Visual Studio Enterprise"
+          ],
+          "answer": 1,
+          "explanation": "Executing tests requires Basic; preparing UAT needs Basic + Test Plans.",
+          "placement": true
+        },
+        {
+          "id": "tp-u11-l2-e2",
+          "type": "mcq",
+          "prompt": "A UAT tester reports 'I wish the form also had a note field'. How do you classify it?",
+          "choices": [
+            "Severity 1 bug",
+            "A new idea for the backlog",
+            "Test failure",
+            "Ignore"
+          ],
+          "answer": 1,
+          "explanation": "It is a change request or story, not a defect against agreed criteria."
+        },
+        {
+          "id": "tp-u11-l2-e3",
+          "type": "short",
+          "prompt": "What record documents the customer's acceptance of a build?",
+          "accept": [
+            "sign-off",
+            "sign off",
+            "signoff",
+            "uat sign-off"
+          ],
+          "answer": "sign-off",
+          "explanation": "The record of acceptance, with build, scope, results and signer."
+        },
+        {
+          "id": "tp-u11-l2-e4",
+          "type": "open",
+          "prompt": "Draft the UAT entry and exit criteria for the SOS release in six lines.",
+          "answer": "Entry: system testing complete with all priority 1 cases run; no open Severity 1 or 2 bugs; UAT environment on the frozen build 2051 with seeded test pharmacies; testers have Basic access and accounts verified; scripts reviewed with the customer lead. Exit: all priority 1 UAT scenarios passed; no open Severity 1 or 2; any remaining issues listed, understood and accepted by the customer lead in writing; sign-off record completed with build, date and signer.",
+          "rubric": [
+            "Entry about prior testing and environment",
+            "Entry about access and scripts",
+            "Exit about priority 1 scenarios",
+            "Exit about open severities",
+            "Names sign-off"
+          ]
+        }
+      ]
+    }
+  ]
+}

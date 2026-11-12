@@ -1,0 +1,202 @@
+{
+  "id": "ado-u7",
+  "title": "Work items in depth",
+  "summary": "Process templates side by side, fields and link types, and how Epics and Features roll up into a plan.",
+  "lessons": [
+    {
+      "id": "ado-u7-l1",
+      "title": "The four processes side by side: types and states",
+      "minutes": 10,
+      "body": "Microsoft ships four default processes: Basic, Agile, Scrum and CMMI. They differ mainly in the work item types and the states those types move through. A project's process is fixed when the project is created (you cannot switch the base process later), and you can see it under Project settings, then Process.\n\n| | Basic | Agile | Scrum | CMMI |\n|---|---|---|---|---|\n| Requirement-level type | Issue | User Story | Product Backlog Item | Requirement |\n| Portfolio levels | Epic | Epic, Feature | Epic, Feature | Epic, Feature |\n| Work breakdown | Task | Task | Task | Task |\n| Defects | Issue | Bug | Bug | Bug |\n| Blockers and risk | Issue | Issue | Impediment | Change Request, Issue, Risk, Review |\n| Main states | To Do, Doing, Done | New, Active, Resolved, Closed, Removed | New, Approved, Committed, Done, Removed | Proposed, Active, Resolved, Closed |\n\nThree details people get wrong:\n\n- **Removed.** Agile and Scrum have a Removed state for work you decided not to do. The default CMMI workflow does not; you close the item with a reason such as Deferred or Rejected.\n- **Resolved is not Closed.** In Agile, CMMI and the Bug type, a developer typically sets Resolved (\"I fixed it\") and a tester or owner sets Closed after verifying. Scrum skips this: its items go to Done.\n- **Any-to-any transitions.** The default workflows let you move an item from any state to any other. Teams that need order add rules by customizing an inherited process.\n\nDone and Closed items vanish from the backlog page but stay on the board for the sprint; Removed items vanish from every backlog and board. Backlogs also hide completed items not changed for about six months, so an \"old\" item missing from the board is not deleted. Find it with a query.\n\n**Where bugs appear** is a team setting: bugs can be treated like requirements (on the backlog with stories), like tasks (under the story on the taskboard), or not shown. This explains why two teams on the same process show bugs differently.\n\nTest Plans adds hidden types you cannot create from the New menu: Test Plan, Test Suite, Test Case, Shared Steps, Shared Parameters (Test Case is creatable from Test Plans or from a story's Add test). They exist in Agile, Scrum and CMMI; Basic has them too inside Test Plans.\n\nFor the scheduling product: the SOS feature is a Feature; \"Manager sends an SOS request\" is a User Story (Agile) or PBI (Scrum); \"Alert sent to a Busy pharmacist\" is a Bug; \"Write the radius filter\" is a Task.",
+      "keyPoints": [
+        "Four default processes differ mainly in types and states; the base process cannot be changed after project creation.",
+        "Agile and CMMI use Resolved then Closed; Scrum uses Done; Basic uses To Do, Doing, Done.",
+        "Removed exists in Agile and Scrum, not in default CMMI.",
+        "Where bugs appear is a team setting, not a process rule."
+      ],
+      "interviewAngle": "A common opener is 'which template did your team use?'. Answer with the type names and states of your real project (Agile was the pattern: User Story, Bug, New to Active to Resolved to Closed), and show you know the others differ in names, not in ideas. If you are not sure about a state name on a different template, say what the state means and that you would check the board.",
+      "exercises": [
+        {
+          "id": "ado-u7-l1-e1",
+          "type": "mcq",
+          "prompt": "In the default Scrum process, which sequence matches the states of a Product Backlog Item?",
+          "choices": [
+            "New, Active, Resolved, Closed",
+            "New, Approved, Committed, Done",
+            "Proposed, Active, Resolved, Closed",
+            "To Do, Doing, Done"
+          ],
+          "answer": 1,
+          "explanation": "Scrum PBIs move New, Approved, Committed, Done, with Removed for dropped work. The first is Agile, the third CMMI, the last Basic.",
+          "placement": true
+        },
+        {
+          "id": "ado-u7-l1-e2",
+          "type": "mcq",
+          "prompt": "A developer finishes a fix and sets a Bug to Resolved in an Agile project. What normally happens next?",
+          "choices": [
+            "It is deleted",
+            "A tester verifies it and sets Closed, or reactivates it if it still fails",
+            "It moves to Removed",
+            "Nothing; Resolved is the final state"
+          ],
+          "answer": 1,
+          "explanation": "Resolved means fixed but unverified. Closed follows verification."
+        },
+        {
+          "id": "ado-u7-l1-e3",
+          "type": "short",
+          "prompt": "Which default process has Epic, Issue and Task only?",
+          "accept": [
+            "basic"
+          ],
+          "answer": "Basic",
+          "explanation": "Basic tracks Epics, Issues and Tasks with To Do, Doing and Done."
+        },
+        {
+          "id": "ado-u7-l1-e4",
+          "type": "open",
+          "prompt": "A teammate says 'we closed the story last year but I cannot find it on the board'. Give two reasons it may not be visible and how you would find it.",
+          "answer": "Reasons: (1) Closed or Done items drop off the product backlog page, and completed items not changed for about six months are hidden from backlogs and boards even though the data is kept. (2) If the item went to Removed, it never shows on any backlog or board. To find it, run a query on the work item ID, title or state, since queries return all states. If it should return to the board, make a small update (or change its state back) so its Changed Date refreshes.",
+          "rubric": [
+            "Mentions completed items being hidden from backlogs/boards",
+            "Mentions Removed state hides items entirely",
+            "Finds it with a query",
+            "Notes the data is retained"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u7-l2",
+      "title": "Fields, tags and link types",
+      "minutes": 9,
+      "body": "A work item is a set of fields plus links. Know the ones you use daily and what they are for.\n\n| Field | Use |\n|---|---|\n| Title, Description | What and why |\n| Acceptance Criteria | Testable conditions (on User Story and PBI) |\n| Repro Steps, System Info | Bug detail. Test Plans fills these when you file from a failed step |\n| State, Reason | Where it is in its life and why it moved |\n| Assigned To | One person at a time |\n| Area Path | Which part of the product or which team owns it, for example `Dispatch\\Notifications` |\n| Iteration Path | Which sprint (or the backlog) it belongs to |\n| Priority (1 to 4) | Urgency of fixing |\n| Severity | Bugs only: 1 - Critical, 2 - High, 3 - Medium, 4 - Low |\n| Story Points / Effort / Size | Estimate (Agile / Scrum / CMMI) |\n| Tags | Free labels such as `sos`, `uat-feedback`, `regression` |\n\n**Area and iteration paths** are trees. Teams pick which area nodes and which iterations belong to them, which is how a board shows only that team's work.\n\n**Tags** need no admin setup; typing a new tag creates it (permission to create tag definitions is in the Contributors group by default). They are good for cross-cutting labels but easy to misspell, so agree a short list. Queries can filter with Tags Contains.\n\n**Links** connect items and are how traceability works:\n\n| Link type | Meaning |\n|---|---|\n| Parent / Child | Hierarchy: Feature to Story to Task |\n| Related | Loose association |\n| Predecessor / Successor | Order or dependency |\n| Duplicate / Duplicate Of | Same problem reported twice |\n| Tests / Tested By | Test Case to the requirement or bug it covers |\n| Test Case / Shared Steps | Case to its reusable steps |\n\nBesides work-item links there are **artifact links** to a branch, commit, pull request or build. Mention `#1234` in a commit or PR and the work item is linked automatically. A bug found while testing gets a Tested By or Related link to the story, and a link to the test case.\n\nWhy a PM or tester cares: from one story you can walk to its tasks, its test cases, its bugs, the PR that changed the code and the build that shipped it. When a customer asks \"was this tested before release 3.2?\" you can answer from links, not memory.\n\nDependency tip: use Predecessor/Successor for \"the alert service must ship before the dashboard card\", and a query for Successor links shows blocked work.",
+      "keyPoints": [
+        "Area Path says who owns it; Iteration Path says when.",
+        "Severity values are 1 - Critical, 2 - High, 3 - Medium, 4 - Low; Priority is a separate 1 to 4 scale.",
+        "Tests / Tested By is the link between a test case and the thing it verifies.",
+        "Mentioning #ID in a commit or pull request links it to the work item."
+      ],
+      "interviewAngle": "Interviewers probe whether you understand traceability, not field names. Tell the story of one SOS request: story, tasks, test cases linked Tested By, bug linked from a failed step, PR linked by #ID. If asked about customizing fields, say the administrator did that and you worked within it.",
+      "exercises": [
+        {
+          "id": "ado-u7-l2-e1",
+          "type": "mcq",
+          "prompt": "Which pair of fields decides whether an item appears on a team's sprint board?",
+          "choices": [
+            "Severity and Priority",
+            "Area Path and Iteration Path",
+            "Tags and State",
+            "Story Points and Reason"
+          ],
+          "answer": 1,
+          "explanation": "A team's board shows items under its area paths and in its current iteration.",
+          "placement": true
+        },
+        {
+          "id": "ado-u7-l2-e2",
+          "type": "short",
+          "prompt": "Which link type connects a Test Case to the User Story it covers?",
+          "accept": [
+            "tests",
+            "tested by",
+            "tests / tested by",
+            "tests/tested by"
+          ],
+          "answer": "Tests / Tested By",
+          "explanation": "A test case Tests a story; the story is Tested By the case."
+        },
+        {
+          "id": "ado-u7-l2-e3",
+          "type": "mcq",
+          "prompt": "A bug title typo should be fixed this sprint but has no real impact. Which setting is right?",
+          "choices": [
+            "Severity 1 - Critical, Priority 4",
+            "Severity 4 - Low, Priority 2",
+            "Severity 3 - Medium, Priority 4",
+            "Leave both blank"
+          ],
+          "answer": 1,
+          "explanation": "Low impact, moderate urgency. Severity is impact, Priority is urgency."
+        },
+        {
+          "id": "ado-u7-l2-e4",
+          "type": "open",
+          "prompt": "Explain how you would show that the 'SOS radius' story was tested, using links. Name the items and link types.",
+          "answer": "Open the story and show its Related Work: test cases attached with Tests / Tested By (for example 9 cases), the bugs found (Related or Tested By links from failed steps), the pull request and commits linked by #ID mentions, and the build that contains them. In Test Plans the requirement-based suite for the story gives the pass/fail counts per test point. So the evidence chain is Story, Test Cases (Tested By), Test results, Bugs, PR, Build.",
+          "rubric": [
+            "Names Tested By links to test cases",
+            "Mentions bugs linked to the story",
+            "Mentions PR or commit links",
+            "Uses the suite or results as evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u7-l3",
+      "title": "Delivery plans and the portfolio view",
+      "minutes": 8,
+      "body": "Day to day you work on a sprint board. Stakeholders also ask \"when will the SOS feature land?\" and \"what depends on what?\". Azure Boards answers with portfolio backlogs and **Delivery Plans**.\n\n**Portfolio backlogs.** Epics contain Features; Features contain stories. Switch the backlog level from Stories to Features to Epics to see progress roll up. The rollup shows how many child items are done, so a Feature card can show \"7 of 12 stories done\".\n\n**Delivery Plans.** A hub in Boards that draws a calendar of several teams' work on one timeline. You pick teams and the backlog levels to show (for example Features and Epics), and each item appears as a bar between its start and target dates, with a progress rollup. It shows dependencies between items linked as Predecessor and Successor. The page is read-and-plan: you can drag to change dates.\n\nWhat it is good for:\n\n- A release roadmap for a customer meeting.\n- Spotting overlap: two teams with Features due the same week.\n- Seeing which Features have no start or target date set (they do not show on the bar).\n\nWhat it is not: a Gantt chart with hard scheduling. It displays the fields and links you maintain; it does not calculate a critical path.\n\n**The planning rhythm that feeds it.**\n\n1. The product owner keeps Epics and Features ordered by value.\n2. Features get target dates when the team can commit.\n3. Stories are sliced to fit a sprint and linked to their Feature.\n4. During the sprint the board moves; the Delivery Plan rollup updates itself.\n\nExample: Epic \"Faster emergency staffing\" holds Features \"SOS request\", \"Alert delivery rules\" and \"Fill-rate dashboard\". In Delivery Plans the SOS Feature bar runs across three sprints, with the dashboard Feature as its Successor. Late alert work visibly pushes the dashboard.\n\nKeep hygiene simple: every story has a parent Feature, every Feature has dates, and closed work gets Closed or Done. A plan is only as true as the data behind it.",
+      "keyPoints": [
+        "Epics roll up Features roll up stories; switch backlog level to see progress.",
+        "Delivery Plans shows several teams' Features and Epics on a calendar with dependencies.",
+        "It displays the dates and links you keep; it does not schedule for you.",
+        "Parent links and target dates are what make a plan trustworthy."
+      ],
+      "interviewAngle": "A product-owner interviewer may ask how you gave stakeholders a roadmap. Say you kept stories linked to Features, showed progress at the Feature level, and used the sprint review for detail. Be honest that you planned at the team level; cross-team Delivery Plans are something you understand and can set up, not a thing you ran across many teams.",
+      "exercises": [
+        {
+          "id": "ado-u7-l3-e1",
+          "type": "mcq",
+          "prompt": "A Feature does not show up as a bar on a Delivery Plan. What is the most likely cause?",
+          "choices": [
+            "It has no start or target date",
+            "It has Severity 4",
+            "It has no tags",
+            "It is assigned to a Stakeholder"
+          ],
+          "answer": 0,
+          "explanation": "Items need dates to draw on the calendar.",
+          "placement": true
+        },
+        {
+          "id": "ado-u7-l3-e2",
+          "type": "mcq",
+          "prompt": "Which statement about Delivery Plans is true?",
+          "choices": [
+            "They compute the critical path for you",
+            "They show work from several teams on one timeline with progress rollup",
+            "They replace the sprint taskboard",
+            "They only work for Scrum projects"
+          ],
+          "answer": 1,
+          "explanation": "They are a multi-team timeline of the data you keep."
+        },
+        {
+          "id": "ado-u7-l3-e3",
+          "type": "short",
+          "prompt": "In the hierarchy, which level sits directly above User Story in the Agile process?",
+          "accept": [
+            "feature"
+          ],
+          "answer": "Feature",
+          "explanation": "Epic, Feature, User Story, Task."
+        },
+        {
+          "id": "ado-u7-l3-e4",
+          "type": "open",
+          "prompt": "Draft the three-line explanation you would give a customer who asks when the SOS feature will be available, using what Boards shows you.",
+          "answer": "SOS request is a Feature in the Faster emergency staffing Epic. Its progress rollup shows 9 of 14 stories done, and the Delivery Plan shows its target date at the end of sprint 6. The remaining risk is the alert-delivery story, which has a linked bug open, so I will confirm the date at the next sprint review after that is resolved.",
+          "rubric": [
+            "Names the Feature/Epic level",
+            "Uses rollup progress",
+            "Uses the target date",
+            "States the risk honestly"
+          ]
+        }
+      ]
+    }
+  ]
+}

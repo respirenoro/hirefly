@@ -1,0 +1,142 @@
+{
+  "id": "excel-u2",
+  "title": "The formulas interviews test",
+  "summary": "Conditional logic, conditional totals, and text and date functions: the formulas that appear in nearly every timed Excel assessment.",
+  "lessons": [
+    {
+      "id": "excel-u2-l1",
+      "title": "IF, IFS, AND and OR",
+      "minutes": 8,
+      "body": "`IF` chooses between two results:\n\n```text\n=IF(condition, value_if_true, value_if_false)\n```\n\nFor more than two outcomes you can nest `IF` inside `IF`, but it gets hard to read. `IFS` (Excel 2019 and Microsoft 365) lists condition and result pairs and returns the result of the **first** condition that is true:\n\n```text\n=IFS(D2>=0.9, \"On target\", D2>=0.75, \"Watch\", TRUE, \"Action\")\n```\n\nThe final `TRUE` is a catch-all. Without it, a row that matches nothing returns `#N/A`. The nested equivalent is:\n\n```text\n=IF(D2>=0.9, \"On target\", IF(D2>=0.75, \"Watch\", \"Action\"))\n```\n\n| Pharmacy | Fill rate (D) | Result |\n|---|---|---|\n| Eastside | 0.90 | On target |\n| Lakeview | 0.80 | Watch |\n| Harbor | 0.72 | Action |\n\n**Order matters.** Conditions are tested top to bottom and the first true one wins. If you wrote the 0.75 test first, Eastside at 0.90 would be labelled \"Watch\", because 0.90 is also at least 0.75. Always test the most specific or strictest condition first.\n\n**Combining conditions.** `AND` is true only if all its tests are true; `OR` is true if any is:\n\n```text\n=IF(AND(B2>=20, D2<0.75), \"Review\", \"\")\n```\n\nWith 25 requests and a 0.72 fill rate, Harbor returns \"Review\". Eastside (40 requests, 0.90) returns an empty string. Use `NOT` to flip a test.\n\n**Text comparisons** are not case sensitive: `=IF(C2=\"Cancelled\", ...)` also matches \"cancelled\". Blank checks use `=\"\"`, for example `=IF(H2=\"\", \"Missing reason\", \"OK\")`.\n\nWrap a risky formula in `IFERROR(formula, fallback)` to replace any error. Use it sparingly, because it hides real problems. Where a lookup is involved, `IFNA` only catches \"not found\" errors, which is safer.\n\nWhen writing a conditional formula in a test, write the plain English first (\"if the shift is cancelled and has no reason, flag it\"), then translate each part.",
+      "keyPoints": [
+        "IF picks between two results; IFS returns the result of the first true condition.",
+        "End an IFS with TRUE and a default, or unmatched rows return #N/A.",
+        "Order conditions from strictest to loosest.",
+        "AND needs all tests true; OR needs one.",
+        "IFERROR can hide real problems; use it deliberately."
+      ],
+      "interviewAngle": "Expect a banding or flagging question: \"label each row Good, OK or Poor.\" Say your logic out loud: strictest condition first, a default at the end. If you only know nested IF, say so and use it; it is fine. IFS is just easier to read and needs a recent Excel version.",
+      "exercises": [
+        {
+          "id": "excel-u2-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "D2 contains 0.90. What does this return?\n\n```text\n=IFS(D2>=0.75, \"Watch\", D2>=0.9, \"On target\", TRUE, \"Action\")\n```",
+          "choices": ["On target", "Watch", "Action", "#N/A"],
+          "answer": 1,
+          "explanation": "IFS stops at the first true condition. 0.90 is at least 0.75, so it returns Watch and never reaches the 0.9 test."
+        },
+        {
+          "id": "excel-u2-l1-e2",
+          "type": "short",
+          "prompt": "What does =IF(AND(10>5, 2>3), \"Yes\", \"No\") return? (Type the result without quotes.)",
+          "accept": ["no"],
+          "answer": "No",
+          "explanation": "AND needs both tests true. 2>3 is false, so the whole AND is false and IF returns the false value."
+        },
+        {
+          "id": "excel-u2-l1-e3",
+          "type": "open",
+          "prompt": "Column G holds Status and column H holds the cancel reason. Write a formula for I2 that returns \"Missing reason\" when a shift is Cancelled and the reason is empty, and \"OK\" otherwise. Explain what each part does.",
+          "answer": "```text\n=IF(AND(G2=\"Cancelled\", H2=\"\"), \"Missing reason\", \"OK\")\n```\n\nAND requires both conditions: the status is Cancelled and the reason cell is empty (equal to an empty string). If both are true IF returns \"Missing reason\"; for every other row it returns \"OK\".",
+          "rubric": [
+            "Uses IF with AND",
+            "Tests G2=\"Cancelled\"",
+            "Tests H2=\"\" for blank",
+            "Returns the two labels in the right branches"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u2-l2",
+      "title": "COUNTIFS, SUMIFS and AVERAGEIFS",
+      "minutes": 10,
+      "body": "These functions answer \"how many, how much, what average, for rows that meet these conditions\". They are the backbone of summary tables and appear in almost every test.\n\n```text\n=COUNTIFS(criteria_range1, criteria1, [criteria_range2, criteria2], ...)\n=SUMIFS(sum_range, criteria_range1, criteria1, ...)\n=AVERAGEIFS(average_range, criteria_range1, criteria1, ...)\n```\n\nNote the argument order: `SUMIFS` and `AVERAGEIFS` put the range to add or average **first**. `COUNTIFS` has no such range because it just counts rows. All ranges must be the same size, and every criteria pair is combined with AND.\n\nSample data in A1:D7:\n\n| ID | Pharmacy | Status | Hours |\n|---|---|---|---|\n| S1 | Eastside | Filled | 8 |\n| S2 | Eastside | Cancelled | 6 |\n| S3 | Harbor | Filled | 10 |\n| S4 | Harbor | Filled | 4 |\n| S5 | Harbor | Cancelled | 8 |\n| S6 | Lakeview | Filled | 6 |\n\n```text\n=COUNTIFS(B2:B7, \"Harbor\", C2:C7, \"Filled\")           -> 2\n=SUMIFS(D2:D7, B2:B7, \"Harbor\", C2:C7, \"Filled\")      -> 14\n=AVERAGEIFS(D2:D7, C2:C7, \"Filled\")                  -> 7\n=COUNTIFS(D2:D7, \">=8\")                              -> 3\n```\n\nThe average works because filled hours are 8, 10, 4, 6, which total 28 across 4 rows.\n\n**Criteria tips**\n\n- Operators go inside quotes: `\">=8\"`, `\"<>Cancelled\"` (not equal).\n- To compare with a cell, join with `&`: `\">=\"&F1`.\n- Wildcards: `\"East*\"` matches anything starting with East; `?` matches one character.\n- Reference a cell for the criterion to make the formula reusable: `=COUNTIFS($B$2:$B$7, $F2, $C$2:$C$7, G$1)`. This is where mixed references pay off.\n\n**A ratio.** Harbor's fill rate is filled shifts divided by all shifts:\n\n```text\n=COUNTIFS(B2:B7, \"Harbor\", C2:C7, \"Filled\") / COUNTIFS(B2:B7, \"Harbor\")\n```\n\nThat is 2 / 3, or 66.7%. Check your answer against a number you can count by eye. When a SUMIFS returns 0 unexpectedly, look for text-numbers, trailing spaces or mismatched range sizes.",
+      "keyPoints": [
+        "SUMIFS and AVERAGEIFS take the range to add or average first; COUNTIFS has none.",
+        "Multiple criteria pairs are combined with AND; all ranges must be the same size.",
+        "Put operators in quotes and join cell references with &, such as \">=\"&F1.",
+        "Wildcards * and ? work in text criteria.",
+        "Rates are a COUNTIFS divided by another COUNTIFS."
+      ],
+      "interviewAngle": "These are the formulas a timed test will probably ask for, often to fill a small summary table. Say how you would verify the result, for example by filtering and counting by eye. You can claim these confidently as part of moderate Excel. Mention that you use them alongside pivot tables, and that you know when each is the quicker tool.",
+      "exercises": [
+        {
+          "id": "excel-u2-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Using the sample data (A1:D7), what does this return?\n\n```text\n=SUMIFS(D2:D7, B2:B7, \"Harbor\", C2:C7, \"Cancelled\")\n```",
+          "choices": ["14", "8", "22", "12"],
+          "answer": 1,
+          "explanation": "Only S5 is Harbor and Cancelled, and its hours are 8. 14 is Harbor Filled, and 22 is all Harbor hours."
+        },
+        {
+          "id": "excel-u2-l2-e2",
+          "type": "short",
+          "prompt": "Using the sample data, what does =COUNTIFS(C2:C7, \"Cancelled\") return?",
+          "accept": ["2"],
+          "answer": "2",
+          "explanation": "S2 and S5 are the two cancelled rows."
+        },
+        {
+          "id": "excel-u2-l2-e3",
+          "type": "open",
+          "prompt": "Write one formula for Harbor's fill rate (filled shifts divided by all Harbor shifts) using the sample data in B2:C7, and give its value.",
+          "answer": "```text\n=COUNTIFS(B2:B7, \"Harbor\", C2:C7, \"Filled\") / COUNTIFS(B2:B7, \"Harbor\")\n```\n\nHarbor has 3 shifts (S3, S4, S5) and 2 are filled, so the result is 2/3, which is 66.7% when formatted as a percentage.",
+          "rubric": [
+            "Numerator counts Harbor AND Filled",
+            "Denominator counts all Harbor rows",
+            "Divides numerator by denominator",
+            "States the value as 2/3 or 66.7%"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u2-l3",
+      "title": "Text and date functions",
+      "minutes": 9,
+      "body": "Text and date functions let you pull pieces out of codes and compute time spans. Both come up in cleaning tasks.\n\n**Text functions.** Suppose a shift code is `HBR-0142`.\n\n| Formula | Result | What it does |\n|---|---|---|\n| `=LEFT(A2, 3)` | HBR | first 3 characters |\n| `=RIGHT(A2, 4)` | 0142 | last 4 characters |\n| `=MID(A2, 5, 4)` | 0142 | 4 characters starting at position 5 |\n| `=LEN(A2)` | 8 | number of characters |\n| `=FIND(\"-\", A2)` | 4 | position of the dash |\n| `=UPPER(\"harbor\")` | HARBOR | also LOWER and PROPER |\n\nCombine them so the formula survives codes of different length: `=LEFT(A2, FIND(\"-\", A2) - 1)` returns everything before the dash. Join text with `&` or `TEXTJOIN`: `=B2 & \" - \" & C2`. Results of text functions are text, so `RIGHT(A2, 4)` returns \"0142\", with the leading zero kept.\n\n**Dates are numbers.** Excel stores a date as a day count, and a time as a fraction of a day. That makes subtraction work. If requested time is in B2 (3-Mar-2026 08:00) and filled time is in C2 (3-Mar-2026 09:30):\n\n```text\n=(C2-B2)*24*60      -> 90   (minutes to fill)\n=(C2-B2)*24         -> 1.5  (hours)\n```\n\nThe difference is in days, so multiply by 24 for hours and by 24*60 for minutes. Format the result cell as Number, not Date, or you will see a strange date.\n\n| Formula | Result for B2 |\n|---|---|\n| `=YEAR(B2)` | 2026 |\n| `=MONTH(B2)` | 3 |\n| `=TEXT(B2, \"yyyy-mm\")` | 2026-03 |\n| `=EOMONTH(B2, 0)` | 31-Mar-2026 |\n| `=INT(B2)` | the date with the time removed |\n\n`EOMONTH(date, 0)` is the end of the same month; `EOMONTH(date, -1) + 1` is the first day. `TODAY()` returns the current date and recalculates on every open. `NETWORKDAYS(start, end)` counts weekdays inclusive: from Monday 2-Mar-2026 to Friday 6-Mar-2026 it returns 5.\n\nBeware text that looks like a date. If dates are left-aligned, they may be text; convert with Text to Columns or `DATEVALUE`.",
+      "keyPoints": [
+        "LEFT, RIGHT, MID, LEN and FIND extract and measure pieces of text.",
+        "Results of text functions are text, even when they look like numbers.",
+        "Dates are numbers: subtract, then multiply by 24 for hours or 24*60 for minutes.",
+        "TEXT(date,\"yyyy-mm\") makes month labels; EOMONTH finds month ends.",
+        "Left-aligned dates are usually text."
+      ],
+      "interviewAngle": "A cleaning or time-to-fill question uses these directly: split a code, build a month label, or compute minutes between two timestamps. Explain the days-to-minutes conversion, because interviewers look for that. This matches your SQL reporting work on average time to fill a shift, so you can say you know the metric and are showing the Excel version.",
+      "exercises": [
+        {
+          "id": "excel-u2-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "B2 holds the requested timestamp and C2 holds the filled timestamp. Which formula gives the minutes between them?",
+          "choices": ["=C2-B2", "=(C2-B2)*24", "=(C2-B2)*24*60", "=(C2-B2)/60"],
+          "answer": 2,
+          "explanation": "Subtracting timestamps gives days. Multiply by 24 for hours, then by 60 for minutes."
+        },
+        {
+          "id": "excel-u2-l3-e2",
+          "type": "short",
+          "prompt": "What does =MID(\"HBR-0142\", 5, 4) return? (Type the result without quotes.)",
+          "accept": ["0142"],
+          "answer": "0142",
+          "explanation": "Position 5 is the first character after the dash, and 4 characters from there give 0142 as text."
+        },
+        {
+          "id": "excel-u2-l3-e3",
+          "type": "open",
+          "prompt": "B2 holds a requested timestamp such as 3-Mar-2026 08:00 and C2 holds the filled timestamp. Write formulas for (a) a month label like 2026-03 and (b) hours to fill with one decimal place, and say how you would format the result cells.",
+          "answer": "(a) `=TEXT(B2, \"yyyy-mm\")` returns 2026-03 as text.\n\n(b) `=ROUND((C2-B2)*24, 1)` converts the day difference to hours and rounds to one decimal. Format that cell as Number (not Date or Time), otherwise Excel displays the result as a date.",
+          "rubric": [
+            "Uses TEXT with a yyyy-mm format",
+            "Subtracts the two timestamps",
+            "Multiplies by 24 to convert days to hours",
+            "Rounds or formats to one decimal and notes Number format"
+          ]
+        }
+      ]
+    }
+  ]
+}

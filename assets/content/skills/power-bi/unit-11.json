@@ -1,0 +1,112 @@
+{
+  "id": "power-bi-u11",
+  "title": "PL-300-style question drill",
+  "summary": "Twenty exam-style questions with keys on preparing, modelling, visualizing and securing data.",
+  "lessons": [
+    {
+      "id": "power-bi-u11-l1",
+      "title": "PL-300-style drill A: prepare and model the data",
+      "minutes": 15,
+      "body": "PL-300 is Microsoft's Power BI Data Analyst certification exam, and its skills outline has four areas: prepare the data, model the data, visualize and analyze the data, and manage and secure Power BI. You do not need to sit it for an entry-level job, but its question style is a good drill. Answer each question first, then read the key. Questions are written around the practice data.\n\n**Questions**\n\n1. You import shifts.csv and the profile shows 113 empty values in `filled_at`. What do you do?\n2. Which Power Query step removes the time from `requested_at` to make a relationship key?\n3. A merge of Shifts to Pharmacies on a unique key returns 1043 rows instead of 1019. Why?\n4. You need only a few columns from a wide source. Where do you remove the rest, and why?\n5. Shifts relates to Pharmacies. Which cardinality and filter direction is the default recommendation?\n6. A shift has requested, filled and starting dates, all related to Dates. How many can be active?\n7. A column `Fill Rate = filled / total` was added to Shifts as a calculated column. Why is the total wrong?\n8. Which function returns blank rather than an error when the denominator is zero?\n9. What does `CALCULATE([Total Shifts], Shifts[status] = \"cancelled\")` return when a slicer on status is set to completed?\n10. Which table must be marked as a date table for DATEADD and TOTALYTD to work reliably?\n\n**Key**\n\n1. Nothing; it is valid because unfilled shifts have no filled time. Check it equals cancelled-unfilled plus open shifts (93 + 20 = 113).\n2. Add Column > Date > Date Only (or Transform > Date > Date Only).\n3. The Pharmacies key is not unique, so rows matched more than once. A left join on a unique key keeps the row count.\n4. In Power Query, early, so the model is smaller and, with a database, the work folds into the source query.\n5. One-to-many from the dimension to the fact, single direction.\n6. One. Inactive relationships are used with USERELATIONSHIP.\n7. A calculated column stores a row-level value that cannot be re-aggregated; a rate must be a measure (906 / 1019 = 88.9% overall).\n8. DIVIDE.\n9. 171, the cancelled shifts. The boolean filter replaces the existing filter on status.\n10. The Dates table, with a contiguous Date column.\n\nScore yourself: eight or more is a good base. For each miss, reread the matching lesson and redo the question a day later.",
+      "keyPoints": [
+        "PL-300 areas: prepare, model, visualize/analyze, manage/secure.",
+        "Valid nulls differ from errors: check the cause.",
+        "Merge row growth means a non-unique key.",
+        "Rates are measures; the date table must be marked and contiguous."
+      ],
+      "interviewAngle": "You do not claim the certification. If asked, say: \"I used the PL-300 skills outline to structure my practice and drilled sample questions.\" That is accurate and shows a plan.",
+      "exercises": [
+        {
+          "id": "power-bi-u11-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A Left Outer merge on a key returns more rows than the left table. What is the most likely cause?",
+          "choices": [
+            "The key is not unique in the right table",
+            "The merge was an inner join",
+            "Null values in the left key",
+            "The data types are numeric"
+          ],
+          "answer": 0,
+          "explanation": "Duplicates on the right multiply the matching rows. Inner joins and nulls reduce or preserve rows."
+        },
+        {
+          "id": "power-bi-u11-l1-e2",
+          "type": "short",
+          "prompt": "Which DAX function safely divides and returns blank on a zero denominator?",
+          "accept": [
+            "divide",
+            "divide()"
+          ],
+          "answer": "DIVIDE",
+          "explanation": "DIVIDE(numerator, denominator, [alternate result])."
+        },
+        {
+          "id": "power-bi-u11-l1-e3",
+          "type": "open",
+          "prompt": "Explain how to decide whether the 113 empty filled_at values are a data problem or expected.",
+          "answer": "Check what they correspond to: filter the rows with empty filled_at and look at status and pharmacist_id. In the practice data they are 93 cancelled shifts that were never filled and 20 open shifts, with an empty pharmacist_id on the same rows. Because they match the business meaning (no pharmacist yet), they are expected, so I keep them as null, document the reason and make sure calculations such as hours to fill ignore them.",
+          "rubric": [
+            "Filters and inspects the rows",
+            "Relates them to cancelled and open status",
+            "Keeps nulls and documents",
+            "Mentions calculations must handle nulls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u11-l2",
+      "title": "PL-300-style drill B: visualize, analyze, manage and secure",
+      "minutes": 15,
+      "body": "Ten more questions, in the style of the visualize, analyze, manage and secure areas. Answer first, then check.\n\n**Questions**\n\n1. Which visual best shows the overall fill rate as a single number?\n2. A reader needs to see one pharmacy's details from a summary bar. Which feature?\n3. How do you let a slicer choice on page 1 carry to page 2?\n4. Which feature saves a combination of filters and visible visuals so a button can restore it?\n5. Which tool records how long each visual takes to load?\n6. Which Service item is a one-page set of tiles pinned from reports?\n7. A report published in Import mode shows old numbers. What do you configure?\n8. When is an on-premises data gateway needed?\n9. How do you restrict a state manager to their state's shifts?\n10. Which workspace roles are not restricted by row-level security?\n\n**Key**\n\n1. A card (or KPI).\n2. Drill-through to a detail page.\n3. View > Sync slicers.\n4. Bookmarks, triggered by buttons.\n5. Performance analyzer.\n6. A dashboard.\n7. Scheduled refresh on the semantic model (with credentials).\n8. When the source is on-premises or in a private network, so the Service cannot reach it directly.\n9. A role with a DAX filter such as `[state] = \"FL\"` on Pharmacies, tested with View as, then members assigned in the Service.\n10. Admin, Member and Contributor.\n\n**Scenario practice**\n\n- \"Totals look wrong.\" Check the relationship, check that rates are measures, and compare with a hand count: 906 of 1019 is 88.9%.\n- \"A manager wants fill rate alerts.\" Pin a card to a dashboard and set a data alert.\n- \"A visual is slow.\" Record in Performance analyzer, simplify the measure, reduce cardinality.\n- \"Share with 200 people.\" Use an app, mind licences, and use row-level security if audiences differ.\n\nExam questions often present a short scenario and several plausible answers. Read the last sentence first to see what is being asked, remove options that clash with a stated constraint, and choose the simplest feature that meets it.\n\nUse Microsoft's practice assessment linked in the resources to test yourself further.",
+      "keyPoints": [
+        "Match the feature to the need: drill-through, bookmarks, sync slicers, alerts.",
+        "Stale numbers in Import mode mean scheduled refresh; private sources need a gateway.",
+        "RLS roles are DAX filters; Admin, Member and Contributor bypass them.",
+        "In scenarios, find the question and the constraint first."
+      ],
+      "interviewAngle": "Use these scenarios as your own practice, and say honestly that they are practice. In an interview you can state the concept answers confidently, while keeping the line that you have not administered a Power BI tenant.",
+      "exercises": [
+        {
+          "id": "power-bi-u11-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A published Import-mode report does not show yesterday's new shifts. What should you configure?",
+          "choices": [
+            "A scheduled refresh for the semantic model, with credentials",
+            "A new relationship",
+            "A bookmark",
+            "A theme"
+          ],
+          "answer": 0,
+          "explanation": "Import mode stores a copy, which only updates on refresh."
+        },
+        {
+          "id": "power-bi-u11-l2-e2",
+          "type": "short",
+          "prompt": "Which roles in a workspace are not restricted by row-level security? (Name one.)",
+          "accept": [
+            "admin",
+            "member",
+            "contributor"
+          ],
+          "answer": "Admin",
+          "explanation": "Admin, Member and Contributor can edit the model, so RLS does not restrict them."
+        },
+        {
+          "id": "power-bi-u11-l2-e3",
+          "type": "open",
+          "prompt": "A scenario says: \"A report takes a long time to open and the managers see different totals than a colleague's Excel file.\" Describe how you would handle both problems.",
+          "answer": "For speed, record with Performance analyzer, find the slowest visuals and DAX, remove unused columns and rows, reduce high-cardinality columns such as datetimes, simplify measures and limit the visuals. For the totals, compare definitions first (for example filled time present, 906 or 88.9%, versus completed, 828 or 81.3%), then check relationships and filters, make sure rates are measures, and reconcile to a hand count or SQL. Then document the agreed definition on the report.",
+          "rubric": [
+            "Uses Performance analyzer",
+            "Names model and visual fixes",
+            "Checks metric definitions",
+            "Reconciles totals with an independent count"
+          ]
+        }
+      ]
+    }
+  ]
+}

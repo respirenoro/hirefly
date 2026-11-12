@@ -1,0 +1,56 @@
+{
+  "id": "ado-u3",
+  "title": "Queries and visibility",
+  "summary": "Finding work with queries and WIQL, and showing status with charts, dashboards, burndown and velocity.",
+  "lessons": [
+    {
+      "id": "ado-u3-l1",
+      "title": "Work item queries and a little WIQL",
+      "minutes": 8,
+      "body": "A **query** is a saved filter over work items. It is how you answer questions like 'which bugs are still open this sprint?' without scrolling the board. If you know Jira, it is the equivalent of a saved JQL filter.\n\n**Three query types:**\n\n| Type | Result | Use for |\n|---|---|---|\n| Flat list of work items | A plain table | Most reports: open bugs, my items |\n| Work items and direct links | Items plus related items | Stories with their linked bugs |\n| Tree of work items | Parent/child hierarchy | Epic > Feature > Story > Task rollups |\n\nYou build a query in the editor with rows of **Field / Operator / Value**, joined by And / Or. You choose which columns to show and can sort. You can save it under **My Queries** (private) or **Shared Queries** (team), then use it in charts or dashboard widgets. Useful macros include `@Me`, `@Project`, `@Today` and `@CurrentIteration`, so a query stays current as sprints change.\n\n**Under the hood: WIQL.** Every query is stored as Work Item Query Language, which looks like SQL. You don't need to write it daily, but being able to read it is a good sign. You can see it in the editor's text view or in tools that accept it.\n\n```sql\nSELECT [System.Id], [System.Title], [System.State], [Microsoft.VSTS.Common.Severity]\nFROM WorkItems\nWHERE [System.TeamProject] = @project\n  AND [System.WorkItemType] = 'Bug'\n  AND [System.State] <> 'Closed'\n  AND [System.IterationPath] = @CurrentIteration\nORDER BY [Microsoft.VSTS.Common.Severity] ASC\n```\n\nIt reads: bugs in this project that are not closed, in the current sprint, sorted by severity. Notice that WIQL has `SELECT`, `FROM`, `WHERE` and `ORDER BY` but no joins. Relationships come from the query type (direct links or tree), not from `JOIN`. Your SQL background helps you read it quickly.\n\n**Worked examples for your product:**\n\n- 'SOS bugs not yet fixed': work item type is Bug, area path under `Dispatch\\Notifications`, state not in Closed or Resolved, title contains 'SOS'.\n- 'Stories with no test case': use a direct-links query with tested-by links; filtering for missing links is more awkward than in SQL, so many teams track it with a test plan suite instead.\n\nKeep queries in a shared folder with clear names, because nobody else can use a query called 'test2'.",
+      "keyPoints": [
+        "A query is a saved filter; flat, direct links and tree are the three types.",
+        "Macros like @Me and @CurrentIteration keep queries current.",
+        "WIQL looks like SQL but has no JOIN; links come from the query type.",
+        "Save useful queries in Shared Queries with clear names."
+      ],
+      "interviewAngle": "Mention that you built queries for bug triage and sprint status, and compare them to JQL filters. If asked about WIQL, be honest: you can read it and recognize SQL patterns from your own SQL work, but you mostly built queries in the visual editor. That is credible and accurate.",
+      "exercises": [
+        {"id": "ado-u3-l1-e1", "type": "mcq", "placement": true, "prompt": "Which query type shows a hierarchy such as an Epic with its Features and Stories underneath?",
+         "choices": ["Flat list of work items", "Tree of work items", "Direct links only", "Chart query"], "answer": 1, "explanation": "A tree query returns parent/child hierarchies. A flat list has no hierarchy."},
+        {"id": "ado-u3-l1-e2", "type": "short", "prompt": "Which macro limits a query to the sprint currently in progress for the team?",
+         "accept": ["@currentiteration", "currentiteration", "@current iteration"], "answer": "@CurrentIteration", "explanation": "@CurrentIteration resolves to the team's current sprint so the query never goes stale."},
+        {"id": "ado-u3-l1-e3", "type": "mcq", "prompt": "Compared with SQL, which statement about WIQL is true?",
+         "choices": ["It supports JOIN between any two tables", "It queries work items and cannot join tables the same way", "It can update rows with UPDATE", "It only works from the command line"], "answer": 1, "explanation": "WIQL selects work items and uses link query types for relationships. It does not have joins and is read-only."},
+        {"id": "ado-u3-l1-e4", "type": "open", "prompt": "Define a query for a release-readiness check: all open Bugs in the SOS area of the product that are Severity 1 or 2. Describe it as rows of field/operator/value, then write the equivalent WIQL.",
+         "answer": "**Query type:** Flat list of work items.\n\n| And/Or | Field | Operator | Value |\n|---|---|---|---|\n| | Work Item Type | = | Bug |\n| And | Area Path | Under | Dispatch\\Notifications |\n| And | State | <> | Closed |\n| And | Severity | In | 1 - Critical, 2 - High |\n\n```sql\nSELECT [System.Id], [System.Title], [System.State], [Microsoft.VSTS.Common.Severity]\nFROM WorkItems\nWHERE [System.TeamProject] = @project\n  AND [System.WorkItemType] = 'Bug'\n  AND [System.AreaPath] UNDER 'Dispatch\\Notifications'\n  AND [System.State] <> 'Closed'\n  AND [Microsoft.VSTS.Common.Severity] IN ('1 - Critical', '2 - High')\nORDER BY [Microsoft.VSTS.Common.Severity] ASC\n```\n\nIf this returns any rows, the release has open blockers.",
+         "rubric": ["Chooses a flat list", "Filters on type Bug, area path, state and severity", "WIQL uses SELECT/FROM/WHERE/ORDER BY with the same conditions", "Explains what a non-empty result means for release"]}
+      ]
+    },
+    {
+      "id": "ado-u3-l2",
+      "title": "Charts, dashboards, burndown and velocity",
+      "minutes": 8,
+      "body": "Queries produce lists. **Charts** and **dashboards** turn them into something a stakeholder can read in ten seconds.\n\n**Charts from queries.** From a saved flat-list query you can create a chart: pie, bar, column, stacked bar, pivot table and trend. You choose how to group, for example open bugs grouped by severity or by assigned person. Charts can be pinned to a dashboard. Test Plans also has its own progress charts for test results (covered in the Test Plans module).\n\n**Dashboards.** A dashboard is a page of **widgets**. Common widgets:\n\n- **Query results / Query tile:** a count such as 'Open Sev 1-2 bugs: 3'.\n- **Chart for work items:** the chart you saved.\n- **Sprint burndown:** remaining work in the current sprint.\n- **Velocity:** story points completed per sprint over recent sprints.\n- **Cumulative flow:** how work is spread across board columns over time.\n- **Build history / Test results trend:** pipeline health.\n- **Markdown:** a text note for the sprint goal.\n\nTeams get a default dashboard, and you can add more, for example one called 'Release readiness'.\n\n**Reading burndown.** The chart plots remaining work (hours) against days of the sprint, with an ideal line sloping to zero. If your actual line stays flat for a week and then drops, people are not updating Remaining Work, or tasks are too big. If it goes up, scope was added or estimates grew. A flat burndown followed by a cliff on the last day is a common warning sign.\n\n**Reading velocity.** Velocity shows planned versus completed points per sprint. Use the average of the last three or so sprints to plan. Do not use it to compare teams, since points are relative to each team. If velocity is 28, 31 and 26, planning 45 points is a stretch.\n\n**Interpretation is your value.** For example: 'Sprint 14 burndown is behind because the alert-radius story grew; we agreed to defer the audit log story, and Sev 1 bugs are zero, so the release is still on track.'\n\nThe numbers are only as good as the data. Stale states and missing hour updates give you a confident-looking chart that is wrong.",
+      "keyPoints": [
+        "Charts are built from saved queries; dashboards are pages of widgets.",
+        "Burndown plots remaining work against the ideal line.",
+        "Velocity is points completed per sprint; use a short average to plan.",
+        "Charts are only as accurate as the states and hours people maintain.",
+        "Add a sentence of interpretation to every chart you share."
+      ],
+      "interviewAngle": "Say what you tracked and what decision it informed: for example you used velocity to size the next sprint, and burndown to raise scope risk early. Do not claim you built a dashboard platform; you assembled team dashboards from queries and widgets. Power BI is a separate, newer skill, so keep those two apart in your answer.",
+      "exercises": [
+        {"id": "ado-u3-l2-e1", "type": "mcq", "placement": true, "prompt": "A sprint burndown stays flat for the first week, then drops sharply on the last two days. What is the most likely cause?",
+         "choices": ["The team was unusually fast", "Remaining Work was not being updated during the sprint", "Velocity is too high", "Queries were not shared"], "answer": 1, "explanation": "A flat line then a cliff usually means people did not update Remaining Work as they went."},
+        {"id": "ado-u3-l2-e2", "type": "short", "prompt": "Which widget or chart shows story points completed per sprint over time?",
+         "accept": ["velocity", "velocity chart", "velocity widget"], "answer": "Velocity", "explanation": "Velocity compares planned and completed work across recent sprints."},
+        {"id": "ado-u3-l2-e3", "type": "mcq", "prompt": "Why should velocity not be used to compare two teams?",
+         "choices": ["Velocity is only available for one team", "Story points are relative to each team's own estimating", "Velocity is measured in hours", "It does not include bugs"], "answer": 1, "explanation": "Points are team-specific, so 30 points on one team has no fixed relation to 30 points on another."},
+        {"id": "ado-u3-l2-e4", "type": "open", "prompt": "Design a 'Release readiness' dashboard for the SOS feature release. List five widgets, the query or data behind each, and one sentence explaining how a stakeholder would read the dashboard.",
+         "answer": "**Release readiness: SOS feature**\n\n1. **Query tile: open Sev 1-2 bugs** (flat query: Bug, SOS area, not Closed, severity 1 or 2). Target is 0.\n2. **Chart: open bugs by severity** (pie or column from a shared query) to show the overall defect profile.\n3. **Test plan progress / test results chart:** passed, failed, blocked and not run for the release suite.\n4. **Sprint burndown:** shows whether the remaining work will finish before the release date.\n5. **Build and test trend:** the last pipeline runs and Playwright results, to show the main branch is healthy.\n\n*How to read it:* if the tile is zero, nearly all tests have run and passed, and the latest build is green, the release is ready; any red item names what needs a decision.",
+         "rubric": ["Includes an open high-severity bug count or query", "Includes test result progress", "Includes a sprint or schedule measure like burndown", "Includes build or pipeline health", "Gives a clear way to read the dashboard for a decision"]}
+      ]
+    }
+  ]
+}

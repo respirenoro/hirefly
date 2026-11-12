@@ -1,0 +1,270 @@
+{
+  "id": "tp-u10",
+  "title": "Suites, configurations, runs and exploratory sessions in practice",
+  "summary": "Choosing suite types, configurations and parameters, running accurately with the tool, and exploratory sessions with Test & Feedback.",
+  "lessons": [
+    {
+      "id": "tp-u10-l1",
+      "title": "Choosing between static, requirement-based and query-based suites",
+      "minutes": 9,
+      "body": "The earlier lesson defined the three suite types. This one is about choosing, because a plan with the wrong structure is slow to run and hard to report on.\n\n**Static suite.** You add test cases by hand. Cases can live in many suites. Use for: smoke, regression, UAT, and any curated set. Static suites can be nested into folders.\n\n**Requirement-based suite.** Created from one or more requirement work items (a User Story, PBI, Requirement or Issue, depending on the process, or a Bug). The suite is named for the item, and any test case linked to that item with Tests / Tested By appears in it. Use for: tracking whether each story has been tested and how it did. Adding a case to the story's links adds it to the suite; creating a new case inside the suite links it to the story.\n\n**Query-based suite.** A saved work item query that returns Test Case items defines the members. Use for: dynamic groups, such as `Priority = 1 And Area Path Under Dispatch\\Notifications And State = Ready`. New cases that match join automatically.\n\n| Need | Suite type |\n|---|---|\n| \"Did every story in this sprint get tested?\" | Requirement-based, one per story |\n| Smoke set run on every build | Static |\n| UAT script for the customer | Static (assigned to testers) |\n| All priority 1 SOS cases | Query-based |\n| Regression for the scheduling module | Static now, query-based when tagging is consistent |\n| Cases tagged `regression` and Ready | Query-based |\n\n**Structure tips.**\n\n- Make one top-level suite per purpose (Smoke, Stories, Regression, UAT), then children.\n- Keep a test case in several suites rather than duplicating it. Duplication causes drift.\n- Use the Ready state as a gate and keep drafts out of run suites with a query that filters State = Ready.\n- Do not create a plan per tester. Create a plan per sprint or release, then assign testers within it.\n\n**Cloning.** You can copy or clone a plan or suite for the next cycle. Cloning a plan copies suites and references the same test cases (or copies them, depending on the option), and resets the results. Check the option before choosing, or you will edit last release's cases by mistake.\n\n**Test points.** Each combination of test case, suite and configuration is a test point; results are stored per point, which is why the same case can be Passed in one suite and Failed in another configuration.\n\nPitfall: a requirement-based suite looks empty if cases were never linked. Empty suite means untested, not passed. Report it that way.",
+      "keyPoints": [
+        "Static for curated sets, requirement-based for story coverage, query-based for dynamic groups.",
+        "Keep one test case in many suites; do not duplicate.",
+        "An empty requirement-based suite means untested.",
+        "Test points combine case, suite and configuration; results attach to them."
+      ],
+      "interviewAngle": "'How did you organise your test plans?' is easy to score on: a plan per release or sprint, requirement-based suites per story for traceability, static smoke, regression and UAT suites, and a query-based suite for high-priority cases. Say what you would change: more consistent tags so regression could be query-based.",
+      "exercises": [
+        {
+          "id": "tp-u10-l1-e1",
+          "type": "mcq",
+          "prompt": "You must show that every story in the sprint has been tested. Which suite structure serves this best?",
+          "choices": [
+            "One static suite with all cases",
+            "One requirement-based suite per story",
+            "One query-based suite on Severity",
+            "A suite per tester"
+          ],
+          "answer": 1,
+          "explanation": "Requirement-based suites tie results to each story.",
+          "placement": true
+        },
+        {
+          "id": "tp-u10-l1-e2",
+          "type": "mcq",
+          "prompt": "Why keep one case in several suites instead of copying it?",
+          "choices": [
+            "Copies are not allowed",
+            "Copies drift apart and double the maintenance",
+            "Suites require unique cases",
+            "Test points cannot be reset"
+          ],
+          "answer": 1,
+          "explanation": "Reuse keeps the definition in one place."
+        },
+        {
+          "id": "tp-u10-l1-e3",
+          "type": "short",
+          "prompt": "What do you call the combination of test case, suite and configuration that holds a result?",
+          "accept": [
+            "test point",
+            "a test point"
+          ],
+          "answer": "test point",
+          "explanation": "Results attach to test points."
+        },
+        {
+          "id": "tp-u10-l1-e4",
+          "type": "open",
+          "prompt": "Design the suite tree for Release 3.2 of the scheduling product, including the SOS feature. Give type for each suite and how each is kept current.",
+          "answer": "Plan: Release 3.2. Suite Smoke (static, 6 cases, reviewed each release). Suite Stories (parent folder) with child requirement-based suites: SOS radius, SOS alert content, SOS accept and fill, Shift cancel reason (kept current by linking cases to each story). Suite Regression (static folders by area: Scheduling, Notifications, Reports; cases added when a bug fix creates a regression case). Suite High priority (query-based: Priority 1, State Ready, area Dispatch). Suite UAT (static, 12 cases written in business language, assigned to the customer's staff). Rules: only Ready cases run; new cases from bugs go to Regression.",
+          "rubric": [
+            "Uses all three types appropriately",
+            "Requirement-based per story",
+            "Smoke and regression static",
+            "UAT suite for the customer",
+            "Explains how each stays current"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u10-l2",
+      "title": "Configurations and parameters in practice",
+      "minutes": 9,
+      "body": "Two features multiply tests without multiplying cases.\n\n**Test configurations** describe the environment: browser, operating system, device. Defined once in the Configurations hub, assigned to suites or cases, and shared by plans. If a suite has two configurations (Chrome on Windows, Safari on iPhone), each case in it produces two test points, one per configuration. A tester runs both and records separate results.\n\nUse configurations for platform coverage that matters to the customer. The pharmacy staff use desktop Chrome and Edge; pharmacists accept alerts on phones. Two or three configurations beat testing everything everywhere. Prioritise from real usage numbers if you have them.\n\n**Parameters** make one case run with many data rows. In the steps you write `@radius`, and the case holds a table:\n\n| @radius | @expected_count |\n|---|---|\n| 5 | 1 |\n| 10 | 2 |\n| 25 | 3 |\n\nAt run time the runner shows each row as an **iteration**, and you mark each step per iteration. The case result summarises the iterations; if any iteration fails the point fails.\n\n**Local versus shared parameters.** Local parameters live inside one case. **Shared parameter sets** are stored once in the Parameters hub and mapped into many cases, so changing the data updates every case that uses it. Use shared sets for data used across cases, such as the list of test pharmacists or valid radii.\n\n**Shared steps** are reusable sequences, such as 'Sign in as manager'. Edit once, every case updates. You can pass parameters to shared steps. Keep them small: a shared step that does 15 things hides what a case actually tests.\n\n**Choosing.**\n\n| Situation | Use |\n|---|---|\n| Same steps, different data | Parameters |\n| Same steps, different environments | Configurations |\n| Same sequence in many cases | Shared steps |\n| Different expected behaviour per row | Separate cases or add an expected-result parameter |\n\n**Limits.** Parameter tables hide the reason each row exists; add a column or note describing it. A table of 40 rows becomes a data dump no one reviews. Five to eight rows chosen by partitions and boundaries is better.\n\n**Permissions reminder.** Creating and managing configurations and parameters needs Basic + Test Plans, and the Manage test configurations permission for configurations.",
+      "keyPoints": [
+        "Configurations multiply test points across environments; parameters multiply iterations across data.",
+        "Shared parameter sets and shared steps are maintained once and reused.",
+        "Choose parameter rows by partitions and boundaries, not volume.",
+        "Managing configurations and parameters needs Basic + Test Plans."
+      ],
+      "interviewAngle": "Describe a concrete use: 'one SOS radius case with four parameter rows, run on two configurations, producing eight results'. Be precise about the difference between parameters (data) and configurations (environment); interviewers use it to test real tool experience.",
+      "exercises": [
+        {
+          "id": "tp-u10-l2-e1",
+          "type": "mcq",
+          "prompt": "A suite has 6 test cases and 2 configurations. How many test points does it contain (one tester)?",
+          "choices": [
+            "6",
+            "8",
+            "12",
+            "2"
+          ],
+          "answer": 2,
+          "explanation": "Each case times each configuration.",
+          "placement": true
+        },
+        {
+          "id": "tp-u10-l2-e2",
+          "type": "mcq",
+          "prompt": "The sign-in steps changed. Which feature lets you fix all 30 cases at once?",
+          "choices": [
+            "Parameters",
+            "Configurations",
+            "Shared steps",
+            "Query-based suites"
+          ],
+          "answer": 2,
+          "explanation": "Shared steps are edited once for all cases using them."
+        },
+        {
+          "id": "tp-u10-l2-e3",
+          "type": "short",
+          "prompt": "What do you call one row of a parameter table when the case is run?",
+          "accept": [
+            "iteration",
+            "an iteration"
+          ],
+          "answer": "iteration",
+          "explanation": "The runner presents each row as an iteration."
+        },
+        {
+          "id": "tp-u10-l2-e4",
+          "type": "open",
+          "prompt": "Design the parameter table for 'Accept an SOS alert' where the expected result depends on how many minutes passed, and say which values you pick and why.",
+          "answer": "Parameters: @minutes_since_sent and @expected_result. Rows: 0 -> Accepted (fresh alert). 5 -> Accepted (middle of valid partition). 9.9 or 9:59 -> Accepted (just inside boundary). 10:01 -> Rejected, 'expired' (just outside). 30 -> Rejected, 'expired' (far outside). Because the expected result differs per row, the second column is a parameter too. Each row is chosen for a partition or boundary, not volume. Add a note column explaining the reason for each row. Configuration: run on the pharmacist's phone configuration only, since manager desktop is not relevant.",
+          "rubric": [
+            "Rows chosen from partitions/boundaries",
+            "Expected result as a parameter",
+            "Explains each row",
+            "Sensible configuration choice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u10-l3",
+      "title": "The runner, evidence and filing bugs, accurately",
+      "minutes": 10,
+      "body": "This lesson tightens the earlier run lesson with what the tool actually offers.\n\n**Where you run.** In the Test Plans area, open a plan, go to the **Execute** view, and pick a suite. The grid lists test points with outcome, tester, configuration and build. You can run selected points or the whole suite. Choose **Run for web application** to use the browser-based **Test Runner**; **Run with options** lets you pick a build, a test settings choice or another client (for desktop apps). Mark outcomes in bulk from the grid when needed, for example marking a set of points Not applicable.\n\n**Inside Test Runner.** Steps appear in a panel beside your app. For each step you mark Pass or Fail, add a comment, and attach files. The runner can capture a **screenshot**, an **image action log** (a trail of your clicks) and a **screen recording**, and it collects system information. You can pause and resume, edit the step text while running (the change is saved to the test case when you choose), and create a bug or update an existing one.\n\n**Outcomes.** Passed, Failed, Blocked, Not applicable, and Active for a point not yet run. A step failing makes the case Failed.\n\n**Create bug from a failed step.** The bug is a work item in your process (Bug in Agile). The tool pre-fills the Repro Steps with the steps up to the failure, adds the screenshots or recording you captured, adds system info, links the bug to the test case (and to the requirement through the case), and links to the test result. You fill in title, severity, priority, area and iteration, expected versus actual.\n\n**Verifying a fix.** Open the bug's linked test point, rerun on the new build, mark Passed, then close the bug. The failed result stays in history, which gives you the evidence trail.\n\n**Run records.** Every execution creates a test run and test results. The **Runs** view lists runs with filters, summaries and attachments; open one to see who ran what on which build. This is your audit trail for UAT sign-off.\n\n**Choosing the build.** Select the build under test before running so results tie to it. A result without a build is almost useless when someone asks 'which version did this pass on?'.\n\n**Hygiene.** One bug per defect. Link rather than duplicate. Retest only the failed points on a fix, then rerun smoke and the affected regression group on the next build.\n\n**Where this was weaker in older material.** Names and buttons change between versions of the web portal. If a button is not where you expect, search the Execute view for the action by its function: run, run with options, bulk mark, create bug.",
+      "keyPoints": [
+        "Run from the Execute view; Test Runner marks steps, captures screenshots, action logs and recordings.",
+        "Create bug from a failed step prefills repro steps, attachments and links.",
+        "Always choose the build so results tie to a version.",
+        "The Runs view is your audit trail."
+      ],
+      "interviewAngle": "Walk through one failure end to end: step fails, screenshot, bug from the step, severity and priority, link to the story, fix resolved, retest on the new build, close. Mention evidence and build number. Avoid claiming exact menu labels; describe the action.",
+      "exercises": [
+        {
+          "id": "tp-u10-l3-e1",
+          "type": "mcq",
+          "prompt": "What does 'Create bug' from a failed step add automatically?",
+          "choices": [
+            "The fix",
+            "Repro steps from the executed steps, attachments, and links to the test case",
+            "A new test plan",
+            "A pull request"
+          ],
+          "answer": 1,
+          "explanation": "It prefills repro steps and links; you add the rest.",
+          "placement": true
+        },
+        {
+          "id": "tp-u10-l3-e2",
+          "type": "mcq",
+          "prompt": "Why select a build before running?",
+          "choices": [
+            "It speeds up the runner",
+            "Results are tied to a version for later questions and sign-off",
+            "It is required to open Test Runner",
+            "It changes the configuration"
+          ],
+          "answer": 1,
+          "explanation": "Traceability of the version tested."
+        },
+        {
+          "id": "tp-u10-l3-e3",
+          "type": "short",
+          "prompt": "What does Test Runner call the recorded trail of your clicks?",
+          "accept": [
+            "image action log",
+            "action log"
+          ],
+          "answer": "image action log",
+          "explanation": "It records actions with screenshots."
+        },
+        {
+          "id": "tp-u10-l3-e4",
+          "type": "open",
+          "prompt": "A step failed during a run. List what you do in order from marking the step to verifying the fix.",
+          "answer": "1. Mark the step Failed, add a comment saying what happened versus expected. 2. Capture a screenshot or recording of the failure state. 3. Create a bug from the step; tidy the pre-filled repro steps to the minimum; add title, severity, priority, area, iteration, build and environment. 4. Check it links to the test case and story. 5. Finish the run honestly (remaining steps marked or the case blocked). 6. When the developer sets the bug Resolved on a new build, rerun that test point on that build. 7. If it passes mark Passed, close the bug; if it fails, reactivate the bug with the new build and result.",
+          "rubric": [
+            "Failed step with evidence",
+            "Bug from step and tidied",
+            "Links verified",
+            "Retest on new build",
+            "Close or reactivate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u10-l4",
+      "title": "Exploratory testing with the Test & Feedback extension",
+      "minutes": 9,
+      "body": "The **Test & Feedback** extension runs in the browser (Chrome and Microsoft Edge, and Firefox per Microsoft's docs) and supports exploratory sessions without a plan or suite. It is free. People with Stakeholder access can use it to give feedback, so customers and business staff can contribute.\n\n**Modes.**\n\n- **Connected mode.** The extension connects to your Azure DevOps organization and project. You can explore a particular user story or feature and see its acceptance criteria in a panel, and the bugs, tasks and test cases you create are linked to what you explore. The session is saved so you can see who explored what.\n- **Standalone mode.** No connection. You capture screenshots, notes and recordings and export an HTML report to share.\n\n**During a session.** Start a session, browse the application, and use the capture tools: screenshots with annotation, screen recording and typed notes. When you find a defect, create a bug from the extension; the captured evidence is attached and, in connected mode, the bug carries the steps and links to the work item. You can also create a task or a test case from what you explored. When the session ends, the saved session shows its notes and findings.\n\n**Insights.** Test Plans has views summarising exploratory sessions across a team, with filters for time and scope, so a lead can see which stories were explored and how many bugs came out. A shared query can list work items nobody has explored yet. That helps you answer 'what has not been looked at?'.\n\n**Using it well.**\n\n1. Write the charter first and keep it in the notes.\n2. Time-box to 45 to 90 minutes.\n3. Explore from the story's acceptance criteria outward.\n4. Convert useful discoveries into test cases so the knowledge survives.\n5. Log what you did not cover.\n\n**Stakeholder feedback.** Developers can ask for feedback on a story; stakeholders respond through the extension with notes, screenshots and bugs. Availability of the formal request-feedback workflow differs between Azure DevOps Services and Server, so check your version before promising it to a customer.\n\n**When to prefer it to scripted cases.** New features still changing, usability, wording, risky integrations, and the final hour before release. When to avoid: compliance evidence that needs a repeatable script.\n\nFree-tier note: the extension works with the free organization.",
+      "keyPoints": [
+        "Test & Feedback captures screenshots, recordings and notes, and files linked bugs from a browser.",
+        "Connected mode links work to the story being explored; Standalone mode exports an HTML report.",
+        "Stakeholders can use it, so business users can give structured feedback.",
+        "Turn useful discoveries into test cases."
+      ],
+      "interviewAngle": "Say you used exploratory sessions on new features before writing scripted cases, kept charters and notes, and converted findings to cases. If you did not use this extension at work, say you used manual exploration and know the extension from the docs and your lab practice.",
+      "exercises": [
+        {
+          "id": "tp-u10-l4-e1",
+          "type": "mcq",
+          "prompt": "Which statement about Test & Feedback is correct?",
+          "choices": [
+            "It requires a test plan and suite",
+            "It works in the browser and can be used by Stakeholders",
+            "It runs only on Windows desktop",
+            "It replaces Test Runner for scripted cases"
+          ],
+          "answer": 1,
+          "explanation": "Exploratory sessions need no plan; Stakeholders can use it.",
+          "placement": true
+        },
+        {
+          "id": "tp-u10-l4-e2",
+          "type": "mcq",
+          "prompt": "Which mode lets you link bugs to the user story you are exploring?",
+          "choices": [
+            "Standalone",
+            "Connected",
+            "Offline",
+            "Guest"
+          ],
+          "answer": 1,
+          "explanation": "Connected mode links to Azure DevOps work items."
+        },
+        {
+          "id": "tp-u10-l4-e3",
+          "type": "short",
+          "prompt": "What is the output of a Standalone session that you can send to someone?",
+          "accept": [
+            "html report",
+            "an html report"
+          ],
+          "answer": "HTML report",
+          "explanation": "Standalone mode exports an HTML report."
+        },
+        {
+          "id": "tp-u10-l4-e4",
+          "type": "open",
+          "prompt": "Plan a 60-minute exploratory session on the SOS accept flow using the extension. Give the charter, the setup, what you capture, and what you leave behind.",
+          "answer": "Charter: Explore accepting an SOS alert with pharmacists in different statuses, expired alerts and repeat taps to discover wrongly accepted or lost assignments. Setup: Connected mode to the lab project, select the 'Pharmacist accepts an SOS request' story so its acceptance criteria show; test accounts for two pharmacists and a manager; build number noted. Capture: screenshots at each state, a screen recording for any odd behaviour, notes in time order. Findings: bugs created from the extension linked to the story; two ideas turned into test cases; questions for the product owner. Leave behind: session notes with charter, duration, areas not covered, and bug IDs.",
+          "rubric": [
+            "Specific charter",
+            "Connected to the story",
+            "Evidence captured",
+            "Bugs and test cases from findings",
+            "Notes of coverage and gaps"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,525 @@
+{
+  "id": "pw-u4",
+  "title": "Structure, configuration and debugging",
+  "summary": "Grouping tests, hooks and fixtures, the config file, recording with codegen, debugging with the trace viewer and reusing a login.",
+  "lessons": [
+    {
+      "id": "pw-u4-l1",
+      "title": "Organising tests: describe, hooks and fixtures",
+      "minutes": 9,
+      "body": "As a suite grows you need structure. Three tools cover most of it.\n\n**test.describe groups related tests**\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest.describe('shift requests', () => {\n  test('dispatcher can request a shift', async ({ page }) => { /* ... */ });\n  test('request needs a pharmacy', async ({ page }) => { /* ... */ });\n});\n```\n\nGroups make the report readable and let you attach shared setup to a set of tests.\n\n**Hooks run shared steps**\n\n```ts\ntest.describe('shift requests', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.goto('/shifts/new');\n  });\n\n  test('request needs a pharmacy', async ({ page }) => {\n    await page.getByRole('button', { name: 'Request shift' }).click();\n    await expect(page.getByText('Pharmacy is required')).toBeVisible();\n  });\n});\n```\n\n`beforeEach` runs before every test in the group; `afterEach`, `beforeAll` and `afterAll` also exist. Keep hooks small. If a hook does a lot, readers cannot tell what a test starts with.\n\n**Fixtures give each test what it needs**\n\nYou have already used fixtures: `page` is one. A fixture sets something up, hands it to the test, and cleans up afterwards. You can define your own with `test.extend`. At a user's level, think of it as a reusable \"start here\" step:\n\n```ts\nimport { test as base, expect } from '@playwright/test';\n\ntype Fixtures = { newShiftPage: import('@playwright/test').Page };\n\nexport const test = base.extend<Fixtures>({\n  newShiftPage: async ({ page }, use) => {\n    await page.goto('/shifts/new');\n    await use(page);   // the test runs here\n  },\n});\nexport { expect };\n```\n\nA test then asks for `newShiftPage` instead of repeating `goto`. Tests that do not ask for it do not pay for it.\n\n**Keep tests independent**\n\nEach test should set up its own state and not rely on another test having run first. Playwright can run tests in parallel across files, so order-dependent tests break in confusing ways. If setup is expensive (creating a test pharmacy), prefer an API call in a hook over clicking through the UI.\n\n**Names matter**\n\nName a test as a sentence about behaviour: \"dispatcher can request a shift\". When it fails in a report, the name should tell you what broke without opening the code.",
+      "keyPoints": [
+        "`test.describe` groups; `beforeEach`/`afterEach` run shared steps.",
+        "Fixtures like `page` set up and clean up per test; `test.extend` adds your own.",
+        "Tests must be independent so parallel runs work.",
+        "Name tests as behaviours so a failing report is readable."
+      ],
+      "interviewAngle": "You are unlikely to be asked to design a framework, and you should not claim to have. If asked about structure, describe what you did: grouped tests by feature, used a `beforeEach` for navigation, kept tests independent. Say you understand fixtures and the page object idea but kept things simple because the suite was small.",
+      "exercises": [
+        {
+          "id": "pw-u4-l1-e1",
+          "type": "mcq",
+          "prompt": "What is the main reason tests should not depend on each other's order?",
+          "choices": [
+            "Playwright forbids shared variables",
+            "Tests can run in parallel and in isolation, so order-dependent tests fail unpredictably",
+            "Reports can only show one test",
+            "Hooks do not run otherwise"
+          ],
+          "answer": 1,
+          "explanation": "Parallel workers run files (and sometimes tests) independently. Each test should create the state it needs.",
+          "placement": true
+        },
+        {
+          "id": "pw-u4-l1-e2",
+          "type": "mcq",
+          "prompt": "What does `test.beforeEach` do?",
+          "choices": [
+            "Runs once before the first test in the file",
+            "Runs before every test in its scope",
+            "Runs after a test fails",
+            "Skips tests that already passed"
+          ],
+          "answer": 1,
+          "explanation": "`beforeEach` runs before each test in the file or `describe` block where it is declared."
+        },
+        {
+          "id": "pw-u4-l1-e3",
+          "type": "short",
+          "prompt": "Which method on `test` lets you define your own fixtures? (Method name only.)",
+          "accept": [
+            "extend",
+            "test.extend",
+            "base.extend"
+          ],
+          "answer": "extend",
+          "explanation": "`test.extend` creates a new `test` with additional fixtures."
+        },
+        {
+          "id": "pw-u4-l1-e4",
+          "type": "open",
+          "prompt": "Write a `test.describe` block named \"shift cancellation\" with a `beforeEach` that opens `/shifts/1042`, and one test that clicks \"Cancel shift\" and expects the text \"Cancelled\". Add a one-line comment on what would break if the second test relied on the first having run.",
+          "answer": "```ts\nimport { test, expect } from '@playwright/test';\n\ntest.describe('shift cancellation', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.goto('/shifts/1042');\n  });\n\n  test('dispatcher can cancel an open shift', async ({ page }) => {\n    await page.getByRole('button', { name: 'Cancel shift' }).click();\n    await expect(page.getByText('Cancelled')).toBeVisible();\n  });\n\n  // A second test that assumed shift 1042 was already cancelled would fail\n  // when run alone or in parallel, because tests must create their own state.\n});\n```",
+          "rubric": [
+            "Uses test.describe with the right name",
+            "beforeEach navigates with page.goto",
+            "Test clicks by role and asserts with await expect",
+            "Comment identifies order dependence/parallel risk"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u4-l2",
+      "title": "Configuration: baseURL, projects, retries, reporters",
+      "minutes": 9,
+      "body": "`playwright.config.ts` controls the whole run. A realistic example for a scheduling app:\n\n```ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 0,\n  workers: process.env.CI ? 2 : undefined,\n  reporter: [\n    ['html', { open: 'never' }],\n    ['junit', { outputFile: 'results/junit.xml' }],\n  ],\n  use: {\n    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',\n    trace: 'on-first-retry',\n    screenshot: 'only-on-failure',\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n  ],\n});\n```\n\n**What matters here**\n\n- `baseURL` lets tests call `page.goto('/shifts')` instead of repeating the host. Reading it from an environment variable means the same tests run against local, test and staging environments.\n- `projects` define browsers or setups. Each test runs once per project. Chromium alone is a fine start; adding Firefox or WebKit costs run time.\n- `retries` re-runs a failed test. Locally 0 is better because you want to see failures. In CI a small number (1 or 2) absorbs rare infrastructure hiccups. Retries are not a fix; a test that only passes on retry is reported as flaky and needs attention.\n- `forbidOnly` fails the run if someone left `test.only` in the code, which would otherwise silently skip everything else in CI.\n- `baseURL` and paths: `page.goto('/shifts')` resolves against the origin. If your base URL has a path (`https://host/app`), `goto('/')` drops it. Use a trailing slash (`https://host/app/`) and `goto('./')`; I hit this on a demo site.\n- `reporter` can be a list. `open: 'never'` stops the HTML report opening itself after a local failure. The HTML report is for people; JUnit XML is what Azure Pipelines reads to show results in its test tab.\n- `trace: 'on-first-retry'` records a trace only when a test is retried, giving you full debugging data without slowing every run.\n- `workers` sets parallel processes. CI machines are small, so fewer workers can be more stable.\n\n**Timeouts**\n\nA test has an overall timeout (30 seconds by default); `expect` has its own (5 seconds). Raise them in config only with a reason, such as a known slow environment. A pile of long timeouts hides performance problems.\n\n**Environment-specific values**\n\nKeep URLs and credentials out of test files. Read them from environment variables, and in a pipeline set them as variables or secrets, never in the repository.",
+      "keyPoints": [
+        "`baseURL` plus relative `goto` lets one suite run against any environment.",
+        "`projects` set browsers; each test runs once per project.",
+        "Retries absorb rare hiccups in CI but flaky results still need investigating.",
+        "Use an HTML reporter for people and a JUnit reporter for Azure Pipelines."
+      ],
+      "interviewAngle": "Config questions test whether you understand how tests run in a pipeline. Be able to say what baseURL, retries and the JUnit reporter are for. Be honest about scope: you used a straightforward config, likely one browser, and changed values rather than designing a setup from scratch.",
+      "exercises": [
+        {
+          "id": "pw-u4-l2-e1",
+          "type": "mcq",
+          "prompt": "What is the benefit of setting `baseURL` in the config?",
+          "choices": [
+            "Tests run faster",
+            "`page.goto('/shifts')` works with a relative path and the environment can be switched in one place",
+            "It installs browsers",
+            "It disables auto-waiting"
+          ],
+          "answer": 1,
+          "explanation": "Relative URLs resolve against `baseURL`, so the same tests can run against local, test or staging.",
+          "placement": true
+        },
+        {
+          "id": "pw-u4-l2-e2",
+          "type": "mcq",
+          "prompt": "Which reporter produces results that Azure Pipelines can display in its test results tab?",
+          "choices": [
+            "html",
+            "line",
+            "junit",
+            "dot"
+          ],
+          "answer": 2,
+          "explanation": "Azure Pipelines' PublishTestResults task understands JUnit XML; the HTML report is published separately as an artifact."
+        },
+        {
+          "id": "pw-u4-l2-e3",
+          "type": "mcq",
+          "prompt": "Why is `forbidOnly: !!process.env.CI` a good setting?",
+          "choices": [
+            "It forbids retries in CI",
+            "It stops a stray `test.only` from silently skipping the rest of the suite in CI",
+            "It disables headed mode",
+            "It sets the number of workers"
+          ],
+          "answer": 1,
+          "explanation": "If `test.only` is committed, only that test would run. `forbidOnly` makes the CI run fail instead."
+        },
+        {
+          "id": "pw-u4-l2-e4",
+          "type": "open",
+          "prompt": "Write a `playwright.config.ts` for a team that wants: tests in `./tests`, a base URL read from `BASE_URL` (default `http://localhost:3000`), 2 retries in CI and none locally, Chromium only, an HTML report and a JUnit report at `results/junit.xml`, and a trace kept when a test is retried.",
+          "answer": "```ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  retries: process.env.CI ? 2 : 0,\n  reporter: [\n    ['html'],\n    ['junit', { outputFile: 'results/junit.xml' }],\n  ],\n  use: {\n    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',\n    trace: 'on-first-retry',\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n  ],\n});\n```",
+          "rubric": [
+            "Uses defineConfig and testDir",
+            "Retries conditional on process.env.CI",
+            "Both html and junit reporters with outputFile",
+            "baseURL from env with default; trace on-first-retry; one chromium project"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u4-l3",
+      "title": "Codegen, the trace viewer and logging in once",
+      "minutes": 10,
+      "body": "**Codegen: record to get started**\n\n```bash\nnpx playwright codegen http://localhost:3000\n```\n\nThis opens a browser and an inspector. As you click and type, Playwright writes the test code, choosing role and label locators where it can. Treat the output as a draft. It is excellent for learning locator syntax and for quickly mapping a flow. Then clean it up: give the test a behaviour name, replace anything fragile, and add real assertions, because recorded tests usually check little.\n\n**Trace viewer: debugging a failure**\n\nA trace is a recording of a test run: every action, the page snapshot before and after each step, network calls and console output. With `trace: 'on-first-retry'` in the config, a failed-then-retried test saves one. Open it with:\n\n```bash\nnpx playwright show-trace test-results/shifts-request-chromium-retry1/trace.zip\n```\n\nOr open the HTML report and click the trace for the failed test. In the viewer you step through the timeline, see exactly what the page looked like when the action failed, and read the locator that did not match. Most \"why did it fail in the pipeline\" questions are answered here: element not found, covered by a dialog, wrong text, or a network error.\n\nYou can also debug locally with `npx playwright test --debug`, which opens the inspector and steps through the test.\n\n**Logging in once with storage state**\n\nMost apps need a login. Logging in through the UI in every test is slow. Instead, log in once in a setup step, save the browser's cookies and storage to a file, and reuse it.\n\n```ts\n// tests/auth.setup.ts\nimport { test as setup, expect } from '@playwright/test';\n\nconst authFile = 'playwright/.auth/dispatcher.json';\n\nsetup('log in as dispatcher', async ({ page }) => {\n  await page.goto('/login');\n  await page.getByLabel('Email').fill(process.env.TEST_USER!);\n  await page.getByLabel('Password').fill(process.env.TEST_PASSWORD!);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page).toHaveURL(/\\/shifts/);\n  await page.context().storageState({ path: authFile });\n});\n```\n\n```ts\n// playwright.config.ts (projects section)\nprojects: [\n  { name: 'setup', testMatch: /.*\\.setup\\.ts/ },\n  {\n    name: 'chromium',\n    use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/dispatcher.json' },\n    dependencies: ['setup'],\n  },\n],\n```\n\nAdd `playwright/.auth` to `.gitignore`: the file contains session data. Credentials come from environment variables or pipeline secrets, never from the repository, and use a dedicated test account.",
+      "keyPoints": [
+        "Codegen records a draft; clean it up and add real assertions.",
+        "The trace viewer shows each step with page snapshots, network and console, and is the first stop for a failure.",
+        "Log in once in a setup project and reuse `storageState`.",
+        "Keep the auth file out of git and credentials in environment variables or secrets."
+      ],
+      "interviewAngle": "Debugging is the strongest honest story for a basic automator: \"When a test failed in the pipeline I opened the report and trace, saw what the page looked like at the failing step, and found whether it was a real bug, a changed label or a timing issue.\" Do not claim to have built the auth setup unless you did; you can say you understand how it works.",
+      "exercises": [
+        {
+          "id": "pw-u4-l3-e1",
+          "type": "mcq",
+          "prompt": "A test fails only in the pipeline. What is the quickest way to see what the page looked like at the failing step?",
+          "choices": [
+            "Add `waitForTimeout` everywhere",
+            "Open the trace for the failed test in the report or with show-trace",
+            "Rerun with more workers",
+            "Delete the test"
+          ],
+          "answer": 1,
+          "explanation": "A trace records page snapshots, actions, network and console for each step, so you can inspect the exact moment of failure.",
+          "placement": true
+        },
+        {
+          "id": "pw-u4-l3-e2",
+          "type": "mcq",
+          "prompt": "Why save login state with `storageState` instead of logging in through the UI in every test?",
+          "choices": [
+            "Playwright cannot click login buttons",
+            "It is faster and keeps login failures out of unrelated tests",
+            "It makes passwords unnecessary everywhere",
+            "It disables parallelism"
+          ],
+          "answer": 1,
+          "explanation": "A single setup login is reused, saving time; the login flow gets its own test instead of being a hidden dependency of every test."
+        },
+        {
+          "id": "pw-u4-l3-e3",
+          "type": "mcq",
+          "prompt": "What should you do with recorded codegen output?",
+          "choices": [
+            "Commit it unchanged",
+            "Treat it as a draft: rename, tidy locators and add meaningful assertions",
+            "Delete the assertions",
+            "Convert locators to XPath"
+          ],
+          "answer": 1,
+          "explanation": "Codegen is a starting point; recorded tests often lack assertions and have generic names."
+        },
+        {
+          "id": "pw-u4-l3-e4",
+          "type": "open",
+          "prompt": "A teammate's test failed in the pipeline with \"locator.click: Timeout 30000ms exceeded... waiting for getByRole('button', { name: 'Assign' })\". Describe, step by step, how you would investigate using the report and the trace, and name three possible causes.",
+          "answer": "1. Open the HTML report (published as a pipeline artifact) and find the failed test; read the full error and the last steps.\n2. Open the trace for that test and go to the failing step. Look at the page snapshot: is the page what I expected, and is there an \"Assign\" button on it?\n3. Check the network tab in the trace for failed or slow requests, and the console for errors.\n\nPossible causes:\n- The button label changed (for example to \"Assign pharmacist\"), so the locator no longer matches. This is a test fix.\n- The page did not reach that state because an earlier request failed or was slow, or login failed. This may be a real defect or an environment issue.\n- The button is present but disabled or covered by a dialog, so actionability never passed.\n\nThen decide: fix the test, raise a bug ticket, or flag the environment.",
+          "rubric": [
+            "Starts with the report/error and opens the trace",
+            "Inspects the snapshot at the failing step, network and console",
+            "Names at least three plausible causes (label change, page state/data, disabled or covered, slow environment)",
+            "Ends with a decision: fix test, file bug or fix environment"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u4-l4",
+      "title": "Fixtures and a first page object",
+      "minutes": 10,
+      "body": "Two patterns remove repeated code from tests. Both are optional at a small scale; know what they are for.\n\n**Page object**\n\nA page object is a class that holds the locators and common actions for one page. Playwright's own guide describes it as giving each part of a web app its own class. Here is one for the TodoMVC demo:\n\n```ts\nexport class TodoPage {\n  readonly input: Locator;\n  readonly items: Locator;\n  readonly count: Locator;\n\n  constructor(readonly page: Page) {\n    this.input = page.getByPlaceholder('What needs to be done?');\n    this.items = page.getByTestId('todo-item');\n    this.count = page.getByTestId('todo-count');\n  }\n\n  async goto() { await this.page.goto('./'); }\n  async add(title: string) {\n    await this.input.fill(title);\n    await this.input.press('Enter');\n  }\n  async complete(title: string) {\n    await this.items.filter({ hasText: title }).getByRole('checkbox').check();\n  }\n}\n```\n\nIf the placeholder changes, you edit one line, not twenty tests.\n\n**Fixture that builds it**\n\nA fixture creates the object, hands it to the test, and cleans up. `test.extend` adds one:\n\n```ts\nconst test = base.extend<{ todoPage: TodoPage }>({\n  todoPage: async ({ page }, use) => {\n    const todoPage = new TodoPage(page);\n    await todoPage.goto();\n    await use(todoPage);       // the test body runs here\n  },\n});\n\ntest('add and complete', async ({ todoPage }) => {\n  await todoPage.add('Call Maple Street Pharmacy');\n  await todoPage.add('Confirm shift 1042');\n  await todoPage.complete('Confirm shift 1042');\n  await expect(todoPage.items).toHaveCount(2);\n  await expect(todoPage.count).toContainText('1 item left');\n});\n```\n\nI ran this test and it passes. Playwright's docs note that fixtures run only for tests that ask for them, unlike a `beforeEach` that runs for every test in the file.\n\n**Keep assertions in the test**\n\nA common rule: the page object finds things and does things; the test decides what is correct. `expect` calls stay in the test file so a failure reads as a requirement.\n\n**When not to bother**\n\nUnder about ten tests on two pages, plain locators in the tests are fine. Add a page object when the same locators repeat in three or more places.",
+      "keyPoints": [
+        "A page object holds the locators and actions for one page, so a change is made in one place.",
+        "`test.extend` creates fixtures; the test body runs at `await use(...)`.",
+        "Fixtures run only for tests that request them; `beforeEach` runs for all tests in scope.",
+        "Keep assertions in tests; keep page objects to finding and doing."
+      ],
+      "interviewAngle": "Expect \"have you used the page object model?\" Honest answer: you understand it and can read one; you kept a small suite with plain locators. This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u4-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the main benefit of a page object?",
+          "choices": [
+            "It removes the need for locators",
+            "It makes tests run in parallel",
+            "Locators and actions for a page live in one place, so UI changes are fixed once",
+            "It replaces assertions"
+          ],
+          "answer": 2,
+          "explanation": "Without it, a changed placeholder means editing every test that uses it."
+        },
+        {
+          "id": "pw-u4-l4-e2",
+          "type": "short",
+          "prompt": "Which method on `test` adds a custom fixture? (Method name only.)",
+          "accept": [
+            "extend",
+            "test.extend",
+            "base.extend"
+          ],
+          "answer": "extend",
+          "explanation": "`base.extend<...>({ ... })` returns a new `test` with your fixture."
+        },
+        {
+          "id": "pw-u4-l4-e3",
+          "type": "mcq",
+          "prompt": "In a fixture, what happens at `await use(todoPage)`?",
+          "choices": [
+            "The test is skipped",
+            "The test body runs with the fixture value; code after use() is teardown",
+            "The fixture ends and the browser closes",
+            "All other fixtures are reset"
+          ],
+          "answer": 1,
+          "explanation": "Code before use() is setup; the test runs at use(); code after it is cleanup."
+        },
+        {
+          "id": "pw-u4-l4-e4",
+          "type": "mcq",
+          "prompt": "Where should `expect(...)` calls normally go when you use page objects?",
+          "choices": [
+            "In the test, so failures read as requirements",
+            "Inside every page object method",
+            "In the Playwright config",
+            "Nowhere; page objects forbid assertions"
+          ],
+          "answer": 0,
+          "explanation": "This is a common convention (not a rule): page objects find and act, tests assert."
+        },
+        {
+          "id": "pw-u4-l4-e5",
+          "type": "open",
+          "prompt": "Write a `LoginPage`-style page object with a `goto()` and `signIn(email, password)` method for a form with labels Email and Password and a button named Sign in. Then write the one line a test uses to sign in. Say where the password should come from.",
+          "answer": "```ts\nexport class LoginPage {\n  constructor(readonly page: Page) {}\n  async goto() { await this.page.goto('/login'); }\n  async signIn(email: string, password: string) {\n    await this.page.getByLabel('Email').fill(email);\n    await this.page.getByLabel('Password').fill(password);\n    await this.page.getByRole('button', { name: 'Sign in' }).click();\n  }\n}\n// in a test\nawait new LoginPage(page).signIn(process.env.TEST_USER!, process.env.TEST_PASSWORD!);\n```\nThe password comes from an environment variable or a pipeline secret, never from the repository.",
+          "rubric": [
+            "Constructor takes page",
+            "Uses getByLabel and getByRole",
+            "signIn takes the credentials as parameters",
+            "Credentials read from environment variables",
+            "No assertion hidden in the page object"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u4-l5",
+      "title": "Test data and environment variables",
+      "minutes": 9,
+      "body": "A test is only as repeatable as its data. Two questions: where does the test get its **settings** (URL, user), and where does it get the **records** it works on?\n\n**Settings from environment variables**\n\nRead them from `process.env` and give safe defaults for non-secrets:\n\n```ts\n// playwright.config.ts\nuse: { baseURL: process.env.BASE_URL ?? 'https://demo.playwright.dev/todomvc/' }\n\n// in a test file\nconst title = process.env.TODO_TITLE ?? 'default title';\n```\n\nRun against another environment without editing code:\n\n```bash\nBASE_URL=https://staging.example.com/ npx playwright test      # macOS, Linux, Git Bash\n$env:BASE_URL=\"https://staging.example.com/\"; npx playwright test   # PowerShell\n```\n\nI ran this with `TODO_TITLE=\"Call Maple\"` and the test printed it. For secrets, never give a default. Skip with a clear reason if one is missing:\n\n```ts\ntest('log in as dispatcher', async ({ page }) => {\n  test.skip(!process.env.TEST_PASSWORD, 'TEST_PASSWORD is not set');\n  // ...\n});\n```\n\nI ran this: the report shows the test as skipped, with the reason, not as a false failure.\n\n**A trap with baseURL**\n\n`page.goto('/')` resolves against the *origin*. With `baseURL: 'https://demo.playwright.dev/todomvc'`, `goto('/')` went to `https://demo.playwright.dev/` and every test timed out. The fix is a trailing slash on `baseURL` and a relative path: `goto('./')`. If your app lives under a path, test this first.\n\n**Records: make your own, and make them unique**\n\nTests that share a record interfere with each other. Give each run its own:\n\n```ts\nconst unique = `${title} ${Date.now()}`;\n```\n\nCreate the record through an API call or a seed, not by clicking through a long UI flow, and delete it afterwards when the system allows.\n\n**Where secrets live**\n\nIn the pipeline's secret variables or a variable group, mapped to `env:` on the test step. A local `.env` file is fine on your machine only if it is in `.gitignore`. Loading it needs a small helper such as `dotenv` (not used in the runs above).",
+      "keyPoints": [
+        "Read URLs and credentials from `process.env`; defaults only for non-secrets.",
+        "`test.skip(condition, reason)` avoids a misleading failure when a secret is missing.",
+        "`goto('/')` ignores a path in `baseURL`; use a trailing slash and `goto('./')`.",
+        "Give each test unique data and prefer creating it by API over clicking."
+      ],
+      "interviewAngle": "\"How do you handle test data and credentials?\" Say: environment variables and pipeline secrets, nothing in the repo, unique data per run, a dedicated test account. Be straightforward that you used a small, fixed set of test data at work. This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u4-l5-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A test reads `process.env.TEST_PASSWORD`. Where should the value come from in a pipeline?",
+          "choices": [
+            "Hard-coded in the spec file",
+            "A public variable in the YAML",
+            "The README",
+            "A secret pipeline variable mapped in the step's env"
+          ],
+          "answer": 3,
+          "explanation": "Secrets belong in secret variables or a variable group, and secret variables must be mapped into the script's env."
+        },
+        {
+          "id": "pw-u4-l5-e2",
+          "type": "mcq",
+          "prompt": "`baseURL` is `https://demo.playwright.dev/todomvc` and the test calls `page.goto('/')`. Where does it go?",
+          "choices": [
+            "https://demo.playwright.dev/todomvc/index",
+            "https://demo.playwright.dev/todomvc/",
+            "https://demo.playwright.dev/",
+            "It throws an error before navigating"
+          ],
+          "answer": 2,
+          "explanation": "A path starting with / replaces the base path. Use a baseURL ending in / and goto('./'). I ran this and the tests timed out."
+        },
+        {
+          "id": "pw-u4-l5-e3",
+          "type": "short",
+          "prompt": "Which `test` method skips a test and records a reason when a condition holds? (Name only.)",
+          "accept": [
+            "skip",
+            "test.skip"
+          ],
+          "answer": "skip",
+          "explanation": "`test.skip(!process.env.TEST_PASSWORD, 'TEST_PASSWORD is not set')`."
+        },
+        {
+          "id": "pw-u4-l5-e4",
+          "type": "mcq",
+          "prompt": "Two tests both edit \"shift 1042\" and fail when run together. What is the best fix?",
+          "choices": [
+            "Give each test its own record with unique data",
+            "Add retries",
+            "Run with one worker forever",
+            "Add waitForTimeout"
+          ],
+          "answer": 0,
+          "explanation": "Shared records couple tests. Unique data keeps them independent and parallel-safe."
+        },
+        {
+          "id": "pw-u4-l5-e5",
+          "type": "open",
+          "prompt": "Describe how you would run the same suite against a test environment and a staging environment, with a login that needs a password. Cover the base URL, the credentials, what a local run does if the password is missing, and what must stay out of git.",
+          "answer": "The base URL comes from BASE_URL in the config, set per pipeline or per shell, so no code changes. The username and password come from TEST_USER and TEST_PASSWORD, set as secret pipeline variables and mapped into env on the test step; locally from my shell. If the password is missing, the login test calls test.skip with a reason instead of failing misleadingly. A .env file, the playwright/.auth storage state and any credentials stay out of git through .gitignore.",
+          "rubric": [
+            "Base URL from an environment variable",
+            "Credentials from secret variables mapped into env",
+            "Missing secret handled with test.skip and a reason",
+            "Auth state and .env excluded from git"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u4-l6",
+      "title": "Parallelism, retries and reporters",
+      "minutes": 10,
+      "body": "Three settings decide how a run behaves and what you read afterwards.\n\n**Workers and parallelism**\n\nPlaywright runs test **files** in parallel on several worker processes. Tests inside one file run in order on one worker, unless you set `fullyParallel: true` (as the config in the earlier lesson does). Limit workers with `workers: 2` or `--workers=1`. Fewer workers is slower but steadier on a small CI agent.\n\nRules that keep parallel runs safe: independent tests, unique data, no shared state. A group that must run in order can opt in:\n\n```ts\ntest.describe.configure({ mode: 'serial' });   // use rarely; one failure skips the rest\n```\n\n**Retries and the \"flaky\" label**\n\n```bash\nnpx playwright test --retries=2\n```\n\nI ran a test written to fail on its first attempt only. The list reporter showed `x ... fails on first attempt only` then `ok ... (retry #1)`, and the summary read `1 flaky`. Playwright's docs define a flaky test as one that fails on first run and passes on a retry, and say a failed test is rerun in a fresh worker. That is useful for spotting problems and dangerous as a blanket cure.\n\nIn CI a retried-and-passed test can leave the pipeline green. Check the run summary, not only the colour.\n\n**Reporters**\n\nA reporter decides the output.\n\n| Reporter | Use |\n|---|---|\n| `list` | One line per test; readable locally |\n| `dot` | One character per test; quiet, good for CI logs |\n| `line` | A single updating line |\n| `html` | Browsable report; `npx playwright show-report` |\n| `junit` | XML for the Azure Pipelines Tests tab |\n\nSet them in the config as a list:\n\n```ts\nreporter: [['html', { open: 'never' }], ['junit', { outputFile: 'results/junit.xml' }]],\n```\n\n`open: 'never'` stops the HTML report opening a browser after a local failure, which can hang a terminal. I ran the CI-style command (`CI=true npx playwright test`) and got both `playwright-report/index.html` and `results/junit.xml`.\n\nOn the command line, `--reporter=dot` replaces the config's reporters for that run, and `junit` then prints XML to the screen unless an `outputFile` is set (I ran into this).",
+      "keyPoints": [
+        "Files run in parallel on workers; tests in one file run in order unless `fullyParallel` is on.",
+        "A test that fails then passes on retry is reported as flaky, not passed.",
+        "Use `junit` for Azure's Tests tab and `html` for people; `open: 'never'` avoids a hanging local run.",
+        "`--reporter` on the command line overrides the config's reporters."
+      ],
+      "interviewAngle": "\"How do you run tests in parallel, and what are the risks?\" Say independent tests and unique data, and that a retried pass is a flaky test to investigate. This goes beyond basic tests: say it was learned in practice on a demo site, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u4-l6-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does Playwright call a test that fails on its first attempt and passes on retry?",
+          "choices": [
+            "Fixme",
+            "Flaky",
+            "Passed",
+            "Skipped"
+          ],
+          "answer": 1,
+          "explanation": "The reporter lists flaky tests separately from passed and failed ones."
+        },
+        {
+          "id": "pw-u4-l6-e2",
+          "type": "mcq",
+          "prompt": "Why is `open: 'never'` useful on the HTML reporter?",
+          "choices": [
+            "It publishes the report to Azure",
+            "It makes reports smaller",
+            "It disables traces",
+            "It stops a local failed run from opening and holding a browser report server"
+          ],
+          "answer": 3,
+          "explanation": "By default the HTML report can open itself when tests fail, which blocks the terminal."
+        },
+        {
+          "id": "pw-u4-l6-e3",
+          "type": "short",
+          "prompt": "Which command-line option sets how many parallel worker processes to use? (Include the dashes, no value.)",
+          "accept": [
+            "--workers",
+            "--workers=",
+            "--workers=1"
+          ],
+          "answer": "--workers",
+          "explanation": "For example `npx playwright test --workers=1`."
+        },
+        {
+          "id": "pw-u4-l6-e4",
+          "type": "mcq",
+          "prompt": "A pipeline run is green, but the summary says \"1 flaky\". What should you do?",
+          "choices": [
+            "Treat it as a bug to investigate: open the trace of the failed attempt",
+            "Nothing; green means fine",
+            "Raise retries to 5",
+            "Delete the test"
+          ],
+          "answer": 0,
+          "explanation": "Retries can hide a real intermittent failure. The flaky count is the signal."
+        },
+        {
+          "id": "pw-u4-l6-e5",
+          "type": "open",
+          "prompt": "Explain parallel workers, retries and the JUnit reporter to a colleague who will run the suite in a pipeline. Mention one risk of each in a sentence.",
+          "answer": "Workers run test files in parallel, which speeds a run up; the risk is tests that share data or depend on order, which then fail unpredictably, so tests must be independent. Retries rerun a failed test; the risk is hiding real intermittent bugs, so a pass on retry is still a flaky test to look at. The JUnit reporter writes an XML file that Azure Pipelines shows in its Tests tab; the risk is forgetting to publish it with a succeededOrFailed condition, so a failing run publishes nothing.",
+          "rubric": [
+            "Workers = parallel files; risk of shared state",
+            "Retries = rerun; risk of hiding flakiness",
+            "JUnit = results for the Tests tab",
+            "Mentions publishing even on failure"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u4-l7",
+      "title": "A debugging workflow: screenshot, trace, then fix",
+      "minutes": 10,
+      "body": "When a test fails, work in a fixed order and spend effort where it pays.\n\n**Step 1: read the error (30 seconds)**\n\nUse the reading order from the locator drill: first error line, last \"waiting for\" line, the code frame. It tells you which of three things happened: nothing found, too many found, wrong value.\n\n**Step 2: look at the page at the moment of failure**\n\nThe config used in this module saves a screenshot on failure and the run writes a short `error-context.md` beside it, in `test-results/<test-name>/`. Open the screenshot first. Often the answer is visible: a dialog covering the button, a login page, an error banner.\n\n**Step 3: open the trace when the screenshot is not enough**\n\n```bash\nnpx playwright test --trace on                  # record every test, for local debugging\nnpx playwright show-report                      # open the HTML report, click the trace\nnpx playwright show-trace test-results/<folder>/trace.zip\n```\n\nI ran `--retries=2 --trace=on-first-retry` and Playwright wrote `test-results/<test>-chromium-retry1/trace.zip`. That is what the config's `trace: 'on-first-retry'` does in a pipeline. A trace shows each action with before and after snapshots, the locator used, network calls and console messages. Click the failing step and read which locator was waited for.\n\n**Step 4: reproduce on your machine, narrowly**\n\n```bash\nnpx playwright test -g \"completes a todo\"       # one test by title\nnpx playwright test --headed                    # watch the browser\nnpx playwright test --ui                        # time-travel UI\nnpx playwright test --debug                     # inspector, step by step\n```\n\nThe `-g` filter I ran; the interactive modes open windows and I did not drive them in this audit.\n\n**Step 5: decide what kind of failure it is**\n\n| Evidence | Likely cause | Action |\n|---|---|---|\n| Locator found nothing, page looks different | Label changed, or wrong page | Update the locator, confirm the change is intended |\n| Right page, wrong value | Test or app wrong | Check the requirement |\n| Passes alone, fails in the run | Shared data or order | Make data unique |\n| Fails only in CI | Timing, data, URL, viewport | Compare trace with local |\n\nState your conclusion in a sentence before changing code.",
+      "keyPoints": [
+        "Order: error text, failure screenshot, trace, narrow rerun with `-g`, then decide the cause.",
+        "A trace shows each step, its locator, page snapshots and network calls.",
+        "`trace: 'on-first-retry'` records only when a test is retried, so passing runs stay light.",
+        "Say what kind of failure it is before you change code."
+      ],
+      "interviewAngle": "\"Walk me through debugging a failing test\" is the best honest story you have: report, screenshot, trace, cause. You did this on basic tests. The wider workflow (UI mode, debug inspector) was learned in practice, not used at work.",
+      "exercises": [
+        {
+          "id": "pw-u4-l7-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A test fails only in the pipeline. What do you open first?",
+          "choices": [
+            "The config file",
+            "Nothing; re-run it",
+            "The failure screenshot or trace from that run's report",
+            "The package-lock file"
+          ],
+          "answer": 2,
+          "explanation": "They show the page at the failing step, which usually names the cause."
+        },
+        {
+          "id": "pw-u4-l7-e2",
+          "type": "mcq",
+          "prompt": "What does `trace: 'on-first-retry'` do?",
+          "choices": [
+            "Records a trace for every test, always",
+            "Never records anything",
+            "Records video only",
+            "Records a trace only when a test is retried, e.g. after a first failure"
+          ],
+          "answer": 3,
+          "explanation": "It keeps passing runs light and still gives you data on failures."
+        },
+        {
+          "id": "pw-u4-l7-e3",
+          "type": "short",
+          "prompt": "Which option runs only tests whose title matches a pattern? (The short flag, with dash.)",
+          "accept": [
+            "-g",
+            "--grep",
+            "-g ",
+            "--grep="
+          ],
+          "answer": "-g",
+          "explanation": "`npx playwright test -g \"completes a todo\"` (also written `--grep`)."
+        },
+        {
+          "id": "pw-u4-l7-e4",
+          "type": "mcq",
+          "prompt": "A test passes when run alone but fails in the full run. Most likely cause?",
+          "choices": [
+            "Shared data or test-order dependence",
+            "The trace is corrupt",
+            "A missing semicolon",
+            "Wrong browser version"
+          ],
+          "answer": 0,
+          "explanation": "Isolation problems show up only when tests interact."
+        },
+        {
+          "id": "pw-u4-l7-e5",
+          "type": "open",
+          "prompt": "A teammate's test fails in the pipeline with a timeout waiting for `getByRole('button', { name: 'Assign' })`. Write the steps you take, in order, ending with how you decide whether to fix the test or file a bug.",
+          "answer": "1. Read the error: nothing matched the locator in time. 2. Open the failure screenshot from the report. 3. Open the trace and click the failing step to see the page and which locator it waited for. 4. Compare with the app: is the control missing, renamed (for example 'Assign pharmacist'), covered by a dialog, or is the page in the wrong state such as not logged in. 5. Rerun that test alone with -g locally. 6. If the label was intentionally changed, update the locator and tell the team; if the button should be there and is not, file a bug with the trace attached; if it is timing or data, fix the cause rather than adding a sleep.",
+          "rubric": [
+            "Starts from error, screenshot and trace",
+            "Names concrete possibilities (renamed, covered, wrong state)",
+            "Reruns narrowly",
+            "Decides fix-test vs bug on evidence",
+            "Avoids sleeps"
+          ]
+        }
+      ]
+    }
+  ]
+}

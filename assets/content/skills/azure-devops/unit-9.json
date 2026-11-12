@@ -1,0 +1,199 @@
+{
+  "id": "ado-u9",
+  "title": "Repos and Pipelines from a tester's seat",
+  "summary": "Reviewing a pull request, reading real YAML, and getting test results and artifacts out of a pipeline.",
+  "lessons": [
+    {
+      "id": "ado-u9-l1",
+      "title": "Reviewing a pull request from a tester's seat",
+      "minutes": 8,
+      "body": "A pull request (PR) proposes merging one branch into another, usually a feature branch into `main`. Testers and PMs are often added as optional reviewers or are simply watching. You are not expected to review code quality, but you can add real value.\n\n**What you can check without reading code.**\n\n- **Linked work items.** Does the PR link the story or bug (`#1234`)? If the repository policy requires linked work items, the PR cannot complete without one. If not, ask.\n- **Description matches the acceptance criteria.** Does the change claim to do what the story says?\n- **Files changed.** Open the Files tab. A story about SOS radius that also touches the billing screens deserves a question: that is a regression-test hint.\n- **Tests added.** Are there test files, or an updated Playwright spec? A bug fix with no test is a prompt to ask for one.\n- **Pipeline status.** The PR page shows build validation results. A red check means do not approve; open the failed run.\n- **Comments and threads.** Each comment thread has a status (Active, Resolved, Won't fix, Closed, Pending). A policy can require all threads resolved before completion.\n\n**Votes.** A reviewer can choose Approve, Approve with suggestions, Wait for author or Reject. Wait for author is the polite \"not yet\". Your vote only blocks merging if the policy requires your approval, so say in a comment what you checked.\n\n**Policies on `main`** that you should recognise: minimum number of reviewers, required reviewers for certain paths, linked work items, comment resolution, and build validation (a pipeline must pass). A policy-protected branch cannot be pushed to directly.\n\n**Good tester comments.**\n\n> The title says 'radius 5/10/25' but the diff also changes the default when radius is empty. Is that intended? I will add a test case for the empty case.\n\n> Build validation passed but the Playwright job is not in this pipeline. Should the SOS smoke test run on PRs?\n\nKeep comments about behaviour and risk. Leave style to developers.\n\n**Completing the PR.** Options include merge types (for example squash), deleting the source branch, and completing linked work items. Developers or the owner usually complete; as a tester you watch for the merge and the build it produces, then test that build.\n\nFor the scheduling product, an approved PR for the SOS radius story is your signal to check the new build in the test environment and move the story's test points to run.",
+      "keyPoints": [
+        "Check linked work items, description versus criteria, files touched, tests added and the pipeline result.",
+        "Votes are Approve, Approve with suggestions, Wait for author, Reject.",
+        "Branch policies can require reviewers, linked items, resolved comments and a passing build.",
+        "A tester's comments should be about behaviour and risk."
+      ],
+      "interviewAngle": "'Do you review code?' is a trap. Say no, but you read PRs to confirm the linked story, see what areas changed, check that tests and the build are green and plan regression. That shows initiative without overclaiming.",
+      "exercises": [
+        {
+          "id": "ado-u9-l1-e1",
+          "type": "mcq",
+          "prompt": "A PR for the SOS radius story also changes the billing screens. As a tester what is the best response?",
+          "choices": [
+            "Approve; billing is not your area",
+            "Comment asking if it is intended and add regression cases for billing",
+            "Reject without comment",
+            "Close the PR"
+          ],
+          "answer": 1,
+          "explanation": "Unexpected scope is a risk signal. Ask and adjust the regression selection.",
+          "placement": true
+        },
+        {
+          "id": "ado-u9-l1-e2",
+          "type": "mcq",
+          "prompt": "Which reviewer vote means 'not ready, I expect changes'?",
+          "choices": [
+            "Approve",
+            "Approve with suggestions",
+            "Wait for author",
+            "Reject means the same as approve"
+          ],
+          "answer": 2,
+          "explanation": "Wait for author asks for changes without rejecting the idea."
+        },
+        {
+          "id": "ado-u9-l1-e3",
+          "type": "short",
+          "prompt": "Which branch policy requires a pipeline to pass before a PR can complete?",
+          "accept": [
+            "build validation"
+          ],
+          "answer": "Build validation",
+          "explanation": "Build validation runs a pipeline on the PR and gates completion."
+        },
+        {
+          "id": "ado-u9-l1-e4",
+          "type": "open",
+          "prompt": "Write two review comments you might leave on a PR that fixes the bug 'SOS alert sent to a Busy pharmacist'.",
+          "answer": "1. 'Thanks for the fix. Can we add a test for each status (Available, Busy, Off duty)? Right now I only see the Busy case, and the Off duty path uses the same filter.' 2. 'The linked work item is the bug, but the story it affects (#1234) is not linked. Can you add it so the requirement-based suite shows the regression?' Optional: 'I will retest on build 2042 and close the bug if the Busy pharmacist no longer receives the alert.'",
+          "rubric": [
+            "Asks for tests covering related paths",
+            "Asks for the correct work item links",
+            "Keeps comments about behaviour/risk",
+            "States what the tester will do next"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u9-l2",
+      "title": "Reading YAML in practice: variables, conditions, environments",
+      "minutes": 10,
+      "body": "Unit 5 showed stages, jobs and steps. These features appear in every real pipeline, so you need to read them.\n\n```yaml\ntrigger:\n  branches:\n    include: [main]\n\nvariables:\n  nodeVersion: '20.x'\n  testEnv: 'https://test.example.com'\n  - group: scheduling-test-secrets\n\nstages:\n- stage: Build\n  jobs:\n  - job: BuildApp\n    pool:\n      vmImage: ubuntu-latest\n    steps:\n    - task: NodeTool@0\n      inputs:\n        versionSpec: $(nodeVersion)\n    - script: npm ci && npm run build\n\n- stage: E2E\n  dependsOn: Build\n  condition: succeeded()\n  jobs:\n  - job: Playwright\n    steps:\n    - script: npx playwright test\n      env:\n        BASE_URL: $(testEnv)\n        TEST_USER_PASSWORD: $(testUserPassword)\n\n- stage: DeployTest\n  dependsOn: E2E\n  jobs:\n  - deployment: DeployToTest\n    environment: scheduling-test\n    strategy:\n      runOnce:\n        deploy:\n          steps:\n          - script: echo Deploying\n```\n\n(In a real file `variables` is either a list or a map, not both; this shows the pieces.)\n\n**Variables.** `$(name)` is read when a step runs. Values come from the `variables:` block, from the pipeline's Variables dialog, or from a **variable group** in Library, which holds shared values and secrets. A **secret** variable is masked in logs and is not available to a step unless the YAML maps it in (`env:`). Compile-time `${{ }}` and runtime `$[ ]` expressions exist; you need only recognise them.\n\n**Conditions.** A stage, job or step runs only if its condition is true. The default is `succeeded()`. `succeededOrFailed()` and `always()` run even after failures, which is what you want for publishing test results and artifacts. `eq(variables['Build.SourceBranch'], 'refs/heads/main')` runs something only on main.\n\n**Environments and deployment jobs.** A `deployment` job targets an **environment** such as `scheduling-test`. Environments record deployment history and can have **approvals and checks**: a named person must approve before the job runs. That is the usual release gate.\n\n**Templates and parameters.** `template:` pulls reusable YAML from another file; `parameters:` are inputs to it or to the pipeline run. You will see them when many pipelines share one test job.\n\n**Reading drill.**\n\n1. Which variable holds a secret, and how does the test step get it?\n2. What runs if the E2E stage fails?\n3. Where is a human approval likely to appear?\n4. What triggers this pipeline?\n\nAnswers: (1) `testUserPassword` from the variable group, mapped through `env:`. (2) DeployTest does not run because it depends on E2E and the default condition is `succeeded()`. (3) On the `scheduling-test` environment as an approval check. (4) A push to `main`.",
+      "keyPoints": [
+        "`$(name)` variables come from the YAML, the UI or variable groups; secrets are masked and must be mapped into steps.",
+        "Conditions such as succeededOrFailed() and always() let a step run after a failure.",
+        "A deployment job targets an environment, which can require approval.",
+        "Templates and parameters share YAML between pipelines."
+      ],
+      "interviewAngle": "A reading test may hand you a YAML file and ask what happens on failure or where approval occurs. Narrate top to bottom: trigger, variables, stages and dependencies, conditions, environments. Say you can read and make small edits to a pipeline, and that designing pipelines from scratch is the developers' or DevOps engineers' job.",
+      "exercises": [
+        {
+          "id": "ado-u9-l2-e1",
+          "type": "mcq",
+          "prompt": "A job has `dependsOn: E2E` and no condition. The E2E stage failed. What happens to the job?",
+          "choices": [
+            "It runs anyway",
+            "It is skipped",
+            "It runs after a retry",
+            "It deletes the failed run"
+          ],
+          "answer": 1,
+          "explanation": "The default condition is succeeded(), so a dependent stage is skipped when its dependency fails.",
+          "placement": true
+        },
+        {
+          "id": "ado-u9-l2-e2",
+          "type": "mcq",
+          "prompt": "Where is a manual approval before deploying normally configured?",
+          "choices": [
+            "On the environment, as an approval or check",
+            "In the test case",
+            "In the work item Reason field",
+            "In the Playwright config"
+          ],
+          "answer": 0,
+          "explanation": "Environment approvals and checks gate deployment jobs."
+        },
+        {
+          "id": "ado-u9-l2-e3",
+          "type": "short",
+          "prompt": "Which condition lets a step run even when earlier steps failed, but not when the run was cancelled?",
+          "accept": [
+            "succeededorfailed()",
+            "succeededorfailed"
+          ],
+          "answer": "succeededOrFailed()",
+          "explanation": "always() also runs when cancelled; succeededOrFailed() does not."
+        },
+        {
+          "id": "ado-u9-l2-e4",
+          "type": "open",
+          "prompt": "Explain in plain words what this snippet does and why it is written this way:\n\n```yaml\n- task: PublishTestResults@2\n  condition: succeededOrFailed()\n  inputs:\n    testResultsFormat: JUnit\n    testResultsFiles: 'results.xml'\n```",
+          "answer": "It publishes the JUnit test result file results.xml to the run's Tests tab so pass/fail counts and failed test names appear in Azure DevOps. The condition succeededOrFailed() makes it run even if the test step failed; without it a failing test step would stop the job and the results would never be published, hiding exactly what you most need to see.",
+          "rubric": [
+            "Says it publishes JUnit results to the run",
+            "Explains the condition",
+            "Notes why failures must still publish"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u9-l3",
+      "title": "Publishing test results and artifacts",
+      "minutes": 9,
+      "body": "Running tests in a pipeline is only useful if people can see the outcome. Two things carry it: **test results** and **artifacts**.\n\n**Test results.** The `PublishTestResults@2` task reads result files and publishes them to the run. It supports JUnit, NUnit, VSTest (TRX) and xUnit, among others. Inputs you will see:\n\n- `testResultsFormat`: the format, default JUnit.\n- `testResultsFiles`: a file pattern, for example `**/results.xml`.\n- `testRunTitle`: the name shown in the Tests tab.\n- `mergeTestResults`: combine files into one run.\n- `failTaskOnFailedTests`: mark the task failed when tests failed.\n\nAfter publishing, the run has a **Tests** tab with pass, fail and duration, failed test names and error text, a trend across runs, and a test analytics view. These results also feed the dashboard widgets and, when tests are linked to requirements, the Requirements quality widget.\n\n**Playwright to Azure DevOps.** Playwright can write JUnit XML with its reporter setting, for example in `playwright.config.ts`:\n\n```ts\nreporter: [['list'], ['junit', { outputFile: 'results.xml' }], ['html']],\n```\n\nThe pipeline then runs the tests and publishes:\n\n```yaml\nsteps:\n- script: npm ci\n- script: npx playwright install --with-deps\n- script: npx playwright test\n  displayName: Run Playwright tests\n- task: PublishTestResults@2\n  condition: succeededOrFailed()\n  inputs:\n    testResultsFormat: JUnit\n    testResultsFiles: results.xml\n    testRunTitle: Playwright SOS smoke\n- task: PublishPipelineArtifact@1\n  condition: succeededOrFailed()\n  inputs:\n    targetPath: playwright-report\n    artifact: playwright-report\n```\n\n**Artifacts** are files kept with the run: the Playwright HTML report, traces, screenshots, installers. `PublishPipelineArtifact@1` uploads a folder; you download it from the run's summary page. For a failed UI test the trace and screenshot are often the fastest route to the cause.\n\n**Retention.** Runs and artifacts are not kept forever; a retention policy deletes old ones. Download evidence you need for a sign-off.\n\n**What to do with a failure.** Open the run, the Tests tab, the failed test, the error message and attachments. Decide: product bug, test script problem, environment or flaky. A product bug becomes a Bug linked to the build, ideally with the test result attached.\n\nThe two result systems differ: results from **Test Plans** (manual runs) and from **pipelines** (automated runs) both appear under Test Plans, Runs, and in the progress report when automated tests are linked to test cases.",
+      "keyPoints": [
+        "PublishTestResults@2 publishes JUnit/NUnit/TRX results to the run's Tests tab.",
+        "Use condition succeededOrFailed() so failures are still reported.",
+        "PublishPipelineArtifact@1 keeps the Playwright report, traces and screenshots with the run.",
+        "Artifacts and results expire under retention rules."
+      ],
+      "interviewAngle": "This is where your basic Playwright work shows. Describe the loop: test writes JUnit and an HTML report, the pipeline publishes both, you open the Tests tab for the failed test and the report for the trace. Say plainly that you wrote simple tests and read results; you did not design the framework.",
+      "exercises": [
+        {
+          "id": "ado-u9-l3-e1",
+          "type": "mcq",
+          "prompt": "Playwright tests failed in the pipeline but the Tests tab is empty. What is the most likely cause?",
+          "choices": [
+            "The publish task has no succeededOrFailed() condition so it was skipped",
+            "Playwright cannot produce JUnit",
+            "The run is too old",
+            "Test Plans must be enabled"
+          ],
+          "answer": 0,
+          "explanation": "Without the condition, the publish step is skipped after the failed test step.",
+          "placement": true
+        },
+        {
+          "id": "ado-u9-l3-e2",
+          "type": "mcq",
+          "prompt": "You want the Playwright trace to be downloadable after the run. What do you use?",
+          "choices": [
+            "PublishPipelineArtifact@1 on the report folder",
+            "PublishTestResults@2 only",
+            "A work item comment",
+            "A branch policy"
+          ],
+          "answer": 0,
+          "explanation": "Artifacts carry files; test results carry pass/fail data."
+        },
+        {
+          "id": "ado-u9-l3-e3",
+          "type": "short",
+          "prompt": "Which reporter name in Playwright writes an XML file Azure DevOps can read?",
+          "accept": [
+            "junit"
+          ],
+          "answer": "junit",
+          "explanation": "The junit reporter writes JUnit XML, which PublishTestResults@2 reads."
+        },
+        {
+          "id": "ado-u9-l3-e4",
+          "type": "open",
+          "prompt": "A pipeline run is red. Walk through, in five steps, how you decide whether it is a product bug.",
+          "answer": "1. Open the run and find the failed stage, job and step. 2. If the failure is in setup (install, build), it is an environment or config problem; note the error and route to the owner. 3. If tests failed, open the Tests tab, read the failed test name and error. 4. Open the Playwright report or trace artifact to see the page state and screenshot. 5. Re-run only that test or check the history: if it passes on rerun and fails intermittently, treat as flaky and report; if it fails consistently and the behaviour contradicts the acceptance criteria, file a Bug with the run link, build number and evidence.",
+          "rubric": [
+            "Locates failed stage/step",
+            "Separates setup, test and flaky failures",
+            "Uses results and artifacts as evidence",
+            "Files a bug with run link only for real defects"
+          ]
+        }
+      ]
+    }
+  ]
+}

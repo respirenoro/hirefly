@@ -1,0 +1,156 @@
+{
+  "id": "excel-u3",
+  "title": "Lookups: VLOOKUP, INDEX/MATCH and XLOOKUP",
+  "summary": "Understand VLOOKUP properly, including how it fails, then learn the two more robust alternatives.",
+  "lessons": [
+    {
+      "id": "excel-u3-l1",
+      "title": "VLOOKUP in depth and its failure modes",
+      "minutes": 10,
+      "body": "`VLOOKUP` finds a value in the first column of a table and returns a value from a column to its right.\n\n```text\n=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\n```\n\nA pharmacy list in A1:C4:\n\n| ID | Name | Region |\n|---|---|---|\n| 101 | Eastside | East |\n| 102 | Harbor | South |\n| 103 | Lakeview | West |\n\n```text\n=VLOOKUP(102, A2:C4, 3, FALSE)   -> South\n=VLOOKUP(102, A2:C4, 2, FALSE)   -> Harbor\n```\n\nThe lookup value must be in the **first column** of `table_array`, and `col_index_num` counts columns from the left of that range (ID is 1, Name is 2, Region is 3).\n\n**The fourth argument.** `FALSE` (or 0) means exact match. If you omit it, Excel uses `TRUE`, which is approximate match and assumes the first column is sorted ascending. On unsorted data it can return a wrong row without any error. Use `FALSE` unless you are deliberately looking up a band, such as a rate tier.\n\n**Common failures**\n\n| Symptom | Cause | Fix |\n|---|---|---|\n| `#N/A` but the value is visible | trailing space or non-breaking space | `TRIM`/`CLEAN` the key |\n| `#N/A`, values look equal | number stored as text on one side | convert with `VALUE` or Text to Columns |\n| `#N/A` | value genuinely not in the list | label it with `IFNA` |\n| `#REF!` | col_index_num larger than the range width | fix the number |\n| Wrong answer after inserting a column | the hard-coded column number now points elsewhere | recount, or use `MATCH`/`XLOOKUP` |\n| Wrong answer when copying down | table_array not locked | use `$A$2:$C$4` |\n| Cannot find a value to the left | VLOOKUP only looks right | use `INDEX/MATCH` or `XLOOKUP` |\n\nA robust version for a list that is copied down:\n\n```text\n=IFNA(VLOOKUP($E2, $A$2:$C$4, 3, FALSE), \"Not found\")\n```\n\nPrefer `IFNA` to `IFERROR` here: `IFERROR` would also hide a `#REF!` mistake in your own formula. To diagnose a mystery `#N/A`, compare `LEN` of the lookup cell and the list cell, and test `ISNUMBER` on both.",
+      "keyPoints": [
+        "The lookup value must be in the first column of the range; VLOOKUP only returns columns to its right.",
+        "Always pass FALSE as the fourth argument for exact match.",
+        "Lock the table with $ when copying down.",
+        "Most #N/A errors are hidden spaces or text-versus-number mismatches.",
+        "IFNA labels not-found results without hiding other errors."
+      ],
+      "interviewAngle": "VLOOKUP is on your resume, so expect to be asked how it fails. Naming the omitted fourth argument, the hard-coded column number and hidden spaces shows real experience. Be honest that you use it often and know its weak spots, and that you are now learning INDEX/MATCH and XLOOKUP as more robust options.",
+      "exercises": [
+        {
+          "id": "excel-u3-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What happens if you write =VLOOKUP(E2, A2:C100, 3) and leave out the fourth argument?",
+          "choices": [
+            "Excel returns an error asking for the argument",
+            "It uses exact match by default",
+            "It uses approximate match, which can return a wrong row on unsorted data",
+            "It searches the last column instead of the first"
+          ],
+          "answer": 2,
+          "explanation": "The default is TRUE, approximate match, which assumes the first column is sorted. On unsorted data it can silently return the wrong row."
+        },
+        {
+          "id": "excel-u3-l1-e2",
+          "type": "short",
+          "prompt": "Which value do you pass as the fourth argument of VLOOKUP to force an exact match?",
+          "accept": ["false", "0"],
+          "answer": "FALSE",
+          "explanation": "FALSE (or 0) means exact match."
+        },
+        {
+          "id": "excel-u3-l1-e3",
+          "type": "open",
+          "prompt": "A VLOOKUP returns #N/A for \"Harbor\" even though Harbor is clearly in the first column of the lookup table. List the checks you would make, in order, and how you would fix each cause.",
+          "answer": "1. Compare LEN of the lookup cell and the list cell. If they differ, there is a hidden space: wrap the key in TRIM (and SUBSTITUTE CHAR(160) if needed).\n2. Check ISNUMBER on both cells. A number stored as text on one side will not match; convert with VALUE or Text to Columns.\n3. Confirm the fourth argument is FALSE and the lookup column is the first column of the range.\n4. Confirm the table range is locked with $ if the formula was copied down.\n5. If the value really is missing, wrap with IFNA to label it.",
+          "rubric": [
+            "Checks for hidden or trailing spaces, for example by comparing LEN or using TRIM",
+            "Checks text versus number mismatch",
+            "Checks the exact-match argument and that the key is in the first column",
+            "Mentions locking the table range or IFNA for genuine misses"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u3-l2",
+      "title": "INDEX and MATCH",
+      "minutes": 9,
+      "body": "`INDEX` returns the value at a position in a range. `MATCH` finds the position of a value in a range. Combined, they form a lookup that is more flexible than `VLOOKUP`.\n\n```text\n=INDEX(return_range, row_number)\n=MATCH(lookup_value, lookup_range, 0)\n```\n\nThe `0` in `MATCH` means exact match, the same job as `FALSE` in VLOOKUP. Without it, `MATCH` defaults to approximate match.\n\nA pharmacist list in A1:C4:\n\n| Name | License | State |\n|---|---|---|\n| Dana Cole | L-2210 | OH |\n| Marcus Webb | L-3345 | PA |\n| Priya Nair | L-1187 | OH |\n\n```text\n=MATCH(\"L-3345\", B2:B4, 0)                       -> 2\n=INDEX(A2:A4, 2)                                 -> Marcus Webb\n=INDEX(A2:A4, MATCH(\"L-3345\", B2:B4, 0))         -> Marcus Webb\n```\n\nThe name is in column A, to the **left** of the license key in column B. VLOOKUP cannot do that, but INDEX/MATCH can, because the lookup range and the return range are two separate arguments.\n\nWith the license typed in E2, return the state:\n\n```text\n=INDEX($C$2:$C$4, MATCH($E2, $B$2:$B$4, 0))\n```\n\n**Why people prefer it**\n\n- It looks in any direction.\n- There is no hard-coded column number, so inserting a column does not break it.\n- Excel only has to scan the lookup column, not the whole table, which can matter on large sheets.\n\n**Two-way lookup.** `INDEX` takes a row and a column: `=INDEX(B2:D10, MATCH(row_key, A2:A10, 0), MATCH(column_key, B1:D1, 0))`. This is how you pick a value out of a grid, such as the fill rate for one pharmacy in one month.\n\nIf `MATCH` finds nothing it returns `#N/A`, which flows through `INDEX`. Wrap the whole formula in `IFNA(..., \"Not found\")` to label it. Debug in two steps: type the `MATCH` alone in a spare cell and check it returns a sensible number before wrapping it in `INDEX`.",
+      "keyPoints": [
+        "MATCH returns a position; INDEX returns the value at a position.",
+        "Use 0 as the third argument of MATCH for exact match.",
+        "INDEX/MATCH can return columns to the left of the key.",
+        "No column number to miscount, so inserted columns do not break it.",
+        "Test the MATCH on its own when debugging."
+      ],
+      "interviewAngle": "A common question is \"what are the limits of VLOOKUP and how else could you do it?\" INDEX/MATCH is the classic answer. You can honestly say VLOOKUP is your daily tool and you are now comfortable with INDEX/MATCH for left lookups and robustness. Do not suggest you have used it heavily in a job if you have not.",
+      "exercises": [
+        {
+          "id": "excel-u3-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In the pharmacist list (Name in A2:A4, License in B2:B4), which formula returns the name for the license in E2?",
+          "choices": [
+            "=INDEX(B2:B4, MATCH(E2, A2:A4, 0))",
+            "=INDEX(A2:A4, MATCH(E2, B2:B4, 0))",
+            "=MATCH(E2, A2:A4, 0)",
+            "=INDEX(A2:A4, E2)"
+          ],
+          "answer": 1,
+          "explanation": "MATCH finds the position of the license in column B, and INDEX returns the value at that position in column A. The first option swaps the two ranges."
+        },
+        {
+          "id": "excel-u3-l2-e2",
+          "type": "short",
+          "prompt": "Using the pharmacist list, what does =MATCH(\"L-1187\", B2:B4, 0) return?",
+          "accept": ["3"],
+          "answer": "3",
+          "explanation": "L-1187 is the third item in B2:B4."
+        },
+        {
+          "id": "excel-u3-l2-e3",
+          "type": "open",
+          "prompt": "Write an INDEX/MATCH formula that returns the State (C2:C4) for the license in E2, with a \"Not found\" label when the license is missing. Give two reasons it can be better than VLOOKUP.",
+          "answer": "```text\n=IFNA(INDEX($C$2:$C$4, MATCH($E2, $B$2:$B$4, 0)), \"Not found\")\n```\n\nBetter than VLOOKUP because: (1) it can return values to the left of the lookup column, and (2) it has no hard-coded column number, so inserting or moving columns does not silently break it.",
+          "rubric": [
+            "INDEX over the State column",
+            "MATCH of E2 in the License column with 0",
+            "IFNA wrapper with a Not found label",
+            "Gives two valid reasons, such as left lookup and column-insert safety"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u3-l3",
+      "title": "XLOOKUP (newly learned)",
+      "minutes": 8,
+      "body": "`XLOOKUP` is the modern replacement for both `VLOOKUP` and `INDEX/MATCH`. It is a skill you are learning now, so practise it next to the older formulas until it feels natural.\n\n```text\n=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])\n```\n\nUsing the pharmacist list (Name A2:A4, License B2:B4, State C2:C4) and a license in E2:\n\n```text\n=XLOOKUP(E2, B2:B4, A2:A4, \"Not found\")\n```\n\nThis returns the name, looking to the left, with a clean label if the license is missing. Compare with the same task in older style:\n\n```text\n=IFNA(INDEX(A2:A4, MATCH(E2, B2:B4, 0)), \"Not found\")\n```\n\nand the old column-number style that cannot look left at all:\n\n```text\n=VLOOKUP(E2, B2:C4, 2, FALSE)     -> State only\n```\n\n**What is better**\n\n- Exact match is the default. There is no easy-to-forget `FALSE`.\n- The lookup and return ranges are separate, so it looks left or right and ignores inserted columns.\n- `if_not_found` (the fourth argument) is built in, so there is no need for `IFNA`.\n- It works on rows and columns, not just columns.\n- If the return array has several columns, the result spills across them: `=XLOOKUP(E2, B2:B4, A2:C4)` returns the full row for that license.\n\n**Optional arguments.** `match_mode`: 0 exact (default), -1 exact or next smaller, 1 exact or next larger, 2 wildcard match. `search_mode`: 1 first to last (default), -1 last to first, useful to find the latest entry for a key.\n\n**Availability.** XLOOKUP is in Microsoft 365 and Excel 2021 and later. It is not in Excel 2019 or earlier, and a file shared with someone on an older version will show errors. If you do not know which version an employer or test platform uses, `INDEX/MATCH` is the safe choice. Spill behaviour also means you must leave empty cells where the result will fill.",
+      "keyPoints": [
+        "XLOOKUP(lookup, lookup_array, return_array, if_not_found) is exact match by default.",
+        "It can look left or right and does not use a column number.",
+        "The fourth argument handles not-found cases without IFNA.",
+        "Only available in Microsoft 365 and Excel 2021 or later.",
+        "Know INDEX/MATCH as the fallback for older Excel."
+      ],
+      "interviewAngle": "Mark this clearly as newly learned. A good line is: \"I use VLOOKUP daily and I have been learning XLOOKUP, which fixes its main weaknesses.\" Then show you know why it is better and when it is unavailable. Do not claim long-term experience. If a test platform is an older Excel or Google Sheets, be ready to fall back on INDEX/MATCH.",
+      "exercises": [
+        {
+          "id": "excel-u3-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which statement about XLOOKUP is correct?",
+          "choices": [
+            "It uses approximate match unless you pass FALSE",
+            "It can only look to the right of the lookup column",
+            "It uses exact match by default and has a built-in not-found argument",
+            "It is available in every version of Excel since 2010"
+          ],
+          "answer": 2,
+          "explanation": "XLOOKUP defaults to exact match and its fourth argument supplies the not-found result. It can look in either direction and needs Microsoft 365 or Excel 2021 or later."
+        },
+        {
+          "id": "excel-u3-l3-e2",
+          "type": "short",
+          "prompt": "In =XLOOKUP(E2, B2:B4, A2:A4, \"Not found\"), in which numbered argument position is the not-found text? (Give a number.)",
+          "accept": ["4", "4th", "fourth"],
+          "answer": "4",
+          "explanation": "The order is lookup_value, lookup_array, return_array, if_not_found."
+        },
+        {
+          "id": "excel-u3-l3-e3",
+          "type": "open",
+          "prompt": "Rewrite =VLOOKUP(E2, A2:C4, 3, FALSE) with XLOOKUP, where the key is in A2:A4 and the returned value is in C2:C4, with a Not found label. Name two advantages and one limitation.",
+          "answer": "```text\n=XLOOKUP(E2, A2:A4, C2:C4, \"Not found\")\n```\n\nAdvantages: exact match by default and no column number to miscount or break when columns are inserted; the not-found label is built in. It can also look left. Limitation: it needs Microsoft 365 or Excel 2021 or later, so INDEX/MATCH is safer when others may use older Excel.",
+          "rubric": [
+            "Formula uses the key range, the return range and a not-found value in the right order",
+            "Names two valid advantages",
+            "States the version limitation"
+          ]
+        }
+      ]
+    }
+  ]
+}

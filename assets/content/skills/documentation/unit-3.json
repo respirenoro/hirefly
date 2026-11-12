@@ -1,0 +1,142 @@
+{
+  "id": "doc-u3",
+  "title": "Requirements and user stories",
+  "summary": "Writing user stories, acceptance criteria in Given/When/Then, a short requirements document, non-functional requirements and a glossary.",
+  "lessons": [
+    {
+      "id": "doc-u3-l1",
+      "title": "User stories and acceptance criteria",
+      "minutes": 9,
+      "body": "A **user story** states a need from the user's point of view, in one sentence:\n\n> As a **[role]**, I want **[capability]** so that **[benefit]**.\n\nThe benefit matters most. It tells the team why, so they can suggest a better way to reach the same goal.\n\n*Weak:* \"As a user, I want a notification button.\"\n*Better:* \"As a staffing coordinator, I want pharmacists near a pharmacy to be alerted when an emergency shift is requested, so that I can fill it before the pharmacy runs out of cover.\"\n\n**Acceptance criteria**\n\nA story is not done until it meets acceptance criteria: specific, testable conditions. A common format is **Given / When / Then**:\n\n- **Given** a starting state\n- **When** something happens\n- **Then** an observable result\n\nFor the alert story:\n\n```text\nScenario: Nearby pharmacists are alerted\n  Given an emergency shift is requested for a pharmacy\n  And three pharmacists are available within 25 miles\n  When the coordinator submits the request\n  Then all three pharmacists receive an alert within one minute\n\nScenario: Pharmacists already assigned are not alerted\n  Given a pharmacist is already assigned to an overlapping shift\n  When the coordinator submits the request\n  Then that pharmacist does not receive an alert\n\nScenario: Nobody is available\n  Given no pharmacists are available within 25 miles\n  When the coordinator submits the request\n  Then the coordinator sees a message that no pharmacists were found\n```\n\nThe distance and timing figures above are examples; real numbers come from the product owner and customer.\n\n**What makes criteria good**\n\n- **Testable.** A tester can say pass or fail. \"Alerts are fast\" is not testable; \"within one minute\" is.\n- **Specific.** Include the unhappy paths: empty results, errors, permissions.\n- **One behaviour each.** If a scenario has three Thens that could fail independently, consider splitting.\n- **About behaviour, not implementation.** Say what the user sees, not which database column changes.\n\n**Size**\n\nA story should fit within one sprint. If it does not, split it by workflow step or by scenario (\"alert sent\" first, \"alert history\" later) rather than by technical layer.\n\nWritten this way, the same criteria serve three people: developers know what to build, testers know what to check, and the product owner knows what to accept.",
+      "keyPoints": [
+        "A story names a role, a capability and the benefit.",
+        "Acceptance criteria are testable conditions, often Given / When / Then.",
+        "Include unhappy paths and make numbers specific.",
+        "Describe behaviour, not implementation, and keep stories sprint-sized."
+      ],
+      "interviewAngle": "This is directly from your project work: you wrote user stories and acceptance criteria and handed them to developers and testers. Interviewers may ask you to write one on the spot. Use the three-part story, then two or three scenarios including one edge case. Be honest that the SOS alert was proposed and scoped by you; only claim shipped outcomes you can verify.",
+      "exercises": [
+        {
+          "id": "doc-u3-l1-e1",
+          "type": "mcq",
+          "prompt": "Which acceptance criterion is testable?",
+          "choices": [
+            "The alert should be quick.",
+            "The system should be user friendly.",
+            "Then each available pharmacist within 25 miles receives an alert within one minute.",
+            "Alerts should work well in most cases."
+          ],
+          "answer": 2,
+          "explanation": "It states an observable result with a measurable threshold, so a tester can pass or fail it.",
+          "placement": true
+        },
+        {
+          "id": "doc-u3-l1-e2",
+          "type": "mcq",
+          "prompt": "What is the purpose of the 'so that' part of a user story?",
+          "choices": [
+            "It lists the technical approach",
+            "It states the benefit so the team understands why and can suggest alternatives",
+            "It is optional decoration",
+            "It sets the deadline"
+          ],
+          "answer": 1,
+          "explanation": "The benefit explains the underlying goal."
+        },
+        {
+          "id": "doc-u3-l1-e3",
+          "type": "mcq",
+          "prompt": "A story is too large for one sprint. What is the best way to split it?",
+          "choices": [
+            "Frontend story and backend story",
+            "By workflow step or scenario, so each part gives user value",
+            "Remove its acceptance criteria",
+            "Merge it with another story"
+          ],
+          "answer": 1,
+          "explanation": "Splitting vertically by user-visible slices keeps each part testable and valuable."
+        },
+        {
+          "id": "doc-u3-l1-e4",
+          "type": "open",
+          "prompt": "Write a user story and three Given/When/Then scenarios (one happy path, two edge cases) for: \"A pharmacist should be able to decline an alerted shift so the coordinator knows to look elsewhere.\"",
+          "answer": "**Story:** As a contracted pharmacist, I want to decline a shift I have been alerted about, so that the coordinator knows I am not available and can find someone else.\n\n```text\nScenario: Pharmacist declines an alerted shift\n  Given I have received an alert for an open shift\n  When I select Decline\n  Then the shift stays open\n  And the coordinator can see that I declined\n\nScenario: Shift already filled\n  Given another pharmacist has been assigned to the shift\n  When I try to decline the alert\n  Then I see a message that the shift is no longer available\n\nScenario: Declined pharmacist is not alerted again\n  Given I have declined an alerted shift\n  When the shift is re-sent to nearby pharmacists\n  Then I do not receive another alert for that shift\n```",
+          "rubric": [
+            "Story has role, capability, benefit",
+            "Happy path plus two edge cases",
+            "Given/When/Then is clear and observable",
+            "Describes behaviour, not implementation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u3-l2",
+      "title": "A short requirements document, non-functional needs and a glossary",
+      "minutes": 10,
+      "body": "A requirements document answers: what are we building, for whom, why, and how will we know it is right? Keep it as short as the work allows. A one-page version for a small feature:\n\n```text\nSOS emergency alert: requirements (draft)\n\n1. Problem\n   When a pharmacy has an emergency shortage, coordinators call or message\n   pharmacists one by one. This is slow and misses people who could help.\n\n2. Goal\n   Let a coordinator send one alert to qualified, nearby, available pharmacists.\n\n3. Users\n   Staffing coordinators (send alerts). Contracted pharmacists (receive alerts).\n\n4. In scope\n   - Send an alert for an open emergency shift.\n   - Pharmacists can accept or decline.\n   - Coordinator sees responses.\n\n5. Out of scope (for now)\n   - Automatic escalation to wider distance.\n   - Payment or rate negotiation.\n\n6. Functional requirements\n   FR1. The system shall send the alert to available pharmacists within the configured distance.\n   FR2. The alert shall show pharmacy name, start time and duration.\n   FR3. A pharmacist's acceptance shall assign them if the shift is still open.\n\n7. Non-functional requirements\n   NFR1. Alerts are delivered within one minute of the request (target).\n   NFR2. Only authorised roles can send alerts.\n   NFR3. Pharmacists' contact details are not shown to other pharmacists.\n\n8. Open questions\n   - What distance by default? Who decides? (Owner: product)\n\n9. Acceptance\n   See the linked user stories and scenarios.\n```\n\nNumbers like one minute are placeholders to agree with stakeholders, not facts.\n\n**Functional vs non-functional**\n\nFunctional requirements say what the system does. **Non-functional requirements** say how well or under what constraints: speed, reliability, security, privacy, accessibility, audit trail. For healthcare-adjacent software, privacy and access control are often the ones that matter most, and they are the ones most often forgotten.\n\n**Write requirements people can check**\n\nUse \"shall\" for must-haves, give each an ID so tickets and tests can refer to it, and avoid vague words such as \"fast\", \"easy\", \"appropriate\". If you cannot test it, rewrite it.\n\n**Keep a glossary**\n\nWords drift: \"shift\", \"assignment\", \"booking\", \"request\" may mean four things or one. A glossary fixes this:\n\n| Term | Meaning |\n|---|---|\n| Shift | A period of work at a pharmacy that needs a pharmacist |\n| Assignment | The link between one pharmacist and one shift |\n| Filled | A shift that has an assignment |\n| Emergency shift | A shift requested with short notice, flagged for urgent handling |\n\nUse the glossary's words in the guides, tickets and screens. Inconsistent words cause confusion for users and bugs for developers.",
+      "keyPoints": [
+        "A short requirements doc covers problem, goal, users, scope, requirements, open questions.",
+        "Non-functional requirements (speed, security, privacy) are often forgotten and matter.",
+        "Give requirements IDs and make them checkable.",
+        "A glossary keeps terms consistent across docs, tickets and screens."
+      ],
+      "interviewAngle": "This reflects what you did as project manager: writing requirements and keeping developers, customers and testers aligned. Expect \"how do you handle unclear requirements?\" Say you capture open questions with owners and avoid silent assumptions. Do not present yourself as a formal business analyst if you did not hold the title; say you did requirements work.",
+      "exercises": [
+        {
+          "id": "doc-u3-l2-e1",
+          "type": "mcq",
+          "prompt": "Which is a non-functional requirement?",
+          "choices": [
+            "The system shall send an alert to nearby pharmacists.",
+            "The coordinator can view responses.",
+            "Alerts shall be delivered within one minute of the request.",
+            "A pharmacist can accept or decline."
+          ],
+          "answer": 2,
+          "explanation": "It describes a quality of the function (timing), not the function itself.",
+          "placement": true
+        },
+        {
+          "id": "doc-u3-l2-e2",
+          "type": "mcq",
+          "prompt": "Why list 'out of scope' items?",
+          "choices": [
+            "To pad the document",
+            "To prevent assumptions and scope creep by saying what is deliberately not included",
+            "To hide risks",
+            "Because the template requires it"
+          ],
+          "answer": 1,
+          "explanation": "Stating exclusions avoids hidden expectations and helps with prioritisation."
+        },
+        {
+          "id": "doc-u3-l2-e3",
+          "type": "mcq",
+          "prompt": "The words 'booking', 'request' and 'shift' are used interchangeably across documents. What helps most?",
+          "choices": [
+            "A glossary agreed and used everywhere",
+            "Longer sentences",
+            "More screenshots",
+            "Ignoring it"
+          ],
+          "answer": 0,
+          "explanation": "A shared glossary fixes meaning and keeps documents, tickets and the interface consistent."
+        },
+        {
+          "id": "doc-u3-l2-e4",
+          "type": "open",
+          "prompt": "Write a one-page requirements document (use the headings problem, goal, users, in scope, out of scope, functional requirements, non-functional requirements, open questions) for a feature that records a reason when a pharmacy cancels a shift, so that managers can report on cancellation reasons.",
+          "answer": "**Cancellation reason capture: requirements (draft)**\n\n**Problem:** Shifts are cancelled without a recorded reason, so managers cannot see why pharmacies cancel or report on it.\n\n**Goal:** Capture one reason for every cancellation so it can be reported.\n\n**Users:** Coordinators (cancel shifts). Managers (report on reasons).\n\n**In scope**\n- Require a reason when a shift is cancelled.\n- A fixed list of reasons plus Other with a note.\n- Show the reason in the shift record.\n\n**Out of scope**\n- Changing the reason after cancellation.\n- Automatic analysis or alerts on cancellation patterns.\n\n**Functional requirements**\n- FR1. The system shall require a reason before confirming a cancellation.\n- FR2. The reason list shall include Other, which requires a note.\n- FR3. The reason shall be stored with the shift and visible in the shift list and detail.\n- FR4. Existing cancelled shifts shall show 'Not recorded'.\n\n**Non-functional requirements**\n- NFR1. Only users with the Dispatcher role can cancel shifts.\n- NFR2. The reason data can be exported to reports (for example with SQL) without manual cleaning.\n- NFR3. The cancel form shall be usable on a tablet.\n\n**Open questions**\n- What are the agreed reason categories? (Owner: product, with customer)\n- Is the reason editable by a manager later? (Owner: product)",
+          "rubric": [
+            "All requested headings present",
+            "Requirements are checkable with IDs or 'shall'",
+            "At least one meaningful non-functional requirement",
+            "Open questions have owners",
+            "Stays short and avoids implementation detail"
+          ]
+        }
+      ]
+    }
+  ]
+}

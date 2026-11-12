@@ -1,0 +1,112 @@
+{
+  "id": "power-bi-u10",
+  "title": "Sharing and securing a report",
+  "summary": "Compare the ways to share Power BI content and work through row-level security on the practice data.",
+  "lessons": [
+    {
+      "id": "power-bi-u10-l1",
+      "title": "Sharing options compared",
+      "minutes": 8,
+      "body": "Publishing is only the first step. How you share decides who sees what, and what it costs. Licences and menus change, so treat the following as concepts and confirm details with an administrator.\n\n| Item | What it is |\n|---|---|\n| **Report** | one or more pages of visuals, built in Desktop or the Service |\n| **Semantic model** | tables, relationships and measures behind reports (formerly dataset) |\n| **Dashboard** | a single Service-only page of tiles pinned from one or more reports |\n| **App** | a packaged set of reports and dashboards for a wider audience |\n| **Workspace** | a shared area where content is built and stored |\n\n**Ways to share**\n\n- **Workspace access.** Add people as Viewer, Contributor, Member or Admin. Good for the team that builds the content; viewers see everything the roles allow.\n- **App.** Publish an app from a workspace so readers get a clean entry and you can control audiences. The usual choice for a wide group.\n- **Share a report** with a person or group by link or email. They typically need access to the underlying semantic model, and a suitable licence, or the report sits in capacity that covers viewers.\n- **Subscriptions.** A scheduled email snapshot of a report page to people, useful for managers who never open the Service.\n- **Data alerts.** On a dashboard tile (card, gauge or KPI), notify when a value crosses a threshold, for example fill rate under 85%.\n- **Embed or export.** Teams tabs, SharePoint pages, and exports to PowerPoint, PDF or Excel. Check export settings, because exported data leaves your security model.\n- **Publish to web** creates a public link that anyone can open. It is **not** for company or personal data. Never use it with real pharmacist or customer information.\n\n**Governance concepts.** Content can be **endorsed** (promoted or certified) so readers know which reports to trust, and items can carry **sensitivity labels** that follow data when exported. Workspace roles and item permissions decide who edits. A **gateway** is needed to refresh on-premises sources on a schedule.\n\n**Report versus dashboard.** A report is interactive with filters and many pages. A dashboard is a one-page summary of pinned tiles that opens the source report on click; it can hold alerts. If asked, say you would usually share a report or app.\n\nBefore sharing, check the audience, the refresh time, the definitions on the page, and whether row-level security is needed.",
+      "keyPoints": [
+        "Workspace for builders, app for wide audiences, share links for individuals.",
+        "Subscriptions email snapshots; data alerts fire on dashboard tiles.",
+        "Publish to web is public: never use it for real data.",
+        "Endorsement and sensitivity labels help readers trust and protect content."
+      ],
+      "interviewAngle": "At entry level, show you understand the options and the risks: \"I would publish to a workspace, share an app, set refresh, and check security.\" Say you understand this conceptually and have not administered a tenant.",
+      "exercises": [
+        {
+          "id": "power-bi-u10-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which sharing method creates a link that anyone on the internet can open?",
+          "choices": [
+            "Publish to web",
+            "Workspace Viewer role",
+            "App with an audience",
+            "Subscription"
+          ],
+          "answer": 0,
+          "explanation": "Publish to web is public, so it must not be used for confidential or real operational data."
+        },
+        {
+          "id": "power-bi-u10-l1-e2",
+          "type": "short",
+          "prompt": "What is a single Service-only page of pinned tiles called?",
+          "accept": [
+            "dashboard",
+            "a dashboard"
+          ],
+          "answer": "dashboard",
+          "explanation": "Dashboards pin tiles from reports; reports are the interactive pages built in Desktop."
+        },
+        {
+          "id": "power-bi-u10-l1-e3",
+          "type": "open",
+          "prompt": "Management wants the fill-rate report each Monday, and one manager wants an alert if fill rate drops below 85%. How would you deliver both, and what would you check before sharing?",
+          "answer": "Publish the report to a workspace and share it as an app or with the group. Set scheduled refresh so Monday's data is current. Add an email subscription to the report page for Monday, and pin the fill rate card to a dashboard and set a data alert at 85%. Before sharing check the numbers against Desktop, the refresh history, the definitions on the page, who has access, and whether row-level security is needed.",
+          "rubric": [
+            "Workspace or app for sharing",
+            "Scheduled refresh",
+            "Subscription and data alert",
+            "Pre-share checks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u10-l2",
+      "title": "Row-level security: a worked example",
+      "minutes": 8,
+      "body": "Suppose each state has its own manager and each should see only their state. One model and one report serve everyone; a role filters rows.\n\n**Define the role** (Desktop: Modeling > Manage roles). Create a role `FL` on the `Pharmacies` table with the DAX filter\n\n```text\n[state] = \"FL\"\n```\n\nThe filter flows from `Pharmacies` to `Shifts` along the one-to-many relationship, so every visual shows only Florida. Test with Modeling > **View as**, choose the role.\n\n**What the numbers look like** (practice data)\n\n| View | Pharmacies | Total Shifts | Filled | Fill Rate |\n|---|---|---|---|---|\n| Everyone | 40 | 1019 | 906 | 88.9% |\n| Role FL | 22 | 537 | 481 | 89.6% |\n| Role GA | 13 | 340 | 301 | 88.5% |\n| Role AL | 2 | 57 | 50 | 87.7% |\n| Role SC | 3 | 85 | 74 | 87.1% |\n\nA state manager's \"state share of all shifts\" measure would show 100% because `ALL(Pharmacies)` cannot remove the security filter. RLS always applies, which is the point, but it changes what a measure can compare against.\n\n**Dynamic security.** Instead of one role per state, add a table `UserState` with columns `email` and `state`, relate it to `Pharmacies[state]` (or filter `Pharmacies` through a lookup), and use one role with\n\n```text\n[email] = USERPRINCIPALNAME()\n```\n\nAdd a row when a manager changes. Handle multiple states per person with one row each.\n\n**Publish and assign.** After publishing, open the semantic model's Security settings in the Service and add people or groups to each role. Use View as there to test with a real name.\n\n**Limits**\n\n- Workspace Admin, Member and Contributor roles can edit the model and are not restricted by RLS. Share with Viewers or through an app.\n- RLS controls rows only. Sensitive columns need other treatment, and a decision not to include the data at all is stronger.\n- Check totals: users with no role mapping see nothing, which is safer than seeing everything, but confirm the behaviour.\n- Test bidirectional filters; security can flow in ways you did not intend.\n\nThe rules about who may see what come from the data owner and compliance, particularly in healthcare. An analyst asks, implements and documents.",
+      "keyPoints": [
+        "A role is a DAX filter on a table; it flows through relationships.",
+        "Test with View as in Desktop and in the Service.",
+        "Dynamic RLS uses USERPRINCIPALNAME() with a mapping table.",
+        "Admins, Members and Contributors bypass RLS; share with Viewers or an app."
+      ],
+      "interviewAngle": "Explain RLS with the state example and the four numbers (537, 340, 85, 57). Be clear you understand it as a concept and tested it on a practice model, and that real access rules come from the data owner.",
+      "exercises": [
+        {
+          "id": "power-bi-u10-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A state manager reports that their Share of All Shifts measure shows 100%. What is the explanation?",
+          "choices": [
+            "RLS always applies, so ALL(Pharmacies) cannot remove the security filter and the denominator is only their state",
+            "The measure has a DAX error",
+            "The relationship is many-to-many",
+            "The manager has the Admin role"
+          ],
+          "answer": 0,
+          "explanation": "Row-level security filters are applied before DAX, so ALL does not escape them."
+        },
+        {
+          "id": "power-bi-u10-l2-e2",
+          "type": "short",
+          "prompt": "Which DAX function returns the signed-in user's account name for dynamic row-level security?",
+          "accept": [
+            "userprincipalname()",
+            "userprincipalname",
+            "userprincipalname( )"
+          ],
+          "answer": "USERPRINCIPALNAME()",
+          "explanation": "It is compared to an email column in a mapping table."
+        },
+        {
+          "id": "power-bi-u10-l2-e3",
+          "type": "open",
+          "prompt": "Describe how you would give Florida and Georgia managers only their own shifts, and what totals each should see.",
+          "answer": "Create roles FL and GA on Pharmacies with [state] = \"FL\" and [state] = \"GA\" (or a dynamic role using a UserState table and USERPRINCIPALNAME()). Test with View as. Publish, then add each manager to their role in the semantic model security settings, sharing the report with Viewer access or through an app. Florida should see 537 shifts (481 filled, 89.6%) and Georgia 340 (301 filled, 88.5%).",
+          "rubric": [
+            "Role filter on Pharmacies",
+            "Tests with View as",
+            "Assigns members in the Service and shares as Viewer",
+            "Gives 537 and 340"
+          ]
+        }
+      ]
+    }
+  ]
+}

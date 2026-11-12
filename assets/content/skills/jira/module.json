@@ -1,0 +1,486 @@
+{
+  "id": "jira",
+  "title": "Jira",
+  "tagline": "Talk about Jira like someone who used it every day, and write the JQL to prove it.",
+  "claim": "Resume: daily use of Jira (and Azure DevOps) for tickets, backlog and sprints. To back it you must explain the issue model, run a Scrum board, write useful JQL, link and triage bugs, and map Jira terms to Azure DevOps. You were a daily user, not a Jira administrator.",
+  "units": [
+    "unit-1.json",
+    "unit-2.json",
+    "unit-7.json",
+    "unit-3.json",
+    "unit-9.json",
+    "unit-4.json",
+    "unit-8.json",
+    "unit-11.json",
+    "unit-5.json",
+    "unit-10.json",
+    "unit-6.json"
+  ],
+  "resources": [
+    {
+      "title": "Atlassian University (free Jira Fundamentals learning path and badge)",
+      "url": "https://www.atlassian.com/university",
+      "source": "Atlassian",
+      "kind": "course",
+      "minutes": 90,
+      "free": true,
+      "why": "The free Fundamentals path ends in a badge you can put on a resume, and tests the vocabulary in units 1 and 2. Check the current path name, it has changed over time.",
+      "units": [
+        "jira-u1",
+        "jira-u2"
+      ],
+      "priority": "core",
+      "useWhen": "Do it in the first week, alongside \"The Jira model\", for hands-on practice in the real product and a badge.",
+      "versus": "Atlassian offers videos in a live Jira and a badge for the resume, which HireFly cannot; HireFly is shorter and maps Jira to Azure DevOps, the tool you actually used."
+    },
+    {
+      "title": "Learn scrum with Jira",
+      "url": "https://www.atlassian.com/agile/tutorials/how-to-do-scrum-with-jira",
+      "source": "Atlassian",
+      "kind": "docs",
+      "minutes": 45,
+      "free": true,
+      "why": "Step-by-step Scrum in a real Jira project, covering the backlog, sprints and ceremonies in unit 7.",
+      "units": [
+        "jira-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Follow it with the lab \"Configure the board and run a sprint end to end\" if you have a week or more.",
+      "versus": "Atlassian shows the current screens step by step; HireFly ties sprint work to your own planning and retrospectives."
+    },
+    {
+      "title": "Backlog refinement",
+      "url": "https://www.atlassian.com/agile/scrum/backlog-refinement",
+      "source": "Atlassian",
+      "kind": "reference",
+      "minutes": 10,
+      "free": true,
+      "why": "Atlassian's own definition of who refines the backlog and what the activities are.",
+      "units": [
+        "jira-u7"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it once for the vendor's definition, after \"Setting up and running Scrum in Jira\".",
+      "versus": "A short definition page with no practice; HireFly shows refinement as you did it."
+    },
+    {
+      "title": "JQL functions",
+      "url": "https://support.atlassian.com/jira-software-cloud/docs/advanced-search-reference-jql-functions/",
+      "source": "Atlassian Support",
+      "kind": "reference",
+      "minutes": 20,
+      "free": true,
+      "why": "The authoritative list of functions such as openSprints(), linkedIssues() and unreleasedVersions() used in the drill.",
+      "units": [
+        "jira-u3",
+        "jira-u9"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Keep it open while you work \"JQL drill: 20 graded queries\".",
+      "versus": "It is the authoritative list of functions that HireFly cannot keep current; HireFly gives graded queries with answers."
+    },
+    {
+      "title": "JQL fields",
+      "url": "https://support.atlassian.com/jira-software-cloud/docs/advanced-search-reference-jql-fields/",
+      "source": "Atlassian Support",
+      "kind": "reference",
+      "minutes": 20,
+      "free": true,
+      "why": "Which fields exist and which operators each supports, the fix for most 'my query errors' problems.",
+      "units": [
+        "jira-u3",
+        "jira-u9"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it when a query errors in the drill or the lab \"Save five JQL filters\".",
+      "versus": "The vendor's list of fields and operators is exact; HireFly teaches which ones matter."
+    },
+    {
+      "title": "View and understand the velocity chart",
+      "url": "https://support.atlassian.com/jira-software-cloud/docs/view-and-understand-the-velocity-chart/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 10,
+      "free": true,
+      "why": "How commitment, completed work and the average line are calculated.",
+      "units": [
+        "jira-u7",
+        "jira-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after the lab \"Add an automation rule and read the reports\".",
+      "versus": "Atlassian explains how the chart is calculated; HireFly covers what to say about velocity."
+    },
+    {
+      "title": "View and understand the cumulative flow diagram",
+      "url": "https://support.atlassian.com/jira-software-cloud/docs/view-and-understand-the-cumulative-flow-diagram/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 10,
+      "free": true,
+      "why": "Explains how to read bands and bottlenecks, which this module only summarises.",
+      "units": [
+        "jira-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it if a posting names Kanban or flow reports, after \"Planning, reports and Confluence\".",
+      "versus": "A closer read of one report; HireFly only summarises it and adds interview wording."
+    },
+    {
+      "title": "Get started with Jira automation",
+      "url": "https://support.atlassian.com/cloud-automation/docs/jira-cloud-automation/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "Triggers, conditions, actions and smart values with examples to copy.",
+      "units": [
+        "jira-u11"
+      ],
+      "priority": "optional",
+      "useWhen": "Use it only if you want to build rules after the lab \"Add an automation rule and read the reports\".",
+      "versus": "It has copyable examples in the real editor; HireFly keeps automation at a user's level."
+    },
+    {
+      "title": "Use Jira Cloud with Confluence",
+      "url": "https://support.atlassian.com/jira-core-cloud/docs/use-jira-cloud-with-confluence/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "How pages and issues link in both directions.",
+      "units": [
+        "jira-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it if a role mentions Confluence, after \"Planning, reports and Confluence\".",
+      "versus": "A short how-to that stays current; HireFly says what to claim about it."
+    },
+    {
+      "title": "About queues in Jira Service Management",
+      "url": "https://support.atlassian.com/jira-service-management-cloud/docs/check-out-your-queues/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "The agent's view of queues and how they are sorted.",
+      "units": [
+        "jira-u5",
+        "jira-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it before a support or service-desk interview, after \"Jira Service Management in practice\".",
+      "versus": "The agent's view in the vendor's words; HireFly puts it in interview terms."
+    },
+    {
+      "title": "About service level agreements (SLAs)",
+      "url": "https://support.atlassian.com/jira-service-management-cloud/docs/what-are-slas-and-how-do-i-view-them-in-my-service-project/",
+      "source": "Atlassian Support",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "Goals, clocks and what a breach looks like in JSM.",
+      "units": [
+        "jira-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after \"Jira Service Management in practice\" if SLAs come up.",
+      "versus": "Shows goals and breaches in the tool; HireFly links them to ticket metrics and honest wording."
+    },
+    {
+      "title": "ACP-620 Managing Jira Projects for Cloud: exam topics",
+      "url": "https://www.atlassian.com/dam/jcr:90960354-c158-4a0e-b31a-71f53b207669/ACP-620%20Managing%20Jira%20Projects%20for%20Cloud%20Exam%20Topics%20V2.pdf",
+      "source": "Atlassian",
+      "kind": "certification",
+      "minutes": 20,
+      "free": true,
+      "why": "Read the topic outline (version dated April 2021) to see what an admin-lite credential covers; unit 11 gives the reader's level. You are not preparing to claim this certification.",
+      "units": [
+        "jira-u11"
+      ],
+      "priority": "optional",
+      "useWhen": "Skim it only to see what an admin-level credential covers.",
+      "versus": "It is a topic list for a certificate you are not claiming; HireFly teaches the reader's level."
+    }
+  ],
+  "labs": [
+    {
+      "id": "jira-lab-1",
+      "title": "Create a Scrum project and enter a starter backlog",
+      "minutes": 40,
+      "goal": "A free Jira Cloud site with a Scrum project for the shift-scheduling product and 12 estimated issues in an ordered backlog.",
+      "setup": "Sign up for the free Jira Cloud plan on Atlassian's site with your own email. Create a project from the Scrum template, name it 'Dispatch', key DISP. No practice CSV is needed; the backlog is below.\n\nStarter backlog (summary, type, points): Dispatcher marks a shift as emergency (Story, 3); Find pharmacists within a set distance (Story, 5); Send SMS for a nearby emergency shift (Story, 5); Pharmacist accepts a shift from the alert link (Story, 3); Dispatcher sees who was alerted (Story, 3); Text message when a shift is filled (Story, 5); Bulk upload of shift requests (Story, 8); Schedule shows the wrong time zone (Bug, 2); Duplicate assignment created on double click (Bug, 3); Password reset email not received (Bug, 2); Set up a test environment (Task, 2); Document the export of monthly assignments (Task, 1).",
+      "steps": [
+        "Create the free Jira site and the Scrum project 'Dispatch' with key DISP.",
+        "Open the backlog and use Create to add the 12 issues with the right issue types.",
+        "Set the story point estimate on each issue (add the field to the issue view if it is hidden).",
+        "Create an epic 'Emergency shift alerts' and set it as the parent of the first five stories.",
+        "Drag the issues into this order: alert stories first, then bugs, then the rest.",
+        "Add labels: `notifications` on the SMS and filled-text items, `customer-reported` on the three bugs.",
+        "Open one issue and write a three-line acceptance criteria list in the description.",
+        "Take a screenshot of the ordered backlog."
+      ],
+      "check": [
+        "The backlog shows 12 issues, with the epic grouping five of them.",
+        "Total estimate is 42 points.",
+        "Searching `project = DISP AND issuetype = Bug` returns 3 issues.",
+        "Searching `labels = notifications` returns 2 issues."
+      ],
+      "talkTrack": "I set up a Scrum project from scratch in Jira, entered and estimated a backlog, and grouped related stories under an epic."
+    },
+    {
+      "id": "jira-lab-2",
+      "title": "Configure the board and run a sprint end to end",
+      "minutes": 45,
+      "goal": "A completed sprint with a sprint goal, moved cards, one carry-over and a visible sprint report.",
+      "setup": "Continue in the DISP project from lab 1. No extra installs.",
+      "steps": [
+        "Open the board settings and look at the columns. Add a column 'In Review' and map a status to it (create the status if needed).",
+        "Add a quick filter named 'Mine' with the JQL `assignee = currentUser()`.",
+        "Assign yourself the alert stories and the two small tasks.",
+        "In the backlog create a sprint, drag in 19 points (the first four alert stories and the two tasks), and open Start sprint.",
+        "Type the sprint goal 'Pharmacies can be alerted about an emergency shift' and start the sprint, using a two-week length.",
+        "On the board move cards across the columns, leaving one story unfinished.",
+        "Choose Complete sprint and move the unfinished story to the backlog.",
+        "Open the Sprint report and the Burndown chart and screenshot both."
+      ],
+      "check": [
+        "The board shows your new column and the quick filter works.",
+        "The sprint report lists completed issues and one not completed.",
+        "`project = DISP AND sprint in closedSprints()` returns the issues that were in the sprint.",
+        "Velocity chart shows one bar with committed and completed values."
+      ],
+      "talkTrack": "I ran a sprint in Jira from planning to the sprint report, set a sprint goal, and handled carry-over deliberately."
+    },
+    {
+      "id": "jira-lab-3",
+      "title": "Build a bug triage board",
+      "minutes": 35,
+      "goal": "A Kanban-style triage board that only shows bugs and moves them New, Needs Info, Triaged.",
+      "setup": "Same Jira site. Create a second project from the Kanban template called 'Triage' with key TRI, or reuse DISP and create a new board.",
+      "steps": [
+        "Create five bugs with priorities and rough text, for example 'Alert was not sent to nearby pharmacists' and 'Schedule shows the wrong time zone'.",
+        "Create a board whose filter is `project = DISP AND issuetype = Bug ORDER BY Rank ASC`.",
+        "Create columns New, Needs Info, Triaged and map statuses to them.",
+        "Move bugs through the columns, writing a comment that asks for steps to reproduce on one bug.",
+        "Link one bug as 'is blocked by' or 'relates to' another and add a label `customer-reported`.",
+        "Add a quick filter `priority IN (Highest, High)`.",
+        "Screenshot the board."
+      ],
+      "check": [
+        "The board lists exactly the five bugs and nothing else.",
+        "One bug sits in Needs Info with your comment.",
+        "The linked issues show the link on both tickets.",
+        "Changing the filter to `issuetype = Task` empties the board."
+      ],
+      "talkTrack": "I built a triage board on a JQL filter and used it to separate bugs needing information from bugs ready for a developer."
+    },
+    {
+      "id": "jira-lab-4",
+      "title": "Save five JQL filters",
+      "minutes": 30,
+      "goal": "Five named, saved filters you could show in an interview.",
+      "setup": "Continue in DISP. Open the advanced issues search and switch to JQL mode.",
+      "steps": [
+        "Write `project = DISP AND resolution = Unresolved AND assignee IS EMPTY ORDER BY created ASC` and save it as 'DISP: Unassigned open'.",
+        "Write `project = DISP AND sprint in openSprints() AND statusCategory != Done ORDER BY priority DESC` and save as 'DISP: Left in sprint'.",
+        "Write `project = DISP AND issuetype = Bug AND priority IN (Highest, High) AND resolution = Unresolved` and save as 'DISP: Urgent bugs'.",
+        "Write `project = DISP AND status CHANGED TO \"Done\" DURING (-7d, now())` and save as 'DISP: Done this week'.",
+        "Write `parent = DISP-1 AND statusCategory != Done` (use your epic's key) and save as 'DISP: Epic remaining'.",
+        "Open Filters and confirm all five exist; share one with the project."
+      ],
+      "check": [
+        "All five filters run without a syntax error.",
+        "'DISP: Urgent bugs' returns only unresolved Highest and High bugs.",
+        "'DISP: Left in sprint' returns zero after you complete the sprint, and the number of unfinished cards while it runs."
+      ],
+      "talkTrack": "I keep a set of saved filters for triage, sprint review and epic progress, and I can write each from scratch."
+    },
+    {
+      "id": "jira-lab-5",
+      "title": "Create a dashboard from the filters",
+      "minutes": 30,
+      "goal": "A dashboard with four gadgets driven by your saved filters.",
+      "setup": "Continue in DISP with the five filters from lab 4.",
+      "steps": [
+        "Create a dashboard named 'DISP team'.",
+        "Add a Filter Results gadget for 'DISP: Urgent bugs'.",
+        "Add a Pie Chart gadget on 'DISP: Unassigned open', statistic type Priority.",
+        "Add a Created vs Resolved chart for the project.",
+        "Add a Sprint health or sprint-related gadget if your site offers one, otherwise a second filter results list.",
+        "Change the layout to two columns and share the dashboard with the project.",
+        "Screenshot the finished dashboard."
+      ],
+      "check": [
+        "Four gadgets display data without errors.",
+        "The Filter Results gadget count matches the filter's own search count.",
+        "Editing a bug's priority changes the pie chart after refresh."
+      ],
+      "talkTrack": "I built a team dashboard from saved filters, so everyone sees the same numbers from the same queries."
+    },
+    {
+      "id": "jira-lab-6",
+      "title": "Add an automation rule and read the reports",
+      "minutes": 35,
+      "goal": "One working automation rule with an audit log entry and a short written reading of the sprint reports.",
+      "setup": "Continue in DISP. The free plan includes a limited number of automation runs a month.",
+      "steps": [
+        "Open Project settings and find Automation. Create a rule from scratch.",
+        "Trigger: work item created. Condition: issue type equals Bug and priority equals Highest.",
+        "Action: add the label `urgent` and add a comment 'Triage within one hour.'",
+        "Turn the rule on and create a Highest-priority bug to test it.",
+        "Open the rule's audit log and confirm the run.",
+        "Open the velocity chart, burndown and cumulative flow diagram (if offered for your project type) and write three sentences on what each shows for your sprint.",
+        "Open the timeline and set dates on the epic."
+      ],
+      "check": [
+        "The new bug carries the label `urgent` and the comment.",
+        "The audit log shows one successful run.",
+        "Your written reading mentions committed versus completed points."
+      ],
+      "talkTrack": "I have built a simple trigger, condition and action rule and I read sprint reports for what they actually show."
+    }
+  ],
+  "interviewQuestions": [
+    {
+      "id": "jira-iq-1",
+      "prompt": "How have you used Jira?",
+      "strongAnswer": "I used Jira daily as a project manager at a small software company. I wrote tickets and user stories, kept the backlog ordered, and planned two-week sprints on a Scrum board. I ran standups from the board and used sprint reports in retrospectives. I also used filters to check what was open for a release. I was a regular user, not an administrator, so I did not design workflows or permission schemes. I worked with an admin or a developer lead when a workflow needed to change."
+    },
+    {
+      "id": "jira-iq-2",
+      "prompt": "What is the difference between a story, a task and a bug?",
+      "strongAnswer": "A story describes value for a user, written from their point of view, with acceptance criteria. A task is work that needs doing but has no direct user-facing value, like setting up a test environment. A bug is something that used to work or should work and does not. In my last role a shift showing at the wrong time on a pharmacist's schedule was a bug. The SOS alert feature I scoped was an epic broken into stories. The type matters because it drives how we report, prioritize and test."
+    },
+    {
+      "id": "jira-iq-3",
+      "prompt": "Walk me through a JQL query you would write to prepare for sprint review.",
+      "strongAnswer": "I would start with the project and the active sprint, then look at what is not finished. Something like project = DISP AND sprint in openSprints() AND statusCategory != Done, ordered by priority. For the review itself I would flip it to statusCategory = Done to list what we can demo. I would save the filter so it is reusable and put it on a dashboard gadget. I can write basic and intermediate JQL comfortably. For anything unusual I check the autocomplete or the documentation."
+    },
+    {
+      "id": "jira-iq-4",
+      "prompt": "How do you keep a board and backlog healthy?",
+      "strongAnswer": "I owned the product backlog, so I reviewed it before every sprint planning. The top items had clear acceptance criteria and were small enough to finish in a sprint. Old tickets nobody would ever do were closed rather than left to pile up. I checked for unassigned or stale in-progress items at standup, and I made sure statuses matched reality. A board that lies is worse than no board, because people stop trusting it and start asking for updates in chat instead."
+    },
+    {
+      "id": "jira-iq-5",
+      "prompt": "You used Azure DevOps too. How do the two compare?",
+      "strongAnswer": "I used both at an equal level, so the concepts transfer well. A Jira issue is an Azure DevOps work item. A sprint is an iteration. JQL maps to queries in Azure DevOps, which use WIQL under the hood. Labels are tags, and components loosely map to area paths, though area paths are a hierarchy that also assigns ownership. Azure DevOps bundles repos, pipelines and Test Plans in the same product, which I used for test cases and for Playwright runs. Jira usually connects to those things through other tools. I can be productive in either within a day or two."
+    },
+    {
+      "id": "jira-iq-6",
+      "prompt": "How would you handle a flood of low-quality tickets in a queue?",
+      "strongAnswer": "I would first find out why they are low quality. Often the form asks for the wrong things. I would add required fields or a template with steps to reproduce, expected and actual results, and environment. I would triage daily so bad tickets get a quick request for details instead of sitting. In my last role, rewriting the knowledge base and end-user documentation cut ticket inflow by 35%, because many tickets were questions the documentation should have answered. Fixing the cause beats working the queue faster."
+    },
+    {
+      "id": "jira-iq-7",
+      "prompt": "How do you estimate work, and what do you use velocity for?",
+      "strongAnswer": "We estimated stories in points, comparing each new story to ones we had already finished. The discussion mattered more than the number, because a big gap between estimates showed someone knew something the others did not. I used the velocity chart to plan: the average of completed work over recent sprints, adjusted for who was away. I never used it to compare teams or push the team to raise it. When we kept committing more than we completed, I lowered the commitment and looked for causes in the retrospective."
+    },
+    {
+      "id": "jira-iq-8",
+      "prompt": "A stakeholder says the sprint 'went badly'. Which Jira reports do you open?",
+      "strongAnswer": "I open the sprint report first for facts: what was completed, what was not, and what was added after the start. Then the burndown to see when work actually moved. If many items were started and finished late, the cumulative flow diagram shows whether a status like review is piling up. I would bring numbers to the retrospective, not opinions. In my last role scope added mid-sprint was the most common cause, and the report made that visible without blaming anyone."
+    },
+    {
+      "id": "jira-iq-9",
+      "prompt": "Write or describe a JQL query that finds bugs open for more than 30 days.",
+      "strongAnswer": "Project equals DISP, issue type equals Bug, resolution is Unresolved, and created is on or before minus 30 days, ordered by priority descending and then created ascending. I use resolution rather than a status name because status names change between teams. I would save it as a filter and put it on the dashboard so the oldest items are seen weekly. If I were unsure of a field name I would use autocomplete to confirm it."
+    },
+    {
+      "id": "jira-iq-10",
+      "prompt": "What is the difference between a company-managed and a team-managed project?",
+      "strongAnswer": "In a company-managed project, administrators configure workflows, fields and permissions, and schemes can be shared across projects. In a team-managed project the team configures its own board and workflow without an admin, and the settings are local to that project. Company-managed suits a standard process across many teams, team-managed suits a small independent team. I have used the day-to-day side of Jira and know the vocabulary, but I have not administered schemes, so I would work with an admin on any change."
+    },
+    {
+      "id": "jira-iq-11",
+      "prompt": "Have you used Jira automation?",
+      "strongAnswer": "Not on the job. My automation experience is basic Playwright tests running in Azure DevOps pipelines. I have since built a simple Jira rule in a free project: when a Highest-priority bug is created, add a label and a comment asking for triage within an hour. I understand the trigger, condition and action model and I read the audit log to check a run. I would also ask for a rule that chases tickets waiting for information, because that was a real problem for us."
+    },
+    {
+      "id": "jira-iq-12",
+      "prompt": "How would you use epics and the timeline to plan a feature?",
+      "strongAnswer": "I would create an epic with a one-sentence outcome, split it into stories that can each finish in a sprint, and order them so the riskiest or most foundational pieces come first. For the SOS alert feature I scoped, that meant flagging an emergency shift and finding nearby pharmacists before sending messages. On the timeline I would show the epic as a bar with dates and treat movement as a conversation. I would link requirements in Confluence and keep acceptance criteria on the tickets."
+    },
+    {
+      "id": "jira-iq-13",
+      "prompt": "What does a Jira Service Management SLA consist of?",
+      "strongAnswer": "A clock with a goal. It starts at a condition, usually when the request is created, pauses at a condition like waiting for customer, and stops at another, like first reply or resolution. The goal time can differ by priority or request type, and uses business hours or a 24x7 calendar. Agents see the countdown in the queue. I have not configured SLAs, but in my support role I worked to response expectations, and I know that changing status just to stop a clock corrupts the data."
+    },
+    {
+      "id": "jira-iq-14",
+      "prompt": "A developer says a ticket you wrote is unclear. What do you do?",
+      "strongAnswer": "I ask what is missing before defending it. Usually it is acceptance criteria, an example, or steps to reproduce. I update the ticket itself, not just reply in chat, so the next person sees the fix. If the gap shows a pattern, I change the template. In my last role I was the liaison between customers and developers, so unclear tickets were my problem, and a five-minute call with the developer often saved a day of guessing."
+    },
+    {
+      "id": "jira-iq-15",
+      "prompt": "How do you link Jira and Confluence in your work?",
+      "strongAnswer": "The ticket holds the current acceptance criteria and status. The Confluence page holds background, diagrams and decisions, and I link it to the ticket instead of copying it. In Confluence I can embed a live list of issues with a JQL query, which is handy for release notes. I keep one source of truth for each fact, because copies drift. I used documentation heavily in my last role and rewrote the end-user guides, though my day-to-day tickets lived in Jira."
+    },
+    {
+      "id": "jira-iq-16",
+      "prompt": "What would you do on your first day in a new team's Jira?",
+      "strongAnswer": "I would find the board and read its filter and columns, then look at the workflow to see what each status means. I would check the backlog's top items, the definition of ready if there is one, and the saved filters and dashboards the team already uses. I would ask which issue types and labels they use and what a good ticket looks like. Because I used Jira and Azure DevOps at the same level, the model is familiar and I only need local conventions."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you to a clear spoken account of Jira: the issue model, a Scrum board, JQL, bug triage and how it maps to Azure DevOps, which you used equally. Reading alone is not enough: the labs in a real free Jira site and Atlassian's hands-on material are what make the skill real. It will not make you an administrator.",
+    "hireflyBetter": [
+      "You need the Jira and Azure DevOps vocabulary mapped in one place.",
+      "You want 20 graded JQL queries with answers.",
+      "You want a short explanation of how you used Jira honestly.",
+      "You want sprint and triage practice that reuses your scheduling examples.",
+      "You have days and need the fastest route to a screening."
+    ],
+    "externalBetter": [
+      "You need a badge or certificate; Atlassian University gives a badge.",
+      "You want to see the live interface in video.",
+      "You need an exact JQL function or field, which Atlassian keeps current.",
+      "You want a free site to experiment in; the labs here use one but Atlassian's path guides it.",
+      "You are heading for admin work, which the outside path covers."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for \"The Jira model\" and \"Finding things: filters, JQL and dashboards\" and study only what you miss (40 minutes).",
+          "Read \"In the interview\" (15 minutes).",
+          "Do the lab \"Create a Scrum project and enter a starter backlog\" (40 minutes).",
+          "Do the lab \"Save five JQL filters\" (30 minutes).",
+          "Work \"JQL drill: 20 graded queries\" first set (30 minutes).",
+          "Do the lab \"Build a bug triage board\" (35 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Start \"Atlassian University (free Jira Fundamentals learning path and badge)\" (1.5 hours).",
+          "Work \"The Jira model\" and \"Boards, backlog and sprints\" (40 minutes).",
+          "Do the lab \"Create a Scrum project and enter a starter backlog\" and the lab \"Configure the board and run a sprint end to end\" (1 hour 25 minutes).",
+          "Work \"Setting up and running Scrum in Jira\" and read \"Learn scrum with Jira\" (1.5 hours).",
+          "Work \"Finding things: filters, JQL and dashboards\" and \"JQL drill: 20 graded queries\" (1.2 hours).",
+          "Do the lab \"Save five JQL filters\" and the lab \"Create a dashboard from the filters\" (1 hour).",
+          "Work \"Working well in Jira\" and \"Jira for QA and support\" and do the lab \"Build a bug triage board\" (1 hour).",
+          "Work \"Planning, reports and Confluence\" and do the lab \"Add an automation rule and read the reports\" (1 hour).",
+          "Finish with \"In the interview\" (15 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Finish \"Atlassian University (free Jira Fundamentals learning path and badge)\" for the badge (3 hours).",
+          "Work every HireFly unit in order and do all six labs (9 hours).",
+          "Follow \"Learn scrum with Jira\" in your own project (3 hours).",
+          "Use \"JQL functions\" and \"JQL fields\" to extend the JQL drill with your own queries (4 hours).",
+          "Work \"Automation and administration at a user's level\" and read \"Get started with Jira automation\" (3 hours).",
+          "Work \"Jira Service Management in practice\" and read \"About queues in Jira Service Management\" and \"About service level agreements (SLAs)\" (3 hours).",
+          "Use Jira daily, keep your boards and filters going and map them to Azure DevOps (12 hours).",
+          "Reread \"In the interview\" (1 hour)."
+        ]
+      }
+    ]
+  }
+}

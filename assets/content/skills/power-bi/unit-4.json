@@ -1,0 +1,175 @@
+{
+  "id": "power-bi-u4",
+  "title": "Building a report",
+  "summary": "Choose the right visuals, add interactivity, design for the reader, and build the shift fill-rate dashboard as a worked project.",
+  "lessons": [
+    {
+      "id": "power-bi-u4-l1",
+      "title": "Choosing visuals and designing for the reader",
+      "minutes": 8,
+      "body": "A report succeeds when its reader gets an answer quickly. Start with the question and who asks it, then pick the visual.\n\n**Match the visual to the question**\n\n| Question | Visual | Notes |\n|---|---|---|\n| What is the number right now? | Card (or KPI) | One headline value, such as overall fill rate |\n| How do categories compare? | Bar or column chart | Sort by value; horizontal bars suit long names |\n| How does it change over time? | Line chart | Put the date table's month on the axis |\n| Which parts make up a total? | Stacked bar, or a pie/donut for 2 to 4 parts only | Many slices are unreadable |\n| Show exact values or detail | Table or matrix | Matrix is the pivot-table equivalent |\n| Show a geographic spread | Map | Only if location matters |\n\nAvoid decoration. 3-D charts, many colours and gauges tend to take space and say little.\n\n**Field wells.** Drag fields into the wells of the Visualizations pane. For a bar chart of fill rate by pharmacy: put `Pharmacies[pharmacy_name]` on the Y axis (or Axis) and the `[Fill Rate]` measure in Values. Dimension fields go on axes and in legends; measures go in values.\n\n**Design for the reader**\n\n1. **One page, one story.** Put the most important numbers top left, where eyes land first. Cards across the top, trend in the middle, breakdowns below.\n2. **Titles that say something.** \"Fill rate fell in March\" beats \"Fill rate by month\". Edit titles in the Format pane.\n3. **Consistent colour.** Use one colour for the main measure and a second to highlight exceptions. Do not use colour as the only signal, because some readers cannot distinguish red from green.\n4. **Align and space.** Line visuals up to a grid, keep margins even, and leave white space.\n5. **Limit the page.** Roughly 5 to 8 visuals. More means the reader hunts for the point.\n6. **Label clearly.** Format percentages as percentages, add units such as \"minutes\", and hide axis titles that repeat the chart title.\n7. **Add alt text** to key visuals so screen readers can describe them.\n\nA useful test: show the page to someone for five seconds, then ask what they remember. If it is not the main point, simplify.",
+      "keyPoints": [
+        "Start from the question, then choose: card, bar, line, table or matrix.",
+        "Dimension fields go on axes; measures go in values.",
+        "Place key numbers top left and give charts titles that state the finding.",
+        "Use few colours and do not rely on colour alone.",
+        "Aim for roughly 5 to 8 visuals per page."
+      ],
+      "interviewAngle": "When asked how you would design a dashboard, begin with the audience and the decision they make, not the chart types. This is a strength you can claim honestly: you wrote requirements and documentation for real users, which is the same skill. Say your practice dashboard is a learning project.",
+      "exercises": [
+        {
+          "id": "power-bi-u4-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which visual best shows how fill rate changed month by month over a year?",
+          "choices": [
+            "Pie chart",
+            "Card",
+            "Line chart",
+            "Map"
+          ],
+          "answer": 2,
+          "explanation": "A line chart with months on the axis shows a trend over time. A pie shows parts of a whole, and a card shows a single value."
+        },
+        {
+          "id": "power-bi-u4-l1-e2",
+          "type": "short",
+          "prompt": "Which visual is best for showing a single headline number such as the overall fill rate?",
+          "accept": [
+            "card",
+            "a card",
+            "card visual",
+            "kpi",
+            "kpi card"
+          ],
+          "answer": "Card",
+          "explanation": "A card displays one value prominently."
+        },
+        {
+          "id": "power-bi-u4-l1-e3",
+          "type": "open",
+          "prompt": "A pharmacy staffing manager wants to know where shifts go unfilled. Describe a one-page layout: which visuals, where they go, and one design choice you make to help the reader.",
+          "answer": "Top row: cards for overall fill rate, shifts requested and average minutes to fill. Middle left: a line chart of fill rate by month to show the trend. Middle right: a bar chart of fill rate by pharmacy, sorted lowest first, so the weak sites are obvious. Bottom: a bar chart of cancellation reasons. Slicers for date and region. Design choices: titles that state the finding, one highlight colour for pharmacies below target, and no more than about seven visuals.",
+          "rubric": [
+            "Cards for headline numbers",
+            "A trend visual over time and a comparison visual by pharmacy",
+            "Places key numbers prominently and keeps the page uncluttered",
+            "Mentions at least one specific readability choice, such as sorting, titles or colour use"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u4-l2",
+      "title": "Slicers, filters, drill-through and interactions",
+      "minutes": 9,
+      "body": "Interactivity is a big part of why people use Power BI instead of a static spreadsheet. A few tools do most of the work.\n\n**Slicers.** A slicer is a visual that filters the page. Add one from the Visualizations pane and drop a field such as `Dates[Month]` or `Pharmacies[region]` on it. It can be a list, dropdown, buttons or a date range slider. Slicers filter through the relationships you built, which is why they should use dimension fields. Keep them together and visible, and use at most three or four.\n\n**The Filters pane.** Filters can be applied at three levels:\n\n| Level | Applies to |\n|---|---|\n| Visual | one chart only |\n| Page | every visual on the page |\n| Report | every page |\n\nUse a filter, not a slicer, when the reader should not change it, for example excluding test shifts from the whole report.\n\n**Cross-filtering and highlighting.** By default, clicking a bar filters or highlights the other visuals on the page. Hold Ctrl to select several. Use Format > Edit interactions to stop a visual from affecting another, for example so a trend line is not filtered by a click on its neighbour.\n\n**Drill down.** Put several fields in a chart axis as a hierarchy, such as Year, Month. The drill buttons on the visual let readers move from year to month and back.\n\n**Drill-through.** This lets a reader jump from a summary to detail about one item:\n\n1. Add a new page, called for example \"Pharmacy detail\".\n2. Drag `Pharmacies[pharmacy_name]` into the **Drill-through** well of that page.\n3. Build visuals on the page for that single pharmacy: fill rate by month, cancellation reasons, a table of shifts.\n4. On the main page, right-click a pharmacy bar and choose Drill through > Pharmacy detail. The detail page opens filtered to that pharmacy, and a back button appears.\n\n**Tooltips and bookmarks.** Hovering shows a tooltip, which you can customise with a small report page. Bookmarks save a view, and with buttons let readers switch between views. Learn these after the basics.\n\nBe careful that too much interaction hides the main message. Set a sensible default view so the report makes sense before anyone clicks. Test by clicking everything: one broken interaction can show wrong numbers without any error message.",
+      "keyPoints": [
+        "Slicers filter the page and work best on dimension fields.",
+        "Filters can be set at visual, page or report level.",
+        "Edit interactions controls how visuals affect each other.",
+        "Drill-through jumps to a detail page filtered to the selected item.",
+        "Set a clear default view and click through every interaction before sharing."
+      ],
+      "interviewAngle": "If asked what makes a dashboard useful, mention a summary page plus drill-through to detail. Explain it as you would to a user: \"click a pharmacy to see its own page\". Be honest that you have built these in practice and in no production role.",
+      "exercises": [
+        {
+          "id": "power-bi-u4-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A reader sees a low fill rate for Harbor and wants a separate page showing only Harbor's detail. Which feature provides this?",
+          "choices": [
+            "A page-level filter",
+            "Drill-through",
+            "A bookmark on the title",
+            "Edit interactions"
+          ],
+          "answer": 1,
+          "explanation": "Drill-through opens a detail page filtered to the item the reader right-clicked. A page filter would fix the filter for everyone."
+        },
+        {
+          "id": "power-bi-u4-l2-e2",
+          "type": "short",
+          "prompt": "Which filter level applies to every page of a report: visual, page or report?",
+          "accept": [
+            "report",
+            "report level",
+            "report-level",
+            "report level filter"
+          ],
+          "answer": "report",
+          "explanation": "Report-level filters apply to all pages; page-level to one page; visual-level to one chart."
+        },
+        {
+          "id": "power-bi-u4-l2-e3",
+          "type": "open",
+          "prompt": "Describe the steps to build a drill-through page so a reader can right-click a pharmacy on the summary page and see that pharmacy's monthly fill rate and cancellation reasons.",
+          "answer": "Add a new page and name it Pharmacy detail. Drag Pharmacies[pharmacy_name] into the Drill-through well on that page. Build a line chart of Fill Rate by month and a bar chart of cancellation reasons on the page, using the shared measures. On the summary page, right-click a pharmacy in a visual and choose Drill through > Pharmacy detail. The page opens filtered to that pharmacy, with a back button to return.",
+          "rubric": [
+            "Creates a new page for the detail",
+            "Adds the pharmacy field to the Drill-through well",
+            "Builds the monthly and cancellation visuals on that page",
+            "Explains the right-click action from the summary page"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u4-l3",
+      "title": "Worked project: the shift fill-rate dashboard",
+      "minutes": 10,
+      "body": "Here is the whole workflow on the practice data in `assets/content/datasets/`. It stands in for what you reported on in SQL: shift fill rate, time to fill and cancellation reasons. The data is fictional, so it is safe to show.\n\n**1. Get and clean.** Load `shifts.csv` (id, pharmacy_id, pharmacist_id, requested_at, filled_at, starts_at, status, cancel_reason, is_emergency; 1019 rows) and `pharmacies.csv` (id, name, city, state; 40 rows). In Power Query: set the three datetime columns to Date/Time, rename `id` to `shift_id` and `name` to `pharmacy_name`, and add:\n\n- `request_date`: Date Only from `requested_at`.\n- `hours_to_fill`: `filled_at` minus `requested_at`, converted to hours (null when `filled_at` is empty).\n- `is_filled`: 1 when `filled_at` has a value, otherwise 0 (Add Column > Conditional Column).\n\n**2. Model.** Create the `Dates` table and mark it. Relate `Pharmacies[id]` to `Shifts[pharmacy_id]` and `Dates[Date]` to `Shifts[request_date]`, both one-to-many, single direction.\n\n**3. Measures.**\n\n```text\nTotal Shifts = COUNTROWS(Shifts)\nFilled Shifts = CALCULATE([Total Shifts], Shifts[is_filled] = 1)\nCancelled Shifts = CALCULATE([Total Shifts], Shifts[status] = \"cancelled\")\nFill Rate = DIVIDE([Filled Shifts], [Total Shifts])\nCancel Rate = DIVIDE([Cancelled Shifts], [Total Shifts])\nAvg Hours to Fill = AVERAGE(Shifts[hours_to_fill])\n```\n\nFormat the two rates as percentages and `Avg Hours to Fill` with two decimals.\n\n**4. Check.** Before drawing anything, put the measures in a card or table and compare with a SQL query on the same file. On the whole dataset you should see Total Shifts 1019, Filled Shifts 906 (Fill Rate 88.9%), Cancelled Shifts 171 (Cancel Rate 16.8%) and Avg Hours to Fill 9.52. Combined rates come from totals: if January has 20 requests with 18 filled and February has 30 with 21 filled, the two months together are 39 / 50 = 78.0%, not the average of 90% and 70%.\n\n**5. Layout.**\n\n| Area | Visual |\n|---|---|\n| Top row | Cards: Fill Rate, Total Shifts, Cancel Rate, Avg Hours to Fill |\n| Middle left | Line chart: Fill Rate by `Dates[Month]` |\n| Middle right | Bar chart: Fill Rate by `Pharmacies[state]`, sorted ascending |\n| Bottom | Bar chart: Cancelled Shifts by `cancel_reason` |\n| Left side | Slicers: month, state |\n\nAdd a drill-through page for one pharmacy. Give each visual a title that states what it shows, and keep one highlight colour for results below target.\n\n**6. Publish** (next unit) and write a short note: data source, date range, definitions (\"fill rate = shifts with a filled time / all requested shifts\") and known gaps. Definitions are as valuable as charts, because stakeholders argue about what a metric means.",
+      "keyPoints": [
+        "Build in order: clean, model, measure, check, then visuals.",
+        "Define Total Shifts, Filled Shifts, Fill Rate, Cancel Rate and Avg Hours to Fill as measures.",
+        "Verify measures against a SQL query before building charts: 1019 shifts, 906 filled, 88.9%.",
+        "Combined rates are computed from totals (39/50), not by averaging months.",
+        "Use sample data, document metric definitions and keep the page uncluttered."
+      ],
+      "interviewAngle": "This project is your proof of learning. Describe it plainly: \"a practice dashboard built on sample shift data that mirrors the reporting I did in SQL\". Walk through the measures and the check against SQL. Do not imply it came from the employer's real data or that you used Power BI at work.",
+      "exercises": [
+        {
+          "id": "power-bi-u4-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is the correct definition of the Fill Rate measure in the project?",
+          "choices": [
+            "Fill Rate = AVERAGE(Shifts[status])",
+            "Fill Rate = [Filled Shifts] - [Total Shifts]",
+            "Fill Rate = DIVIDE([Filled Shifts], [Total Shifts])",
+            "Fill Rate = COUNTROWS(Shifts) * 100"
+          ],
+          "answer": 2,
+          "explanation": "The fill rate is filled shifts as a share of all shifts, and DIVIDE handles a zero denominator safely."
+        },
+        {
+          "id": "power-bi-u4-l3-e2",
+          "type": "short",
+          "prompt": "January has 20 requested shifts with 18 filled, and February has 30 requested with 21 filled. What is the fill rate across both months combined, as a percentage?",
+          "accept": [
+            "78%",
+            "78",
+            "0.78",
+            "78.0%",
+            "78.00%"
+          ],
+          "answer": "78%",
+          "explanation": "39 filled divided by 50 requested is 0.78. Averaging 90% and 70% would wrongly give 80%."
+        },
+        {
+          "id": "power-bi-u4-l3-e3",
+          "type": "open",
+          "prompt": "Walk through, in order, how you would build the shift fill-rate dashboard from two CSV files and make sure the numbers are correct.",
+          "answer": "Load shifts and pharmacies in Power Query, set types, add a date-only request date, hours to fill and an is_filled flag. Build a Dates table, mark it, and create one-to-many relationships from Pharmacies and Dates to Shifts. Write measures: Total Shifts, Filled Shifts, Cancelled Shifts, Fill Rate, Cancel Rate and Avg Hours to Fill. Put the measures in a card or table and compare with a SQL query on the same data (1019 shifts, 906 filled, 88.9%). Then build cards, a monthly line chart, a bar chart by state, a cancellation reasons chart and slicers, add a drill-through page, and document the metric definitions.",
+          "rubric": [
+            "Cleans and shapes data in Power Query first",
+            "Builds the date table and relationships",
+            "Defines measures including Fill Rate with DIVIDE",
+            "Checks measures against SQL or a manual count",
+            "Builds sensible visuals and documents definitions"
+          ]
+        }
+      ]
+    }
+  ]
+}

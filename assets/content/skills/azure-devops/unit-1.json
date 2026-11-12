@@ -1,0 +1,55 @@
+{
+  "id": "ado-u1",
+  "title": "The map: organization, project and services",
+  "summary": "How Azure DevOps is organized, what each of the five services does, and why work item names change between process templates.",
+  "lessons": [
+    {
+      "id": "ado-u1-l1",
+      "title": "Organization, project and the five services",
+      "minutes": 8,
+      "body": "Azure DevOps is a set of connected tools for planning, building, testing and shipping software. Everything lives in a hierarchy.\n\n**Organization** is the top container, usually one per company, with its own users, billing and settings. **Project** sits inside it and holds one product's work. A company with the pharmacist scheduling product might have one project called `Dispatch` with all its backlog, code and tests.\n\nInside a project there are five services:\n\n| Service | What it holds | Who uses it most |\n|---|---|---|\n| Boards | Work items, backlogs, Kanban boards, sprints | PM, product owner, whole team |\n| Repos | Git repositories, branches, pull requests | Developers, reviewers |\n| Pipelines | Automated builds, test runs, deployments | Developers, DevOps, QA |\n| Test Plans | Test plans, suites, test cases, runs | QA, UAT testers, PM |\n| Artifacts | Package feeds (npm, NuGet and similar) | Developers |\n\nThe value is that these are linked. Here is how one piece of work moves through them, using the emergency SOS request feature:\n\n1. In **Boards**, the PM writes a User Story: 'As a pharmacy manager, I can send an SOS request to nearby pharmacists.' It has acceptance criteria and sits in the backlog.\n2. In sprint planning it is pulled into a sprint and split into tasks.\n3. A developer creates a branch in **Repos**, commits, and opens a pull request linked to the story.\n4. When the PR merges, a **Pipeline** builds the app and runs automated tests.\n5. In **Test Plans**, a tester runs the manual test cases linked to the story. A failed step creates a Bug linked back to the story.\n6. **Artifacts** matters if the build publishes or consumes shared packages. A tester or PM rarely touches it.\n\nBecause every step links to the story, you can open one work item and see its branch, PR, build and tests. That chain is called traceability, and it is the main reason teams use one platform rather than five separate tools.\n\nYou do not need every service equally. A PM lives in Boards and Test Plans; a tester adds Pipelines results; developers live in Repos.",
+      "keyPoints": [
+        "Organization contains projects; a project holds one product's work.",
+        "Five services: Boards, Repos, Pipelines, Test Plans, Artifacts.",
+        "Work items link across services, which gives traceability from requirement to code to test.",
+        "A PM or tester mostly uses Boards and Test Plans, and reads Pipelines results."
+      ],
+      "interviewAngle": "Interviewers often ask 'what parts of Azure DevOps have you used?'. Answer by naming the services and the job you did in each: Boards for backlog and sprints, Test Plans for test cases, Pipelines for running and reading Playwright runs. Say plainly that you did not administer the organization or build the pipelines from scratch.",
+      "exercises": [
+        {"id": "ado-u1-l1-e1", "type": "mcq", "placement": true, "prompt": "Which Azure DevOps service holds the work items, backlog and sprint boards?",
+         "choices": ["Repos", "Boards", "Artifacts", "Pipelines"], "answer": 1, "explanation": "Boards is the planning service. Repos is for Git code, Pipelines for automation and Artifacts for package feeds."},
+        {"id": "ado-u1-l1-e2", "type": "short", "prompt": "What is the name for being able to follow a requirement through its code and tests via links?",
+         "accept": ["traceability", "requirements traceability"], "answer": "Traceability", "explanation": "Links between a story, its pull requests, builds and test cases let you trace a requirement end to end."},
+        {"id": "ado-u1-l1-e3", "type": "mcq", "prompt": "Which statement about organizations and projects is correct?",
+         "choices": ["A project contains organizations", "An organization and a project are the same thing", "An organization contains one or more projects", "Each service is its own organization"], "answer": 2, "explanation": "The organization is the top container; projects live inside it, and each project has the services."},
+        {"id": "ado-u1-l1-e4", "type": "open", "prompt": "Explain in your own words how the emergency SOS request story would move through Boards, Repos, Pipelines and Test Plans. Name what links the steps together.",
+         "answer": "The SOS story is written in **Boards** with acceptance criteria and placed in the backlog. In sprint planning it is assigned to an iteration and broken into tasks. A developer creates a branch in **Repos**, commits work and opens a pull request that is linked to the story. After the merge, a **Pipeline** builds the app and runs automated tests. In **Test Plans**, a tester runs manual test cases linked to the story, and any failed step creates a Bug linked back to it. The work item links tie everything together, so opening the story shows its PR, build and tests (traceability).",
+         "rubric": ["Starts in Boards with a story and acceptance criteria", "Mentions branch and linked pull request in Repos", "Mentions a pipeline build or test run", "Mentions test cases and bugs in Test Plans", "Names work item links as the connecting mechanism"]}
+      ]
+    },
+    {
+      "id": "ado-u1-l2",
+      "title": "Process templates and work item type names",
+      "minutes": 8,
+      "body": "When a project is created it uses a **process template**, which decides what work item types exist, what states they move through and what they are called. This is why two Azure DevOps teams can use different words for the same idea. The four standard templates are Basic, Agile, Scrum and CMMI.\n\n| Template | Requirement-level item | Hierarchy |\n|---|---|---|\n| Basic | Issue | Epic > Issue > Task |\n| Agile | User Story | Epic > Feature > User Story > Task |\n| Scrum | Product Backlog Item (PBI) | Epic > Feature > PBI > Task |\n| CMMI | Requirement | Epic > Feature > Requirement > Task |\n\nBug is a separate type in Agile, Scrum and CMMI. In Basic, defects are normally tracked as Issues. Scrum also has an Impediment type for blockers, and CMMI adds types like Change Request, Risk and Review for formal processes.\n\n**Same idea, different names.** A thing a customer wants is a User Story in Agile, a PBI in Scrum, a Requirement in CMMI and an Issue in Basic. States differ too. A User Story in Agile goes New, Active, Resolved, Closed (and Removed for dropped work). A PBI in Scrum goes New, Approved, Committed, Done (and Removed). CMMI's Requirement goes Proposed, Active, Resolved, Closed, and Basic's Issue goes To Do, Doing, Done. Estimation fields also differ: Agile uses Story Points, Scrum uses Effort, CMMI uses Size.\n\n**Why it matters to you.** If you join a new team you must check which template they use before you say 'story' or 'ticket' in a meeting. Look at the types offered when you click New Work Item, and the states in the dropdown.\n\nTemplates can also be customized. Many teams use an **inherited process**, which is a copy of a standard template with extra fields, states or types. If a team's board has a state called 'Ready for QA' that is not in the standard list, that is a customization made by an administrator. You do not need to create these. You do need to recognize them and work within them.\n\nFor the pharmacist scheduling product, a team on the Agile template would write 'SOS request: nearby pharmacists get an alert' as a User Story with Story Points, and a defect such as 'SOS alert not sent when radius is 0' as a Bug linked to it.",
+      "keyPoints": [
+        "Process template decides work item types, states and field names.",
+        "Requirement-level item: Issue (Basic), User Story (Agile), PBI (Scrum), Requirement (CMMI).",
+        "Estimation field differs: Story Points (Agile), Effort (Scrum), Size (CMMI).",
+        "Teams often customize a template; check the states and types before using the vocabulary."
+      ],
+      "interviewAngle": "A good interview line is 'my team called them user stories, but I know Scrum calls them Product Backlog Items and Jira calls them stories'. It shows you are fluent in the concept rather than tied to one tool's words. Be honest that you used one template daily and that you did not configure or customize processes.",
+      "exercises": [
+        {"id": "ado-u1-l2-e1", "type": "mcq", "placement": true, "prompt": "Which process template calls its requirement-level work item a Product Backlog Item?",
+         "choices": ["Agile", "Basic", "CMMI", "Scrum"], "answer": 3, "explanation": "Scrum uses Product Backlog Item. Agile uses User Story, Basic uses Issue and CMMI uses Requirement."},
+        {"id": "ado-u1-l2-e2", "type": "short", "prompt": "In the Agile template, what is the work item type for a customer-facing requirement?",
+         "accept": ["user story", "story", "a user story"], "answer": "User Story", "explanation": "Agile uses User Story; Scrum uses PBI."},
+        {"id": "ado-u1-l2-e3", "type": "mcq", "prompt": "A board shows a state called 'Ready for QA' that is not in the standard list. What is the most likely explanation?",
+         "choices": ["The board is broken", "It is a customization added to an inherited process", "Basic template always includes it", "Azure DevOps adds it automatically for testers"], "answer": 1, "explanation": "Administrators can add states to an inherited process. You work within them."},
+        {"id": "ado-u1-l2-e4", "type": "open", "prompt": "A hiring manager says their team uses the Scrum template and asks whether your experience transfers. Draft a short spoken answer that maps the terms you used to Scrum's terms and states honestly what you did not do.",
+         "answer": "\"Yes, it transfers. On my team we used User Stories, which are Product Backlog Items in Scrum, and I estimated them in story points, which Scrum calls Effort. States are named a bit differently, but the flow is the same: new, approved, committed, done. I did not configure the process template myself, I worked within it as the person who owned the backlog. I would check the exact states and fields in the first day.\"",
+         "rubric": ["Maps User Story to Product Backlog Item", "Mentions estimate field naming or state differences", "States that the learner worked within a template rather than configuring it", "Sounds confident but not overclaiming"]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "id": "jira-u4",
+  "title": "Working well in Jira",
+  "summary": "Linking issues, grouping with components, labels and versions, communicating through comments, and keeping notifications and bulk edits under control.",
+  "lessons": [
+    {
+      "id": "jira-u4-l1",
+      "title": "Links, components, labels and versions",
+      "minutes": 8,
+      "body": "Jira gives you several ways to relate issues. Using the right one keeps searches meaningful.\n\n**Issue links** connect two issues and describe the relationship. Common link types:\n\n| Link | Meaning | Example |\n|---|---|---|\n| blocks / is blocked by | One cannot finish until the other does | Time zone fix blocks the schedule export story |\n| relates to | Loosely connected | Two bugs seen in the same release |\n| duplicates / is duplicated by | Same problem reported twice | Two pharmacies report the missing shift |\n| clones / is cloned by | A copy made from another | Same fix applied to another product |\n\nAn admin can add or rename link types, so what you see may differ. When you close a duplicate, link it to the original first so the history is clear and anyone watching the duplicate can follow.\n\n**Epic and parent.** A story belongs under an epic through its parent relationship. Older projects use an Epic Link field, which is why you will see both in JQL examples. Use whichever your project shows.\n\n**Components** split a project into parts of the product, for example Scheduling, Notifications, Mobile app, Billing. They are set up by a project admin and often come with a default owner. They are good for routing a bug to the right developer. Team-managed projects may not offer components, so check before promising them.\n\n**Labels** are free-form tags. Anyone can add them, which is both the point and the problem: `timezone`, `time-zone` and `tz` end up as three labels. Agree a short list and stick to it.\n\n**Versions (releases).** A fix version names the release an issue ships in, and an affects version names where a bug was found. With these, a release becomes searchable:\n\n```jql\nproject = DISP AND fixVersion = \"2.4\" AND resolution = Unresolved\n```\n\nThat query is your release-readiness check. Jira can also mark a version released and show its progress.\n\nA rule of thumb for choosing: use a **link** for a relationship between two specific issues, a **component** for where in the product something lives, a **label** for a lightweight cross-cutting tag, and a **version** for which release.",
+      "keyPoints": [
+        "Use the specific link type; blocks and duplicates carry real meaning.",
+        "Components describe where in the product; versions describe which release.",
+        "Free-form labels drift, so agree a short list.",
+        "Link duplicates to the original before closing them."
+      ],
+      "interviewAngle": "Describe how you linked a bug to the story it came from, or marked a ticket as a duplicate, and why. If you did not set up components or versions yourself, say you used the ones the team had and picked the right values when filing.",
+      "exercises": [
+        {
+          "id": "jira-u4-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Two pharmacies each report that a filled shift is missing from the calendar. What is the best handling of the second ticket?",
+          "choices": [
+            "Leave both open with no link",
+            "Delete the second ticket",
+            "Link it as a duplicate of the first, note the second pharmacy on the original, and close it",
+            "Change its summary to match the first one and keep working both"
+          ],
+          "answer": 2,
+          "explanation": "Linking as a duplicate preserves history and keeps the work in one place. Deleting loses the record that a second customer is affected."
+        },
+        {
+          "id": "jira-u4-l1-e2",
+          "type": "mcq",
+          "prompt": "You want to find every unresolved issue that must ship in release 2.4. Which field do you use?",
+          "choices": ["labels", "fixVersion", "reporter", "component"],
+          "answer": 1,
+          "explanation": "Fix version names the release an issue ships in."
+        },
+        {
+          "id": "jira-u4-l1-e3",
+          "type": "open",
+          "prompt": "A bug is found during UAT: the notification for a newly assigned shift is not sent when the pharmacist's phone is set to a different time zone. Describe how you would use a link, a component, a label and a version when filing or updating it.",
+          "answer": "**Link:** Link the bug to the story that introduced shift notifications with 'relates to' or 'is caused by' if available, so developers see the original acceptance criteria. If it blocks release, add 'blocks' to the release task.\n\n**Component:** Notifications, so it routes to the right developer.\n\n**Label:** `timezone`, from the team's agreed list, so we can find all time zone related defects.\n\n**Version:** Set Affects version to the build under UAT, and Fix version to the next planned release (for example 2.4) if the team agrees it must ship then.",
+          "rubric": [
+            "Uses a link type that explains the relationship",
+            "Chooses a sensible component for routing",
+            "Uses a label from a controlled vocabulary",
+            "Distinguishes affects version from fix version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u4-l2",
+      "title": "Comments, mentions, notifications and bulk changes",
+      "minutes": 8,
+      "body": "Most of the time in Jira is spent reading and writing comments, so a few habits go a long way.\n\n**Comments.** A good comment is a mini status report. Compare:\n\n> Looked into it, seems fine.\n\n> Tried to reproduce on build 2.3.1 with a pharmacist set to Pacific time. Shift shows at the correct local time. Not reproducible with the steps given. Can the reporter confirm the pharmacist's phone time zone and attach a screenshot of the schedule? Moving to Waiting for Info.\n\nThe second tells the reader what was tried, what happened, what is needed, and where the ticket is. Write comments so that someone opening the ticket in a month understands it without asking.\n\n**Mentions.** Typing `@` and a name notifies that person. Use it when you need a specific action: `@Priya can you confirm the expected delivery window?` Do not mention people out of habit, since each mention is an interruption. If you want a decision, say so and say by when.\n\n**Notification hygiene.** Jira notifies reporters, assignees and watchers on changes, according to notification settings that an admin controls plus your personal preferences. Common noise problems and fixes:\n\n- Watching every ticket in a busy project. Watch only what you own or must follow.\n- Long threads in comments that should be a short call. Summarize the outcome in a comment afterward.\n- Auto-watching on every comment. Adjust your personal notification settings where Jira allows.\n- Using comments for urgent matters. A comment can be missed, so use a direct message for something that cannot wait, then record the outcome on the ticket.\n\n**Bulk changes.** From a search result you can select many issues and apply one change to all, such as changing the fix version, adding a label, or moving a set of issues to another sprint. The steps:\n\n1. Build a JQL query that returns exactly the issues you intend.\n2. Check the count and skim the list.\n3. Choose the bulk change option and pick the operation.\n4. Review the confirmation page before submitting.\n\nBulk edits can be hard to undo, and workflow transitions applied in bulk may skip fields people usually fill in. Test on a small set first. Also remember that a bulk edit can notify everyone watching each issue, so tell the team before you change fifty tickets.",
+      "keyPoints": [
+        "Write comments that state what was tried, what happened, what is needed and the new status.",
+        "Mention a person only when you need their action, and say by when.",
+        "Reduce noise by watching selectively and moving long discussions to a call.",
+        "For bulk changes, verify the query result first and start with a small set."
+      ],
+      "interviewAngle": "Communication is the real skill here. Tell a short story about a ticket where a clear comment saved a back-and-forth, or where you cleaned up stale tickets in bulk after checking with the team. Do not claim to have changed notification schemes, as those are admin settings.",
+      "exercises": [
+        {
+          "id": "jira-u4-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Before running a bulk change on a set of issues, what should you do first?",
+          "choices": [
+            "Run it on all issues in the project to be safe",
+            "Check that the JQL returns exactly the intended issues, and try a small set first",
+            "Ask every watcher to turn off notifications",
+            "Delete the issues you do not recognize"
+          ],
+          "answer": 1,
+          "explanation": "Bulk changes affect many issues at once and can be hard to undo, so confirm the selection and test small."
+        },
+        {
+          "id": "jira-u4-l2-e2",
+          "type": "mcq",
+          "prompt": "Which is the best use of an @mention?",
+          "choices": [
+            "Tagging the whole team on every update",
+            "Asking a specific person for a specific answer by a specific day",
+            "Telling someone 'FYI' on every comment",
+            "Replacing the assignee field"
+          ],
+          "answer": 1,
+          "explanation": "Mentions interrupt people, so they should carry a clear request."
+        },
+        {
+          "id": "jira-u4-l2-e3",
+          "type": "open",
+          "prompt": "Rewrite this weak comment on a bug ticket into a strong one: 'Checked this, it's weird. Not sure what's going on. Will look later.' Use details from a missing-shift bug in dispatch software. Include what was tried, what happened, what you need, and the next step.",
+          "answer": "Tried to reproduce on staging, build 2.3.1, by creating a shift for 9:00 AM Eastern for a pharmacist set to Central time. The shift appears at 8:00 AM Central on the web schedule, which is correct, but is missing from the mobile app calendar.\n\nIt looks specific to the mobile app. Not yet checked iOS versus Android.\n\n@Dana can you confirm which platform the pharmacist uses and attach a screenshot of the app calendar?\n\nNext: I will test on both platforms tomorrow morning and attach results. Moving to Waiting for Info until I hear back.",
+          "rubric": [
+            "States what was tried with environment details",
+            "States what was observed",
+            "Makes a specific request of a named person",
+            "Gives a next step and updates the status"
+          ]
+        }
+      ]
+    }
+  ]
+}

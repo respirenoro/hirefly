@@ -1,0 +1,162 @@
+{
+  "id": "excel-u10",
+  "title": "Power Query depth and what-if",
+  "summary": "Merge, append, unpivot and layered refreshable queries, plus Goal Seek and data tables.",
+  "lessons": [
+    {
+      "id": "excel-u10-l1",
+      "title": "Power Query: merge, append and unpivot (newly learned)",
+      "minutes": 10,
+      "body": "You met Power Query as a recorder of cleaning steps. Three more commands cover most analyst jobs. All are on the Home tab of the Power Query Editor, and all are things you are learning now rather than doing at work, where the equivalents were SQL joins and manual copy and paste.\n\n**Merge Queries** is a join. Load `shifts.csv` and `pharmacies.csv` (Data > Get Data > From File > From Text/CSV > Transform Data). Select the shifts query, choose Home > Merge Queries, pick `pharmacy_id` in shifts and `id` in pharmacies, and choose the join kind:\n\n| Join kind | Keeps | SQL |\n|---|---|---|\n| Left Outer | all shifts, matching pharmacies | LEFT JOIN |\n| Inner | only shifts with a pharmacy | INNER JOIN |\n| Full Outer | everything from both | FULL JOIN |\n| Left Anti | shifts with no pharmacy | LEFT JOIN ... WHERE right IS NULL |\n\nExpand the new column and tick only `name` and `state`. **Check the row count:** a Left Outer merge on a unique key must stay at 1019 rows. More rows means the key was not unique in the pharmacies table. A Left Anti merge should return 0 rows here, because every shift has a pharmacy; any rows would be orphans to report.\n\n**Append Queries** stacks tables with the same columns, like UNION ALL. If a monthly export arrives as `shifts-jan.csv`, `shifts-feb.csv` and so on, append them into one query. Column names must match exactly, or you get extra columns of nulls.\n\n**Unpivot Columns** turns columns into rows. A summary exported with one column per month (Jan, Feb, Mar) becomes one row per pharmacy and month, which pivots and charts need. Select the identifying column, then Transform > Unpivot Other Columns.\n\n**Group By** summarises while loading. Group the merged query by `state` and add Count Rows and Average of `hours_to_fill`. The state counts are FL 537, GA 340, SC 85 and AL 57, which add to 1019.\n\nChoose Close & Load. Next month, replace the files and press Data > Refresh All. If a step turns into an error, click the step before it and find the first bad one.",
+      "keyPoints": [
+        "Merge Queries is a join; check row counts after it.",
+        "Left Anti shows rows with no match, a good data-quality test.",
+        "Append stacks tables with identical column names.",
+        "Unpivot Other Columns reshapes month columns into rows."
+      ],
+      "interviewAngle": "Be exact: \"I have been learning Power Query on my own. At work I did joins in SQL and lookups in Excel; I have practised merge, append and unpivot in Excel on sample data.\" The row-count check after a merge shows good habits that transfer.",
+      "exercises": [
+        {
+          "id": "excel-u10-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "After a Left Outer merge of 1019 shifts to pharmacies, the result has 1043 rows. What is the likely cause?",
+          "choices": [
+            "The pharmacies key is not unique, so some shifts matched more than once",
+            "Excel added blank rows by itself",
+            "The merge used an inner join",
+            "Some shifts had no pharmacy"
+          ],
+          "answer": 0,
+          "explanation": "A left join on a unique key never adds rows. Duplicates in the right table multiply matches. Shifts with no pharmacy would stay as one row each."
+        },
+        {
+          "id": "excel-u10-l1-e2",
+          "type": "short",
+          "prompt": "Which join kind returns only the rows of the first table that have no match in the second?",
+          "accept": [
+            "left anti",
+            "left anti join"
+          ],
+          "answer": "Left Anti",
+          "explanation": "Left Anti keeps unmatched rows of the left table, useful for finding orphans."
+        },
+        {
+          "id": "excel-u10-l1-e3",
+          "type": "open",
+          "prompt": "Describe a refreshable query that gives shifts per state from the practice CSVs, and the figures you expect.",
+          "answer": "Load shifts and pharmacies, merge shifts to pharmacies on pharmacy_id = id (Left Outer), expand state, check the row count is still 1019, then Group By state with Count Rows, and Close & Load to a table. Expected: FL 537, GA 340, SC 85, AL 57 (1019 total). After new files replace the old ones, Refresh All reruns every step.",
+          "rubric": [
+            "Merges on pharmacy_id and id",
+            "Checks the row count stays 1019",
+            "Groups by state with a count",
+            "Gives FL 537, GA 340, SC 85, AL 57",
+            "Mentions Refresh All"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u10-l2",
+      "title": "A refreshable summary: staging queries and load options",
+      "minutes": 9,
+      "body": "The point of Power Query is a report that rebuilds itself. Plan it in layers so it stays understandable.\n\n**Layers**\n\n1. **Source queries** read the raw files only (`Shifts`, `Pharmacies`). Set types and do nothing else.\n2. **Prepared query** merges and adds columns, such as `hours_to_fill`, `request_month` and `is_filled`.\n3. **Summary queries** use Group By on the prepared query.\n\nRight-click a query and choose **Reference** to start a new query from an existing one without repeating its steps; **Duplicate** copies the steps instead. For the source and prepared layers use Close & Load To > **Only Create Connection**, so they do not fill sheets. Only the summaries load to worksheets.\n\n**Useful steps for the shifts**\n\n- Add Column > Custom Column for hours: `Duration.TotalHours([filled_at] - [requested_at])`. For rows with a null `filled_at` the result is null, which Excel treats as blank. This avoids the 1900 problem from the errors lesson.\n- Date > Month > Name of Month, or `Date.ToText([requested_at],\"yyyy-MM\")` for a sortable month key.\n- Conditional Column `is_filled` (1 when `filled_at` is not null).\n\nCheck the numbers before you build on them: 1019 rows, 906 with `is_filled` = 1, an average `hours_to_fill` of 9.52.\n\n**Group By month.** Group the prepared query by `request_month` and count rows. January to September give 100, 92, 105, 102, 103, 130, 132, 142 and 108 requests, with a tiny December 2025 (4) and October (1) at the edges. Load it, then insert a line chart from the loaded Table.\n\n**Refresh behaviour**\n\n- Data > Refresh All reruns every query; queries and pivots on loaded tables refresh separately unless you use Refresh All.\n- Right-click a loaded table > Refresh refreshes one query.\n- If the file moves, edit the source path (Data > Queries & Connections > Properties, or Data Source Settings). Using a folder in a fixed location avoids it.\n- Excel may ask about privacy levels when sources combine; choose the level that matches your data.\n- The Mac version of Excel supports refreshing but has fewer editing features, so build on Windows if you can.",
+      "keyPoints": [
+        "Layer queries: source, prepared, summary.",
+        "Load staging queries as connection only.",
+        "Compute hours with Duration.TotalHours so nulls stay null.",
+        "Check row counts and a known average before building on a query."
+      ],
+      "interviewAngle": "A refreshable report is the best Power Query story: \"I built a small practice report that refreshes from CSVs.\" Say it is practice, not production. Mention the checks (1019 rows, a known average) because that is what interviewers want to hear.",
+      "exercises": [
+        {
+          "id": "excel-u10-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why load source and prepared queries as \"Only Create Connection\"?",
+          "choices": [
+            "So only the final summary tables fill worksheets, keeping the workbook small and clear",
+            "So the queries cannot be refreshed",
+            "So the data is protected by a password",
+            "Because Excel cannot load more than one table"
+          ],
+          "answer": 0,
+          "explanation": "Connection-only queries still run when referenced, but they do not create extra sheets."
+        },
+        {
+          "id": "excel-u10-l2-e2",
+          "type": "short",
+          "prompt": "Which refresh command reruns all queries in the workbook? (Three words or fewer.)",
+          "accept": [
+            "refresh all",
+            "data > refresh all"
+          ],
+          "answer": "Refresh All",
+          "explanation": "Data > Refresh All runs every query and connection."
+        },
+        {
+          "id": "excel-u10-l2-e3",
+          "type": "open",
+          "prompt": "You build a monthly shifts summary from CSVs with Power Query. List the checks that prove it is right before you share it.",
+          "answer": "Row count of the prepared query equals the source (1019). Sum of the monthly counts equals the total (December 4 plus January to September plus October 1 is 1019). Spot check one month against a COUNTIFS or SQL result (for example March 105). Average hours to fill matches a hand calculation (9.52 over 906 filled shifts). Then refresh once with an unchanged file to confirm nothing changes.",
+          "rubric": [
+            "Compares row counts with the source",
+            "Reconciles monthly total",
+            "Spot-checks a month against another method",
+            "Tests a refresh"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u10-l3",
+      "title": "What-if basics: Goal Seek, data tables and scenarios",
+      "minutes": 8,
+      "body": "What-if tools answer \"what if this input changed\". They need a model where inputs sit in their own cells and a result cell is a formula of them.\n\n**Set up.** Put the practice figures in cells: B1 requested shifts = 1019, B2 filled shifts = 906, B3 fill rate = `=B2/B1`, which shows 88.9%.\n\n**Goal Seek** (Data > What-If Analysis > Goal Seek) finds the one input value that gives a target. Set cell B3 to value 0.92 by changing cell B2. Excel returns 937.48. You cannot fill 0.48 of a shift, so round up: 938 filled shifts, which is 32 more than now (938 - 906). Goal Seek changes one cell only, and the input must be a typed number, not a formula.\n\n**Data table** (What-If Analysis > Data Table) shows many inputs at once. List filled counts down column D, put `=B3` in the cell above and to the right, select the block, and give B2 as the Column input cell:\n\n| Filled shifts | Fill rate |\n|---|---|\n| 900 | 88.3% |\n| 925 | 90.8% |\n| 950 | 93.2% |\n\nThe cells hold the array formula `{=TABLE(,B2)}`; you cannot edit one cell.\n\n**Scenario Manager** stores named sets of inputs (Base, Target) and produces a summary sheet. It is clumsy for more than a few cells. A simpler pattern is an input cell with a dropdown (`Base`, `Target`) and `=CHOOSE(MATCH(...))` or `=XLOOKUP` pulling the matching assumptions from a small table, so all scenarios sit visibly on the sheet.\n\n**Good practice**\n\n- Keep assumptions in labelled cells, never inside formulas.\n- Round to what is physically possible, such as whole shifts.\n- Say clearly that a what-if shows arithmetic, not a forecast: 938 filled shifts out of 1019 is the target maths, not a promise about demand.\n- Reset inputs after a Goal Seek, or save a copy first, because it overwrites the input cell.",
+      "keyPoints": [
+        "Goal Seek finds one input that hits a target; the input must be a typed number.",
+        "A one-variable data table shows results for a list of inputs.",
+        "Keep assumptions in their own labelled cells.",
+        "What-if is arithmetic, not a forecast."
+      ],
+      "interviewAngle": "What-if basics appear in finance and planning tests more than analyst ones, but a simple target question is fair game: \"how many more filled shifts to reach 92%?\" Show the arithmetic (938 versus 906) and explain you would round up. It is a basic skill; no need to call it advanced.",
+      "exercises": [
+        {
+          "id": "excel-u10-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which tool finds the single input value that makes a formula reach a target result?",
+          "choices": [
+            "Goal Seek",
+            "Data Table",
+            "Remove Duplicates",
+            "Slicer"
+          ],
+          "answer": 0,
+          "explanation": "Goal Seek varies one input cell until the formula cell equals the target."
+        },
+        {
+          "id": "excel-u10-l3-e2",
+          "type": "short",
+          "prompt": "With 1019 requested shifts, how many filled shifts are needed to reach a 92% fill rate? (Whole number, rounded up.)",
+          "accept": [
+            "938"
+          ],
+          "answer": "938",
+          "explanation": "1019 x 0.92 = 937.48, rounded up to 938."
+        },
+        {
+          "id": "excel-u10-l3-e3",
+          "type": "open",
+          "prompt": "Explain how you would use a data table to show the fill rate at 900, 925 and 950 filled shifts, and the values.",
+          "answer": "Put requested (1019) and filled in separate cells and the fill rate formula `=filled/requested` in a result cell. List 900, 925 and 950 in a column, put a reference to the result cell above the next column, select the block, choose Data > What-If Analysis > Data Table, and set the filled-shifts cell as the Column input cell. Results are 88.3%, 90.8% and 93.2%.",
+          "rubric": [
+            "Separate input and result cells",
+            "Uses Data Table with a column input cell",
+            "Gives the three values"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,472 @@
+{
+  "id": "azure-devops",
+  "title": "Azure DevOps",
+  "tagline": "Talk about a sprint, a backlog, a pull request and a failed pipeline run like someone who has lived in the tool.",
+  "claim": "Resume: daily use of Azure DevOps for tickets, backlog, sprints, test cases and basic Playwright runs in Pipelines. To back it you must be able to explain how work flows through Boards, Repos, Pipelines and Test Plans, build a query, read a pipeline YAML file and a failed run, and map all of it to Jira terms. You are a power user, not an administrator.",
+  "units": [
+    "unit-1.json",
+    "unit-2.json",
+    "unit-7.json",
+    "unit-3.json",
+    "unit-8.json",
+    "unit-4.json",
+    "unit-9.json",
+    "unit-5.json",
+    "unit-10.json",
+    "unit-6.json"
+  ],
+  "interviewQuestions": [
+    {
+      "id": "ado-iq-1",
+      "prompt": "How did you use Azure DevOps day to day?",
+      "strongAnswer": "I used it as the single place our team tracked work. In Boards I owned the product backlog, wrote user stories with acceptance criteria and planned our two-week sprints, including checking capacity. I wrote and ran test cases in Test Plans for release testing and UAT, and logged bugs from failed steps. Developers linked their commits and pull requests to my stories, so I could trace a requirement to the code and the tests. I also learned to read our pipeline runs, because I added basic Playwright tests that ran there. I was a daily user, not an administrator."
+    },
+    {
+      "id": "ado-iq-2",
+      "prompt": "Walk me through how a sprint ran in Azure DevOps.",
+      "strongAnswer": "Before planning I groomed the backlog so the top stories had acceptance criteria and estimates. In planning we looked at team capacity and pulled stories into the sprint's iteration path, then the developers broke them into tasks on the taskboard. In standups we walked the board. As stories finished, testers ran the linked test cases in Test Plans and bugs were linked back to the story. At the end we reviewed what was done, checked the burndown and velocity, and held a retrospective. Unfinished stories went back to the backlog and I re-prioritized them."
+    },
+    {
+      "id": "ado-iq-3",
+      "prompt": "We use Jira. How would you get up to speed from Azure DevOps?",
+      "strongAnswer": "The concepts map closely, so I expect the ramp to be short. Azure DevOps work items are Jira issues, a User Story or Product Backlog Item is a Jira story, iteration paths are sprints, and the taskboard is the sprint board. A work item query is a JQL filter. The syntax and menus will differ and I would need a week or two to be fast, but the habits I rely on are tool-independent: clear acceptance criteria, a groomed backlog, linked work and traceability from requirement to test."
+    },
+    {
+      "id": "ado-iq-4",
+      "prompt": "How do you keep visibility for stakeholders who do not live in the tool?",
+      "strongAnswer": "I used saved queries and a dashboard so people did not need to ask me for status. A typical query was open bugs by severity for the current sprint, and the dashboard also showed sprint burndown and test progress. For non-technical stakeholders I summarized it in plain language in the sprint review: what finished, what moved, what is at risk. The tool gives the numbers, but I always added the one-sentence interpretation, because a chart alone rarely answers what someone wants to know."
+    },
+    {
+      "id": "ado-iq-5",
+      "prompt": "A pipeline run failed. What do you do?",
+      "strongAnswer": "I open the run and find which stage and job failed, then read the log of the failed step to see the actual error. I separate three cases: a build or setup problem, a real test failure, and a flaky test. For a test failure I check the test results tab and any attached artifacts such as the Playwright report and traces. If it is a genuine product bug I file it with the run link. If it is infrastructure or a test script problem I raise it with whoever owns it. I do not simply rerun and hope."
+    },
+    {
+      "id": "ado-iq-6",
+      "prompt": "What is the difference between a bug and a task, and where do bugs go on the board?",
+      "strongAnswer": "A task is planned work to deliver a story, such as build the API call or write the test data. A bug is a defect where behavior differs from what was agreed. Where bugs appear depends on how the team configured them: some teams treat bugs like stories on the backlog, others like tasks under a story. In my team I linked each bug to the story it was found against, gave it a severity and repro steps, and triaged it in grooming so it competed fairly with new work."
+    },
+    {
+      "id": "ado-iq-7",
+      "prompt": "Have you administered Azure DevOps or built pipelines?",
+      "strongAnswer": "No. I did not administer the organization, set permissions or design pipelines. I was a daily user of Boards, Test Plans and the results side of Pipelines. I taught myself basic Playwright tests and ran them in a pipeline that was set up alongside the developers, and I can read a YAML file, follow the stages and find why a run failed. I understand branch policies and release gates as concepts. I would be comfortable learning more of the admin side if a role needed it."
+    },
+    {
+      "id": "ado-iq-8",
+      "prompt": "Explain the difference between the Agile, Scrum and Basic processes.",
+      "strongAnswer": "They differ mainly in the work item types and states. Agile uses User Stories with New, Active, Resolved and Closed. Scrum uses Product Backlog Items with New, Approved, Committed and Done. Basic is the lightest: Epics, Issues and Tasks with To Do, Doing and Done. CMMI adds formal types like Requirement and Change Request. The base process is chosen when the project is created. My team used the Agile pattern, but the ideas are the same, so I would adapt quickly to either of the others."
+    },
+    {
+      "id": "ado-iq-9",
+      "prompt": "How would you find all user stories that have no test cases?",
+      "strongAnswer": "I would build a direct links query in Boards. The top level is User Story, the link type is Tested By, and I choose the option to return only items that do not have matching links. I would save it as a shared query and put its count on the dashboard, so the gap is visible before release. In Test Plans, an empty requirement-based suite points to the same problem. It is a quick traceability check I used before sign-off."
+    },
+    {
+      "id": "ado-iq-10",
+      "prompt": "What access does a tester need in Azure DevOps?",
+      "strongAnswer": "To run tests and mark outcomes, Basic is enough. To create test plans, suites, configurations and parameters, or to prepare UAT, you need Basic plus Test Plans. Stakeholder access cannot open the Test Plans portal but can give feedback through the Test & Feedback extension. Permissions on the area path also matter, for example managing test suites. I used these as a power user and asked an administrator to set them; I did not administer them."
+    },
+    {
+      "id": "ado-iq-11",
+      "prompt": "How do you read a pipeline YAML file you have never seen?",
+      "strongAnswer": "I read it top to bottom. First the trigger, to know when it runs. Then variables and any secret groups. Then the stages and their dependencies, jobs inside them, and the steps. I check conditions, because that tells me what runs after a failure, and any deployment job with an environment, which is where approvals sit. For test jobs I look for the publish step. I can read and make small edits; designing pipelines is the developers' or DevOps engineers' work."
+    },
+    {
+      "id": "ado-iq-12",
+      "prompt": "What would you check when reviewing a pull request as a non-developer?",
+      "strongAnswer": "I check that it links the story or bug, that the description matches the acceptance criteria, which files changed and whether that suggests extra regression testing, whether tests were added, and that the build validation is green. I comment on behaviour and risk, not code style. For example: the change also touches billing, is that intended? I do not review code quality. The approved PR tells me which build to test."
+    },
+    {
+      "id": "ado-iq-13",
+      "prompt": "How would you show stakeholders sprint progress and release readiness?",
+      "strongAnswer": "I use a dashboard from shared queries and charts: open Severity 1 and 2 bugs, test progress, sprint burndown and the last pipeline result. I add a text widget with the exit criteria so people know what good looks like. In the sprint review I add the plain-language summary: what finished, what is at risk, what I recommend. Stakeholders with the free Stakeholder access can view the dashboard without needing a paid seat."
+    },
+    {
+      "id": "ado-iq-14",
+      "prompt": "Where do you keep process documentation, and what goes in a work item versus a wiki?",
+      "strongAnswer": "A work item holds one requirement or defect with its acceptance criteria, discussion and links. Anything that applies across items, like how we test, exit criteria, environment guides and the UAT checklist, belongs in a wiki page that people can find and that is versioned. Test steps and results belong in Test Plans. At work I also rewrote the end-user knowledge base, which is outside the tool but follows the same rule: put it where people look."
+    },
+    {
+      "id": "ado-iq-15",
+      "prompt": "A pipeline passed but the Tests tab shows nothing. What do you check?",
+      "strongAnswer": "First whether a publish step exists and ran. Then the results file path and format: the task needs the right format, like JUnit, and a file pattern that matches where the tests wrote the file. Then the condition: if the test step fails and the publish step lacks succeededOrFailed, it is skipped. I would also check the reporter configuration in the test project. I fixed this kind of gap when setting up my Playwright runs."
+    }
+  ],
+  "resources": [
+    {
+      "title": "What is Azure DevOps?",
+      "url": "https://learn.microsoft.com/en-us/training/modules/get-started-with-devops/",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 45,
+      "free": true,
+      "why": "Microsoft's own starter module: the services, creating a free organization and project.",
+      "units": [
+        "ado-u1"
+      ],
+      "priority": "core",
+      "useWhen": "Do it before the first lab, because you need a free organization and project in the real tool.",
+      "versus": "Microsoft's module walks the live signup and project creation, which HireFly cannot host; HireFly then adds your scheduling backlog and the Jira mapping."
+    },
+    {
+      "title": "Choose an Agile approach to software development",
+      "url": "https://learn.microsoft.com/en-us/training/modules/choose-an-agile-approach/",
+      "source": "Microsoft Learn",
+      "kind": "course",
+      "minutes": 60,
+      "free": true,
+      "why": "Hands-on module that creates a project and adds work items to Azure Boards; its exercise uses the Basic process, so repeat it on Agile.",
+      "units": [
+        "ado-u2"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Do it after \"Boards: work items, backlogs and sprints\" for a guided build in Boards.",
+      "versus": "It is a hands-on exercise in the real tool on the Basic process; HireFly uses the Agile process and your own SOS example."
+    },
+    {
+      "title": "Default processes and process templates",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/boards/work-items/guidance/choose-process?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "The reference table of types and states for Basic, Agile, Scrum and CMMI that unit 7 summarises.",
+      "units": [
+        "ado-u1",
+        "ado-u7"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Keep it open while reading \"Work items in depth\".",
+      "versus": "The vendor table is exact and kept current; HireFly explains which differences matter in an interview."
+    },
+    {
+      "title": "Plan and track work in Azure Boards",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/boards/get-started/plan-track-work?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 30,
+      "free": true,
+      "why": "Microsoft's walkthrough of backlogs, boards and sprints on the Basic process; compare with the Agile steps in the labs.",
+      "units": [
+        "ado-u2"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Follow it with the lab \"Plan a two-week sprint\" if you want the vendor's version.",
+      "versus": "A step-by-step on the Basic process; HireFly compares the Agile steps and ties them to your sprints."
+    },
+    {
+      "title": "Work Item Query Language (WIQL) syntax reference",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/boards/queries/wiql-syntax?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "reference",
+      "minutes": 30,
+      "free": true,
+      "why": "The full WIQL grammar, macros and limits behind the query lessons.",
+      "units": [
+        "ado-u3",
+        "ado-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it when a query in the lab \"Write queries and build a dashboard\" needs exact syntax.",
+      "versus": "A complete grammar with little teaching; HireFly teaches the queries that people ask for."
+    },
+    {
+      "title": "Define a work item query in Azure Boards",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/boards/queries/using-queries?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 30,
+      "free": true,
+      "why": "Query editor, tree and direct-links queries, used by the graded drill.",
+      "units": [
+        "ado-u8"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it during \"Queries, dashboards and keeping people informed\" to see the query editor.",
+      "versus": "The vendor shows the editor and query types; HireFly adds a graded drill and what to say about it."
+    },
+    {
+      "title": "Add widgets to a dashboard",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/report/dashboards/add-widget-to-dashboard?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "Step-by-step for the dashboard lab, including widget limits and permissions.",
+      "units": [
+        "ado-u8"
+      ],
+      "priority": "optional",
+      "useWhen": "Follow it during the lab \"Write queries and build a dashboard\".",
+      "versus": "Step-by-step with limits and permissions; HireFly chooses which widgets answer a decision."
+    },
+    {
+      "title": "Key Azure Pipelines concepts",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/get-started/key-pipelines-concepts?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 25,
+      "free": true,
+      "why": "Stages, jobs, steps, agents and triggers defined by Microsoft; backs the YAML reading lessons.",
+      "units": [
+        "ado-u5",
+        "ado-u9"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Read it before \"Pipelines at a tester and PM level\" if YAML is new to you.",
+      "versus": "Microsoft defines every term exactly; HireFly shows only the parts a tester reads in a failed run."
+    },
+    {
+      "title": "PublishTestResults@2 task reference",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/publish-test-results-v2?view=azure-pipelines",
+      "source": "Microsoft Learn",
+      "kind": "reference",
+      "minutes": 15,
+      "free": true,
+      "why": "Every input of the task used to show Playwright results in a run.",
+      "units": [
+        "ado-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Use it as a reference during the lab \"Add a YAML pipeline that publishes test results\".",
+      "versus": "Lists every input; HireFly gives the one working example."
+    },
+    {
+      "title": "Reporters (Playwright)",
+      "url": "https://playwright.dev/docs/test-reporters",
+      "source": "Playwright",
+      "kind": "docs",
+      "minutes": 15,
+      "free": true,
+      "why": "Shows the junit and html reporters that feed Azure Pipelines.",
+      "units": [
+        "ado-u5",
+        "ado-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Open it when you reach the pipeline lab.",
+      "versus": "It describes the reporters that feed the pipeline; HireFly shows the pipeline side."
+    },
+    {
+      "title": "About access levels",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/organizations/security/access-levels?view=azure-devops",
+      "source": "Microsoft Learn",
+      "kind": "docs",
+      "minutes": 20,
+      "free": true,
+      "why": "Microsoft's definition of Stakeholder, Basic and Basic + Test Plans.",
+      "units": [
+        "ado-u10"
+      ],
+      "priority": "optional",
+      "useWhen": "Read it after \"Access levels and permissions\" if a missing feature puzzles you.",
+      "versus": "Microsoft's definition is current; HireFly explains what a tester needs."
+    },
+    {
+      "title": "AZ-400: Development for Enterprise DevOps (learning path)",
+      "url": "https://learn.microsoft.com/en-us/training/paths/az-400-get-started-devops-transformation-journey/",
+      "source": "Microsoft Learn",
+      "kind": "certification",
+      "minutes": 300,
+      "free": true,
+      "why": "Advanced path on repos, pull requests and pipelines; read for vocabulary only, since the role is user not administrator.",
+      "units": [
+        "ado-u4",
+        "ado-u9"
+      ],
+      "priority": "optional",
+      "useWhen": "Skim it only for vocabulary, or if you aim at DevOps work later.",
+      "versus": "A long administrator-level path for a role you are not claiming; HireFly stays at the user's level."
+    }
+  ],
+  "labs": [
+    {
+      "id": "ado-lab-1",
+      "title": "Create an organization and an Agile project",
+      "minutes": 25,
+      "goal": "A working Azure DevOps project on the Agile process that the other labs build on.",
+      "setup": "Free Azure DevOps organization at dev.azure.com, signed in with a Microsoft account (free for up to five users with Basic access). Do the labs in order; each reuses the project from lab 1. Use fictional data only.",
+      "steps": [
+        "Sign in at dev.azure.com and create a new organization if prompted. Name it something neutral.",
+        "Choose New project. Name it `Pharmacy Scheduling Lab`, set visibility to Private.",
+        "Expand Advanced and choose version control Git and work item process **Agile**. Create the project.",
+        "Open Project settings, then Process, and confirm the process name shows Agile.",
+        "Open Boards, New Work Item, and note the types offered (Epic, Feature, User Story, Task, Bug, Issue).",
+        "Open Overview, Summary and add a one-line description. Open Wiki and create the project wiki with a page called `Lab notes`."
+      ],
+      "check": [
+        "Process page shows Agile",
+        "Boards offers User Story and Bug",
+        "Wiki has a Lab notes page"
+      ],
+      "talkTrack": "I set up an Azure DevOps project on the Agile process myself, so I know how the types and states differ from Scrum and Basic."
+    },
+    {
+      "id": "ado-lab-2",
+      "title": "Build the scheduling backlog with the SOS feature",
+      "minutes": 40,
+      "goal": "An Epic, three Features and about eight linked User Stories with acceptance criteria.",
+      "setup": "Lab 1 project.",
+      "steps": [
+        "In Boards, Backlogs, switch to the Epics level. Add the Epic `Faster emergency staffing`.",
+        "At Features level add `SOS request`, `Alert delivery rules` and `Fill-rate reporting`, and set each parent to the Epic using the Parent link.",
+        "At Stories level add: Manager sends an SOS request; Manager chooses radius 5, 10 or 25 miles; Pharmacist receives an alert with shift details; Pharmacist accepts and the shift is filled; Alert expires after 10 minutes; Manager cancels with a reason. Parent them to their Features.",
+        "Write acceptance criteria on each story, three or four testable bullets.",
+        "Give each story Story Points and Priority, and add tags such as `sos`.",
+        "Reorder the backlog by dragging so the SOS request stories are at the top.",
+        "Add one Bug: `SOS alert sent to a Busy pharmacist` with Severity 2 - High, linked Related to the accept story."
+      ],
+      "check": [
+        "Switching to the Features level shows 3 Features with progress rollup",
+        "Every story has a Parent and acceptance criteria",
+        "The Bug shows Severity 2 - High and a link"
+      ],
+      "talkTrack": "I built and ordered a backlog from an epic down to stories with acceptance criteria and linked a defect, the same way I owned the product backlog at work."
+    },
+    {
+      "id": "ado-lab-3",
+      "title": "Plan a two-week sprint",
+      "minutes": 30,
+      "goal": "Sprint 1 with stories, tasks, capacity and a visible burndown.",
+      "setup": "Labs 1 and 2.",
+      "steps": [
+        "Project settings, Project configuration, Iterations: set Sprint 1 with a two-week start and end date and make it the team's current iteration (Team configuration, Iterations).",
+        "In Boards, Sprints, open the Capacity tab and add yourself with hours per day.",
+        "Drag five stories from the backlog into Sprint 1 using the Planning pane.",
+        "On the taskboard add Tasks to each story with Remaining Work in hours.",
+        "Compare total task hours with capacity and move a story out if over capacity.",
+        "Move one task to Active and one to Closed and open the Burndown chart in Analytics."
+      ],
+      "check": [
+        "Sprint 1 shows five stories and their tasks",
+        "Capacity view shows a total versus planned hours",
+        "A burndown line appears"
+      ],
+      "talkTrack": "I planned a sprint against capacity, broke stories into tasks, and used the burndown to see risk, as I did in two-week sprints at work."
+    },
+    {
+      "id": "ado-lab-4",
+      "title": "Write queries and build a dashboard",
+      "minutes": 40,
+      "goal": "Four shared queries and a dashboard that answers 'can we release?'.",
+      "setup": "Labs 1 to 3.",
+      "steps": [
+        "Boards, Queries, New query. Build: Work Item Type = Bug, State <> Closed, Severity In 1 - Critical, 2 - High. Save under Shared Queries as `Open Sev 1-2 bugs`.",
+        "Build a direct links query: User Story with link type Tested By, option to return items that do not have matching links. Save as `Stories with no tests`.",
+        "Build a flat query for active items assigned to nobody. Save it.",
+        "Write the first query as WIQL by hand in your notes (SELECT, FROM WorkItems, WHERE, ORDER BY) and compare it with the example in the lesson.",
+        "Create a chart from the first query (column chart grouped by Severity).",
+        "Dashboards, New Dashboard `Release readiness`. Edit, add the query tile, the chart, a Sprint burndown widget and a Markdown widget listing your exit criteria."
+      ],
+      "check": [
+        "Open Sev 1-2 bugs returns the lab bug",
+        "Stories with no tests returns every story you have not tested yet",
+        "Dashboard shows tile, chart, burndown and Markdown"
+      ],
+      "talkTrack": "I built shared queries and a dashboard so stakeholders could read release status without asking me."
+    },
+    {
+      "id": "ado-lab-5",
+      "title": "Open and review a pull request",
+      "minutes": 35,
+      "goal": "A branch, a pull request linked to a story, and a branch policy on main.",
+      "setup": "Lab 1 project with its Git repo. Initialize the repo with a README if it is empty.",
+      "steps": [
+        "Repos, Files: initialize with a README. Create a branch `feature/sos-radius` from main.",
+        "Edit README.md on the branch to add one line about the SOS radius and commit with the message `Add radius note #<story id>` using your story's ID.",
+        "Create a pull request into main. Add a description and link the story.",
+        "Project settings, Repositories, Policies, branch `main`: require one reviewer and linked work items.",
+        "Open the PR Files tab, add a comment on the changed line and set its status.",
+        "Vote on the PR (with one account you may be blocked from approving your own work; note which policies applied) and complete the PR, then open the story to see the linked PR and commit."
+      ],
+      "check": [
+        "PR shows the linked work item",
+        "Policy list shows reviewer and work item rules",
+        "Story Development section shows the commit and PR"
+      ],
+      "talkTrack": "I can read a pull request, check it links to the story and the policies on main, and use it to plan regression testing."
+    },
+    {
+      "id": "ado-lab-6",
+      "title": "Add a YAML pipeline that publishes test results",
+      "minutes": 45,
+      "goal": "A pipeline run with a Tests tab and a downloadable artifact.",
+      "setup": "Lab 5 repo. Node is not needed on your PC; the hosted agent installs it. If your new organization says no hosted parallelism is available, Microsoft documents how to request it; alternatively run a self-hosted agent on your own computer. Do not enter payment details.",
+      "steps": [
+        "In the repo create `results.xml` as a small JUnit file with two passing tests and one failing test (`<testsuite><testcase name=\"radius 10 alerts nearby\"/><testcase name=\"busy pharmacist not alerted\"><failure message=\"alerted\"/></testcase></testsuite>`).",
+        "Create `azure-pipelines.yml` with trigger on main, `pool: vmImage: ubuntu-latest`, a script step `echo run tests`, a PublishTestResults@2 step (JUnit, `results.xml`, condition succeededOrFailed()) and a PublishPipelineArtifact@1 step that uploads results.xml.",
+        "Pipelines, Create pipeline, Azure Repos Git, choose Existing YAML file and run it.",
+        "Open the run: read the stages, the log of each step, then the Tests tab.",
+        "Edit the YAML to remove the condition, make the script step `exit 1`, run again, and observe that no results publish.",
+        "Restore the condition and re-run. Optionally replace the sample file with a real Playwright run using the junit reporter."
+      ],
+      "check": [
+        "Tests tab shows 2 passed and 1 failed",
+        "Artifact is downloadable from the run",
+        "Without the condition the results are missing after a failed step"
+      ],
+      "talkTrack": "I add a small pipeline that runs tests and publishes the results and artifacts, and I can read a failed run to the step that broke."
+    }
+  ],
+  "pathway": {
+    "summary": "HireFly gets you to describe a full sprint in Azure DevOps, build queries, read a pipeline YAML and a failed run, and map it all to Jira. Reading alone is not enough: the labs in a free organization and Microsoft's own hands-on modules are what make the skill real. You stay a power user, not an administrator.",
+    "hireflyBetter": [
+      "You need the sprint-to-release story with Jira terms mapped.",
+      "You want a graded query drill and a dashboard that answers a decision.",
+      "You need to read a failed pipeline run without being an engineer.",
+      "You want your scheduling backlog and the SOS feature as the example.",
+      "You have days and need the shortest route."
+    ],
+    "externalBetter": [
+      "You need the live setup of an organization and project.",
+      "You want the exact process tables and WIQL grammar kept current.",
+      "You learn better with Microsoft's guided hands-on exercises.",
+      "You are heading toward admin or DevOps work.",
+      "You want to look up a task or permission precisely."
+    ],
+    "plans": [
+      {
+        "when": "Interview in three days or less",
+        "hours": 4,
+        "steps": [
+          "Do the test-out for \"Boards: work items, backlogs and sprints\" and \"Queries and visibility\" and study only what you miss (30 minutes).",
+          "Read \"In the interview\" (15 minutes).",
+          "Do the lab \"Create an organization and an Agile project\" (25 minutes).",
+          "Do the lab \"Build the scheduling backlog with the SOS feature\" (40 minutes).",
+          "Do the lab \"Plan a two-week sprint\" (30 minutes).",
+          "Do the lab \"Write queries and build a dashboard\" (40 minutes).",
+          "Read \"Pipelines at a tester and PM level\" (30 minutes)."
+        ]
+      },
+      {
+        "when": "About two weeks",
+        "hours": 15,
+        "steps": [
+          "Take \"What is Azure DevOps?\" and do the lab \"Create an organization and an Agile project\" (1 hour 10 minutes).",
+          "Work \"The map: organization, project and services\" and \"Boards: work items, backlogs and sprints\" (35 minutes).",
+          "Do \"Choose an Agile approach to software development\" (1 hour).",
+          "Do the labs \"Build the scheduling backlog with the SOS feature\" and \"Plan a two-week sprint\" (1 hour 10 minutes).",
+          "Work \"Work items in depth\" with \"Default processes and process templates\" (50 minutes).",
+          "Work \"Queries and visibility\" and \"Queries, dashboards and keeping people informed\" (45 minutes).",
+          "Do the lab \"Write queries and build a dashboard\" (40 minutes).",
+          "Work \"Repos at a tester and PM level\" and do the lab \"Open and review a pull request\" (50 minutes).",
+          "Read \"Key Azure Pipelines concepts\", work \"Pipelines at a tester and PM level\" and do the lab \"Add a YAML pipeline that publishes test results\" (1.5 hours).",
+          "Work \"Access levels and permissions\" and \"In the interview\" (25 minutes)."
+        ]
+      },
+      {
+        "when": "A month or more, or you have the job",
+        "hours": 40,
+        "steps": [
+          "Take \"What is Azure DevOps?\" and \"Choose an Agile approach to software development\" (2 hours).",
+          "Work every HireFly unit in order and do all six labs (9 hours).",
+          "Read \"Plan and track work in Azure Boards\" and \"Default processes and process templates\" (1 hour).",
+          "Use \"Define a work item query in Azure Boards\" and \"Add widgets to a dashboard\" to rebuild your reports (2 hours).",
+          "Read \"Key Azure Pipelines concepts\" and \"PublishTestResults@2 task reference\" and extend the pipeline lab (3 hours).",
+          "Work in Azure DevOps daily, map each habit to Jira, then reread \"In the interview\" for the Jira mapping (22 hours).",
+          "Skim \"AZ-400: Development for Enterprise DevOps (learning path)\" for vocabulary (1 hour)."
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "id": "power-bi-u6",
+  "title": "In the interview",
+  "summary": "Talk honestly about a skill you are still learning, bridge from your SQL and Excel work, and prepare for common questions and practical tests.",
+  "lessons": [
+    {
+      "id": "power-bi-u6-l1",
+      "title": "An honest talk track for a skill you are learning",
+      "minutes": 7,
+      "body": "Power BI is new to you. The way to handle that in an interview is to be plain about it and show momentum. Employers hiring at entry level expect gaps. They do not expect misleading claims.\n\n**What is true.** You have not used Power BI at work. You are learning it now, and you have done the equivalent reporting with SQL and Excel: shift fill rate, average time to fill, cancellation rates and reasons, and assignments completed per month.\n\n**A three-part shape: where I am, what I have done, what comes next.**\n\n> \"Power BI is new to me and I am learning it now. At work I did this kind of reporting in SQL and Excel, such as shift fill rate and cancellation reasons. To build the skill I am working on a practice dashboard with sample scheduling data, where I clean it in Power Query, model it as a star schema, write DAX measures and publish it. I can walk you through it.\"\n\nOnly say the last sentence when it is true. If the dashboard is not finished, say you are in the middle of it.\n\n**Do and don't**\n\n| Do | Don't |\n|---|---|\n| Say \"I am learning Power BI\" | Say \"I have Power BI experience\" |\n| Name specific things you built or tried: a star schema, a Fill Rate measure | Name features you only read about |\n| Link to what you did in SQL and Excel | Pretend the work account used Power BI |\n| Show the practice dashboard if asked | Show real company or pharmacist data |\n| Say what you would verify first on the job | Promise expertise in months |\n\n**Handling questions you cannot answer.** If asked about something you have not met, such as incremental refresh or composite models, say: \"I have not used that yet. My understanding is X, and I would check the documentation and test it on a small sample.\" Even a partly right understanding, offered with honesty, is better than silence or a bluff.\n\n**Show learning speed.** Mention how you are learning: the concepts you covered, the project you built, how you checked your measures against SQL. This demonstrates the thing employers actually need, which is the ability to pick up a tool and produce correct numbers.\n\nPractise the talk track aloud so that it sounds like you, takes under 30 seconds, and ends with an offer to go deeper.",
+      "keyPoints": [
+        "Say clearly that Power BI is new and you are learning it; never claim on-the-job use.",
+        "Use the shape: where I am, what I did in SQL and Excel, what I have built to learn.",
+        "Mention only things you actually built or tried.",
+        "When you hit a gap, state your understanding, how you would check it, and move on.",
+        "Show learning speed through your project and your checks against SQL."
+      ],
+      "interviewAngle": "This lesson is your script for any posting that lists Power BI as a skill. Keep it under 30 seconds, true in every sentence, and end by offering to walk through your practice project. If a role requires proven Power BI experience, say you are building it and ask what a good first project would look like.",
+      "exercises": [
+        {
+          "id": "power-bi-u6-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which answer to \"Do you have Power BI experience?\" is honest and effective for you?",
+          "choices": [
+            "\"Yes, I used Power BI daily in my last job.\"",
+            "\"No, so I can't help with dashboards.\"",
+            "\"I'm learning it now. At work I did similar reporting in SQL and Excel, and I'm building a practice dashboard I can walk you through.\"",
+            "\"I know Power BI really well; it's just like Excel.\""
+          ],
+          "answer": 2,
+          "explanation": "It states the real level, connects to genuine experience and shows momentum. The first and last overclaim, and the second undersells your reporting background."
+        },
+        {
+          "id": "power-bi-u6-l1-e2",
+          "type": "mcq",
+          "prompt": "An interviewer asks about incremental refresh, which you have not used. What is the best reply?",
+          "choices": [
+            "Describe it confidently as if you had configured it",
+            "Say \"I haven't used that yet. My understanding is that it refreshes only new data, and I'd check the documentation and test it on a small sample.\"",
+            "Change the subject",
+            "Say it isn't important"
+          ],
+          "answer": 1,
+          "explanation": "Admitting the gap, giving your understanding and saying how you'd verify it shows honesty and a sound learning approach."
+        },
+        {
+          "id": "power-bi-u6-l1-e3",
+          "type": "open",
+          "prompt": "Write your own 30-second talk track answering \"Tell me about your Power BI experience\". Use only statements that are true for you today.",
+          "answer": "Power BI is new to me and I am learning it now; I haven't used it at work. In my last role I did the equivalent reporting in SQL, such as shift fill rate, time to fill and cancellation reasons. To build the skill I'm working on a practice dashboard with sample scheduling data: I clean the data in Power Query, model it as a star schema, write DAX measures for fill rate and cancel rate, and build a report with slicers. I can walk you through it, and I check my measures against SQL results.",
+          "rubric": [
+            "States plainly that Power BI is new and not used at work",
+            "Links to real SQL or Excel reporting experience",
+            "Names a specific learning project or activity",
+            "Short enough to say in about 30 seconds"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u6-l2",
+      "title": "Bridging from SQL and Excel",
+      "minutes": 8,
+      "body": "You already know most of the concepts. Power BI gives them new names. Translating them in an interview shows that you can learn quickly and that your SQL and Excel experience counts.\n\n**Translation table**\n\n| You know | In Power BI |\n|---|---|\n| `SELECT ... WHERE` | Filter Rows in Power Query; filters and slicers on the report |\n| `JOIN ... ON` | A relationship in the model, or Merge Queries in Power Query |\n| `GROUP BY` | The visual's axis or rows (the visual groups for you) |\n| `COUNT(*)` | `COUNTROWS(Table)` |\n| `SUM(col)` | `SUM(Table[col])` |\n| `CASE WHEN` | `IF` or `SWITCH` in DAX or Power Query |\n| `UNION ALL` | Append Queries |\n| Pivot table | Matrix visual |\n| `SUMIFS` / `COUNTIFS` | `CALCULATE` with a filter |\n| Calculated field in a pivot | Measure |\n| `VLOOKUP` | A relationship, or `RELATED()` in a calculated column |\n| `TRIM`, Remove Duplicates | Trim and Remove Duplicates in Power Query |\n\n**One worked translation.** In SQL, filled shifts for Harbor:\n\n```sql\nSELECT COUNT(*) AS filled_shifts\nFROM shifts s\nJOIN pharmacies p ON p.id = s.pharmacy_id\nWHERE s.status = 'Filled' AND p.name = 'Harbor';\n```\n\nIn Power BI the join is the relationship, the `WHERE` on pharmacy is a slicer or a visual row, and the status condition is a measure:\n\n```text\nFilled Shifts = CALCULATE(COUNTROWS(Shifts), Shifts[status] = \"Filled\")\n```\n\nPut `Pharmacies[pharmacy_name]` on rows, and the Harbor row shows the same number as the SQL query.\n\n**The big difference.** A SQL query returns one answer set for one question. A Power BI model holds the definitions once (relationships and measures), and every visual and slicer reuses them for many questions. That is why you define `Fill Rate` once instead of rewriting it.\n\n**Where Excel thinking misleads.** In Excel a formula lives in a cell; in DAX a measure lives in the model and has no cell address. Excel-style row-by-row logic often belongs in Power Query or a calculated column, while aggregations belong in measures.\n\nUse this table in answers: \"I think about it in SQL terms. A relationship is the join, the visual does the grouping, and CALCULATE is my WHERE.\" Keep it humble: the mapping is a starting point, and DAX has behaviours with no SQL equivalent, such as filter context.\n\nWhen possible, verify Power BI results by running the SQL you already know. It builds trust in the numbers and shows good practice.",
+      "keyPoints": [
+        "A relationship is the join; the visual does the GROUP BY; CALCULATE acts like a WHERE or SUMIFS.",
+        "COUNT(*) becomes COUNTROWS; a pivot becomes a matrix; a pivot's calculated field becomes a measure.",
+        "Measures and relationships are defined once and reused by every visual.",
+        "Row-by-row logic belongs in Power Query or columns; aggregates belong in measures.",
+        "Verify Power BI numbers by running the SQL you already know."
+      ],
+      "interviewAngle": "Use this mapping whenever you are asked how your background transfers. It is true and specific: SQL for shift fill rate and cancellation reports, Excel pivots and SUMIFS-style thinking. Add that the new part is DAX and filter context, and that you check results against SQL while you learn.",
+      "exercises": [
+        {
+          "id": "power-bi-u6-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which Power BI idea is closest to Excel's SUMIFS or COUNTIFS?",
+          "choices": ["A slicer", "CALCULATE with a filter", "Unpivot Columns", "A card visual"],
+          "answer": 1,
+          "explanation": "CALCULATE evaluates an expression under extra filter conditions, as SUMIFS and COUNTIFS do."
+        },
+        {
+          "id": "power-bi-u6-l2-e2",
+          "type": "short",
+          "prompt": "Which DAX function is the equivalent of SQL's COUNT(*) on a table?",
+          "accept": ["countrows", "countrows()"],
+          "answer": "COUNTROWS",
+          "explanation": "COUNTROWS(Table) counts the rows in the current filter context."
+        },
+        {
+          "id": "power-bi-u6-l2-e3",
+          "type": "open",
+          "prompt": "Translate this SQL into the Power BI parts you would use: SELECT COUNT(*) FROM shifts WHERE status = 'Cancelled' joined to pharmacies, grouped by pharmacies.region.",
+          "answer": "Relationship: Pharmacies[pharmacy_id] one-to-many to Shifts[pharmacy_id] replaces the join. Measure: `Cancelled Shifts = CALCULATE(COUNTROWS(Shifts), Shifts[status] = \"Cancelled\")` replaces COUNT(*) and the WHERE on status. Visual: a bar chart or table with Pharmacies[region] on the axis and [Cancelled Shifts] in values; the visual does the GROUP BY.",
+          "rubric": [
+            "Replaces the join with a one-to-many relationship",
+            "Writes a measure using CALCULATE, COUNTROWS and the status filter",
+            "Puts region on a visual axis to do the grouping"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u6-l3",
+      "title": "Common questions and practical tests",
+      "minutes": 8,
+      "body": "Power BI questions for entry-level roles tend to test understanding of the basics rather than advanced DAX. Prepare short answers.\n\n**Concept questions**\n\n| Question | Core of your answer |\n|---|---|\n| Desktop vs Service? | Desktop builds; the Service shares, refreshes and secures |\n| Measure vs calculated column? | Column: per row, stored. Measure: on demand for the current filters |\n| What is a star schema? | Fact table of events surrounded by dimension tables, joined one-to-many |\n| What is filter context? | The filters in effect for a visual's cell: row, slicers, page |\n| Import vs DirectQuery? | Stored copy refreshed on schedule vs live queries to the source |\n| What does Power Query do? | Connects, cleans and shapes, recording repeatable steps |\n| What is row-level security? | Role filters that limit which rows viewers see |\n\n**Scenario questions.** \"A report is slow.\" Likely answers: remove unused columns and tables, avoid unnecessary calculated columns, use a star schema, reduce the number of visuals per page. \"Totals look wrong.\" Check relationships, then check whether a ratio is a measure, then compare with a trusted count.\n\n**What a practical test or take-home looks like.** You may receive a CSV or Excel file and a brief such as \"build a one-page report on shift fill rate and cancellations for operations managers\". Typical time is a few hours, or a few days for a take-home. Reviewers look for:\n\n1. Correct numbers, confirmed by a check.\n2. A clean model with sensible names and relationships.\n3. A readable page: clear titles, few colours, the main point first.\n4. A short note on assumptions, definitions and anything you did not do.\n5. Willingness to ask a clarifying question, such as how to treat cancelled shifts in the denominator.\n\nIf Power BI Desktop is not available (it runs on Windows), ask whether you can use Excel with pivot tables or a screenshot-and-explain approach. If you hit a snag, document what you tried.\n\n**Questions to ask them.** \"Which tools does the team use for reporting? Who reads the dashboards and what decisions do they make from them? How are metric definitions agreed?\" These show a focus on usefulness.\n\nFinish by tying back to honest level: you are early in Power BI, with solid SQL and Excel reporting habits, and you check your work.",
+      "keyPoints": [
+        "Be ready with one-sentence answers to the core concept questions.",
+        "For \"slow\" or \"wrong totals\", check the model first: relationships, columns and measures.",
+        "Take-homes are judged on correct numbers, a clean model, readability and documented assumptions.",
+        "Ask clarifying questions about definitions such as the denominator of fill rate.",
+        "End by tying back to honest level, learning speed and your verification habit."
+      ],
+      "interviewAngle": "Practise the concept table aloud until each answer fits in one or two sentences. For a take-home, note your assumptions and definitions in writing; that mirrors your experience writing requirements and acceptance criteria. Be honest if you could not finish something, and say what you would do next.",
+      "exercises": [
+        {
+          "id": "power-bi-u6-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is the best one-sentence answer to \"What is the difference between Power BI Desktop and the Power BI Service?\"",
+          "choices": [
+            "Desktop is for viewing and the Service is for building",
+            "They are the same product with different logos",
+            "Desktop is where you build the model and report; the Service is where you publish, share, refresh and secure it",
+            "Desktop is only for mobile phones"
+          ],
+          "answer": 2,
+          "explanation": "Authoring happens in Desktop; sharing, scheduled refresh and access control happen in the Service."
+        },
+        {
+          "id": "power-bi-u6-l3-e2",
+          "type": "mcq",
+          "prompt": "In a take-home you are asked for a fill-rate report, but it is unclear whether cancelled shifts count in the denominator. What should you do?",
+          "choices": [
+            "Guess silently and move on",
+            "State your assumption in your notes (or ask the reviewer) and define the metric clearly in the report",
+            "Leave the fill rate out",
+            "Use a different metric without saying so"
+          ],
+          "answer": 1,
+          "explanation": "Metric definitions are a common source of disputes. Ask if you can, otherwise state the assumption visibly so the reader can judge the number."
+        },
+        {
+          "id": "power-bi-u6-l3-e3",
+          "type": "open",
+          "prompt": "A practice report shows the same total in every row of a pharmacy matrix and the grand total of Fill Rate looks too high. Explain how you would investigate, in order.",
+          "answer": "First check the model: in Model view confirm there is a one-to-many relationship from Pharmacies to Shifts and that the matrix rows come from the Pharmacies table. Then check how Fill Rate is built: it should be a measure, DIVIDE([Filled Shifts], [Total Shifts]), not a calculated column or an average of row percentages. Compare Total Shifts and Filled Shifts by pharmacy in a table with a SQL or manual count on the same data. Finally check for filters, such as slicers or page filters, that might be affecting the numbers, and for duplicate rows that Power Query should have removed.",
+          "rubric": [
+            "Checks relationships in Model view first",
+            "Checks that the rate is a measure computed from totals",
+            "Compares numbers with an independent count such as SQL",
+            "Considers filters or duplicate rows"
+          ]
+        }
+      ]
+    }
+  ]
+}

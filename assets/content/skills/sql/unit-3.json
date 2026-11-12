@@ -1,0 +1,208 @@
+{
+  "id": "sql-u3",
+  "title": "Joins",
+  "summary": "Combine tables with INNER and LEFT joins, find rows that have no match, and recognise the join mistakes that quietly duplicate rows and inflate totals.",
+  "lessons": [
+    {
+      "id": "sql-u3-l1",
+      "title": "INNER JOIN: connecting tables",
+      "minutes": 10,
+      "body": "Data is split across tables so it is stored once. A shift stores `pharmacy_id`, not the pharmacy name. A join looks up the matching row in another table. Here are the other sample tables:\n\n| pharmacies.id | name | city |\n|---|---|---|\n| 1 | Riverside Pharmacy | Austin |\n| 2 | Maple Drug | Dallas |\n| 3 | Harbor Health Rx | Houston |\n| 4 | Oak Street Pharmacy | Austin |\n\n| pharmacists.id | name | license_state |\n|---|---|---|\n| 10 | Dana Ortiz | TX |\n| 11 | Sam Lee | TX |\n| 12 | Priya Nair | OK |\n| 13 | Chris Boyd | TX |\n\nAn `INNER JOIN` returns a row only when the `ON` condition matches in both tables. Table aliases (`s`, `p`) keep the query short, and you must qualify any column name that exists in both tables, such as `id` and `name`:\n\n```sql\nSELECT s.id, p.name AS pharmacy\nFROM shifts s\nINNER JOIN pharmacies p ON p.id = s.pharmacy_id\nWHERE s.status = 'cancelled';\n```\n\nThis returns 103 Maple Drug, 106 Harbor Health Rx and 108 Maple Drug. Writing just `id` instead of `s.id` would fail with an ambiguous column error, because both tables have an `id`.\n\nNow join pharmacists:\n\n```sql\nSELECT s.id, ph.name AS pharmacist\nFROM shifts s\nINNER JOIN pharmacists ph ON ph.id = s.pharmacist_id;\n```\n\nThis returns only 5 rows: 101 Dana Ortiz, 102 Sam Lee, 104 Priya Nair, 105 Dana Ortiz and 108 Sam Lee. Shifts 103, 106 and 107 have a NULL `pharmacist_id`, which matches nothing, so an inner join drops them. That is the defining behaviour: unmatched rows disappear.\n\nChain several joins by adding more `JOIN` lines. Each one hooks onto a table already in the query:\n\n```sql\nSELECT s.id, p.name AS pharmacy, ph.name AS pharmacist\nFROM shifts s\nJOIN pharmacies p  ON p.id  = s.pharmacy_id\nJOIN pharmacists ph ON ph.id = s.pharmacist_id\nWHERE s.status = 'completed';\n```\n\nThat returns 4 rows: 101 Riverside Pharmacy and Dana Ortiz, 102 Riverside Pharmacy and Sam Lee, 104 Maple Drug and Priya Nair, 105 Harbor Health Rx and Dana Ortiz. `JOIN` alone means `INNER JOIN`.\n\nJoins combine with grouping. Shifts per pharmacy name:\n\n```sql\nSELECT p.name, COUNT(*) AS shifts\nFROM shifts s\nJOIN pharmacies p ON p.id = s.pharmacy_id\nGROUP BY p.name;\n```\n\nThis gives Riverside Pharmacy 3, Maple Drug 3 and Harbor Health Rx 2. Oak Street Pharmacy is missing because it has no shifts to match. The next lesson shows how to keep it.",
+      "keyPoints": [
+        "A join matches rows using an ON condition, normally foreign key = primary key.",
+        "Use short table aliases and qualify columns that exist in both tables.",
+        "INNER JOIN drops rows with no match, including rows where the key is NULL.",
+        "Chain joins one ON clause at a time."
+      ],
+      "interviewAngle": "Interviewers often hand you two or three tables and ask for a report that spans them. Say which column links them before you write the ON clause, and note which rows an inner join will drop. For your background, you can honestly say you joined shift, pharmacy and pharmacist data to build reports.",
+      "exercises": [
+        {
+          "id": "sql-u3-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "How many rows does this return on the sample data?\n\n```sql\nSELECT s.id\nFROM shifts s\nINNER JOIN pharmacists ph ON ph.id = s.pharmacist_id;\n```",
+          "choices": [
+            "8",
+            "5",
+            "3",
+            "4"
+          ],
+          "answer": 1,
+          "explanation": "Shifts 103, 106 and 107 have a NULL pharmacist_id, which matches no pharmacist, so the inner join drops them. That leaves 5 shifts."
+        },
+        {
+          "id": "sql-u3-l1-e2",
+          "type": "short",
+          "prompt": "Which clause of a JOIN states the matching condition between the two tables? Answer with the keyword.",
+          "accept": [
+            "on",
+            "the on clause"
+          ],
+          "answer": "ON",
+          "explanation": "The ON clause names the columns to match, for example ON p.id = s.pharmacy_id."
+        },
+        {
+          "id": "sql-u3-l1-e3",
+          "type": "mcq",
+          "prompt": "Why does `SELECT id, name FROM shifts s JOIN pharmacies p ON p.id = s.pharmacy_id;` fail?",
+          "choices": [
+            "JOIN cannot be used without WHERE.",
+            "The alias p must be written in capitals.",
+            "The column id exists in both tables, so the reference is ambiguous.",
+            "shifts has no column called name."
+          ],
+          "answer": 2,
+          "explanation": "Both tables have an id column, so the database cannot tell which you mean. Write s.id. The name column exists only in pharmacies, so it would work on its own, but qualifying it is still clearer."
+        },
+        {
+          "id": "sql-u3-l1-e4",
+          "type": "open",
+          "prompt": "Write a query that lists every completed shift with its id, the pharmacy name and the pharmacy city, ordered by shift id. Give the rows it returns on the sample data.",
+          "answer": "```sql\nSELECT s.id, p.name AS pharmacy, p.city\nFROM shifts s\nJOIN pharmacies p ON p.id = s.pharmacy_id\nWHERE s.status = 'completed'\nORDER BY s.id;\n```\n\nResult: 101 Riverside Pharmacy Austin; 102 Riverside Pharmacy Austin; 104 Maple Drug Dallas; 105 Harbor Health Rx Houston.\n\nOn the practice data this returns 828 rows (columns: id, pharmacy, city); the first row is 1001, Pinecrest Community Pharmacy #132, Miami.",
+          "rubric": [
+            "Joins shifts to pharmacies with ON p.id = s.pharmacy_id",
+            "Filters s.status = 'completed'",
+            "Qualifies ambiguous columns such as s.id",
+            "Lists the four rows 101, 102, 104, 105 with the right names and cities"
+          ],
+          "sqlite": "SELECT s.id, p.name AS pharmacy, p.city FROM shifts s JOIN pharmacies p ON p.id = s.pharmacy_id WHERE s.status = 'completed' ORDER BY s.id",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u3-l2",
+      "title": "LEFT JOIN and finding unmatched rows",
+      "minutes": 10,
+      "body": "A `LEFT JOIN` keeps every row from the left table, even when nothing matches on the right. The right-hand columns come back as NULL for those rows.\n\nWhich pharmacies have no shifts? Start from `pharmacies`, left join to `shifts`, then keep only rows where the right side did not match:\n\n```sql\nSELECT p.name\nFROM pharmacies p\nLEFT JOIN shifts s ON s.pharmacy_id = p.id\nWHERE s.id IS NULL;\n```\n\nThe result is Oak Street Pharmacy. This pattern is called an anti-join: LEFT JOIN, then `IS NULL` on a column from the right table that can never be NULL when matched (usually its primary key). The same idea finds pharmacists with no shifts:\n\n```sql\nSELECT ph.name\nFROM pharmacists ph\nLEFT JOIN shifts s ON s.pharmacist_id = ph.id\nWHERE s.id IS NULL;\n```\n\nThe result is Chris Boyd.\n\nLEFT JOIN is also how you get zeros into a report. Compare two counts:\n\n```sql\nSELECT p.name, COUNT(s.id) AS shifts\nFROM pharmacies p\nLEFT JOIN shifts s ON s.pharmacy_id = p.id\nGROUP BY p.name;\n```\n\n| name | shifts |\n|---|---|\n| Riverside Pharmacy | 3 |\n| Maple Drug | 3 |\n| Harbor Health Rx | 2 |\n| Oak Street Pharmacy | 0 |\n\n`COUNT(s.id)` skips NULLs, so Oak Street correctly shows 0. If you wrote `COUNT(*)`, Oak Street would show 1, because the single NULL-filled row still counts as a row. Counting a right-table column is the habit to build.\n\nA subtle trap: filtering the right table in `WHERE` undoes the LEFT JOIN. This query returns only pharmacies that have cancelled shifts, just like an inner join, because for unmatched pharmacies `s.status` is NULL and the test fails:\n\n```sql\nWHERE s.status = 'cancelled'\n```\n\nIf you want every pharmacy with a count of cancelled shifts, put the condition in the `ON` clause:\n\n```sql\nSELECT p.name, COUNT(s.id) AS cancelled\nFROM pharmacies p\nLEFT JOIN shifts s ON s.pharmacy_id = p.id AND s.status = 'cancelled'\nGROUP BY p.name;\n```\n\nThis gives Riverside Pharmacy 0, Maple Drug 2, Harbor Health Rx 1 and Oak Street Pharmacy 0. Every pharmacy appears.\n\nOne last note: the table you want to keep goes on the left of `LEFT JOIN`. Swapping the order changes which rows survive. You may also see `RIGHT JOIN`, which is the same thing mirrored; most people avoid it and swap table order instead.",
+      "keyPoints": [
+        "LEFT JOIN keeps all left rows; unmatched right columns are NULL.",
+        "Anti-join: LEFT JOIN then WHERE right.id IS NULL finds rows with no match.",
+        "Count a right-table column, such as COUNT(s.id), to get a true zero.",
+        "Put right-table filters in ON, not WHERE, or the LEFT JOIN becomes an inner join."
+      ],
+      "interviewAngle": "Expect 'find customers with no orders' in some form. Your version: pharmacies or pharmacists with no shifts. Say 'LEFT JOIN and filter the right key to NULL' and mention the WHERE-versus-ON trap. You can honestly use this to describe checking for shifts with no assigned pharmacist or records with no match when validating data.",
+      "exercises": [
+        {
+          "id": "sql-u3-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You need the pharmacies that have never had a shift. Which pattern is correct?",
+          "choices": [
+            "pharmacies INNER JOIN shifts, then WHERE s.id IS NULL",
+            "pharmacies LEFT JOIN shifts ON s.pharmacy_id = p.id, then WHERE s.id IS NULL",
+            "shifts LEFT JOIN pharmacies, then WHERE p.id = 0",
+            "pharmacies LEFT JOIN shifts, then WHERE s.id = NULL"
+          ],
+          "answer": 1,
+          "explanation": "The LEFT JOIN keeps every pharmacy, and rows with no matching shift have NULL in s.id. An inner join would already have removed those rows, and = NULL is never true."
+        },
+        {
+          "id": "sql-u3-l2-e2",
+          "type": "short",
+          "prompt": "In the grouped query `SELECT p.name, COUNT(s.id) ... FROM pharmacies p LEFT JOIN shifts s ...`, what does COUNT(s.id) return for Oak Street Pharmacy?",
+          "accept": [
+            "0",
+            "zero"
+          ],
+          "answer": "0",
+          "explanation": "Oak Street has one joined row, but s.id is NULL in it. COUNT(column) skips NULLs, so the count is 0."
+        },
+        {
+          "id": "sql-u3-l2-e3",
+          "type": "mcq",
+          "prompt": "In the same query, what would `COUNT(*)` return for Oak Street Pharmacy?",
+          "choices": [
+            "0",
+            "1",
+            "NULL",
+            "4"
+          ],
+          "answer": 1,
+          "explanation": "COUNT(*) counts rows, and the LEFT JOIN produces one row for Oak Street with NULLs on the right. That gives a misleading 1."
+        },
+        {
+          "id": "sql-u3-l2-e4",
+          "type": "open",
+          "prompt": "Write a query that lists every pharmacist's name and the number of shifts they have (`shifts`), including pharmacists with none. Sort by shifts descending, then name. Give the result on the sample data.",
+          "answer": "```sql\nSELECT ph.name, COUNT(s.id) AS shifts\nFROM pharmacists ph\nLEFT JOIN shifts s ON s.pharmacist_id = ph.id\nGROUP BY ph.name\nORDER BY shifts DESC, ph.name;\n```\n\nResult: Dana Ortiz 2, Sam Lee 2, Priya Nair 1, Chris Boyd 0.\n\nOn the practice data this returns 60 rows (columns: name, shifts); the first row is Wei Reyes, 24.",
+          "rubric": [
+            "Starts from pharmacists and uses LEFT JOIN to shifts so Chris Boyd is kept",
+            "Counts s.id (not COUNT(*)) so the zero is correct",
+            "Groups by the pharmacist name (or id)",
+            "Orders by shifts descending then name; result Dana 2, Sam 2, Priya 1, Chris 0"
+          ],
+          "sqlite": "SELECT ph.name, COUNT(s.id) AS shifts FROM pharmacists ph LEFT JOIN shifts s ON s.pharmacist_id = ph.id GROUP BY ph.name ORDER BY shifts DESC, ph.name",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u3-l3",
+      "title": "Join pitfalls: duplicated rows and wrong totals",
+      "minutes": 10,
+      "body": "The most dangerous join bug does not raise an error. It returns too many rows, and your totals quietly inflate.\n\nA join multiplies rows when one row on one side matches several rows on the other. Join `pharmacies` to `shifts` and you get one row per shift, not one per pharmacy:\n\n```sql\nSELECT COUNT(*)\nFROM pharmacies p\nJOIN shifts s ON s.pharmacy_id = p.id;\n```\n\nThe answer is 8. If you thought you were counting pharmacies, you are wrong by a factor of two. To count Austin pharmacies that had at least one shift, count distinct pharmacies, not rows:\n\n```sql\nSELECT COUNT(DISTINCT p.id)\nFROM pharmacies p\nJOIN shifts s ON s.pharmacy_id = p.id\nWHERE p.city = 'Austin';\n```\n\nThat returns 1 (Riverside, with 3 joined rows). Oak Street is also in Austin but has no shifts, so the inner join dropped it.\n\nWrong-key joins are worse. The `assignments` table links a shift to a pharmacist:\n\n| id | shift_id | pharmacist_id | status | completed_at |\n|---|---|---|---|---|\n| 1 | 101 | 10 | completed | 2026-03-03 17:00 |\n| 2 | 102 | 11 | completed | 2026-03-06 17:00 |\n| 3 | 104 | 12 | completed | 2026-03-15 17:00 |\n| 4 | 105 | 10 | completed | 2026-04-02 17:00 |\n| 5 | 108 | 11 | cancelled | NULL |\n\nThe correct join matches the shift:\n\n```sql\nSELECT COUNT(*)\nFROM shifts s\nJOIN assignments a ON a.shift_id = s.id;\n```\n\nThe answer is 5. Now match on the pharmacist by mistake:\n\n```sql\nSELECT COUNT(*)\nFROM shifts s\nJOIN assignments a ON a.pharmacist_id = s.pharmacist_id;\n```\n\nThe answer is 9. Pharmacist 10 has 2 shifts and 2 assignments, so 4 combinations. Pharmacist 11 gives another 4, and pharmacist 12 gives 1. No error, but every total built on this join is inflated.\n\nA checklist before you trust a join:\n\n1. Know the relationship: one-to-one, one-to-many, or many-to-many.\n2. Join on the key that really identifies the link, usually the complete key.\n3. Compare row counts before and after adding each join. If the count rose when you expected it not to, find out why.\n4. Look at one entity, such as one shift, and see how many rows it produced.\n5. Do not paper over duplicates with `DISTINCT`. It can hide the real problem and still produce a wrong total. Fix the join, or aggregate the many-side first.\n\nWhen a total looks too high by a neat multiple, suspect a fan-out.",
+      "keyPoints": [
+        "A join returns one row per matching pair, so one-to-many joins multiply rows.",
+        "Counting rows after a join counts the many side; use COUNT(DISTINCT key) for the one side.",
+        "Joining on the wrong column does not error; it inflates the result.",
+        "Compare row counts before and after each join.",
+        "Fix the join rather than hiding duplicates with DISTINCT."
+      ],
+      "interviewAngle": "Interviewers ask 'a total looks too high after a join, what happened?' Answer with a fan-out explanation and your checking steps: row counts before and after, inspect one record, fix the key. As a tester you can truthfully say checking that kind of result is the habit you bring to any report number.",
+      "exercises": [
+        {
+          "id": "sql-u3-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "On the sample data, how many rows does this return?\n\n```sql\nSELECT COUNT(*)\nFROM shifts s\nJOIN assignments a ON a.pharmacist_id = s.pharmacist_id;\n```\n\nThe correct link is `a.shift_id = s.id`, which would give 5.",
+          "choices": [
+            "5",
+            "9",
+            "8",
+            "13"
+          ],
+          "answer": 1,
+          "explanation": "Joining on pharmacist multiplies rows. Pharmacist 10 has 2 shifts and 2 assignments (4 pairs), pharmacist 11 the same (4), pharmacist 12 has 1 and 1 (1). Total 9."
+        },
+        {
+          "id": "sql-u3-l3-e2",
+          "type": "short",
+          "prompt": "How many rows does `pharmacies p INNER JOIN shifts s ON s.pharmacy_id = p.id` return on the sample data? Answer with a number.",
+          "accept": [
+            "8",
+            "eight"
+          ],
+          "answer": "8",
+          "explanation": "There is one output row per matching shift, and all 8 shifts match a pharmacy. Oak Street has no shifts, so it contributes none."
+        },
+        {
+          "id": "sql-u3-l3-e3",
+          "type": "mcq",
+          "prompt": "A report total is too high after a join. Someone suggests adding SELECT DISTINCT to the query. What is the main risk?",
+          "choices": [
+            "DISTINCT is not allowed with joins.",
+            "DISTINCT can hide a wrong join and still give an incorrect total.",
+            "DISTINCT always makes the query return zero rows.",
+            "DISTINCT converts the join to a LEFT JOIN."
+          ],
+          "answer": 1,
+          "explanation": "DISTINCT removes duplicate output rows but does not tell you why they appeared. If the join key is wrong, the remaining rows may still be the wrong ones."
+        },
+        {
+          "id": "sql-u3-l3-e4",
+          "type": "open",
+          "prompt": "Write a query that returns how many different pharmacies in one city had at least one shift (`city_pharmacies_with_shifts`). Use Austin on the lesson sample and state the answer there; use Atlanta on the practice data. Explain why COUNT(*) would be the wrong function here.",
+          "answer": "```sql\nSELECT COUNT(DISTINCT p.id) AS city_pharmacies_with_shifts\nFROM pharmacies p\nJOIN shifts s ON s.pharmacy_id = p.id\nWHERE p.city = 'Austin';   -- 'Atlanta' on the practice data\n```\n\nOn the lesson sample the answer is 1. Riverside Pharmacy is the only Austin pharmacy with shifts (Oak Street has none). `COUNT(*)` would return 3, because Riverside has three shifts and the join produces one row per shift, not one per pharmacy.\n\nOn the practice data this returns 1 row (columns: city_pharmacies_with_shifts); the first row is 8.",
+          "rubric": [
+            "Joins pharmacies to shifts on pharmacy id",
+            "Filters p.city = 'Austin'",
+            "Uses COUNT(DISTINCT p.id)",
+            "States 1 and explains that COUNT(*) would return 3 because of one row per shift"
+          ],
+          "sqlite": "SELECT COUNT(DISTINCT p.id) AS city_pharmacies_with_shifts FROM pharmacies p JOIN shifts s ON s.pharmacy_id = p.id WHERE p.city = 'Atlanta'"
+        }
+      ]
+    }
+  ]
+}

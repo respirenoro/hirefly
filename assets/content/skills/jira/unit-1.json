@@ -1,0 +1,96 @@
+{
+  "id": "jira-u1",
+  "title": "The Jira model",
+  "summary": "Projects, issue types, fields, workflows and statuses: the vocabulary everything else in Jira is built on.",
+  "lessons": [
+    {
+      "id": "jira-u1-l1",
+      "title": "Projects and issue types",
+      "minutes": 8,
+      "body": "A Jira **project** is a container for issues with its own key, board and settings. Every issue gets an id made of the project key and a number, such as `DISP-142`. In Jira Cloud a project is either company-managed or team-managed, and the difference comes up in interviews.\n\n| | Company-managed | Team-managed |\n|---|---|---|\n| Who configures it | Jira administrators, using shared schemes | The project's own admins, per project |\n| Workflows and fields | Shared across projects | Local to the project |\n| Best for | Larger organizations that want consistent reporting | Small teams that want to change their own setup |\n| Trade-off | Changes need an admin | Easy to change, harder to standardize |\n\nOlder documentation calls these classic and next-gen projects. At a concept level: company-managed means central control, team-managed means local control. Which one a company uses tells you a lot about how it works.\n\nAn **issue** is one unit of work. The **issue type** says what kind it is.\n\n| Type | Meaning | Example from dispatch software |\n|---|---|---|\n| Epic | A large body of work, split into smaller issues | SOS alerts for nearby pharmacists |\n| Story | A user-facing need, written from the user's side | As a dispatcher, I can send an alert to pharmacists within 20 miles |\n| Task | Work with no direct user value | Set up a staging database for UAT |\n| Bug | Something is broken | Filled shift shows at the wrong time on the pharmacist's calendar |\n| Sub-task | A step inside another issue | Write test cases for the alert radius |\n\nThe usual hierarchy is epic, then story/task/bug, then sub-task. Some paid plans add levels above epics, but you can describe the standard three without them.\n\nTwo habits matter. First, pick the type honestly. A bug filed as a story hides defects from your bug counts. Second, keep sub-tasks for steps one person finishes within a sprint. If a sub-task needs its own discussion, it is probably a story.\n\nProject names and keys are chosen once and are awkward to change, so a good key is short and obvious: `DISP` for dispatch, `NOTIF` for notifications.",
+      "keyPoints": [
+        "Company-managed means admin-controlled shared setup; team-managed means each team controls its own project.",
+        "Standard types are epic, story, task, bug and sub-task, in that rough hierarchy.",
+        "Pick the issue type honestly, because reports and filters depend on it.",
+        "An issue key is the project key plus a number, like DISP-142."
+      ],
+      "interviewAngle": "You will be asked what issue types you used and why. Answer with real examples: a missing shift is a bug, the SOS alert is an epic with stories under it. If asked company-managed or team-managed, say which one you remember, or say you worked inside a project an admin had set up and did not configure schemes yourself.",
+      "exercises": [
+        {
+          "id": "jira-u1-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A pharmacist reports that a shift created for 9:00 AM appears at 8:00 AM on their schedule. Which issue type fits best?",
+          "choices": ["Epic", "Story", "Bug", "Sub-task"],
+          "answer": 2,
+          "explanation": "The software does not behave as it should, so it is a bug. A story would be a new capability, and an epic is a large group of work."
+        },
+        {
+          "id": "jira-u1-l1-e2",
+          "type": "mcq",
+          "prompt": "In a team-managed project, who can usually change the workflow?",
+          "choices": ["Only a site-wide Jira administrator", "The project's own admins", "Any user who can comment", "Nobody, workflows are fixed"],
+          "answer": 1,
+          "explanation": "Team-managed projects keep their configuration local, so the project admins can adjust it without a site admin."
+        },
+        {
+          "id": "jira-u1-l1-e3",
+          "type": "open",
+          "prompt": "For a new feature that lets pharmacies mark a shift as urgent, write one epic title, two story titles in 'As a ... I can ...' form, one bug title that could be found in testing, and one sub-task under one of the stories.",
+          "answer": "**Epic:** Urgent shift requests\n\n**Story 1:** As a pharmacy manager, I can mark a shift request as urgent when I create it.\n\n**Story 2:** As a dispatcher, I can see urgent shifts at the top of the open-shifts list.\n\n**Bug:** Urgent flag is lost when a shift is edited after creation.\n\n**Sub-task (under Story 2):** Write test cases for sort order with mixed urgent and normal shifts.",
+          "rubric": [
+            "Epic names a body of work, not a single task",
+            "Stories name a user role and a capability",
+            "Bug describes wrong behavior, not a feature request",
+            "Sub-task is a small step one person can finish"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jira-u1-l2",
+      "title": "Fields, workflows and statuses",
+      "minutes": 8,
+      "body": "Every issue is a bag of **fields**. Some are built in, and some are custom fields that an admin adds.\n\n| Field | What it is for |\n|---|---|\n| Summary | The title. Short and specific. |\n| Description | The detail: steps, context, acceptance criteria |\n| Assignee | The one person doing the work now |\n| Reporter | The person who raised it |\n| Priority | How urgent it is. Defaults are Highest, High, Medium, Low, Lowest |\n| Labels, Components | Ways to group issues |\n| Fix version, Affects version | The release it ships in, and the release where it was found |\n| Sprint | The sprint it belongs to |\n| Story points | An estimate of relative size |\n| Resolution | How it ended, such as Done or Won't Do |\n\nThe field names above are common defaults. A company can rename or hide many of them, so do not assume every project looks the same.\n\nA **workflow** is the set of statuses an issue can be in and the **transitions** that move it between them. A simple one:\n\n```text\nTo Do  ->  In Progress  ->  In Review  ->  In Test  ->  Done\n```\n\nEach status belongs to a **status category**: To Do, In Progress or Done. This is why a filter such as `statusCategory != Done` keeps working even when two teams name their statuses differently.\n\nTransitions can have rules set by an admin. A **condition** controls who can make a move, a **validator** checks something first (for example, a resolution must be chosen), and a **post function** does something afterward (for example, set the assignee). You do not need to configure these. You should know they exist, because they explain why a button is missing or a transition asks for a field.\n\nA common beginner mistake is treating status as a mood. Status should reflect where the work really is. If a bug sits in In Progress for two weeks because the developer is waiting on logs from the customer, a status like Waiting for Info tells the truth.\n\nResolution matters for reporting. An issue that is Done has a resolution. An issue with an empty resolution is open, and `resolution = Unresolved` finds those.",
+      "keyPoints": [
+        "Fields hold the data; summary and description carry most of the meaning.",
+        "A workflow is statuses plus the transitions allowed between them.",
+        "Status categories (To Do, In Progress, Done) make cross-team reporting work.",
+        "Conditions, validators and post functions are admin rules that explain odd transition behavior.",
+        "Keep statuses honest, and add a waiting status if work is genuinely blocked."
+      ],
+      "interviewAngle": "Interviewers ask you to describe your team's workflow. Name the actual statuses your team used and who moved tickets between them. You can say you suggested a status change or asked an admin to adjust the workflow, but do not claim to have administered Jira unless you did.",
+      "exercises": [
+        {
+          "id": "jira-u1-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Two teams use different status names, but you want one filter for everything not finished. What should the filter use?",
+          "choices": ["status = \"In Progress\"", "statusCategory != Done", "assignee is EMPTY", "priority = Highest"],
+          "answer": 1,
+          "explanation": "Status categories group differently named statuses into To Do, In Progress and Done, so one filter works across teams."
+        },
+        {
+          "id": "jira-u1-l2-e2",
+          "type": "short",
+          "prompt": "What do you call the rule that checks something before a transition is allowed, such as requiring a resolution?",
+          "accept": ["validator", "a validator"],
+          "answer": "Validator",
+          "explanation": "A validator checks input before the transition. A condition controls who may do it, and a post function acts afterward."
+        },
+        {
+          "id": "jira-u1-l2-e3",
+          "type": "open",
+          "prompt": "A bug about missed notifications has been 'In Progress' for ten days because the developer is waiting on logs from the customer. Explain what is wrong with that status and what you would do, in a few sentences.",
+          "answer": "The status says active work is happening, but the work is blocked. That misleads the sprint board and burndown and hides a dependency.\n\nI would change the status to a waiting status such as Waiting for Info if the workflow has one, or ask the project admin to add one. I would add a comment tagging the customer contact with exactly which logs are needed and by when, and set a reminder to follow up. If it is still stuck after the agreed date, I would raise it at standup so the team can decide whether to pause or close it.",
+          "rubric": [
+            "Identifies that status does not match reality",
+            "Names a more truthful status or asks for one",
+            "States a specific request for the missing information",
+            "Includes a follow-up or escalation step"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,331 @@
+{
+  "id": "tp-u9",
+  "title": "Writing test cases from acceptance criteria",
+  "summary": "Sixteen graded exercises on the scheduling product, from single-rule stories to permissions, non-functional criteria and a UAT script.",
+  "lessons": [
+    {
+      "id": "tp-u9-l1",
+      "title": "Exercises 1 to 4: single-rule stories",
+      "minutes": 14,
+      "body": "A good test case has a title that names the behaviour, preconditions and data, numbered steps, and an expected result for each meaningful check. Priority marks what must run first. Write each case so another person could run it cold.\n\n**Method per criterion.** (1) Restate the rule in your own words. (2) Find the inputs, states and actors. (3) Apply techniques: partitions, boundaries, decision table, state transitions. (4) Add negative and permission cases. (5) Add what the criterion does not say but the user would expect. (6) Give each case a priority: 1 for the core path and anything dangerous, 2 for important variations, 3 for cosmetic or rare.\n\nAnswer format for the exercises: a table of cases with ID, title, steps, expected, priority. Model answers show the minimum a strong answer contains. Yours may differ if it covers the same risks.\n\n**Level 1.** One rule, few variables. Practise getting the basics complete: positive, negative, boundary, and a clear expected result. Example finished case:\n\n| ID | Title | Steps | Expected | P |\n|---|---|---|---|---|\n| TC-1 | Radius 10 alerts pharmacists within 10 miles only | 1. Sign in as manager. 2. Create SOS for tomorrow 08:00. 3. Choose radius 10. 4. Send. | Pharmacists 4 and 9 miles away receive the alert; the one 20 miles away does not | 1 |\n\n\n**Marking your own answer.** Compare against the model answer in three passes. First, coverage: does every acceptance criterion have at least one case, and did you include a negative case for each rule? Second, precision: could another tester run each case without asking you anything, and is every expected result observable (a message, a status, a record, a count) rather than 'works correctly'? Third, judgement: did you set priorities by risk, and did you write down the questions the criteria leave open? A short list of sharp cases with priorities beats a long list of near-duplicates. If your cases differ from the model but cover the same risks, that is fine.",
+      "keyPoints": [
+        "Read each acceptance criterion and ask: what must be true, and how could it be false?",
+        "One case checks one idea; name it by the behaviour, not the screen.",
+        "Cover valid, invalid, boundary and state variations, then the unstated risks.",
+        "Always write the expected result as something observable."
+      ],
+      "interviewAngle": "These exercises mirror the job: you turn acceptance criteria into test cases and defend what you chose. In an interview, pick one story from your real work, state its criteria, and walk through your cases in priority order, saying what you left out and why.",
+      "exercises": [
+        {
+          "id": "tp-u9-l1-e1",
+          "type": "mcq",
+          "prompt": "Acceptance criterion: 'The manager can choose a radius of 5, 10 or 25 miles.' Which first case is the best core test?",
+          "choices": [
+            "Choose 25 and verify the page layout",
+            "Choose each option and verify the alert reaches only pharmacists inside it",
+            "Check the label text colour",
+            "Send without a radius"
+          ],
+          "answer": 1,
+          "explanation": "The core behaviour is which pharmacists are alerted for each radius.",
+          "placement": true
+        },
+        {
+          "id": "tp-u9-l1-e2",
+          "type": "open",
+          "prompt": "Exercise 1. Story: 'As a manager I choose the SOS radius (5, 10 or 25 miles).' AC: only these three options appear; the default is 10; pharmacists outside the radius are not alerted. Write at least 5 test cases.",
+          "answer": "TC1 Options list shows exactly 5, 10, 25 and no others (P2). TC2 Default is 10 when opening a new request (P2). TC3 Radius 5 alerts pharmacist at 4 miles, not at 6 (P1). TC4 Radius 25 alerts pharmacist at 24, not at 26 (P1). TC5 Radius 10 boundary: pharmacist at exactly 10.0 miles, expected per spec (inclusive?) and raise the question (P2). TC6 Edit the request payload to radius 15 through the API: rejected, no alert (P2). TC7 No pharmacist in radius: manager sees a 'no pharmacists nearby' message (P2).",
+          "rubric": [
+            "At least 5 cases",
+            "Each option and the default",
+            "Inside versus outside radius",
+            "An invalid value via API",
+            "Clear expected results"
+          ]
+        },
+        {
+          "id": "tp-u9-l1-e3",
+          "type": "open",
+          "prompt": "Exercise 2. Story: 'As a manager I must give a reason when cancelling a shift.' AC: reason list is: no coverage needed, pharmacy cancelled, pharmacist cancelled, other; 'other' needs free text of 1 to 200 characters; cancel is blocked without a reason. Write at least 6 cases.",
+          "answer": "TC1 Cancel without reason is blocked with a message (P1). TC2 Each of the three fixed reasons saves and appears on the shift record and in reporting (P1, one case per value or one data-driven case). TC3 'Other' with empty text is blocked (P1). TC4 'Other' with 1 character accepted (P2). TC5 'Other' with 200 accepted, 201 rejected or truncated per spec (P2). TC6 Text with special characters and emoji saves and displays correctly, no script injection (P2). TC7 Cancel reason is read-only after save (P3, if specified).",
+          "rubric": [
+            "Blocked with no reason",
+            "All reason values",
+            "Other text empty/1/200/201",
+            "Special characters or security",
+            "Persistence checked"
+          ]
+        },
+        {
+          "id": "tp-u9-l1-e4",
+          "type": "open",
+          "prompt": "Exercise 3. Story: 'As a pharmacist I cannot be assigned two overlapping shifts.' AC: a second assignment that overlaps by any minute is rejected with a message; back-to-back shifts (end equals start) are allowed. Write at least 6 cases.",
+          "answer": "TC1 Assign 08:00 to 16:00 shift then 15:00 to 23:00: second rejected with message (P1). TC2 Overlap by one minute (08:00-16:00 and 15:59-23:00) rejected (P1). TC3 Back-to-back 08:00-16:00 then 16:00-23:00 accepted (P1). TC4 One-minute gap accepted (P2). TC5 Shift fully contained inside another rejected (P2). TC6 Overlap across midnight and across a daylight saving change (P2). TC7 Two managers assign the same pharmacist to overlapping shifts simultaneously: only one succeeds (P2). TC8 Cancelled shift frees the time and a new overlapping assignment is accepted (P2).",
+          "rubric": [
+            "Overlap by any amount",
+            "Back-to-back boundary",
+            "Containment",
+            "Midnight/DST or concurrency",
+            "State change after cancel"
+          ]
+        },
+        {
+          "id": "tp-u9-l1-e5",
+          "type": "open",
+          "prompt": "Exercise 4. Story: 'As an admin I lock a user for 15 minutes after 5 failed logins.' AC: counter resets on success; lockout message does not reveal whether the account exists. Write at least 6 cases.",
+          "answer": "TC1 Four failed attempts then a correct login succeeds (P1). TC2 Five failed attempts lock the account; correct password during lock is refused (P1). TC3 After 15 minutes the account can log in (P1; use a time shortcut or wait). TC4 Counter resets after a successful login: 4 fails, success, 4 fails, still not locked (P2). TC5 Lockout message is the same for an unknown email and a real locked account (P1, security). TC6 Failed attempts across two browsers count together (P2). TC7 Locked account password reset path behaves per spec (P3). Open question: does a failed attempt during lock extend it?",
+          "rubric": [
+            "Counts of 4 and 5",
+            "Time expiry",
+            "Reset on success",
+            "No account enumeration",
+            "Raises an open spec question"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u9-l2",
+      "title": "Exercises 5 to 8: multi-rule stories",
+      "minutes": 14,
+      "body": "A good test case has a title that names the behaviour, preconditions and data, numbered steps, and an expected result for each meaningful check. Priority marks what must run first. Write each case so another person could run it cold.\n\n**Method per criterion.** (1) Restate the rule in your own words. (2) Find the inputs, states and actors. (3) Apply techniques: partitions, boundaries, decision table, state transitions. (4) Add negative and permission cases. (5) Add what the criterion does not say but the user would expect. (6) Give each case a priority: 1 for the core path and anything dangerous, 2 for important variations, 3 for cosmetic or rare.\n\nAnswer format for the exercises: a table of cases with ID, title, steps, expected, priority. Model answers show the minimum a strong answer contains. Yours may differ if it covers the same risks.\n\n**Level 2.** Several rules interact. Use a decision table or a state model first, then derive cases. Do not write one giant case; split by rule. Share setup using shared steps and parameters in Test Plans: a sign-in shared step, and a data table for different recipients.\n\n\n**Marking your own answer.** Compare against the model answer in three passes. First, coverage: does every acceptance criterion have at least one case, and did you include a negative case for each rule? Second, precision: could another tester run each case without asking you anything, and is every expected result observable (a message, a status, a record, a count) rather than 'works correctly'? Third, judgement: did you set priorities by risk, and did you write down the questions the criteria leave open? A short list of sharp cases with priorities beats a long list of near-duplicates. If your cases differ from the model but cover the same risks, that is fine.",
+      "keyPoints": [
+        "Read each acceptance criterion and ask: what must be true, and how could it be false?",
+        "One case checks one idea; name it by the behaviour, not the screen.",
+        "Cover valid, invalid, boundary and state variations, then the unstated risks.",
+        "Always write the expected result as something observable."
+      ],
+      "interviewAngle": "These exercises mirror the job: you turn acceptance criteria into test cases and defend what you chose. In an interview, pick one story from your real work, state its criteria, and walk through your cases in priority order, saying what you left out and why.",
+      "exercises": [
+        {
+          "id": "tp-u9-l2-e1",
+          "type": "mcq",
+          "prompt": "A story has four acceptance criteria. How should the test cases map?",
+          "choices": [
+            "One case covering all four",
+            "Cases per criterion, plus cases for interactions between them",
+            "One case per screen",
+            "Only the first criterion"
+          ],
+          "answer": 1,
+          "explanation": "Trace cases to each criterion, then add interaction cases.",
+          "placement": true
+        },
+        {
+          "id": "tp-u9-l2-e2",
+          "type": "open",
+          "prompt": "Exercise 5. AC: alert text contains pharmacy name, address, start time, pay rate and an Accept link; alert expires 10 minutes after sending; after expiry Accept shows 'This request has expired'. Write at least 6 cases.",
+          "answer": "TC1 Alert contains all five items correctly for a known request (P1). TC2 Accept link opens the right request (P1). TC3 Accept within 10 minutes assigns the shift (P1). TC4 Accept at 9:59 works; at 10:01 shows the expired message and no assignment (P1). TC5 Pay rate and time display in the pharmacist's expected format and time zone (P2). TC6 Long pharmacy name or special characters do not break the message (P3). TC7 Accept link reused after acceptance shows 'already filled' (P2). TC8 Alert on both push and email if both are configured, content identical (P2).",
+          "rubric": [
+            "All five content items",
+            "Expiry boundary",
+            "Expired message",
+            "Reuse of link",
+            "Time zone or format"
+          ]
+        },
+        {
+          "id": "tp-u9-l2-e3",
+          "type": "open",
+          "prompt": "Exercise 6. AC: first pharmacist to accept gets the shift; others see 'Filled'; the manager is notified; the shift status changes to Filled. Write at least 6 cases, including one concurrency case.",
+          "answer": "TC1 One pharmacist accepts: shift Filled, manager notified (P1). TC2 Second pharmacist opens the alert after: sees Filled and cannot accept (P1). TC3 Two pharmacists accept within the same second: exactly one assignment, the other gets Filled (P1). TC4 Filled shift appears as assigned to the right person in the manager's list and in reports (P1). TC5 Notification content names the pharmacist and shift (P2). TC6 Accepting pharmacist already has an overlapping shift: accept refused with reason (P2). TC7 Manager cancels at the moment of accept: consistent final state (P3).",
+          "rubric": [
+            "First accept wins",
+            "Others see Filled",
+            "Concurrency case",
+            "Manager notified",
+            "Record consistency"
+          ]
+        },
+        {
+          "id": "tp-u9-l2-e4",
+          "type": "open",
+          "prompt": "Exercise 7. AC: shift list can be filtered by status (open, filled, cancelled) and date range; filters combine; results show 25 per page; the count of results is displayed. Write at least 7 cases.",
+          "answer": "TC1 Each status filter shows only that status (P1). TC2 Date range includes both end dates (P1). TC3 Status and date combine as AND (P1). TC4 No results shows an empty state and count 0 (P2). TC5 Exactly 25 results: one page; 26: two pages (P2). TC6 Changing the filter resets to page 1 (P2). TC7 Start date after end date gives validation message (P2). TC8 Count equals the number of rows across pages (P1). TC9 Filter persists or resets after opening a shift and returning, per spec (P3).",
+          "rubric": [
+            "Each filter",
+            "Combined filters",
+            "Page boundary 25/26",
+            "Empty state",
+            "Count matches rows"
+          ]
+        },
+        {
+          "id": "tp-u9-l2-e5",
+          "type": "open",
+          "prompt": "Exercise 8. AC: a manager can export fill rate by month to CSV; fill rate = filled shifts divided by requested shifts; months with no requests show blank, not 0 percent or an error. Write at least 6 cases.",
+          "answer": "TC1 Export downloads a CSV with the expected headers (P1). TC2 Fill rate for a month with known data matches a hand calculation (for example 18 filled of 24 requested = 75 percent) (P1). TC3 Month with no requests shows blank, no divide-by-zero (P1). TC4 Month with all filled shows 100 percent; none filled shows 0 percent (P2). TC5 Cancelled and open shifts are counted per the definition in requested shifts (P1; confirm the definition). TC6 Date range crossing a year boundary orders months correctly (P2). TC7 Special characters in the pharmacy name are quoted correctly in the CSV (P3). TC8 Cross-check against a SQL query for the same period (P2).",
+          "rubric": [
+            "Hand-calculated expected value",
+            "Divide-by-zero month",
+            "Definition of requested shifts",
+            "CSV format issues",
+            "Reconciliation with SQL"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u9-l3",
+      "title": "Exercises 9 to 12: states, data and negative paths",
+      "minutes": 14,
+      "body": "A good test case has a title that names the behaviour, preconditions and data, numbered steps, and an expected result for each meaningful check. Priority marks what must run first. Write each case so another person could run it cold.\n\n**Method per criterion.** (1) Restate the rule in your own words. (2) Find the inputs, states and actors. (3) Apply techniques: partitions, boundaries, decision table, state transitions. (4) Add negative and permission cases. (5) Add what the criterion does not say but the user would expect. (6) Give each case a priority: 1 for the core path and anything dangerous, 2 for important variations, 3 for cosmetic or rare.\n\nAnswer format for the exercises: a table of cases with ID, title, steps, expected, priority. Model answers show the minimum a strong answer contains. Yours may differ if it covers the same risks.\n\n**Level 3.** The behaviour depends on state, history or data. Draw the states first. Look for stale data, duplicates, time, notifications and what happens when the same thing is done twice.\n\n\n**Marking your own answer.** Compare against the model answer in three passes. First, coverage: does every acceptance criterion have at least one case, and did you include a negative case for each rule? Second, precision: could another tester run each case without asking you anything, and is every expected result observable (a message, a status, a record, a count) rather than 'works correctly'? Third, judgement: did you set priorities by risk, and did you write down the questions the criteria leave open? A short list of sharp cases with priorities beats a long list of near-duplicates. If your cases differ from the model but cover the same risks, that is fine.",
+      "keyPoints": [
+        "Read each acceptance criterion and ask: what must be true, and how could it be false?",
+        "One case checks one idea; name it by the behaviour, not the screen.",
+        "Cover valid, invalid, boundary and state variations, then the unstated risks.",
+        "Always write the expected result as something observable."
+      ],
+      "interviewAngle": "These exercises mirror the job: you turn acceptance criteria into test cases and defend what you chose. In an interview, pick one story from your real work, state its criteria, and walk through your cases in priority order, saying what you left out and why.",
+      "exercises": [
+        {
+          "id": "tp-u9-l3-e1",
+          "type": "mcq",
+          "prompt": "Where is a duplicate-submit defect most likely to appear?",
+          "choices": [
+            "Static help text",
+            "A button that creates a record and sends a notification",
+            "A read-only report",
+            "The logo"
+          ],
+          "answer": 1,
+          "explanation": "Actions with side effects need idempotence checks.",
+          "placement": true
+        },
+        {
+          "id": "tp-u9-l3-e2",
+          "type": "open",
+          "prompt": "Exercise 9. AC: pharmacist status is Available, Busy or Off duty; only Available pharmacists are alerted; a status change takes effect for the next alert immediately; Busy pharmacists still see requests in the app. Write at least 7 cases using a decision table idea.",
+          "answer": "TC1 Available inside radius is alerted (P1). TC2 Busy inside radius is not alerted but sees the request in the app (P1). TC3 Off duty is not alerted and the request is hidden or visible per spec (P1). TC4 Status changed from Busy to Available then a new SOS: alerted (P1). TC5 Status changed during an open SOS: no retroactive alert (P2). TC6 Available but outside radius: not alerted (P1). TC7 Available inside radius but licence not valid in the state: not alerted (P1). TC8 Status default for a new pharmacist is as specified (P3).",
+          "rubric": [
+            "All three statuses",
+            "Immediate effect",
+            "Combination with radius and licence",
+            "Visibility rule for Busy",
+            "Expected results exact"
+          ]
+        },
+        {
+          "id": "tp-u9-l3-e3",
+          "type": "open",
+          "prompt": "Exercise 10. AC: a manager cannot send a second SOS for the same shift within 15 minutes; after 15 minutes they can; the warning names the earlier request. Write at least 6 cases.",
+          "answer": "TC1 Second SOS for the same shift at 5 minutes: blocked, warning shows the earlier request ID/time (P1). TC2 At 14:59 blocked; at 15:01 allowed (P1). TC3 Different shift at 5 minutes: allowed (P1). TC4 Same shift after the first was cancelled: allowed or blocked per spec; raise (P2). TC5 Double click on Send creates exactly one request and one set of alerts (P1). TC6 Two managers at the same pharmacy send for the same shift simultaneously: one succeeds (P2). TC7 Page refresh after Send does not resubmit (P3).",
+          "rubric": [
+            "Window boundary 14:59/15:01",
+            "Different shift allowed",
+            "Double submit",
+            "Concurrency",
+            "Raises spec question"
+          ]
+        },
+        {
+          "id": "tp-u9-l3-e4",
+          "type": "open",
+          "prompt": "Exercise 11. AC: editing the start time of a Filled shift notifies the assigned pharmacist; if the new time overlaps another of their shifts the edit is blocked; the change is recorded in the shift history. Write at least 6 cases.",
+          "answer": "TC1 Edit start time on a Filled shift: pharmacist notified with old and new time (P1). TC2 Edit creating an overlap with another assigned shift is blocked with a message (P1). TC3 History shows who changed what and when (P2). TC4 Edit on an Open shift sends no pharmacist notification (P2). TC5 Edit to a time in the past is blocked (P1). TC6 Edit then pharmacist declines or the shift reopens per spec (P3, raise). TC7 Edit by a user from another pharmacy is forbidden (P1).",
+          "rubric": [
+            "Notification content",
+            "Overlap blocked",
+            "History entry",
+            "Past time",
+            "Permission"
+          ]
+        },
+        {
+          "id": "tp-u9-l3-e5",
+          "type": "open",
+          "prompt": "Exercise 12. AC: shift times are stored in UTC and shown in the pharmacy's local time zone; the pharmacist sees times in their own time zone with the zone label. Write at least 6 cases.",
+          "answer": "TC1 Pharmacy in Eastern time creates 08:00 shift; DB/API shows 12:00 or 13:00 UTC per season; manager sees 08:00 (P1). TC2 Pharmacist in Pacific time sees 05:00 with zone label (P1). TC3 Shift on the daylight saving change day displays correct local time (P1). TC4 Shift crossing midnight local shows the right date to both users (P2). TC5 Pharmacy near a time zone border or in a zone without DST (P3). TC6 Report 'completed per month' assigns a shift ending at 23:30 local on the last day to the correct month (P2). TC7 Alert text time matches the app time (P1). Tester note: set the device time zone and check the user setting, which one wins.",
+          "rubric": [
+            "UTC vs local display",
+            "DST",
+            "Midnight/month boundary",
+            "Zone label",
+            "Consistency between alert and app"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u9-l4",
+      "title": "Exercises 13 to 16: permissions, non-functional and UAT scripts",
+      "minutes": 14,
+      "body": "A good test case has a title that names the behaviour, preconditions and data, numbered steps, and an expected result for each meaningful check. Priority marks what must run first. Write each case so another person could run it cold.\n\n**Method per criterion.** (1) Restate the rule in your own words. (2) Find the inputs, states and actors. (3) Apply techniques: partitions, boundaries, decision table, state transitions. (4) Add negative and permission cases. (5) Add what the criterion does not say but the user would expect. (6) Give each case a priority: 1 for the core path and anything dangerous, 2 for important variations, 3 for cosmetic or rare.\n\nAnswer format for the exercises: a table of cases with ID, title, steps, expected, priority. Model answers show the minimum a strong answer contains. Yours may differ if it covers the same risks.\n\n**Level 4.** Cross-cutting concerns and end-to-end scenarios. Non-functional criteria still need a measurable expected result: if the story says 'fast', ask for a number. UAT scripts are written in the customer's words and cover a business outcome, not a screen.\n\n\n**Marking your own answer.** Compare against the model answer in three passes. First, coverage: does every acceptance criterion have at least one case, and did you include a negative case for each rule? Second, precision: could another tester run each case without asking you anything, and is every expected result observable (a message, a status, a record, a count) rather than 'works correctly'? Third, judgement: did you set priorities by risk, and did you write down the questions the criteria leave open? A short list of sharp cases with priorities beats a long list of near-duplicates. If your cases differ from the model but cover the same risks, that is fine.",
+      "keyPoints": [
+        "Read each acceptance criterion and ask: what must be true, and how could it be false?",
+        "One case checks one idea; name it by the behaviour, not the screen.",
+        "Cover valid, invalid, boundary and state variations, then the unstated risks.",
+        "Always write the expected result as something observable."
+      ],
+      "interviewAngle": "These exercises mirror the job: you turn acceptance criteria into test cases and defend what you chose. In an interview, pick one story from your real work, state its criteria, and walk through your cases in priority order, saying what you left out and why.",
+      "exercises": [
+        {
+          "id": "tp-u9-l4-e1",
+          "type": "mcq",
+          "prompt": "A story says 'the SOS alert must be fast'. What is the best test response?",
+          "choices": [
+            "Test it manually and decide if it feels fast",
+            "Ask for a measurable target, such as delivered within 30 seconds for 95 percent of alerts, then test that",
+            "Skip it as non-functional",
+            "Mark it passed"
+          ],
+          "answer": 1,
+          "explanation": "Non-functional criteria must be measurable to be testable.",
+          "placement": true
+        },
+        {
+          "id": "tp-u9-l4-e2",
+          "type": "open",
+          "prompt": "Exercise 13. AC: pharmacy staff see only their own pharmacy's shifts; a regional admin sees all pharmacies in their region; direct links to other pharmacies' shifts return 'not found' or 'forbidden'. Write at least 6 cases.",
+          "answer": "TC1 Staff user at pharmacy A sees only A's shifts (P1). TC2 Staff user cannot open pharmacy B's shift by pasting its URL: forbidden or not found, no data leaked (P1). TC3 Staff user changing the pharmacy ID in an API call gets 403/404 (P1). TC4 Regional admin sees all pharmacies in region, none outside (P1). TC5 User moved from pharmacy A to B sees only B after next sign-in (P2). TC6 Search results and exports contain only permitted shifts (P1). TC7 Pharmacist sees only own assignments plus open requests in radius (P1).",
+          "rubric": [
+            "Positive and negative for each role",
+            "Direct URL/API access",
+            "Exports and search",
+            "Role change",
+            "No data leakage"
+          ]
+        },
+        {
+          "id": "tp-u9-l4-e3",
+          "type": "open",
+          "prompt": "Exercise 14. AC: an SOS request alerts up to 200 nearby pharmacists, and 95 percent of alerts are delivered within 30 seconds. Write the test cases and say what you can and cannot verify manually.",
+          "answer": "TC1 Single alert latency: send to 1 test pharmacist, time from Send to receipt on device, repeat 10 times, record median and max (P1). TC2 Alert to 200 seeded test pharmacists in a test environment: count deliveries and timestamps, check 95 percent within 30 seconds (P1, needs a data seed and logs). TC3 Alert to 201 or more: capped at 200, ordering rule applied per spec (P2). TC4 Delivery failure of one channel (push down) falls back to another if specified (P2). TC5 Monitoring shows delivery results for support (P3). Manual limits: 200 real devices are not available, so verify the pipeline using test accounts, logs or a load test by an engineer, and report the evidence level honestly. Do not claim a performance result you did not measure.",
+          "rubric": [
+            "Measurable target used",
+            "Sample and cap cases",
+            "Evidence from logs/timestamps",
+            "Honest manual limits",
+            "Failure channel"
+          ]
+        },
+        {
+          "id": "tp-u9-l4-e4",
+          "type": "open",
+          "prompt": "Exercise 15. AC: when the pharmacist's phone loses connection after tapping Accept, the app shows a clear status and the shift is not double-assigned when connectivity returns. Write at least 6 cases.",
+          "answer": "TC1 Tap Accept, disable network before response: app shows 'Waiting to confirm' not success (P1). TC2 Reconnect within 1 minute: final state shown correctly (Filled to me or Filled by someone else) (P1). TC3 Second pharmacist accepted meanwhile: first sees Filled by another, no assignment duplicate (P1). TC4 Tap Accept twice during slow network: one assignment (P1). TC5 App killed during the request then reopened: state recovered (P2). TC6 Slow 3G profile: spinner and timeout message after the defined period (P2). TC7 Airplane mode on opening an alert: clear offline message (P3).",
+          "rubric": [
+            "Pending state shown",
+            "Reconciliation after reconnect",
+            "No double assignment",
+            "Repeat taps",
+            "Offline messages"
+          ]
+        },
+        {
+          "id": "tp-u9-l4-e5",
+          "type": "open",
+          "prompt": "Exercise 16. Write a UAT script (8 to 10 steps) for the customer's staff: 'A pharmacy has an emergency, a pharmacist is found, the shift is completed and appears correctly in the monthly fill rate'. Include who does each step, expected result and a sign-off line.",
+          "answer": "UAT-1 Emergency coverage, day in the life. Roles: Manager (M), Pharmacist (P), Reporting user (R). Step 1 M signs in and creates an SOS for a shift starting in 3 hours, radius 10. Expect: request saved, confirmation shown. Step 2 P (Available, 6 miles away) receives the alert; expect shift details are clear and correct. Step 3 P accepts; expect confirmation and Filled status. Step 4 M sees the shift Filled with P's name and gets a notification. Step 5 A second pharmacist opens the alert; expect 'Filled'. Step 6 After the shift, the assignment is marked completed. Step 7 R opens the monthly report; expect the shift counted in filled and completed totals and the fill rate matching the spreadsheet figure. Step 8 R exports to CSV; expect the same number. Sign-off: Tester name, date, build, Pass / Fail / Pass with issues, comments, and who accepts. Written in business wording, no technical terms, with test accounts supplied in the preconditions.",
+          "rubric": [
+            "End-to-end business outcome",
+            "Roles and steps with expected results",
+            "Report reconciliation",
+            "Business language and test data",
+            "Sign-off block"
+          ]
+        }
+      ]
+    }
+  ]
+}

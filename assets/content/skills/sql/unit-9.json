@@ -1,0 +1,248 @@
+{
+  "id": "sql-u9",
+  "title": "How queries run, changing data and classic patterns",
+  "summary": "Read a query in its logical order, change data safely at a reader's level, and recognise the puzzle shapes behind most interview questions.",
+  "lessons": [
+    {
+      "id": "sql-u9-l1",
+      "title": "Reading a query: the order SQL runs it",
+      "minutes": 10,
+      "body": "You write a query from SELECT down, but the database does not run it in that order. Knowing the logical order explains most \"why does this fail?\" questions, and it is how you read a long query you did not write.\n\n| Step | Clause | What happens |\n|---|---|---|\n| 1 | `FROM` and `JOIN ... ON` | Pick the tables and combine rows |\n| 2 | `WHERE` | Keep rows that meet the condition |\n| 3 | `GROUP BY` | Form groups |\n| 4 | `HAVING` | Keep groups that meet the condition |\n| 5 | `SELECT` | Calculate output columns, including window functions, and name them with aliases |\n| 6 | `DISTINCT` | Remove duplicate output rows |\n| 7 | `ORDER BY` | Sort; this is why it can use aliases |\n| 8 | `TOP` / `OFFSET FETCH` / `LIMIT` | Cut the sorted result |\n\nThis is the logical order, the order that explains the results. The optimizer may physically do things differently as long as the answer is the same.\n\nEach rule follows from the table:\n\n- An alias defined in `SELECT` does not exist yet in `WHERE` or `HAVING`, so `WHERE n > 100` fails when `n` is a `COUNT(*) AS n`. `ORDER BY n` works.\n- An aggregate cannot be in `WHERE`, because groups do not exist until step 3. Use `HAVING`.\n- A window function cannot be in `WHERE`, because it is computed in step 5. Filter in an outer query.\n- A filter on the right table of a `LEFT JOIN` belongs in `ON`. In `WHERE` it runs after the join and discards the unmatched rows.\n\nPractise by predicting a result. On the lesson sample, what does this return?\n\n```sql\nSELECT pharmacy_id, COUNT(*) AS n\nFROM shifts\nWHERE status <> 'open'\nGROUP BY pharmacy_id\nHAVING COUNT(*) > 2\nORDER BY n DESC;\n```\n\nWalk it in order. `WHERE` drops open shift 107, leaving 7 rows. Grouping gives pharmacy 1 with 2 (101, 102), pharmacy 2 with 3 (103, 104, 108) and pharmacy 3 with 2 (105, 106). `HAVING` keeps counts above 2, which is pharmacy 2 only. The answer is one row: pharmacy 2 with n = 3.\n\nA related reading skill is spotting predicates that block an index. A filter like `WHERE YEAR(requested_at) = 2026 AND MONTH(requested_at) = 6` wraps the column in functions, so the database usually cannot use an index on `requested_at`. The half-open range from unit 1 does the same job and is index-friendly:\n\n```sql\nWHERE requested_at >= '2026-06-01' AND requested_at < '2026-07-01'\n```\n\nPeople call a condition that can use an index \"SARGable\". You do not need to design indexes. You do need to recognise the pattern and say it plainly.\n\nWhen an interviewer hands you a query and asks what it does, narrate it in this order: what is one row of the source, what is filtered, how it is grouped, and what is shown last.",
+      "keyPoints": [
+        "Logical order: FROM/JOIN, WHERE, GROUP BY, HAVING, SELECT, DISTINCT, ORDER BY, TOP.",
+        "Aliases and window functions do not exist yet in WHERE and HAVING; ORDER BY can use aliases.",
+        "Aggregates cannot go in WHERE; groups do not exist until GROUP BY.",
+        "Predict a result by walking the clauses in logical order.",
+        "Wrapping a column in a function in WHERE usually blocks an index; use a range."
+      ],
+      "interviewAngle": "Interviewers often paste a query and ask what it returns or why it fails. Walk the clauses in logical order out loud. It is also a natural way to explain WHERE versus HAVING. For your background: you debugged wrong numbers by reading queries this way. Do not claim query tuning or index design; just recognise the common patterns.",
+      "exercises": [
+        {
+          "id": "sql-u9-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Why does `SELECT status, COUNT(*) AS n FROM shifts WHERE n > 100 GROUP BY status;` fail?",
+          "choices": [
+            "COUNT(*) cannot be given an alias.",
+            "WHERE runs before SELECT creates the alias n, and aggregates cannot be used in WHERE.",
+            "GROUP BY must come before WHERE.",
+            "status must be in uppercase."
+          ],
+          "answer": 1,
+          "explanation": "WHERE is evaluated early, before groups exist and before SELECT defines n. The condition belongs in HAVING COUNT(*) > 100."
+        },
+        {
+          "id": "sql-u9-l1-e2",
+          "type": "short",
+          "prompt": "Which clause filters groups after the aggregate is calculated?",
+          "accept": [
+            "having",
+            "the having clause"
+          ],
+          "answer": "HAVING",
+          "explanation": "WHERE filters rows before grouping; HAVING filters groups after."
+        },
+        {
+          "id": "sql-u9-l1-e3",
+          "type": "mcq",
+          "prompt": "On the lesson sample, what does the query in the lesson (WHERE status <> 'open', GROUP BY pharmacy_id, HAVING COUNT(*) > 2) return?",
+          "choices": [
+            "Pharmacies 1 and 2",
+            "Pharmacy 2 with n = 3 only",
+            "All three pharmacies",
+            "No rows"
+          ],
+          "answer": 1,
+          "explanation": "Without the open shift, pharmacy 1 has 2, pharmacy 2 has 3 and pharmacy 3 has 2. Only 3 is greater than 2."
+        },
+        {
+          "id": "sql-u9-l1-e4",
+          "type": "open",
+          "prompt": "A colleague's query `SELECT status, COUNT(*) AS n FROM shifts WHERE n > 100 GROUP BY status` fails. Write the corrected query returning each status (`status`) and its count (`n`) for statuses with more than 100 shifts, largest count first, and explain the error.",
+          "answer": "```sql\nSELECT status, COUNT(*) AS n\nFROM shifts\nGROUP BY status\nHAVING COUNT(*) > 100\nORDER BY n DESC;\n```\n\nThe alias `n` does not exist when WHERE runs, and an aggregate cannot be used in WHERE. The condition on the count goes in HAVING, which runs after GROUP BY. ORDER BY runs last, so it can use the alias.\n\nOn the practice data this returns 2 rows (columns: status, n); the first row is completed, 828.",
+          "rubric": [
+            "Moves the count condition to HAVING COUNT(*) > 100",
+            "Keeps GROUP BY status",
+            "Explains that WHERE runs before grouping and before aliases exist",
+            "Orders by n descending"
+          ],
+          "sqlite": "SELECT status, COUNT(*) AS n FROM shifts GROUP BY status HAVING COUNT(*) > 100 ORDER BY n DESC",
+          "ordered": true
+        },
+        {
+          "id": "sql-u9-l1-e5",
+          "type": "open",
+          "prompt": "Someone filters June with `WHERE MONTH(requested_at) = 6 AND YEAR(requested_at) = 2026`. Rewrite it as a half-open date range and write the query that counts June 2026 shifts (`june_shifts`). Say why the range is better.",
+          "answer": "```sql\nSELECT COUNT(*) AS june_shifts\nFROM shifts\nWHERE requested_at >= '2026-06-01'\n  AND requested_at <  '2026-07-01';\n```\n\nThe range keeps the column bare, so the database can use an index on requested_at, and it includes every moment of 30 June. It also stays correct if the column has a time part.\n\nOn the practice data this returns 1 row (columns: june_shifts); the first row is 130.",
+          "rubric": [
+            "Uses >= first day and < first day of the next month",
+            "Does not wrap requested_at in a function",
+            "Counts with COUNT(*) AS june_shifts",
+            "Mentions index use or the time-of-day problem with BETWEEN"
+          ],
+          "sqlite": "SELECT COUNT(*) AS june_shifts FROM shifts WHERE requested_at >= '2026-06-01' AND requested_at < '2026-07-01'"
+        }
+      ]
+    },
+    {
+      "id": "sql-u9-l2",
+      "title": "Changing data safely: INSERT, UPDATE, DELETE and transactions",
+      "minutes": 10,
+      "body": "Most of your SQL was reading. Interviews and some roles still expect you to read and explain statements that change data. This lesson covers them at a reader's level: you should be able to say what each does and how to run one safely, not to design a database.\n\nAdd rows with a column list, so a changed table does not break the statement:\n\n```sql\nINSERT INTO pharmacists (id, name, license_state, active)\nVALUES (14, 'Alex Rivera', 'TX', 1);\n```\n\nChange rows with `UPDATE ... SET ... WHERE`. The `WHERE` is the safety:\n\n```sql\nUPDATE shifts\nSET status = 'cancelled', cancel_reason = 'pharmacy cancelled'\nWHERE id = 107;\n```\n\nWithout the `WHERE`, every row in the table changes. `DELETE FROM assignments WHERE status = 'cancelled'` removes rows, and without the `WHERE` it removes them all. `TRUNCATE TABLE` empties a table in one step, has no `WHERE`, and usually needs higher permissions. `DROP TABLE` removes the table itself.\n\nA safe routine for any change:\n\n1. Write the `SELECT` first with the exact `WHERE`, and check the rows are the ones you mean. On the lesson sample, `SELECT * FROM shifts WHERE status = 'open'` shows only shift 107.\n2. Run the change inside a transaction.\n3. Check the affected row count, which T-SQL gives in `@@ROWCOUNT`, and select the rows again.\n4. `COMMIT` if right, `ROLLBACK` if not.\n\n```sql\nBEGIN TRANSACTION;\n\nUPDATE shifts\nSET status = 'cancelled', cancel_reason = 'pharmacy cancelled'\nWHERE id = 107;\n\nSELECT id, status, cancel_reason FROM shifts WHERE id = 107;  -- cancelled, pharmacy cancelled\n\nROLLBACK;   -- undo: shift 107 is open again\n```\n\nA transaction groups statements so they succeed or fail together. The ACID properties describe what a database promises: atomic (all or nothing), consistent (rules are kept), isolated (concurrent work does not interfere) and durable (committed data survives a crash). Until you `COMMIT`, other sessions normally do not see your change, and an open transaction can hold locks that block other people, so do not leave one sitting.\n\nConstraints are the rules a table enforces. A primary key identifies each row, a foreign key requires `shifts.pharmacy_id` to exist in `pharmacies`, `NOT NULL` forbids missing values, `UNIQUE` forbids duplicates and `CHECK` tests a condition. When an insert fails with a constraint error, the message names the rule that was broken, which makes it useful evidence in a bug report.\n\nHonest scope: in UAT you read data. Data changes belong in a test environment, run from a script with a reviewed `WHERE`, or through the application. Never practise `UPDATE` or `DELETE` on production, and say that if asked.",
+      "keyPoints": [
+        "INSERT with a column list; UPDATE and DELETE always with a checked WHERE.",
+        "Run the SELECT with the same WHERE first, then change inside a transaction.",
+        "COMMIT keeps the work, ROLLBACK undoes it; ACID means atomic, consistent, isolated, durable.",
+        "DELETE removes chosen rows, TRUNCATE empties the table, DROP removes the table.",
+        "Constraints (primary key, foreign key, NOT NULL, UNIQUE, CHECK) are rules the table enforces."
+      ],
+      "interviewAngle": "Expect a reader-level question such as \"what happens if you run an UPDATE without WHERE?\" or \"what is a transaction?\". Answer plainly and then say your scope: you used SQL to read and verify data, and you know how to change it safely in a test environment. Do not claim database design or administration.",
+      "exercises": [
+        {
+          "id": "sql-u9-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What happens if you run `UPDATE shifts SET status = 'cancelled'` with no WHERE clause?",
+          "choices": [
+            "Nothing, because SQL requires a WHERE.",
+            "Only the first row changes.",
+            "Every row in the table changes.",
+            "Only open shifts change."
+          ],
+          "answer": 2,
+          "explanation": "UPDATE touches every row unless a WHERE limits it. That is why you run the matching SELECT first and use a transaction."
+        },
+        {
+          "id": "sql-u9-l2-e2",
+          "type": "short",
+          "prompt": "Which statement undoes the changes of an uncommitted transaction?",
+          "accept": [
+            "rollback",
+            "rollback transaction"
+          ],
+          "answer": "ROLLBACK",
+          "explanation": "ROLLBACK discards the work since BEGIN TRANSACTION; COMMIT keeps it."
+        },
+        {
+          "id": "sql-u9-l2-e3",
+          "type": "mcq",
+          "prompt": "What is the safest first step before an UPDATE or DELETE on a test database?",
+          "choices": [
+            "Run it and check the screen.",
+            "Run a SELECT with the same WHERE and confirm the rows.",
+            "TRUNCATE the table first.",
+            "Remove the WHERE to be sure it works."
+          ],
+          "answer": 1,
+          "explanation": "The SELECT shows exactly which rows the change would touch."
+        },
+        {
+          "id": "sql-u9-l2-e4",
+          "type": "open",
+          "prompt": "Write the T-SQL statements to mark shift 107 as cancelled by the pharmacy, safely: preview the row, make the change in a transaction, verify, and decide between COMMIT and ROLLBACK. Say what @@ROWCOUNT should show.",
+          "answer": "```sql\n-- 1. Preview\nSELECT id, status, cancel_reason FROM shifts WHERE id = 107;   -- open, NULL\n\nBEGIN TRANSACTION;\n\nUPDATE shifts\nSET status = 'cancelled', cancel_reason = 'pharmacy cancelled'\nWHERE id = 107;\n\nSELECT @@ROWCOUNT AS rows_changed;   -- expect 1\nSELECT id, status, cancel_reason FROM shifts WHERE id = 107;\n\nCOMMIT;      -- or ROLLBACK if rows_changed is not 1 or the row is wrong\n```\n\nThe WHERE names one primary key, so exactly one row must change. If the count is anything else, ROLLBACK and investigate.",
+          "rubric": [
+            "Previews the row with a SELECT using the same WHERE",
+            "Wraps the UPDATE in BEGIN TRANSACTION",
+            "Updates both status and cancel_reason with a WHERE on the id",
+            "Checks @@ROWCOUNT = 1 and commits or rolls back"
+          ]
+        },
+        {
+          "id": "sql-u9-l2-e5",
+          "type": "open",
+          "prompt": "In your own words, explain (a) what a transaction is and why it matters, and (b) the difference between DELETE, TRUNCATE and DROP. Keep each to two sentences.",
+          "answer": "(a) A transaction groups statements so they all succeed or all fail together, which keeps the data consistent. For example, if a shift is cancelled and its assignment is cancelled, both changes should be committed or neither.\n\n(b) DELETE removes the rows that match a WHERE (or all rows) and can be rolled back. TRUNCATE empties the whole table quickly and has no WHERE, and DROP removes the table itself, structure included. In practice you almost never run the last two outside a test environment.",
+          "rubric": [
+            "Describes all-or-nothing behaviour of a transaction",
+            "Gives a concrete example of two changes that belong together",
+            "DELETE removes chosen rows; TRUNCATE empties; DROP removes the table",
+            "Stays honest about scope"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sql-u9-l3",
+      "title": "Classic interview patterns: duplicates, gaps, pivots and Nth",
+      "minutes": 11,
+      "body": "A handful of puzzle shapes account for most intermediate SQL interview questions. Each has a standard technique. Recognising the shape is most of the work.\n\n| Puzzle | Technique |\n|---|---|\n| Find duplicates | `GROUP BY key HAVING COUNT(*) > 1` |\n| Delete duplicates, keep one | `ROW_NUMBER() OVER (PARTITION BY key ORDER BY id)` in a CTE, remove `rn > 1` |\n| Nth highest | `DENSE_RANK` in a CTE, filter on the rank |\n| Top N per group | `ROW_NUMBER` or `RANK` with `PARTITION BY` |\n| In A but not in B | `NOT EXISTS`, `LEFT JOIN ... IS NULL`, or `EXCEPT` |\n| Gaps in a sequence | `LEAD` or `LAG`, then filter where the step is more than 1 |\n| Pivot rows into columns | `SUM(CASE WHEN ... THEN 1 ELSE 0 END)` per column |\n| Compare to previous row | `LAG` |\n\n**Duplicates.** Pharmacists who appear on more than one shift:\n\n```sql\nSELECT pharmacist_id, COUNT(*) AS shifts\nFROM shifts\nWHERE pharmacist_id IS NOT NULL\nGROUP BY pharmacist_id\nHAVING COUNT(*) > 1;\n```\n\nOn the lesson sample this returns pharmacist 10 with 2 and pharmacist 11 with 2. To remove duplicate rows while keeping the first, number them and delete the extras (T-SQL allows deleting through the CTE):\n\n```sql\nWITH numbered AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY shift_id, status ORDER BY id) AS rn\n  FROM assignments\n)\nDELETE FROM numbered WHERE rn > 1;\n```\n\nRun it as a `SELECT ... WHERE rn > 1` first to see what would go.\n\n**Gaps.** Which shift ids have an assignment, and where does the sequence jump?\n\n```sql\nSELECT shift_id, next_id\nFROM (SELECT shift_id,\n             LEAD(shift_id) OVER (ORDER BY shift_id) AS next_id\n      FROM assignments) x\nWHERE next_id - shift_id > 1;\n```\n\nAssigned shifts are 101, 102, 104, 105 and 108. The query returns 102 followed by 104 (shift 103 has none) and 105 followed by 108 (106 and 107 have none). A calendar or numbers table with an anti-join finds missing values directly, as in unit 8.\n\n**Pivot.** Counts of each status per pharmacy as columns:\n\n```sql\nSELECT pharmacy_id,\n       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,\n       SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,\n       SUM(CASE WHEN status = 'open'      THEN 1 ELSE 0 END) AS open_shifts\nFROM shifts\nGROUP BY pharmacy_id;\n```\n\nThe result is pharmacy 1 with 2, 0, 1; pharmacy 2 with 1, 2, 0; pharmacy 3 with 1, 1, 0.\n\nA last pattern is consecutive runs (\"islands\"): subtract a `ROW_NUMBER` from a date, and rows in the same run share the same result. It is a harder question; know it exists and say how you would approach it.\n\nWhen you meet a new puzzle, say its shape aloud first. That gives the interviewer a reason to trust the query that follows.",
+      "keyPoints": [
+        "Duplicates: GROUP BY the key with HAVING COUNT(*) > 1; remove extras with ROW_NUMBER.",
+        "Gaps: LEAD or LAG, then filter where the step is greater than 1.",
+        "Pivot: SUM(CASE WHEN ... THEN 1 ELSE 0 END) per output column.",
+        "Nth highest needs DENSE_RANK to handle ties; top N per group needs PARTITION BY.",
+        "Name the puzzle shape out loud before writing the query."
+      ],
+      "interviewAngle": "These are the shapes hiding behind \"tell me about a tricky query you wrote\". Name the pattern, state the technique and mention the NULL or tie edge case. For your background, duplicates and gaps are genuine data-quality work you can describe. Be careful not to claim you applied the harder patterns at work if you have only practised them.",
+      "exercises": [
+        {
+          "id": "sql-u9-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which query shape finds keys that appear more than once in a table?",
+          "choices": [
+            "SELECT key FROM t ORDER BY key",
+            "SELECT key FROM t GROUP BY key HAVING COUNT(*) > 1",
+            "SELECT DISTINCT key FROM t",
+            "SELECT key FROM t WHERE COUNT(*) > 1"
+          ],
+          "answer": 1,
+          "explanation": "Group on the key and keep groups with more than one row. WHERE cannot hold an aggregate, and DISTINCT hides duplicates rather than finding them."
+        },
+        {
+          "id": "sql-u9-l3-e2",
+          "type": "short",
+          "prompt": "Which window function, with PARTITION BY the key, numbers duplicate rows so that every row with a number above 1 is an extra copy?",
+          "accept": [
+            "row_number",
+            "row_number()"
+          ],
+          "answer": "ROW_NUMBER",
+          "explanation": "rn = 1 is the copy you keep; rn > 1 are the duplicates to review or delete."
+        },
+        {
+          "id": "sql-u9-l3-e3",
+          "type": "mcq",
+          "prompt": "You want the second highest value, and two rows can tie for highest. Which approach is correct?",
+          "choices": [
+            "ROW_NUMBER = 2",
+            "RANK = 2",
+            "DENSE_RANK = 2",
+            "ORDER BY value LIMIT 2"
+          ],
+          "answer": 2,
+          "explanation": "With a tie for first, RANK skips 2 and ROW_NUMBER picks an arbitrary tied row. DENSE_RANK = 2 gives the next distinct value."
+        },
+        {
+          "id": "sql-u9-l3-e4",
+          "type": "open",
+          "prompt": "Find double-booked pharmacists: pharmacists with more than one completed shift that starts at the same time. Return `pharmacist_id`, `starts_at` and the number of shifts (`shifts`), sorted by pharmacist_id then starts_at.",
+          "answer": "```sql\nSELECT pharmacist_id, starts_at, COUNT(*) AS shifts\nFROM shifts\nWHERE status = 'completed'\nGROUP BY pharmacist_id, starts_at\nHAVING COUNT(*) > 1\nORDER BY pharmacist_id, starts_at;\n```\n\nThe duplicate key is the pair (pharmacist, start time). Any row returned is a data-quality finding to report: one person cannot work two shifts at once.\n\nOn the practice data this returns 2 rows (columns: pharmacist_id, starts_at, shifts); the first row is 40, 2026-06-23 07:00:00, 2.",
+          "rubric": [
+            "Filters completed shifts",
+            "Groups by pharmacist_id and starts_at together",
+            "Uses HAVING COUNT(*) > 1",
+            "Sorts by pharmacist_id then starts_at"
+          ],
+          "sqlite": "SELECT pharmacist_id, starts_at, COUNT(*) AS shifts FROM shifts WHERE status = 'completed' GROUP BY pharmacist_id, starts_at HAVING COUNT(*) > 1 ORDER BY pharmacist_id, starts_at",
+          "ordered": true
+        },
+        {
+          "id": "sql-u9-l3-e5",
+          "type": "open",
+          "prompt": "Pivot shift statuses into columns for pharmacies 1 to 5: one row per pharmacy_id with `completed`, `cancelled` and `open_shifts` counts, sorted by pharmacy_id.",
+          "answer": "```sql\nSELECT pharmacy_id,\n       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,\n       SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,\n       SUM(CASE WHEN status = 'open'      THEN 1 ELSE 0 END) AS open_shifts\nFROM shifts\nWHERE pharmacy_id <= 5\nGROUP BY pharmacy_id\nORDER BY pharmacy_id;\n```\n\nEach SUM(CASE ...) is a conditional count that becomes its own column.\n\nOn the practice data this returns 5 rows (columns: pharmacy_id, completed, cancelled, open_shifts); the first row is 1, 29, 4, 0.",
+          "rubric": [
+            "Groups by pharmacy_id",
+            "Uses SUM(CASE WHEN status = ... THEN 1 ELSE 0 END) three times",
+            "Restricts to pharmacy_id <= 5",
+            "Sorts by pharmacy_id"
+          ],
+          "sqlite": "SELECT pharmacy_id, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed, SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled, SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS open_shifts FROM shifts WHERE pharmacy_id <= 5 GROUP BY pharmacy_id ORDER BY pharmacy_id",
+          "ordered": true
+        }
+      ]
+    }
+  ]
+}

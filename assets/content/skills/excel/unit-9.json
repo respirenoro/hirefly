@@ -1,0 +1,219 @@
+{
+  "id": "excel-u9",
+  "title": "Charts, pivot depth, controls and sharing",
+  "summary": "Pick the right chart, use pivot features that finish a report, control data entry, and prepare a workbook for others.",
+  "lessons": [
+    {
+      "id": "excel-u9-l1",
+      "title": "Choosing a chart for a message",
+      "minutes": 8,
+      "body": "Start with the sentence you want the reader to remember, then pick the chart that shows it. \"Tickets fell after the new help articles\" is a change over time. \"Florida has most of the shifts\" is a comparison.\n\n| Message | Chart | Notes |\n|---|---|---|\n| Compare categories | Column or bar | Sort by size; use bars for long labels; start the axis at zero |\n| Change over time | Line (or column for few periods) | Real dates on the axis, in order |\n| Parts of a whole | Stacked bar, or a pie for 2 to 4 parts | Many slices are unreadable |\n| Relationship of two numbers | Scatter | Look for a pattern, not a cause |\n| Spread of values | Histogram | Hours to fill in bands |\n| Count and rate together | Combo with a secondary axis | Label both axes clearly |\n\n**Worked example.** In the practice tickets, \"How do I\" tickets per month run 35, 38, 35, 43, 8, 4, 14, 14, 14 from January to September. A line chart shows a cliff in May. A weak title says \"Tickets by month\". A strong one says \"How do I tickets fell from about 38 a month to about 11 after May\". The average is 37.75 a month for January to April (151 tickets) and 10.8 for May to September (54), a drop of 71%. The data is fictional, built to mirror the documentation rewrite you did, so use it to practise the method.\n\n**Build steps.** Select the pivot or Table, Insert > Recommended Charts or a type, then Chart Design > Add Chart Element. Remove what does not help: gridlines, 3-D effects, a legend with one series. Label directly where you can. Give the chart a title that states the point.\n\n**Common traps**\n\n- A truncated axis on a bar chart exaggerates small differences.\n- Two lines with different scales on one axis hide the smaller one.\n- Colour as the only signal fails for colour-blind readers; add labels.\n- A pie chart of eight categories. Use a sorted bar.\n\nCopy a chart into PowerPoint or Word as a picture if the data should not travel, and paste linked only when the reader needs updates. A one-line caption naming the source and date range builds trust.",
+      "keyPoints": [
+        "Pick the chart from the message: compare, trend, parts, relationship, spread.",
+        "Titles should state the point, not the field names.",
+        "Bar and column axes start at zero.",
+        "Remove clutter; label directly."
+      ],
+      "interviewAngle": "Timed tests often say \"create a chart that shows X\". Name the message first and justify the chart in one sentence. You wrote documentation that cut ticket inflow, so you can tell that story with a chart. Keep it honest: a chart shows an association, and you would say what else changed.",
+      "exercises": [
+        {
+          "id": "excel-u9-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You want to show how many \"How do I\" tickets arrived each month from January to September. Which chart and title are best?",
+          "choices": [
+            "A line or column chart by month titled with the finding, such as \"How do I tickets fell after May\"",
+            "A pie chart with one slice per month",
+            "A scatter chart of ticket id against month",
+            "A 3-D column chart titled \"Tickets\""
+          ],
+          "answer": 0,
+          "explanation": "A time series needs ordered periods, and a title that states the finding tells the reader what to see."
+        },
+        {
+          "id": "excel-u9-l1-e2",
+          "type": "short",
+          "prompt": "Should the value axis of a bar or column chart normally start at zero? (yes or no)",
+          "accept": [
+            "yes",
+            "y"
+          ],
+          "answer": "yes",
+          "explanation": "Bar length encodes value, so a non-zero start exaggerates differences."
+        },
+        {
+          "id": "excel-u9-l1-e3",
+          "type": "open",
+          "prompt": "From the practice tickets, \"How do I\" averages 37.75 per month in January to April and 10.8 in May to September. Describe the chart you would make and the title, and one caution about the claim.",
+          "answer": "A line (or column) chart of How do I tickets per month, January to September, with a clear drop at May, and the title \"How do I tickets fell about 71% after May\". Caution: the chart shows timing, not proof of cause, so I would mention that the documentation rewrite happened then and check for other changes. October is a partial month, so exclude it.",
+          "rubric": [
+            "Chooses a time-series chart",
+            "Title states the finding with the 37.75 to 10.8 change",
+            "Notes correlation versus cause",
+            "Handles the partial month"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u9-l2",
+      "title": "Pivot features that finish the job",
+      "minutes": 10,
+      "body": "You already build pivots. These features turn a first pivot into a report. Load `tickets.csv` as a Table, insert a PivotTable with `category` in Rows, `opened_at` in Columns and Count of `id` in Values.\n\n**Group dates.** Right-click a date, choose Group, and pick Months and Years together. Excel adds a Months field. Now \"How do I\" reads 35, 38, 35, 43, 8, 4, 14, 14, 14 for January to September.\n\n**Show Values As** (right-click a value > Show Values As):\n\n| Setting | Use | Example |\n|---|---|---|\n| % of Grand Total | share of everything | How do I = 205 of 734 = 27.9% |\n| % of Column Total | share within a month | |\n| % of Row Total | how a category splits across months | |\n| % Difference From (previous) | change versus the earlier month | Apr to May: (8-43)/43 = -81.4% |\n| Running Total In | cumulative count | |\n\n**Calculated field.** PivotTable Analyze > Fields, Items & Sets > Calculated Field. Formulas work on the **sum** of fields, so build ratios from totals, as in the earlier lesson. For text fields such as category you need a helper column (for example `is_how_do_i` as 1 or 0), after which the field `=is_how_do_i / id_count` gives a share.\n\n**Slicers and timelines.** Insert > Slicer for Category or Severity, and Insert > Timeline for dates. Right-click a slicer > Report Connections to drive several pivots.\n\n**Top N and value filters.** Row Labels filter > Value Filters > Top 10, for example the five pharmacies with the most tickets.\n\n**Pivot chart.** Insert > PivotChart builds a chart tied to the pivot; the field buttons can be hidden. Filtering the pivot filters the chart.\n\n**GETPIVOTDATA.** Typing `=` then clicking a pivot cell writes `GETPIVOTDATA(...)`, which keeps pointing at the right figure when the pivot is rearranged. Turn it off in PivotTable options if you prefer plain cell references.\n\n**Housekeeping.** Refresh after the source changes (Alt+F5). Use Change Data Source if the Table moved. A Table source makes the range grow automatically. Check that the Grand Total equals `ROWS(tblTickets[id])`, which is 734 here.",
+      "keyPoints": [
+        "Group dates by Months and Years together.",
+        "Show Values As gives shares and changes without extra formulas.",
+        "Calculated fields work on sums, so ratios come from totals.",
+        "Slicers, timelines and pivot charts make the report interactive; refresh after the source changes."
+      ],
+      "interviewAngle": "Pivots are your strongest claim, so go one level deeper confidently: grouping, Show Values As, slicers. Calculated fields and Report Connections are fine to claim if you have practised them. Say what you checked: the grand total against a count.",
+      "exercises": [
+        {
+          "id": "excel-u9-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In a pivot of tickets by month, you want each month's change relative to the previous month. Which setting do you use?",
+          "choices": [
+            "Show Values As > % Difference From, with Base Item set to (previous)",
+            "Show Values As > % of Grand Total",
+            "A calculated field that divides two months",
+            "Sort the months descending"
+          ],
+          "answer": 0,
+          "explanation": "% Difference From with the previous item gives (this - previous) / previous without formulas."
+        },
+        {
+          "id": "excel-u9-l2-e2",
+          "type": "short",
+          "prompt": "Using 8 \"How do I\" tickets in May and 43 in April, what is the % difference from the previous month, to one decimal? (Include the sign.)",
+          "accept": [
+            "-81.4%",
+            "-81.4",
+            "-0.814",
+            "-81.4 %"
+          ],
+          "answer": "-81.4%",
+          "explanation": "(8 - 43) / 43 = -0.814."
+        },
+        {
+          "id": "excel-u9-l2-e3",
+          "type": "open",
+          "prompt": "Describe how you would build a pivot from the practice tickets that shows each category's share of all tickets, by month, and how you would check it.",
+          "answer": "Insert a PivotTable from tblTickets, put category in Rows, group opened_at by Months and Years in Columns, and Count of id in Values. Right-click a value > Show Values As > % of Column Total so each month's categories add to 100%, or % of Grand Total for the overall share. Check that the grand total count equals 734, which is ROWS(tblTickets[id]), and that How do I is 205 (27.9% of all). Add a Category slicer and refresh after any source change.",
+          "rubric": [
+            "Rows, Columns and Values placed correctly",
+            "Groups dates by months and years",
+            "Uses Show Values As",
+            "Reconciles to 734"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u9-l3",
+      "title": "Data validation and protecting a workbook",
+      "minutes": 8,
+      "body": "Validation prevents bad entries; protection prevents accidental changes. Both matter when other people use your file.\n\n**Data Validation** (Data tab). Pick the rule type in Allow:\n\n| Type | Example use |\n|---|---|\n| List | Status from `completed,cancelled,open`, or a range such as `=StatusList` |\n| Whole number | hours between 0 and 72 |\n| Date | requested date between 2026-01-01 and today |\n| Custom | `=COUNTIF($A:$A,A2)=1` to block duplicate IDs |\n\nAdd an **Input Message** to guide the user and choose an **Error Alert** style: Stop blocks, Warning and Information allow an override. The `is_emergency` column is 0 or 1, so use Whole number between 0 and 1. For a cancel reason, a list of the three reasons stops typos such as \"no cover\" that would split a pivot into extra rows.\n\nLimits to remember: pasting over a cell replaces its validation, and validation does not check old data. Use Data > Data Validation > **Circle Invalid Data** to find existing bad values.\n\n**Protection** has three layers.\n\n1. **Lock cells.** All cells are locked by default, but it only matters once the sheet is protected. First select the cells people may edit, open Format Cells > Protection and untick Locked.\n2. **Protect Sheet** (Review tab). Choose what users may still do, such as sort or use filters. Add a password if you need one.\n3. **Protect Workbook** structure stops sheets being added, moved or deleted.\n\nA sheet or workbook password only discourages casual edits. It is **not** strong security. Encrypting the whole file (File > Info > Protect Workbook > Encrypt with Password) is much stronger, but a lost password cannot be recovered. Neither is a reason to put personal or health information in a spreadsheet: share the minimum data, and follow your employer's rules.\n\nA good input sheet: unlocked entry cells shaded one colour, formulas locked, validation on every entry column, and a short \"how to use\" note.",
+      "keyPoints": [
+        "Validation types: list, number, date, custom; add input messages and alerts.",
+        "Circle Invalid Data finds bad values already in the sheet.",
+        "Cells are locked by default, but locking works only after Protect Sheet.",
+        "Sheet passwords are not strong security; keep sensitive data out of spreadsheets."
+      ],
+      "interviewAngle": "Data validation is already part of your honest moderate level. Describe a dropdown that keeps categories consistent so pivots stay clean. If asked about protection, say you lock formula cells and protect the sheet to prevent accidents, and that you know the password is not real security.",
+      "exercises": [
+        {
+          "id": "excel-u9-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You protect a sheet but users can still edit every cell. What did you forget?",
+          "choices": [
+            "Unlock the cells they may edit before protecting, and lock the rest",
+            "Add a data validation list to each cell",
+            "Hide the formula bar",
+            "Save the file as .xlsb"
+          ],
+          "answer": 0,
+          "explanation": "Protection applies the Locked setting; the entry cells must be unlocked first and everything else left locked."
+        },
+        {
+          "id": "excel-u9-l3-e2",
+          "type": "short",
+          "prompt": "Which validation rule type creates a dropdown of allowed values?",
+          "accept": [
+            "list",
+            "a list"
+          ],
+          "answer": "List",
+          "explanation": "Allow: List with a source of comma-separated values or a range."
+        },
+        {
+          "id": "excel-u9-l3-e3",
+          "type": "open",
+          "prompt": "Design validation for a Status column that must hold only completed, cancelled or open, and explain how you would find existing bad values.",
+          "answer": "Select the Status column, Data > Data Validation > Allow: List, Source `completed,cancelled,open` (or a named range), with Stop alert and an input message. This blocks typos but not pasted values. To find existing problems use Circle Invalid Data, or a filter on the column to see distinct values. Fix them with TRIM or Find and Replace, then re-check.",
+          "rubric": [
+            "Uses a List rule with the three values",
+            "Chooses an error alert",
+            "Notes that pasting bypasses validation",
+            "Uses Circle Invalid Data or a filter to find existing errors"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u9-l4",
+      "title": "Printing and sharing a workbook",
+      "minutes": 7,
+      "body": "A correct workbook that prints badly or leaks hidden data still reflects on you. Work through this checklist before you send anything.\n\n**Print setup** (Page Layout tab)\n\n- **Print Area**: select the range, then Set Print Area, so helper columns do not print.\n- **Orientation and size**: landscape for wide tables.\n- **Fit to**: set width to 1 page and height to Automatic, so columns are not split across pages.\n- **Print Titles**: Rows to repeat at top, so the header row appears on every page of a long list.\n- **Page Break Preview** (View tab) shows and lets you drag breaks.\n- **Header and footer**: file name, page numbers and date.\n\nCheck with File > Print: the preview must show page 1 of N with the right range. To send a fixed copy, use File > Export > Create PDF.\n\n**Make it readable.** Freeze panes under the header row, set number formats (percentages, thousands separators), widen columns, and keep one summary sheet first, with the raw data last.\n\n**Share the file**\n\n- Save to OneDrive or SharePoint and use Share to give a link with the right permission (edit or view). Several people can co-author at once.\n- Use **Comments** for a conversation with a named person and **Notes** for a fixed annotation on a cell.\n- If a colleague has an older Excel, avoid XLOOKUP and dynamic arrays, or send values.\n\n**Before you send**\n\n1. Replace formulas with values only if the recipient should not change them (Paste Special > Values).\n2. Check for hidden sheets, columns and personal information: File > Info > Check for Issues > Inspect Document.\n3. Remove test data, clear slicer selections and set the sheet you want shown first.\n4. Give the file a clear name with a date, such as `shift-fill-report-2026-10.xlsx`.\n5. Open the PDF or file once as the recipient would.\n\nFor the practice data there is nothing sensitive, but get into the habit: the same checklist matters when a real report contains names or licence numbers.",
+      "keyPoints": [
+        "Set a print area, fit to one page wide, and repeat the header row.",
+        "Export a PDF when the recipient should not edit.",
+        "Use co-authoring and permission levels instead of emailing copies.",
+        "Inspect Document for hidden sheets and personal data before sharing."
+      ],
+      "interviewAngle": "Practical tests often include a line such as \"prepare the report for printing\". Name print area, fit to width and repeated header rows, then the pre-send checks. Real tidy-up habits from your reporting work are worth mentioning, but only the ones you actually did.",
+      "exercises": [
+        {
+          "id": "excel-u9-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A 400-row report prints on 9 pages, and only the first page has column headings. Which setting fixes this?",
+          "choices": [
+            "Page Layout > Print Titles > Rows to repeat at top",
+            "Freeze Panes",
+            "Page Break Preview",
+            "Set Print Area"
+          ],
+          "answer": 0,
+          "explanation": "Freeze Panes only affects the screen. Print Titles repeats chosen rows on each printed page."
+        },
+        {
+          "id": "excel-u9-l4-e2",
+          "type": "short",
+          "prompt": "Which Excel feature scans a file for hidden sheets, comments and personal information before sharing?",
+          "accept": [
+            "inspect document",
+            "document inspector",
+            "check for issues"
+          ],
+          "answer": "Inspect Document",
+          "explanation": "File > Info > Check for Issues > Inspect Document."
+        },
+        {
+          "id": "excel-u9-l4-e3",
+          "type": "open",
+          "prompt": "List the steps you take to make a one-page summary ready to send to a manager as a PDF.",
+          "answer": "Put the summary on its own sheet; set Print Area; landscape if wide; Fit to 1 page wide; Print Titles for headings; add header/footer with date and page numbers; check number formats and chart titles; look at the print preview; run Inspect Document for hidden data; export with File > Export > Create PDF; open the PDF and check it; name the file with the date.",
+          "rubric": [
+            "Print area and fit to page",
+            "Print titles or header repeat",
+            "Checks preview",
+            "Inspects for hidden or personal data",
+            "Exports to PDF and checks it"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "id": "ticket-u4",
+  "title": "From request to user story",
+  "summary": "Turn feedback into stories with testable acceptance criteria, agree what ready and done mean, and split work so it fits a sprint.",
+  "lessons": [
+    {
+      "id": "ticket-u4-l1",
+      "title": "Writing a user story with acceptance criteria",
+      "minutes": 9,
+      "body": "A **user story** describes a need from the user's point of view:\n\n> As a **[role]**, I want **[capability]** so that **[benefit]**.\n\nThe benefit clause matters most, because it records why. It lets the team find a better solution if the first one is too costly.\n\n**From feedback to story.** Start with what the customer said and work back to the need.\n\n- Raw feedback: 'We can't tell which shifts to fill first.'\n- Ask: what do you do now? 'We scroll the whole list and check the start times by eye.'\n- Need: dispatchers want urgent shifts to be obvious.\n- Story: As a dispatcher, I want shifts that start within 24 hours shown first so that I fill the most urgent shifts before they are missed.\n\n**Acceptance criteria** say how we will know the story is done. Good criteria are specific and testable by someone who did not write the story. A common format is **Given / When / Then**:\n\n```text\nScenario 1: Urgent shifts appear first\nGiven a dispatcher is viewing open shifts\nAnd there are open shifts starting in 6 hours and in 3 days\nWhen the list loads\nThen the shift starting in 6 hours is above the shift starting in 3 days\n\nScenario 2: Urgent shifts are marked\nGiven an open shift starts within 24 hours\nWhen the dispatcher views the list\nThen the shift shows an 'Urgent' label\n\nScenario 3: No urgent shifts\nGiven no open shift starts within 24 hours\nWhen the dispatcher views the list\nThen shifts are ordered by start time and no 'Urgent' label appears\n```\n\n**Checklist-style criteria** also work when scenarios would be forced:\n\n- Urgent threshold is 24 hours from the current time in the pharmacy's time zone.\n- Sorting applies to the open shifts list only.\n- The list loads in under 3 seconds for 500 open shifts.\n\nA good set covers the normal path, an edge case, and an error or empty case. Avoid vague words: 'fast', 'user-friendly' and 'works correctly' cannot be tested. Replace them with numbers or observable behavior.\n\nOne more check is the **INVEST** mnemonic: independent, negotiable, valuable, estimable, small, testable. If a story fails on 'small' or 'testable', rework it.\n\nWriting criteria with the customer and a developer in the room, or in a short review, catches misunderstandings before code is written. That was the benefit of putting acceptance criteria on every ticket at your last job: UAT then tested against what was agreed.",
+      "keyPoints": [
+        "A story names a role, a capability and a benefit.",
+        "Acceptance criteria must be specific and testable by someone else.",
+        "Given / When / Then scenarios cover the normal path, edge cases and empty or error cases.",
+        "Replace vague words like fast with numbers or observable behavior."
+      ],
+      "interviewAngle": "Expect 'write a user story and acceptance criteria for X'. Give the story, then three scenarios including an edge case. Mention that you wrote stories and acceptance criteria daily and used them as the basis for UAT test cases. Do not claim formal BA certification.",
+      "exercises": [
+        {
+          "id": "ticket-u4-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which acceptance criterion is testable?",
+          "choices": [
+            "The urgent shift list is user-friendly",
+            "The list is fast",
+            "Given 500 open shifts, when the list loads, then it appears within 3 seconds",
+            "The feature works correctly"
+          ],
+          "answer": 2,
+          "explanation": "It has a clear condition and a measurable result. The others cannot be tested objectively."
+        },
+        {
+          "id": "ticket-u4-l1-e2",
+          "type": "mcq",
+          "prompt": "What does the 'so that' part of a user story record?",
+          "choices": ["The estimate", "The benefit, which explains why", "The developer's name", "The release date"],
+          "answer": 1,
+          "explanation": "The benefit lets the team judge value and find alternative solutions."
+        },
+        {
+          "id": "ticket-u4-l1-e3",
+          "type": "open",
+          "prompt": "A pharmacy manager says: 'When a pharmacist cancels a shift, I only find out when I check the schedule.' Write a user story and at least three Given/When/Then scenarios: a normal case, an edge case, and a negative or empty case.",
+          "answer": "**Story:** As a pharmacy manager, I want to be notified when an assigned pharmacist cancels a shift so that I can arrange cover before the shift starts.\n\n**Scenario 1: Manager is notified**\nGiven a pharmacist is assigned to a shift at my pharmacy\nWhen the pharmacist cancels the shift\nThen I receive a notification within 1 minute that names the shift, date, time and pharmacist\n\n**Scenario 2: Late cancellation (edge case)**\nGiven the shift starts in less than 2 hours\nWhen the pharmacist cancels\nThen the notification is marked urgent and the shift returns to the open list as urgent\n\n**Scenario 3: Notification settings off (negative)**\nGiven I have turned off cancellation notifications\nWhen a pharmacist cancels a shift\nThen I receive no notification, and the cancellation is still visible in the schedule\n\n**Scenario 4: Other pharmacies**\nGiven a pharmacist cancels a shift at a different pharmacy\nWhen the cancellation occurs\nThen I do not receive a notification",
+          "rubric": [
+            "Story has role, capability and benefit",
+            "A normal-path scenario with a measurable result",
+            "An edge case such as late cancellation",
+            "A negative case such as notifications off or wrong pharmacy",
+            "Uses Given/When/Then correctly"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u4-l2",
+      "title": "Definition of ready, definition of done, and splitting",
+      "minutes": 8,
+      "body": "Two shared checklists keep stories from causing trouble.\n\n**Definition of Ready (DoR)** is what a story must have before it enters a sprint. A typical list:\n\n- Written as a story with a clear benefit.\n- Acceptance criteria agreed and testable.\n- Dependencies identified (another team, an API, a design).\n- Small enough to finish in a sprint.\n- Estimated by the team.\n- Open questions answered or listed with owners.\n\n**Definition of Done (DoD)** is what must be true before the team calls any story finished. A typical list:\n\n- Code reviewed and merged.\n- Acceptance criteria tested and passed, including by someone other than the developer.\n- No known open defects of high severity on the story.\n- Documentation or help article updated if behavior changed.\n- Deployed to the agreed environment.\n- Product owner has accepted it.\n\nDoR protects the team from unclear work. DoD protects the customer from half-finished work. Both are agreements of the team, so write them together, post them where people see them, and update them when something slips through.\n\n**Splitting stories.** A story that cannot be finished within a sprint should be split. Do not split by technical layer ('build the database', 'build the screen') because neither piece delivers value alone. Split so each piece is a thin working slice. Useful patterns:\n\n| Pattern | Example from the SOS alert feature |\n|---|---|\n| By workflow step | Dispatcher sends an alert; then pharmacist receives it; then pharmacist accepts it |\n| By rule or variation | Alert to pharmacists within 20 miles first; configurable radius later |\n| By user role | Dispatcher view first, pharmacy manager view later |\n| By happy path vs. edge cases | Basic alert first; handle no pharmacists nearby later |\n| By channel | Push notification first; text message later |\n\nFor example, the epic 'Emergency alerts to nearby pharmacists' might split into: 1) Dispatcher sends a push alert to pharmacists within a fixed radius; 2) Pharmacist can accept the alert and is assigned the shift; 3) Dispatcher sees who was alerted and who responded; 4) Radius is configurable per pharmacy.\n\nEach slice can be tested and shown at sprint review. If the team cannot agree on an estimate, the story is usually too big or too vague; split it or run a short investigation task first.",
+      "keyPoints": [
+        "Definition of Ready guards the start of a story; Definition of Done guards the end.",
+        "Both are team agreements that evolve.",
+        "Split stories into thin end-to-end slices, not technical layers.",
+        "Patterns: workflow step, rule, role, happy path versus edge cases, channel."
+      ],
+      "interviewAngle": "You planned two-week sprints and owned the backlog, so you can speak to refining stories until they were ready. Give an example of splitting the SOS alert work. Be honest that DoR and DoD were team practice you helped run, not something you imposed alone.",
+      "exercises": [
+        {
+          "id": "ticket-u4-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which is a good way to split a large story?",
+          "choices": [
+            "One story for the database, one for the screen, one for testing",
+            "Thin end-to-end slices, such as sending an alert first and accepting it second",
+            "Split by developer name",
+            "Do not split, extend the sprint instead"
+          ],
+          "answer": 1,
+          "explanation": "Each slice should deliver something usable and testable. Technical-layer slices deliver no value on their own."
+        },
+        {
+          "id": "ticket-u4-l2-e2",
+          "type": "mcq",
+          "prompt": "What does the Definition of Ready protect the team from?",
+          "choices": [
+            "Unclear or unready stories entering a sprint",
+            "Customers reporting bugs",
+            "Missed retrospectives",
+            "Changes in priority"
+          ],
+          "answer": 0,
+          "explanation": "DoR sets the entry bar so sprint planning is based on stories the team understands."
+        },
+        {
+          "id": "ticket-u4-l2-e3",
+          "type": "open",
+          "prompt": "Split this story into 3 or 4 smaller stories that each deliver value: 'As a pharmacy manager, I want to manage my pharmacy's recurring weekly shift needs so that shifts are created automatically.' For each, write the title and one acceptance criterion. Then write a three-item Definition of Done for the team.",
+          "answer": "**1. Create one recurring weekly shift template.** AC: Given I choose a weekday, start time and role, when I save, then a template is stored and shown in my templates list.\n\n**2. Generate open shifts from a template for the next four weeks.** AC: Given a saved template, when the weekly job runs, then open shifts appear for the next four weeks at the template's start time in my pharmacy's time zone.\n\n**3. Edit or pause a template.** AC: Given a template with generated future shifts, when I pause it, then no new shifts are created and existing filled shifts remain.\n\n**4. Skip a holiday week.** AC: Given a template, when I mark a date as skipped, then no shift is generated for that date.\n\n**Definition of Done:**\n- Acceptance criteria tested and passed by someone other than the developer.\n- Code reviewed, merged and deployed to the staging environment.\n- Help article updated and product owner acceptance recorded.",
+          "rubric": [
+            "Slices are end-to-end and valuable, not technical layers",
+            "Each slice has a testable criterion",
+            "Slices are ordered with the basic one first",
+            "Definition of Done has three checkable items"
+          ]
+        }
+      ]
+    }
+  ]
+}

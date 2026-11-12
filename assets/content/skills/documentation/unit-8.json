@@ -1,0 +1,400 @@
+{
+  "id": "doc-u8",
+  "title": "Sentence-level clarity drills",
+  "summary": "Five drills of graded rewrites on active voice, filler, pronouns and terms, lists and steps, and interface text. Twenty graded questions and five rewriting exercises.",
+  "lessons": [
+    {
+      "id": "doc-u8-l1",
+      "title": "Rewrite drill A: active voice and a clear actor",
+      "minutes": 8,
+      "body": "In an active sentence the actor does the action: \"The pharmacy cancels the shift.\" In a passive sentence the action happens to something: \"The shift is cancelled by the pharmacy.\" Passive often hides who does what, which is exactly what a reader following steps needs to know. Google's Technical Writing One course lists active voice first among its core skills.\n\n**How to spot passive voice**\n\nLook for a form of *be* (is, are, was, were, been) plus a past participle (cancelled, sent, saved). \"The alert **is sent**.\" \"Your changes **have been saved**.\"\n\n**How to fix it**\n\n1. Find the actor. If it is the system, say \"the system\". If it is the reader, use \"you\".\n2. Make the actor the subject.\n3. Keep the verb strong.\n\nBefore and after:\n\n| Passive | Active |\n|---|---|\n| The alert is sent to nearby pharmacists when a request is created. | When a dispatcher creates a request, the system sends an alert to nearby pharmacists. |\n| A reason must be entered before the shift can be cancelled. | Enter a reason before you cancel the shift. |\n| Mistakes were made in the report. | The report contains two errors. |\n\n**When passive is fine**\n\nUse passive when the actor is unknown or does not matter: \"Data is encrypted in storage.\" Or when the receiver is the topic: \"Your request was received.\" In instructions, prefer the imperative: \"Select Save.\"\n\n**Check yourself**\n\nAdd \"by zombies\" after the verb. If the sentence still makes sense (\"The shift is cancelled by zombies\"), it is passive. It is a silly test and it works.\n\n**Imperative is active**\n\n\"Enter a reason\" has an implied actor (you). Instructions and steps are best in the imperative.\n\nPractice sentences use the scheduling product. Write your own rewrite before reading the options.",
+      "keyPoints": [
+        "Active voice names the actor and makes the subject do the action.",
+        "Passive is a form of 'to be' plus a past participle; find the actor and make it the subject.",
+        "Use the imperative for instructions: \"Select Save.\"",
+        "Passive is acceptable when the actor is unknown or irrelevant."
+      ],
+      "interviewAngle": "Editing tests often start with passive, wordy sentences. Name the problem as you fix it (\"this hides who does the action\"), show the rewrite, and check it still means the same. Keep the claim modest; you edited and rewrote end-user documentation, you were not a dedicated technical writer.",
+      "exercises": [
+        {
+          "id": "doc-u8-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which sentence is in active voice?",
+          "choices": [
+            "The pharmacy cancels the shift.",
+            "The shift was cancelled.",
+            "The shift is cancelled by the pharmacy.",
+            "Cancellation of the shift is performed by the pharmacy."
+          ],
+          "answer": 0,
+          "explanation": "The actor (the pharmacy) is the subject doing the action."
+        },
+        {
+          "id": "doc-u8-l1-e2",
+          "type": "mcq",
+          "prompt": "Best rewrite of: \"The alert is sent to nearby pharmacists when a request is created.\"",
+          "choices": [
+            "Nearby pharmacists are alerted when requests are created by dispatchers.",
+            "When a dispatcher creates a request, the system sends an alert to nearby pharmacists.",
+            "An alert gets sent to nearby pharmacists once a request has been created.",
+            "Alerts are what nearby pharmacists receive on request creation."
+          ],
+          "answer": 1,
+          "explanation": "It names both actors and keeps one clear order of events."
+        },
+        {
+          "id": "doc-u8-l1-e3",
+          "type": "short",
+          "prompt": "Is \"Your changes have been saved.\" active or passive? (One word.)",
+          "accept": [
+            "passive"
+          ],
+          "answer": "passive",
+          "explanation": "\"have been saved\" is a form of 'be' plus a past participle, with no actor."
+        },
+        {
+          "id": "doc-u8-l1-e4",
+          "type": "mcq",
+          "prompt": "When is passive voice acceptable?",
+          "choices": [
+            "Always in instructions",
+            "Only in release notes",
+            "Never",
+            "When the actor is unknown or unimportant, such as \"Data is encrypted in storage.\""
+          ],
+          "answer": 3,
+          "explanation": "Passive is a tool, not an error. Use it when the actor does not help the reader."
+        },
+        {
+          "id": "doc-u8-l1-e5",
+          "type": "open",
+          "prompt": "Rewrite in active voice, keeping the meaning: (1) \"The shift is marked as filled by the system once a pharmacist is assigned.\" (2) \"A cancellation reason must be selected.\" (3) \"Notifications may be delayed by phone network problems.\" (4) \"It was decided that emergency shifts would be prioritised.\"",
+          "answer": "(1) The system marks the shift as Filled once a pharmacist is assigned. (2) Select a cancellation reason. (3) Phone network problems may delay notifications. (4) The team decided to prioritise emergency shifts. (Name the actual decision maker if you know it.)",
+          "rubric": [
+            "All four are active",
+            "Instruction (2) is imperative",
+            "Meaning unchanged",
+            "Actor in (4) is named or flagged as unknown"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u8-l2",
+      "title": "Rewrite drill B: cut filler and use plain words",
+      "minutes": 8,
+      "body": "Every extra word costs the reader time. Cutting does not mean being curt; it means every word earns its place. The plain language guidelines (plainlanguage.gov, now also preserved by the Center for Plain Language) and the Microsoft Writing Style Guide both say: use short, common words and short sentences.\n\n**Common filler and its cure**\n\n| Wordy | Plain |\n|---|---|\n| in order to | to |\n| utilize | use |\n| it should be noted that | (delete) |\n| at this point in time | now |\n| is able to | can |\n| in the event that | if |\n| click on the button | select the button |\n| a large number of | many |\n| prior to | before |\n| due to the fact that | because |\n\n**Cut in three passes**\n\n1. **Delete** words that carry nothing: \"very\", \"really\", \"basically\", \"actually\", \"just\".\n2. **Replace** long phrases with short ones from the table.\n3. **Merge** sentences that repeat the same idea.\n\n**Worked example**\n\n> In order to be able to cancel a shift, it is necessary that you click on the Cancel button that is located at the top of the shift page.\n\nThat is 31 words. Rewritten:\n\n> To cancel a shift, select **Cancel** at the top of the shift page.\n\nThat is 12 words, one clear step. The shortened sentence still holds every fact the reader needs: what to do and where.\n\n**Do not cut meaning**\n\nCut filler, not content. If removing a word changes what the reader does, put it back. \"Cancel the shift\" and \"Cancel the shift within 24 hours\" are different instructions.\n\n**Short sentences, not telegrams**\n\nAim for one idea per sentence, about 15 to 25 words on average. Vary the length; a run of ten-word sentences reads like a list of orders.\n\n**Use the reader's words**\n\nYour support tickets are a vocabulary list. If users write \"shift\", do not write \"assignment instance\".",
+      "keyPoints": [
+        "Delete filler, replace long phrases with short ones, merge repeated ideas.",
+        "Use 'to' not 'in order to', 'use' not 'utilize', 'select' not 'click on'.",
+        "Cut words, never facts or conditions.",
+        "Prefer the reader's own vocabulary from tickets and search terms."
+      ],
+      "interviewAngle": "A typical editing test hands you a paragraph full of filler. Show the before and after word count and say what you protected (conditions, numbers, names). You rewrote user documentation and saw ticket inflow fall; do not claim formal editing training.",
+      "exercises": [
+        {
+          "id": "doc-u8-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Best rewrite of: \"In order to be able to cancel a shift you will need to click on the Cancel button.\"",
+          "choices": [
+            "To cancel a shift, select Cancel.",
+            "You will need to click on Cancel in order to cancel.",
+            "In order to cancel a shift, the Cancel button must be clicked on.",
+            "Cancelling a shift requires a click on the button for cancelling."
+          ],
+          "answer": 0,
+          "explanation": "It is shorter, active and uses the standard verb for choosing a button."
+        },
+        {
+          "id": "doc-u8-l2-e2",
+          "type": "short",
+          "prompt": "What plain word replaces \"utilize\"? (One word.)",
+          "accept": [
+            "use"
+          ],
+          "answer": "use",
+          "explanation": "\"Use\" does the same job in one syllable."
+        },
+        {
+          "id": "doc-u8-l2-e3",
+          "type": "mcq",
+          "prompt": "\"It should be noted that the alert may take up to a minute.\" What is the best edit?",
+          "choices": [
+            "The alert takes a minute.",
+            "Please note that it should be noted the alert may take a minute.",
+            "The alert may take up to a minute.",
+            "It must be noted: alert up to a minute."
+          ],
+          "answer": 2,
+          "explanation": "The opening phrase adds nothing, and the last option drops 'may' and 'up to', which changes the fact."
+        },
+        {
+          "id": "doc-u8-l2-e4",
+          "type": "mcq",
+          "prompt": "Which edit damages the meaning?",
+          "choices": [
+            "\"Cancel the shift within 24 hours\" shortened to \"Cancel the shift\"",
+            "\"Due to the fact that\" changed to \"because\"",
+            "\"Prior to saving\" changed to \"before saving\"",
+            "\"A large number of\" changed to \"many\""
+          ],
+          "answer": 0,
+          "explanation": "The 24-hour condition changes what the reader must do. The others change style only."
+        },
+        {
+          "id": "doc-u8-l2-e5",
+          "type": "open",
+          "prompt": "Cut this to about half the length without losing a fact: \"At this point in time, it is important to note that a pharmacist who is able to accept an emergency shift will need to make sure that they respond to the alert within a period of 10 minutes, due to the fact that after that the request is sent on to other pharmacists.\"",
+          "answer": "A pharmacist who can accept an emergency shift must respond to the alert within 10 minutes. After that, the request goes to other pharmacists. (Facts kept: who, the 10-minute limit, what happens afterwards.)",
+          "rubric": [
+            "About 30 words or fewer",
+            "Keeps the 10-minute limit and the consequence",
+            "Removes 'at this point in time', 'it is important to note', 'due to the fact that'",
+            "Reads as natural, not telegraphic"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u8-l3",
+      "title": "Rewrite drill C: pronouns, terms and ambiguity",
+      "minutes": 8,
+      "body": "A sentence can be short, active and still unclear if the reader cannot tell what *it*, *this* or *they* points to, or if one thing has three names.\n\n**Ambiguous pronouns**\n\n> When the pharmacist accepts the request, it is marked as filled.\n\nWhat is \"it\": the request or the shift? In this product a request becomes a shift, so the reader may stop and wonder. Repeat the noun:\n\n> When the pharmacist accepts the request, the system marks the shift as Filled.\n\nThe rule from Google's Technical Writing One: do not use a pronoun when more than one noun could be the antecedent, and put the noun right after *this* or *that*: \"This delay causes errors\", not \"This causes errors\".\n\n**Pronoun checklist**\n\n1. Find each *it, this, that, they, these* and *which*.\n2. Ask what noun it points back to. If two nouns are possible, name the noun.\n3. If the pointed-to noun is more than a sentence away, name it.\n\n**One name per thing**\n\nPick one term and stay with it. If a document says *shift*, *booking*, *assignment* and *slot* for the same object, readers will assume four different objects.\n\n| Mixed | Consistent |\n|---|---|\n| Create a booking. The shift appears in the list. Edit the slot. | Create a shift. The shift appears in the list. Edit the shift. |\n\nRecord the choices in a short term list (covered in the style guide lesson): *shift* (a block of work), *assignment* (a pharmacist matched to a shift), *request* (a pharmacy asking for cover).\n\n**Vague words**\n\n\"Some\", \"various\", \"appropriate\" and \"etc.\" leave the reader guessing. Replace with the real list or a number: \"Select a reason: no coverage, pharmacy cancelled, pharmacist cancelled.\"\n\n**Also watch**\n\n\"Soon\", \"recently\" and \"above\" expire or mislead. Give a date, a version or a link.",
+      "keyPoints": [
+        "If more than one noun could be the antecedent, repeat the noun instead of using it/this/they.",
+        "Follow 'this' with a noun: \"This delay\", not \"This\".",
+        "One name for one thing across the whole document; keep a term list.",
+        "Replace vague words and 'etc.' with the real list or number."
+      ],
+      "interviewAngle": "Consistency questions come up in editing exercises: \"what did you notice?\" Mention terminology and ambiguous pronouns by name. At work you cleaned up inconsistent names in the knowledge base; tell it as a practical habit, not a formal terminology programme.",
+      "exercises": [
+        {
+          "id": "doc-u8-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "In \"When the pharmacist accepts the request, it is marked as filled,\" what is the problem?",
+          "choices": [
+            "It uses the wrong tense",
+            "\"It\" could mean the request or the shift",
+            "\"Pharmacist\" is jargon",
+            "The sentence is too short"
+          ],
+          "answer": 1,
+          "explanation": "Two nouns compete as the antecedent. Name the noun."
+        },
+        {
+          "id": "doc-u8-l3-e2",
+          "type": "mcq",
+          "prompt": "A guide says \"Create a booking... the shift appears... edit the slot.\" The product object is a shift. What is the fix?",
+          "choices": [
+            "Use \"slot\" because it is shortest",
+            "Add a footnote explaining the names",
+            "Use \"shift\" every time",
+            "Use all three names to keep it varied"
+          ],
+          "answer": 2,
+          "explanation": "Varied names for one object imply different objects."
+        },
+        {
+          "id": "doc-u8-l3-e3",
+          "type": "short",
+          "prompt": "What is the name for an unclear \"it\" or \"this\" in writing? (Two words.)",
+          "accept": [
+            "ambiguous pronoun",
+            "unclear pronoun",
+            "ambiguous pronouns",
+            "vague pronoun"
+          ],
+          "answer": "ambiguous pronoun",
+          "explanation": "The antecedent is unclear when more than one noun fits."
+        },
+        {
+          "id": "doc-u8-l3-e4",
+          "type": "mcq",
+          "prompt": "Best fix for: \"The system retries sending the alert. This causes duplicate notifications.\"",
+          "choices": [
+            "\"This retry can cause duplicate notifications.\"",
+            "\"It causes duplicates.\"",
+            "\"This causes duplicate notifications, which is bad.\"",
+            "\"That is the cause of notifications.\""
+          ],
+          "answer": 0,
+          "explanation": "A noun after 'this' removes doubt about what causes the duplicates."
+        },
+        {
+          "id": "doc-u8-l3-e5",
+          "type": "open",
+          "prompt": "Rewrite to remove ambiguity and unify terms (a shift is the block of work; a request is a pharmacy asking for cover): \"When a pharmacy makes a booking request, they get an alert once it is filled. If it is cancelled, they can create a new slot. This needs a reason.\"",
+          "answer": "When a pharmacy submits a request, it receives an alert once a pharmacist fills the shift. If the shift is cancelled, the pharmacy can create a new request. Cancelling a shift requires a reason.",
+          "rubric": [
+            "\"booking\" and \"slot\" replaced by request or shift",
+            "\"they\" and \"it\" resolved to the pharmacy or the shift",
+            "\"This\" followed by a noun or replaced",
+            "Facts unchanged"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u8-l4",
+      "title": "Rewrite drill D: lists, parallel form and steps",
+      "minutes": 9,
+      "body": "Lists help only when they are built correctly. Two rules cover most of the mistakes: choose the right list type, and keep the items parallel.\n\n**Numbered or bulleted?**\n\n- **Numbered** when order matters or you refer to steps.\n- **Bulleted** when items are a set in any order.\n- Do not use a list for a single sentence's worth of ideas; do not use a long paragraph for steps.\n\n**Parallel items**\n\nEach item should start with the same kind of word and have the same shape.\n\nNot parallel:\n\n- Open the shift\n- Pharmacist selection\n- You should click Assign\n\nParallel:\n\n- Open the shift\n- Select a pharmacist\n- Select **Assign**\n\nAlso parallel: \"Fast, reliable and low-cost\", not \"Fast, reliable, and it costs less\".\n\n**One action per step**\n\n> Click Settings, then go to Notifications and turn on the SOS option and save.\n\nBecomes:\n\n1. Select **Settings**.\n2. Select **Notifications**.\n3. Turn on **SOS alerts**.\n4. Select **Save**.\n\nBold the interface labels exactly as they appear. State the result when something changes: \"The alert option shows as On.\"\n\n**Condition before action**\n\nPut the \"if\" first so readers do not act before they see it.\n\n> Select Save if you want to keep your changes.\n\nbecomes\n\n> To keep your changes, select **Save**.\n\n**Intro sentence for a list**\n\nIntroduce the list with a sentence that ends in a colon or states the count: \"You need three things:\" Do not break a sentence across the list items unless they all complete it.\n\n**Keep punctuation consistent**\n\nUse sentence case and the same ending punctuation for all items. If items are full sentences, end each with a full stop; if they are fragments, do not.",
+      "keyPoints": [
+        "Numbered lists for sequences, bullets for sets; keep items parallel in form.",
+        "One action per step; bold the interface label exactly; state the result.",
+        "Put the condition before the action.",
+        "Introduce every list and punctuate its items consistently."
+      ],
+      "interviewAngle": "Many writing tests are really list-and-steps tests. Show you split compound steps, put conditions first and state the result. This is the heart of the how-to articles you rewrote for the knowledge base.",
+      "exercises": [
+        {
+          "id": "doc-u8-l4-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which list is parallel?",
+          "choices": [
+            "Open the shift / Pharmacist selection / You should click Assign",
+            "Opening the shift / Select a pharmacist / Assign",
+            "Shift opens / Pick pharmacist / Assignment button",
+            "Open the shift / Select a pharmacist / Select Assign"
+          ],
+          "answer": 3,
+          "explanation": "Each item starts with an imperative verb."
+        },
+        {
+          "id": "doc-u8-l4-e2",
+          "type": "mcq",
+          "prompt": "Best edit of: \"Click Settings, then go to Notifications and turn on SOS and save.\"",
+          "choices": [
+            "Keep it as one sentence but bold the words",
+            "Remove the word 'then'",
+            "Split into four numbered steps, one action each",
+            "Make it a bulleted list in random order"
+          ],
+          "answer": 2,
+          "explanation": "One action per step makes progress and errors easy to see."
+        },
+        {
+          "id": "doc-u8-l4-e3",
+          "type": "short",
+          "prompt": "A list of steps that must happen in order should be which type of list? (One word.)",
+          "accept": [
+            "numbered",
+            "ordered",
+            "numbered list",
+            "ordered list"
+          ],
+          "answer": "numbered",
+          "explanation": "Numbers show the order and let the reader find their place."
+        },
+        {
+          "id": "doc-u8-l4-e4",
+          "type": "mcq",
+          "prompt": "Best order for: \"Select Save if you want to keep your changes.\"",
+          "choices": [
+            "\"Saving keeps changes: select it.\"",
+            "\"Select Save, if you want to keep your changes.\"",
+            "\"To keep your changes, select Save.\"",
+            "\"Your changes will be kept if you select Save.\""
+          ],
+          "answer": 2,
+          "explanation": "The condition comes first so the reader does not act before reading it."
+        },
+        {
+          "id": "doc-u8-l4-e5",
+          "type": "open",
+          "prompt": "Turn this paragraph into a procedure with an intro line, numbered steps and a result line: \"To reassign a shift you open it and then use the pharmacist dropdown which you will find on the right to choose someone else and then press Assign and you will see the new name in the list and the old pharmacist gets a message.\"",
+          "answer": "To reassign a shift to a different pharmacist:\n\n1. Open the shift.\n2. In the **Pharmacist** list on the right, choose the new pharmacist.\n3. Select **Assign**.\n\nThe shift list shows the new pharmacist's name, and the previous pharmacist receives a message.",
+          "rubric": [
+            "Intro line states the goal",
+            "One action per numbered step",
+            "Interface labels bold",
+            "Result stated after the steps",
+            "Steps are parallel imperatives"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "doc-u8-l5",
+      "title": "Rewrite drill E: tone, labels and error messages",
+      "minutes": 9,
+      "body": "Error messages and interface text are documentation too, and they are read at the worst moment. A good one says what happened, why if known, and what to do next, in plain words and a calm tone.\n\n**Three parts of a useful message**\n\n1. **What happened.** \"Couldn't send the alert.\"\n2. **Why, if you know.** \"No pharmacists are within 25 miles.\"\n3. **What to do.** \"Widen the distance or call the pharmacy.\"\n\nCompare:\n\n| Weak | Better |\n|---|---|\n| Error 4012: invalid radius | Couldn't send the alert. No pharmacists are within 25 miles. Widen the distance or call the pharmacy. |\n| You entered an incorrect value. | Enter a start time in the future. |\n| Operation failed. Contact administrator. | We couldn't cancel the shift. Try again in a minute. If it keeps failing, contact support and quote shift 1042. |\n\n**Tone**\n\nThe Microsoft Writing Style Guide asks for a warm, relaxed, crisp and clear voice. Practical rules:\n\n- Address the reader as **you**; do not blame them (\"You entered...\").\n- Do not apologise for everything; \"Sorry\" once for a real failure is enough.\n- No jargon for a general reader: \"alert on the pharmacist's phone\", not \"pharmacist-facing push notification\".\n- Avoid exclamation marks except where a real celebration is meant.\n\n**Interface verbs**\n\nIn Microsoft's style, use **select** for choosing an item or button (works for mouse, touch and keyboard), **enter** for typing, and **turn on / turn off** for switches. Bold the label exactly as shown.\n\n**Labels and buttons**\n\nA button label starts with a verb and says what happens: \"Send alert\", not \"OK\" or \"Submit\". Use sentence case.\n\n**Check it in context**\n\nRead the message aloud as the person it appears to. If a pharmacist with five minutes to fill an urgent shift saw it, what would they do next?",
+      "keyPoints": [
+        "A useful error message says what happened, why if known, and what to do next.",
+        "Use plain words, 'you', and no blame; avoid codes without explanation.",
+        "Use 'select' for choosing, 'enter' for typing, and bold labels exactly as shown.",
+        "Button labels start with a verb that says the result."
+      ],
+      "interviewAngle": "Microcopy and error text show care. You can say that in support you saw which messages confused users, and used those tickets to rewrite help text. Avoid claiming you owned the product's interface text unless you did.",
+      "exercises": [
+        {
+          "id": "doc-u8-l5-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which error message is best?",
+          "choices": [
+            "You entered an incorrect value.",
+            "Couldn't send the alert. No pharmacists are within 25 miles. Widen the distance or call the pharmacy.",
+            "Error 4012: invalid radius",
+            "Operation failed. Contact administrator."
+          ],
+          "answer": 1,
+          "explanation": "It says what happened, why, and what to do."
+        },
+        {
+          "id": "doc-u8-l5-e2",
+          "type": "short",
+          "prompt": "Which verb does Microsoft style prefer for choosing a button or menu item, instead of \"click\"? (One word.)",
+          "accept": [
+            "select",
+            "choose"
+          ],
+          "answer": "select",
+          "explanation": "\"Select\" works across mouse, touch and keyboard."
+        },
+        {
+          "id": "doc-u8-l5-e3",
+          "type": "mcq",
+          "prompt": "Best button label for sending an emergency request:",
+          "choices": [
+            "Send request",
+            "OK",
+            "Submit",
+            "Click here"
+          ],
+          "answer": 0,
+          "explanation": "A verb that says what happens is clearer than a generic label."
+        },
+        {
+          "id": "doc-u8-l5-e4",
+          "type": "mcq",
+          "prompt": "Which phrase is plainest for a general reader?",
+          "choices": [
+            "pharmacist-facing push notification",
+            "client-side alert dispatch",
+            "mobile endpoint messaging",
+            "alert on the pharmacist's phone"
+          ],
+          "answer": 3,
+          "explanation": "Plain words describe the thing the reader recognises."
+        },
+        {
+          "id": "doc-u8-l5-e5",
+          "type": "open",
+          "prompt": "Rewrite these three messages: (1) \"Invalid input.\" shown when a pharmacy enters a start time in the past. (2) \"Error 500\" when the shift list can't load. (3) \"Are you sure you want to proceed? OK / Cancel\" before cancelling a shift with a pharmacist assigned.",
+          "answer": "(1) Start time must be in the future. Enter a later time. (2) We couldn't load the shift list. Refresh the page. If it keeps happening, contact support. (3) Cancel this shift? Rachel Rivera is assigned and will be notified. Buttons: Cancel shift / Keep shift.",
+          "rubric": [
+            "Each message says what happened",
+            "Next step offered",
+            "Button labels are verbs and specific",
+            "Plain words, no blame"
+          ]
+        }
+      ]
+    }
+  ]
+}

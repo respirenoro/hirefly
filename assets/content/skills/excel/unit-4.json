@@ -1,0 +1,107 @@
+{
+  "id": "excel-u4",
+  "title": "Pivot tables and charts",
+  "summary": "Build a summary report from raw rows, group dates, add a calculated field, filter with slicers and chart the result.",
+  "lessons": [
+    {
+      "id": "excel-u4-l1",
+      "title": "Building a summary report with a pivot table",
+      "minutes": 9,
+      "body": "A pivot table summarises many rows into a compact report without formulas. It is already on your resume, so aim to build one quickly and explain it clearly.\n\n**Steps**\n\n1. Make sure the source is clean: one header row, one record per row, no blank rows. Convert it to a Table with Ctrl+T.\n2. Click inside the Table and choose Insert > PivotTable. Place it on a new sheet.\n3. Drag fields into the four areas: **Rows** (what you group by), **Columns** (a second grouping across), **Values** (what you calculate), **Filters** (a report-wide filter).\n\nUsing the six shifts from the SUMIFS lesson, with Pharmacy in Rows, Status in Columns and Shift ID in Values as **Count of ID**:\n\n| Pharmacy | Cancelled | Filled | Grand Total |\n|---|---|---|---|\n| Eastside | 1 | 1 | 2 |\n| Harbor | 1 | 2 | 3 |\n| Lakeview |  | 1 | 1 |\n| Grand Total | 2 | 4 | 6 |\n\n**Value settings.** Text fields default to Count and numeric fields default to Sum. Right-click a value and choose Value Field Settings to switch to Sum, Average, Max and so on, and to apply a number format. Drop Hours in as Sum of Hours to get total hours by pharmacy.\n\n**Show Values As.** Choose % of Row Total and each row shows its split. Harbor becomes 33.3% Cancelled and 66.7% Filled, which is Harbor's fill rate in one click.\n\n**Pivot charts.** With a cell in the pivot selected, choose Insert > PivotChart. Column or bar charts compare categories; line charts show change over time; use a pie only for a few parts of a whole. Give every chart a title that states the point, label axes, and sort bars so the biggest are first.\n\n**Pivot habits**\n\n- A pivot does **not** update when the source changes. Click Refresh (Alt+F5) or Data > Refresh All.\n- Pivot cells cannot be typed over. Reference them with `GETPIVOTDATA` or copy the values elsewhere.\n- Check the Grand Total against a number you can calculate another way, such as a simple `COUNTA` of the IDs.\n- Blank cells in the source show as \"(blank)\" and text-numbers are counted, not summed: both are signs of dirty data.",
+      "keyPoints": [
+        "Clean the source and convert to a Table before building the pivot.",
+        "Rows and Columns group; Values calculate; Filters restrict the whole report.",
+        "Text fields default to Count, numeric fields to Sum; change in Value Field Settings.",
+        "Show Values As > % of Row Total turns counts into shares.",
+        "Pivots need a manual Refresh after the source changes."
+      ],
+      "interviewAngle": "Pivot tables are your strongest claim, so use real vocabulary: rows, values, refresh, value field settings. Describe a report you would build for a manager and how you checked the total. If asked what you cannot do, say you have not written macros to automate pivots, and that you are learning Power Query to refresh cleaning steps.",
+      "exercises": [
+        {
+          "id": "excel-u4-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You add three new rows to the source data and the pivot table still shows the old totals. What is the cause?",
+          "choices": [
+            "The pivot table is corrupt and must be rebuilt",
+            "Pivot tables do not update automatically; you need to refresh it",
+            "The new rows must be sorted before they appear",
+            "Pivot tables only include the first 1,000 rows"
+          ],
+          "answer": 1,
+          "explanation": "A pivot caches its source and only updates on Refresh (Alt+F5 or Data > Refresh All). If the source is a Table, refreshing also picks up the new rows."
+        },
+        {
+          "id": "excel-u4-l1-e2",
+          "type": "short",
+          "prompt": "In the pivot above, what is the Filled count for Harbor?",
+          "accept": ["2"],
+          "answer": "2",
+          "explanation": "Harbor has two Filled shifts (S3 and S4)."
+        },
+        {
+          "id": "excel-u4-l1-e3",
+          "type": "open",
+          "prompt": "A manager wants to know how many shifts were cancelled for each reason, largest first. Source columns are ID, Pharmacy, Status, Cancel reason. Describe how you would build it as a pivot table and how you would check it.",
+          "answer": "Turn the data into a Table and insert a PivotTable. Filter Status to Cancelled (put Status in Filters). Put Cancel reason in Rows and ID in Values as Count of ID. Sort the Count of ID column largest to smallest. Check that the Grand Total equals the number of cancelled rows from a simple COUNTIFS on the source, and look for a (blank) row, which means cancelled shifts with no reason recorded. Refresh after any data change.",
+          "rubric": [
+            "Cancel reason in Rows and a count of ID in Values",
+            "Restricts to cancelled shifts, for example with a Status filter",
+            "Sorts largest first",
+            "Checks the total against the source or a COUNTIFS"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u4-l2",
+      "title": "Grouping dates, calculated fields and slicers",
+      "minutes": 10,
+      "body": "Three features turn a basic pivot into a reader-friendly report.\n\n**Grouping dates.** Put a date field in Rows and, in many Excel versions, Excel groups it into months automatically. If it does not, right-click a date in the pivot, choose Group, and select Months and Years together. Selecting only Months merges March 2025 with March 2026, which is a common mistake. If grouping is greyed out, the date column contains text or blanks. You can also group numbers into bands, for example hours to fill in 0-60 and 60-120.\n\n**Calculated fields.** To add a ratio, use PivotTable Analyze > Fields, Items & Sets > Calculated Field. Name it `FillRate` and enter `=Filled/Requested`. A calculated field works on the **sum** of each field, not row by row. Given:\n\n| Pharmacy | Requested | Filled |\n|---|---|---|\n| Eastside | 40 | 36 |\n| Harbor | 25 | 18 |\n| Total | 65 | 54 |\n\nthe field gives Eastside 36/40 = 90%, Harbor 18/25 = 72%, and a grand total of 54/65 = 83.1%. That is the correct weighted rate. Averaging the two row rates gives (90% + 72%) / 2 = 81%, which is wrong because Eastside has more shifts. This is why you build ratios from sums rather than by averaging percentages. Calculated fields cannot reference cells outside the pivot or use lookup functions, and they appear in Values like any other field.\n\n**Slicers and timelines.** Insert > Slicer adds clickable buttons for any field, such as Pharmacy or Status. Hold Ctrl to select several. Insert > Timeline adds a date slider you can set to months, quarters or years. To drive several pivots from one slicer, right-click it and choose Report Connections, then tick each pivot. Slicers show and hide data for everyone using the workbook, so clear them before saving a shared file.\n\n**Layout tips**\n\n- Pivot Table Design > Report Layout > Show in Tabular Form makes the report easier to copy.\n- Turn off Grand Totals if they mislead.\n- Sort and filter inside the pivot, not in the source.\n\nFinally, always sanity-check a ratio: whole-company fill rate must sit between the lowest and highest pharmacy rate, and 83.1% sits between 72% and 90%.",
+      "keyPoints": [
+        "Group dates by Months and Years together so different years stay apart.",
+        "A calculated field divides the sum of one field by the sum of another: a weighted ratio.",
+        "Never average percentages from rows of different sizes.",
+        "Slicers and timelines filter visually; Report Connections link them to several pivots.",
+        "Sanity-check a combined rate sits between the smallest and largest group rates."
+      ],
+      "interviewAngle": "Interviewers like the weighted-average explanation because it shows data thinking. Use the phrase \"I calculate the rate from totals, not by averaging row percentages.\" You can claim grouping and slicers as part of moderate pivot skill. Calculated fields are a step beyond basics; claim them only to the extent you have practised them.",
+      "exercises": [
+        {
+          "id": "excel-u4-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Eastside requested 40 shifts and filled 36. Harbor requested 25 and filled 18. What is the correct overall fill rate and why?",
+          "choices": [
+            "81%, the average of 90% and 72%",
+            "83.1%, total filled divided by total requested",
+            "90%, the best pharmacy rate",
+            "72%, the lowest pharmacy rate"
+          ],
+          "answer": 1,
+          "explanation": "54 filled out of 65 requested is 83.1%. Averaging the two percentages ignores that the pharmacies have different volumes."
+        },
+        {
+          "id": "excel-u4-l2-e2",
+          "type": "short",
+          "prompt": "Filled total divided by requested total (54 and 65) as a percentage to one decimal place?",
+          "accept": ["83.1%", "83.1", "83.1 %"],
+          "answer": "83.1%",
+          "explanation": "54 / 65 = 0.8307..., which rounds to 83.1%."
+        },
+        {
+          "id": "excel-u4-l2-e3",
+          "type": "open",
+          "prompt": "Describe how you would produce a monthly fill-rate report with a pharmacy filter from a Table with columns Pharmacy, Requested_at (date), Requested (count) and Filled (count). Explain why you use a calculated field for the rate.",
+          "answer": "Insert a PivotTable from the Table. Put Requested_at in Rows and group it by Months and Years. Add Requested and Filled to Values as sums. Add a calculated field FillRate = Filled/Requested and format it as a percentage. Insert a slicer for Pharmacy and, if useful, a timeline for dates. The calculated field divides the sum of Filled by the sum of Requested for whatever is shown, so month and grand totals are weighted correctly. Averaging each row's percentage would give a wrong total.",
+          "rubric": [
+            "Groups the date by months and years",
+            "Adds Requested and Filled as sums plus a calculated field Filled/Requested",
+            "Adds a Pharmacy slicer",
+            "Explains the rate is built from sums rather than an average of percentages"
+          ]
+        }
+      ]
+    }
+  ]
+}

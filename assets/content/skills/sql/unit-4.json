@@ -1,0 +1,208 @@
+{
+  "id": "sql-u4",
+  "title": "Dates, CASE, subqueries, CTEs and window functions",
+  "summary": "Work with time, label rows with CASE, nest queries, structure longer queries with CTEs, and get a first look at ROW_NUMBER and running totals.",
+  "lessons": [
+    {
+      "id": "sql-u4-l1",
+      "title": "Working with dates",
+      "minutes": 10,
+      "body": "Scheduling data is mostly timestamps, so date arithmetic is central to your reporting. This course defaults to SQL Server (T-SQL) and flags where PostgreSQL differs.\n\nThe sample timestamps are the ones from unit 1: for example, shift 101 was requested at 2026-03-02 08:00 and filled at 09:30, and shift 104 was requested on 2026-03-12 at 14:00 for a start on 2026-03-15.\n\n`DATEDIFF(unit, start, end)` returns the number of whole unit boundaries between two values:\n\n```sql\nSELECT id,\n       DATEDIFF(MINUTE, requested_at, filled_at) AS minutes_to_fill,\n       DATEDIFF(DAY, requested_at, starts_at)    AS lead_days\nFROM shifts;\n```\n\n| id | minutes_to_fill | lead_days |\n|---|---|---|\n| 101 | 90 | 1 |\n| 102 | 45 | 1 |\n| 103 | NULL | 1 |\n| 104 | 240 | 3 |\n| 105 | 20 | 1 |\n| 106 | NULL | 1 |\n| 107 | NULL | 2 |\n| 108 | 120 | 1 |\n\nUnfilled shifts give NULL for the first column. Note the wording: DATEDIFF counts boundaries crossed, not elapsed time. `DATEDIFF(DAY, '2026-03-02 23:59', '2026-03-03 00:01')` is 1 even though two minutes passed. For elapsed time, use a small unit such as MINUTE and divide, rather than DAY or HOUR.\n\nTo report by month, reduce each timestamp to the first day of its month, then group by that:\n\n```sql\nSELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n       COUNT(*) AS requested,\n       AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0) AS avg_min_to_fill\nFROM shifts\nGROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\nORDER BY month_start;\n```\n\nThe result is 2026-03-01 with 4 requests and 125.0 minutes, and 2026-04-01 with 4 requests and 70.0 minutes. March averages the three filled shifts (90, 45 and 240); April averages two (20 and 120). The `* 1.0` keeps the decimals.\n\nUseful helpers:\n\n- `CAST(requested_at AS date)` drops the time part.\n- `DATEADD(DAY, -7, GETDATE())` is seven days ago.\n- `GETDATE()` is the current date and time.\n\nDialect differences you may need to mention:\n\n| Task | SQL Server (T-SQL) | PostgreSQL |\n|---|---|---|\n| Minutes between a and b | `DATEDIFF(MINUTE, a, b)` | `EXTRACT(EPOCH FROM (b - a)) / 60` |\n| Days between dates | `DATEDIFF(DAY, a, b)` | `b::date - a::date` |\n| First day of month | `DATEFROMPARTS(YEAR(x), MONTH(x), 1)` | `date_trunc('month', x)` |\n| Now | `GETDATE()` | `now()` |\n| Month start (SQL Server 2022 and later) | `DATETRUNC(MONTH, x)` | `date_trunc('month', x)` |\n| Add 7 days | `DATEADD(DAY, 7, x)` | `x + INTERVAL '7 days'` |\n\nWhen filtering a month, still prefer the half-open range from unit 1 over wrapping the column in a function, which can stop the database from using an index.",
+      "keyPoints": [
+        "DATEDIFF(unit, start, end) counts boundaries crossed; use MINUTE for elapsed time.",
+        "Unfilled shifts give NULL durations, which AVG ignores.",
+        "Group by a month-start date to build monthly reports.",
+        "Know the PostgreSQL equivalents: date_trunc, EXTRACT, interval, now()."
+      ],
+      "interviewAngle": "Say which database you assume ('I will write T-SQL; in PostgreSQL I would use date_trunc and EXTRACT'). That is honest and shows awareness of dialects. For your work, time to fill and shifts per month are real examples you can describe, including the choice to average only shifts that had a fill time.",
+      "exercises": [
+        {
+          "id": "sql-u4-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Shift 105 was requested at 2026-04-01 09:00 and filled at 2026-04-01 09:20. What does `DATEDIFF(MINUTE, requested_at, filled_at)` return for it?",
+          "choices": [
+            "0",
+            "80",
+            "1",
+            "20"
+          ],
+          "answer": 3,
+          "explanation": "DATEDIFF(MINUTE, start, end) returns end minus start in minutes, which is 20. The order of arguments is unit, start, end."
+        },
+        {
+          "id": "sql-u4-l1-e2",
+          "type": "short",
+          "prompt": "Shift 104 was requested on 2026-03-12 and starts on 2026-03-15. What does `DATEDIFF(DAY, requested_at, starts_at)` return? Answer with a number.",
+          "accept": [
+            "3",
+            "three"
+          ],
+          "answer": "3",
+          "explanation": "From 12 March to 15 March crosses three day boundaries."
+        },
+        {
+          "id": "sql-u4-l1-e3",
+          "type": "mcq",
+          "prompt": "Which PostgreSQL expression gives the first day of the month for `requested_at`, equivalent to `DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)` in T-SQL?",
+          "choices": [
+            "DATEADD(MONTH, 0, requested_at)",
+            "date_trunc('month', requested_at)",
+            "EXTRACT(MONTH FROM requested_at)",
+            "now() - INTERVAL '1 month'"
+          ],
+          "answer": 1,
+          "explanation": "date_trunc('month', x) truncates a timestamp to the start of its month. EXTRACT returns only the month number, losing the year."
+        },
+        {
+          "id": "sql-u4-l1-e4",
+          "type": "open",
+          "prompt": "Write a T-SQL query that returns, for each month of requested_at, the number of shifts requested (`requested`) and the average minutes to fill (`avg_min_to_fill`, with decimals, rounded to one decimal). State the result on the lesson sample and say why the average ignores unfilled shifts. In the SQLite sandbox, use `strftime('%Y-%m-01', requested_at)` for the month and `(strftime('%s', filled_at) - strftime('%s', requested_at)) / 60.0` for minutes.",
+          "answer": "```sql\nSELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n       COUNT(*) AS requested,\n       ROUND(AVG(DATEDIFF(MINUTE, requested_at, filled_at) * 1.0), 1) AS avg_min_to_fill\nFROM shifts\nGROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\nORDER BY month_start;\n```\n\nResult: 2026-03-01 with 4 requested and 125.0; 2026-04-01 with 4 requested and 70.0. AVG ignores NULL, and unfilled shifts have a NULL duration (filled_at is NULL), so only filled shifts contribute: March averages 90, 45 and 240; April averages 20 and 120.\n\nOn the practice data this returns 11 rows (columns: month_start, requested, avg_min_to_fill); the first row is 2025-12-01, 4, 884.6.",
+          "rubric": [
+            "Builds a month key with DATEFROMPARTS (or an equivalent) and groups by the same expression",
+            "Uses DATEDIFF(MINUTE, requested_at, filled_at) with * 1.0 for decimals",
+            "Gives 4 / 125.0 for March and 4 / 70.0 for April",
+            "Explains AVG skips NULL durations from unfilled shifts"
+          ],
+          "sqlite": "SELECT strftime('%Y-%m-01', requested_at) AS month_start, COUNT(*) AS requested, ROUND(AVG((strftime('%s', filled_at) - strftime('%s', requested_at)) / 60.0), 1) AS avg_min_to_fill FROM shifts GROUP BY month_start ORDER BY month_start",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u4-l2",
+      "title": "CASE expressions and subqueries",
+      "minutes": 11,
+      "body": "`CASE` is SQL's if/else. It returns a value for each row, and you can use it in `SELECT`, `ORDER BY`, or inside an aggregate.\n\nLabel how quickly each shift was filled. `WHEN` branches are tested in order and the first match wins, so put the most specific test first:\n\n```sql\nSELECT id,\n       CASE\n         WHEN filled_at IS NULL THEN 'unfilled'\n         WHEN DATEDIFF(MINUTE, requested_at, filled_at) <= 60  THEN 'fast'\n         WHEN DATEDIFF(MINUTE, requested_at, filled_at) <= 180 THEN 'normal'\n         ELSE 'slow'\n       END AS speed\nFROM shifts;\n```\n\nResult: 101 normal, 102 fast, 103 unfilled, 104 slow, 105 fast, 106 unfilled, 107 unfilled, 108 normal. Without an `ELSE`, a row that matches no branch gets NULL.\n\nInside an aggregate, CASE gives you conditional counting. Count each cancel reason in one pass:\n\n```sql\nSELECT SUM(CASE WHEN cancel_reason = 'no coverage' THEN 1 ELSE 0 END)           AS no_coverage,\n       SUM(CASE WHEN cancel_reason = 'pharmacy cancelled' THEN 1 ELSE 0 END)    AS pharmacy_cancelled,\n       SUM(CASE WHEN cancel_reason = 'pharmacist cancelled' THEN 1 ELSE 0 END)  AS pharmacist_cancelled\nFROM shifts;\n```\n\nThe result is 1, 1 and 1.\n\nA subquery is a query inside another query. A scalar subquery returns one value. Which filled shifts took longer than the average?\n\n```sql\nSELECT id\nFROM shifts\nWHERE DATEDIFF(MINUTE, requested_at, filled_at) >\n      (SELECT AVG(DATEDIFF(MINUTE, requested_at, filled_at)) FROM shifts);\n```\n\nThe inner query returns 103 (the average from unit 2). Shifts 104 (240 minutes) and 108 (120 minutes) are above it. Shift 101 took 90, which is below. Unfilled shifts have a NULL duration, so the comparison drops them.\n\n`IN` with a subquery handles lists. Pharmacies that have at least one cancelled shift:\n\n```sql\nSELECT name\nFROM pharmacies\nWHERE id IN (SELECT pharmacy_id FROM shifts WHERE status = 'cancelled');\n```\n\nThat returns Maple Drug and Harbor Health Rx.\n\nNow the trap. To find pharmacists with no shifts, you might write:\n\n```sql\nSELECT name FROM pharmacists\nWHERE id NOT IN (SELECT pharmacist_id FROM shifts);\n```\n\nThis returns zero rows, even though Chris Boyd has no shifts. The subquery contains NULLs (shifts 103, 106 and 107). `id NOT IN (10, 11, NULL, ...)` can never be true, because the NULL makes every comparison unknown. Safer options are `NOT EXISTS`:\n\n```sql\nSELECT ph.name\nFROM pharmacists ph\nWHERE NOT EXISTS (SELECT 1 FROM shifts s WHERE s.pharmacist_id = ph.id);\n```\n\nThis correctly returns Chris Boyd. The LEFT JOIN anti-join from unit 3 is an equally good answer.",
+      "keyPoints": [
+        "CASE returns a value per row; the first matching WHEN wins; no ELSE means NULL.",
+        "SUM(CASE WHEN ... THEN 1 ELSE 0 END) counts a subset inside one query.",
+        "A scalar subquery returns a single value you can compare against.",
+        "NOT IN with a subquery that contains NULL returns nothing; use NOT EXISTS or a LEFT JOIN."
+      ],
+      "interviewAngle": "The NOT IN with NULL trap is a favourite screening question, and conditional aggregation with CASE shows up in any rate or breakdown report. Mention that you used conditional counts for things like cancellation by reason. Be honest that you reach for LEFT JOIN or NOT EXISTS for 'not in' questions because of the NULL behaviour.",
+      "exercises": [
+        {
+          "id": "sql-u4-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "The average minutes to fill across the five filled shifts is 103. Which shift ids does the query return for filled shifts taking MORE than the average?\n\nMinutes to fill: 101 = 90, 102 = 45, 104 = 240, 105 = 20, 108 = 120.",
+          "choices": [
+            "101, 104 and 108",
+            "104 and 108",
+            "104 only",
+            "101, 102, 104, 105 and 108"
+          ],
+          "answer": 1,
+          "explanation": "Only 240 and 120 exceed 103, which belong to shifts 104 and 108. Shift 101 took 90 minutes, below the average."
+        },
+        {
+          "id": "sql-u4-l2-e2",
+          "type": "short",
+          "prompt": "How many rows does `SELECT name FROM pharmacists WHERE id NOT IN (SELECT pharmacist_id FROM shifts);` return on the sample data? Answer with a number.",
+          "accept": [
+            "0",
+            "zero"
+          ],
+          "answer": "0",
+          "explanation": "The subquery result contains NULL, so id NOT IN (...) is never true for any pharmacist, and no rows come back."
+        },
+        {
+          "id": "sql-u4-l2-e3",
+          "type": "mcq",
+          "prompt": "A CASE expression has no ELSE branch and none of its WHEN conditions are true for a row. What does it return for that row?",
+          "choices": [
+            "0",
+            "An empty string",
+            "An error",
+            "NULL"
+          ],
+          "answer": 3,
+          "explanation": "CASE without ELSE returns NULL when no branch matches."
+        },
+        {
+          "id": "sql-u4-l2-e4",
+          "type": "open",
+          "prompt": "Write a T-SQL query that returns, per month of requested_at, the number of shifts requested (`requested`) and the number cancelled (`cancelled`), using conditional aggregation. Give the result on the sample data. (In SQLite, build the month with `strftime('%Y-%m-01', requested_at)`.)",
+          "answer": "```sql\nSELECT DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1) AS month_start,\n       COUNT(*) AS requested,\n       SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled\nFROM shifts\nGROUP BY DATEFROMPARTS(YEAR(requested_at), MONTH(requested_at), 1)\nORDER BY month_start;\n```\n\nResult: 2026-03-01 with 4 requested and 1 cancelled (shift 103); 2026-04-01 with 4 requested and 2 cancelled (shifts 106 and 108).\n\nOn the practice data this returns 11 rows (columns: month_start, requested, cancelled); the first row is 2025-12-01, 4, 2.",
+          "rubric": [
+            "Derives a month key and groups by it",
+            "Counts cancelled with SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) or an equivalent",
+            "Uses COUNT(*) for requested shifts",
+            "Gives 4/1 for March and 4/2 for April"
+          ],
+          "sqlite": "SELECT strftime('%Y-%m-01', requested_at) AS month_start, COUNT(*) AS requested, SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled FROM shifts GROUP BY month_start ORDER BY month_start",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u4-l3",
+      "title": "CTEs and a first look at window functions",
+      "minutes": 12,
+      "body": "A CTE (common table expression) names a subquery with `WITH`, so a long query reads in steps. It exists only for the one statement that follows.\n\nAverage minutes to fill per pharmacy, using only filled shifts:\n\n```sql\nWITH filled AS (\n  SELECT pharmacy_id,\n         DATEDIFF(MINUTE, requested_at, filled_at) AS minutes_to_fill\n  FROM shifts\n  WHERE filled_at IS NOT NULL\n)\nSELECT pharmacy_id, AVG(minutes_to_fill * 1.0) AS avg_min\nFROM filled\nGROUP BY pharmacy_id\nORDER BY pharmacy_id;\n```\n\nThe result is pharmacy 1 with 67.5 (shifts 101 and 102: 90 and 45), pharmacy 2 with 180.0 (104 and 108: 240 and 120), and pharmacy 3 with 20.0 (105 only). In T-SQL, if the `WITH` is not the first statement in a batch, the previous statement must end with a semicolon.\n\nA window function calculates across related rows without collapsing them. `GROUP BY` returns one row per group; a window function keeps every row and adds a value. The `OVER` clause defines the window: `PARTITION BY` restarts the calculation for each group, and `ORDER BY` sets the order inside it.\n\n`ROW_NUMBER()` numbers rows 1, 2, 3 within each partition. A classic use is the latest row per group. Find each pharmacy's most recent shift:\n\n```sql\nWITH ranked AS (\n  SELECT id, pharmacy_id, requested_at,\n         ROW_NUMBER() OVER (PARTITION BY pharmacy_id\n                            ORDER BY requested_at DESC) AS rn\n  FROM shifts\n)\nSELECT id, pharmacy_id, requested_at\nFROM ranked\nWHERE rn = 1\nORDER BY pharmacy_id;\n```\n\nThe result is shift 107 for pharmacy 1 (requested 2026-04-10), 108 for pharmacy 2 (2026-04-15) and 106 for pharmacy 3 (2026-04-04). You filter on `rn` in a second step because window functions cannot be used directly in `WHERE`.\n\nA running total uses `SUM() OVER`. Here are completed assignments per month, accumulated:\n\n```sql\nWITH monthly AS (\n  SELECT DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1) AS month_start,\n         COUNT(*) AS completed\n  FROM assignments\n  WHERE status = 'completed'\n  GROUP BY DATEFROMPARTS(YEAR(completed_at), MONTH(completed_at), 1)\n)\nSELECT month_start, completed,\n       SUM(completed) OVER (ORDER BY month_start ROWS UNBOUNDED PRECEDING) AS running_total\nFROM monthly\nORDER BY month_start;\n```\n\n| month_start | completed | running_total |\n|---|---|---|\n| 2026-03-01 | 3 | 3 |\n| 2026-04-01 | 1 | 4 |\n\nBoth queries work in PostgreSQL once you swap the month expression for `date_trunc('month', ...)`. Treat this as a first look. Unit 8 goes further with `RANK`, `LAG` and frames; for entry-level roles you should be able to read `ROW_NUMBER` and running totals comfortably first.",
+      "keyPoints": [
+        "WITH name AS (...) gives a subquery a name and makes long queries readable.",
+        "A window function adds a value to each row without collapsing rows.",
+        "PARTITION BY restarts the calculation per group; ORDER BY sets the order within it.",
+        "Latest row per group: ROW_NUMBER() ... DESC in a CTE, then WHERE rn = 1.",
+        "SUM(x) OVER (ORDER BY ...) gives a running total."
+      ],
+      "interviewAngle": "Be straightforward about depth: you are comfortable with CTEs and have a working understanding of ROW_NUMBER and running totals, while most of your day-to-day reporting was filters, joins, grouping and rates. A good line is: 'I use windows for latest-record-per-group questions, and I am still building that skill.' Do not claim advanced analytics.",
+      "exercises": [
+        {
+          "id": "sql-u4-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "How does a window function such as `ROW_NUMBER() OVER (PARTITION BY pharmacy_id ORDER BY requested_at DESC)` differ from GROUP BY?",
+          "choices": [
+            "It returns one row per pharmacy, like GROUP BY.",
+            "It keeps every input row and adds a calculated value to each.",
+            "It can only be used in the WHERE clause.",
+            "It removes duplicate rows."
+          ],
+          "answer": 1,
+          "explanation": "Window functions do not collapse rows. Each shift stays in the result with its own row number within its pharmacy."
+        },
+        {
+          "id": "sql-u4-l3-e2",
+          "type": "short",
+          "prompt": "Which two-word clause inside OVER (...) restarts a window calculation for each group, such as each pharmacy?",
+          "accept": [
+            "partition by"
+          ],
+          "answer": "PARTITION BY",
+          "explanation": "PARTITION BY splits the rows into groups for the window calculation, similar to GROUP BY but without collapsing rows."
+        },
+        {
+          "id": "sql-u4-l3-e3",
+          "type": "mcq",
+          "prompt": "Using the ROW_NUMBER latest-shift query from the lesson (newest first, rn = 1), which shift id is returned for pharmacy 3? Pharmacy 3 has shift 105 (requested 2026-04-01) and shift 106 (requested 2026-04-04).",
+          "choices": [
+            "105",
+            "Both 105 and 106",
+            "106",
+            "None, because rn starts at 0"
+          ],
+          "answer": 2,
+          "explanation": "Ordered by requested_at descending, shift 106 (April 4) gets row number 1 and shift 105 gets 2. Row numbers start at 1."
+        },
+        {
+          "id": "sql-u4-l3-e4",
+          "type": "open",
+          "prompt": "Using a CTE, write a T-SQL query that returns each pharmacist's name and their average minutes to fill (`avg_min`, with decimals, rounded to one decimal) for shifts that have a fill time, sorted by name. Give the result on the lesson sample. (Join `shifts` to `pharmacists` on `pharmacist_id`. In SQLite, minutes are `(strftime('%s', filled_at) - strftime('%s', requested_at)) / 60.0`.)",
+          "answer": "```sql\nWITH filled AS (\n  SELECT pharmacist_id,\n         DATEDIFF(MINUTE, requested_at, filled_at) AS minutes_to_fill\n  FROM shifts\n  WHERE filled_at IS NOT NULL\n)\nSELECT ph.name, ROUND(AVG(f.minutes_to_fill * 1.0), 1) AS avg_min\nFROM filled f\nJOIN pharmacists ph ON ph.id = f.pharmacist_id\nGROUP BY ph.name\nORDER BY ph.name;\n```\n\nResult: Dana Ortiz 55.0 (shifts 101 and 105: 90 and 20), Priya Nair 240.0 (shift 104), Sam Lee 82.5 (shifts 102 and 108: 45 and 120).\n\nOn the practice data this returns 56 rows (columns: name, avg_min); the first row is Ana Castillo, 710.0.",
+          "rubric": [
+            "Defines a CTE with the fill-time calculation and a filled_at IS NOT NULL filter",
+            "Joins to pharmacists on the pharmacist id",
+            "Averages with * 1.0 so decimals are kept and groups by name",
+            "Gives Dana 55.0, Priya 240.0, Sam 82.5 in name order"
+          ],
+          "sqlite": "WITH filled AS (SELECT pharmacist_id, (strftime('%s', filled_at) - strftime('%s', requested_at)) / 60.0 AS minutes_to_fill FROM shifts WHERE filled_at IS NOT NULL) SELECT ph.name, ROUND(AVG(f.minutes_to_fill), 1) AS avg_min FROM filled f JOIN pharmacists ph ON ph.id = f.pharmacist_id GROUP BY ph.name ORDER BY ph.name",
+          "ordered": true
+        }
+      ]
+    }
+  ]
+}
