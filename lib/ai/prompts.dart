@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import '../data/content.dart';
 import '../data/db.dart';
+import '../engine/skill_builder.dart';
 
 Map<String, Object?> _obj(Map<String, Object?> props) =>
     {'type': 'object', 'properties': props, 'required': props.keys.toList(), 'additionalProperties': false};
@@ -253,3 +254,103 @@ Judge the story in the user message as an interviewer would hear it, for the the
 - overclaims: anything past the candidate record or its "never say" lines, with the honest wording.
 - improved: the story as they should tell it aloud in 90 to 120 seconds, in their voice, from their facts only, with [your detail: what is needed] where a true detail is missing.
 - followUp: the hardest follow-up question this story invites.''';
+
+// ---- Building a new skill module --------------------------------------------
+
+/// The cached part: the authoring standard (`assets/content/authoring.md`) and
+/// the learner's record, which sets the honest level every answer must keep to.
+String moduleStable(String rules, Content c) => [
+      'You write training modules for HireFly, an interview-preparation app for one learner. Follow the standard below exactly. You have no web access in this conversation, so the parts of the standard about opening pages apply as written for that case: write no web links, keep to stable concepts, and list what the reader should check.',
+      rules,
+      '# Learner record\n\n${c.facts}',
+    ].join('\n\n');
+
+String _request(SkillRequest r) => [
+      'Skill: ${r.skill}',
+      'What the learner\'s resume says about it: ${r.claim.isEmpty ? '(not given)' : r.claim}',
+      'Real level, and what must never be claimed: ${r.level.isEmpty ? '(not given; assume a beginner and claim nothing)' : r.level}',
+      if (r.roles.isNotEmpty) 'Target roles: ${r.roles}',
+    ].join('\n');
+
+final moduleOutlineSchema = _obj({
+  'title': _str,
+  'tagline': _str,
+  'claim': _str,
+  'units': _list(_obj({
+    'title': _str,
+    'summary': _str,
+    'lessons': _list(_obj({'title': _str, 'covers': _str})),
+  })),
+  'interviewQuestions': _strs,
+  'unverified': _strs,
+});
+
+String moduleOutlineInstructions(SkillRequest r) => '''
+Plan a skill module.
+
+${_request(r)}
+
+- title: the skill's usual name. tagline: one line on what the module gets the learner to.
+- claim: what the resume says, what the learner must be able to do to back it, and what they must not claim.
+- units: 4 or 5, from fundamentals to job-realistic work, each with 2 or 3 lessons. The last unit is titled "In the interview". For each lesson give its title and, in "covers", the ideas, the worked example and the trap it will teach.
+- Include the vocabulary and definition topics interviewers ask by name, the comparison and "when would you choose" topics, and the routine tasks practical tests are built from.
+- interviewQuestions: 10 to 12 questions an interviewer for the target roles asks about this skill: definitions, comparisons, scenarios, and "how would you rate yourself".
+- unverified: what a reader should check against current documentation, since nothing here was looked up: names, versions, limits, prices, syntax you are unsure of. Be specific.''';
+
+final moduleUnitSchema = _obj({
+  'lessons': _list(_obj({
+    'title': _str,
+    'minutes': _num,
+    'body': _str,
+    'keyPoints': _strs,
+    'interviewAngle': _str,
+    'exercises': _list(_obj({
+      'type': {'type': 'string', 'enum': ['mcq', 'short', 'open']},
+      'prompt': _str,
+      'choices': _strs,
+      'correctIndex': _num,
+      'accept': _strs,
+      'answerText': _str,
+      'explanation': _str,
+      'rubric': _strs,
+      'placement': {'type': 'boolean'},
+    })),
+  })),
+});
+
+String moduleUnitInstructions(SkillRequest r, Json outline, int unit) {
+  final units = (outline['units'] as List).cast<Json>();
+  return '''
+Write every lesson of unit ${unit + 1} of this module.
+
+${_request(r)}
+
+The whole plan, so lessons do not repeat each other:
+${[for (var i = 0; i < units.length; i++) '${i + 1}. ${units[i]['title']}: ${[for (final l in (units[i]['lessons'] as List? ?? const [])) (l as Json)['title']].join('; ')}'].join('\n')}
+
+The unit to write: ${units[unit]['title']}. ${units[unit]['summary']}
+${[for (final l in (units[unit]['lessons'] as List? ?? const [])) '- ${(l as Json)['title']}: ${l['covers']}'].join('\n')}
+
+For each lesson:
+- body: markdown, 300 to 500 words. One worked example in the learner's own domain, one trap where the obvious approach is wrong, and the rule for choosing. Tables and fenced code are allowed; no images, no HTML, no web links.
+- Any number or result you state must be one you can check by hand from the example you give.
+- keyPoints: 3 to 5. interviewAngle: 40 to 100 words on how this comes up and what the learner can honestly say, within their real level.
+- exercises: 4. At least one "mcq" and one "open". Mark exactly one "mcq" or "short" as placement: true; it must test the lesson's core idea.
+  - mcq: 4 choices that are real mistakes, correctIndex from 0 (vary its position), explanation. Leave accept, answerText and rubric empty.
+  - short: a one-word or one-line answer in answerText, realistic variants in accept (lower case), explanation. Leave choices and rubric empty and correctIndex 0.
+  - open: a full model answer in answerText and 3 or 4 rubric points. Leave choices, accept and explanation empty and correctIndex 0.''';
+}
+
+final moduleAnswersSchema = _obj({
+  'answers': _list(_obj({'prompt': _str, 'strongAnswer': _str})),
+});
+
+String moduleAnswersInstructions(SkillRequest r, Json outline) => '''
+Write a model spoken answer for each interview question below.
+
+${_request(r)}
+
+${[for (final q in (outline['interviewQuestions'] as List? ?? const [])) '- $q'].join('\n')}
+
+Each strongAnswer: first person, 60 to 120 words, plain words meant to be said aloud. Use only facts from the learner record. Where the question goes past their real level, the answer says what they have done, what they have studied, and what they have not done. Never invent an employer, number, title, certificate or outcome. Keep each prompt exactly as given.''';
+

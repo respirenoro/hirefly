@@ -71,6 +71,7 @@ flutter:
 
   assets:
     - assets/career/
+    - assets/content/authoring.md
     - assets/content/questions/
     - assets/content/datasets/
     - assets/content/skills/sql/

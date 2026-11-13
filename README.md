@@ -18,8 +18,10 @@ Or by hand: download `HireFly-windows.zip` from Releases, unzip, run `project_hi
   mock interview.
 - **Your stories.** Builds, checks and rehearses the stories your answers come from.
 - **Skills.** Nine modules (SQL, Excel, Power BI, Jira, Azure DevOps, Test Plans, Playwright,
-  the ticket process, documentation): 265 lessons, 58 labs in the real tools, a SQL sandbox,
+  the ticket process, documentation): 285 lessons, 58 labs in the real tools, a SQL sandbox,
   and advice on which outside courses to use and when.
+- **New skills.** For a skill it does not cover, Claude Code researches and writes a module to
+  one standard (`assets/content/authoring.md`), or the app writes one itself with an API key.
 - **Works without an API key.** A Claude Code session can send jobs and coach answers through
   a folder the app watches (`docs/inbox.md`). A Claude API key adds in-app coaching.
 
@@ -27,7 +29,7 @@ Or by hand: download `HireFly-windows.zip` from Releases, unzip, run `project_hi
 
 | | |
 |---|---|
-| Question bank (546) | `assets/content/questions/` |
+| Question bank (598) | `assets/content/questions/` |
 | Skill modules | `assets/content/skills/` |
 | Every prompt the app sends | `lib/ai/prompts.dart`, listed in `docs/prompts.md` |
 | Content format | `docs/content-schema.md` |

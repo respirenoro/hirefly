@@ -14,6 +14,7 @@
     "unit-9.json",
     "unit-10.json",
     "unit-11.json",
+    "unit-12.json",
     "unit-6.json"
   ],
   "interviewQuestions": [
@@ -96,24 +97,74 @@
       "id": "excel-iq-16",
       "prompt": "How do you make sure your numbers are right before you send a report?",
       "strongAnswer": "I reconcile totals two ways, for instance the pivot grand total against a row count, and I check a few rows by hand. I look for blanks, duplicates and outliers, test any ratio against a number I can calculate separately, and confirm that percentages are built from totals, not averaged. I note the definitions and assumptions, such as how blanks were treated. At work I often checked reports against my SQL results, and I use the same habit in Excel."
+    },
+    {
+      "id": "excel-iq-17",
+      "prompt": "What is the difference between a relative, an absolute and a mixed reference?",
+      "strongAnswer": "A relative reference like A1 changes when the formula is copied: one row down it becomes A2. An absolute reference, written with dollar signs as $A$1, stays fixed wherever the formula goes, which is what you want for a single rate or a lookup table. A mixed reference fixes only the row or only the column, like $A1, and is useful when one formula has to be copied across and down a grid. F4 cycles through them. Most broken copied formulas I have fixed were a lookup range that should have been absolute, or better, a Table, which avoids the problem."
+    },
+    {
+      "id": "excel-iq-18",
+      "prompt": "How do COUNT, COUNTA, COUNTBLANK and COUNTIF differ?",
+      "strongAnswer": "COUNT counts cells that contain numbers. COUNTA counts every cell that is not empty, including text. COUNTBLANK counts the empty ones, and COUNTIF counts cells that meet a condition, such as a status of cancelled. I use the first two together as a quick data check: if a column should be all numbers and COUNTA is higher than COUNT, the difference is cells holding text, usually numbers stored as text from an export. Those get skipped by SUM, so finding them before I report a total has saved me from a wrong number more than once."
+    },
+    {
+      "id": "excel-iq-19",
+      "prompt": "How do you find duplicate values in a column?",
+      "strongAnswer": "The quickest way to see them is conditional formatting: Highlight Cells Rules, Duplicate Values, which colours every repeat. To work with them I add a helper column with COUNTIF of the value against the whole column; anything above one is a duplicate, and I can filter on it. If I only need the unique list, I use Remove Duplicates on a copy, or UNIQUE in newer Excel. Before deleting anything I check whether the rows are true duplicates or just share one field, because two shifts at the same pharmacy on the same day can both be real."
+    },
+    {
+      "id": "excel-iq-20",
+      "prompt": "What are the parts of a PivotTable, and what goes where?",
+      "strongAnswer": "A PivotTable has four areas. Rows and Columns hold the categories you want to break the data down by, such as pharmacy down the side and month across the top. Values holds what you are measuring, with a summary type like count, sum or average. Filters holds fields that limit the whole table, and slicers do the same job with buttons. I put the thing I am comparing in Rows, time in Columns, and then check the grand total against a simple count of the source data, so I know the pivot has picked up every row."
+    },
+    {
+      "id": "excel-iq-21",
+      "prompt": "When would you use conditional formatting?",
+      "strongAnswer": "When I want the reader's eye to go to the exceptions without reading every number. Typical uses are highlighting values over a threshold, such as shifts that took more than a day to fill, flagging duplicates, colouring overdue dates, and data bars for a quick comparison down a column. I keep it to one or two rules per sheet, because a sheet where everything is coloured tells you nothing. For a rule that depends on another column I use a formula-based rule, with the row reference left relative so it applies to each row correctly."
+    },
+    {
+      "id": "excel-iq-22",
+      "prompt": "Which Excel functions do you use most for analysing data?",
+      "strongAnswer": "For summarising, pivot tables first, and SUMIFS, COUNTIFS and AVERAGEIFS when I need the figure in a fixed cell. For bringing data together, VLOOKUP at work and now XLOOKUP or INDEX and MATCH. For cleaning, TRIM, the text functions and Text to Columns, because exported data is rarely tidy. For checking, COUNT against COUNTA and IFERROR around lookups. I would describe my level as moderate: comfortable with these every day, learning Power Query and dynamic arrays on my own, and not claiming macros or anything I have not used."
+    },
+    {
+      "id": "excel-iq-23",
+      "prompt": "What is Excel's order of operations, and where does it catch people out?",
+      "strongAnswer": "Brackets first, then exponents, then multiplication and division, then addition and subtraction, working left to right. So two plus three times four is fourteen. The place it catches people is percentages and growth: new minus old divided by old needs brackets around the subtraction, or Excel divides first and the answer is wrong. There is also a quirk with a leading minus sign, which Excel applies before an exponent. When a formula matters I add brackets even where they are not strictly needed, because the next person to read it should not have to work it out."
+    },
+    {
+      "id": "excel-iq-24",
+      "prompt": "How do you apply the same formatting to several sheets at once?",
+      "strongAnswer": "I group the sheets: click the first tab, then Shift-click the last, or Ctrl-click the ones I want. While they are grouped, anything I type or format applies to the same cells on every sheet, so one pass sets the headers and column widths for all of them. The risk is forgetting they are grouped and overwriting data everywhere, so I ungroup straight away and spot-check a couple of sheets. If the sheets are not laid out identically, I format one and use Paste Special, Formats on the others instead."
+    },
+    {
+      "id": "excel-iq-25",
+      "prompt": "What file types can Excel open and save, and when does the choice matter?",
+      "strongAnswer": "The standard workbook is xlsx. A workbook with macros has to be saved as xlsm or the macros are lost. CSV is plain text with one sheet and no formatting or formulas, which is what most systems export and import. Excel also opens text files and can save as PDF for a fixed report. The choice matters most with CSV: opening one directly can strip leading zeros from codes and turn long ids into scientific notation, so I import it through Get Data or the text import, and set those columns to text."
+    },
+    {
+      "id": "excel-iq-26",
+      "prompt": "How do you freeze panes, and why would you?",
+      "strongAnswer": "On the View tab, Freeze Panes keeps rows and columns in place while you scroll. Freeze Top Row covers the common case. For both a header row and an id column, I select the cell just below and to the right of what should stay fixed and choose Freeze Panes. I use it on any list longer than a screen, because once the headers scroll away people start reading the wrong column. For printing it is a different setting, Print Titles, which repeats the header row on every page."
     }
   ],
   "resources": [
     {
-      "title": "Exam MO-200: Microsoft Excel (Office 2019)",
-      "url": "https://learn.microsoft.com/certifications/exams/mo-200",
+      "title": "Exam MO-210: Microsoft Excel (Microsoft 365 Apps)",
+      "url": "https://learn.microsoft.com/certifications/exams/mo-210",
       "source": "Microsoft Learn",
       "kind": "certification",
       "minutes": 30,
       "free": true,
-      "why": "The official skills areas (worksheets, cells and ranges, tables, formulas, charts) with weightings; use it as a checklist of what a baseline Excel test covers.",
+      "why": "The current Microsoft Office Specialist Excel exam, which replaced the Office 2019 exam MO-200. Its task areas (manage worksheets and workbooks, manage data cells and ranges, manage tables, formulas and functions, manage charts) are a fair checklist of what a practical Excel test covers.",
       "units": [
         "excel-u1",
         "excel-u9"
       ],
       "priority": "worthwhile",
       "useWhen": "Read the skills outline on day one and tick off what you can already do before choosing units.",
-      "versus": "It is a vendor checklist with weightings and no teaching; HireFly teaches the items interviews test and shows them on the shift data."
+      "versus": "The exam page is the only route to the certificate and lists the task areas, but it teaches nothing and at the time of checking its skills-outline link was broken. HireFly teaches the tasks and drills them under time."
     },
     {
       "title": "Learn to use Power Query and Power Pivot in Excel",
@@ -132,7 +183,7 @@
       "versus": "Microsoft's page is an index of links and version notes; HireFly's lessons walk a real merge and unpivot and say honestly that this is newly learned."
     },
     {
-      "title": "Get to know Power Query",
+      "title": "Import data from the web (a first Power Query import)",
       "url": "https://support.microsoft.com/en-gb/office/b13eed81-33fe-410d-9247-1747269c28e4",
       "source": "Microsoft Support",
       "kind": "docs",
@@ -147,13 +198,13 @@
       "versus": "It is the vendor's current screens for a first import; HireFly adds the practice CSVs and the interview wording for a skill you are still learning."
     },
     {
-      "title": "Explore the Power Query user interface",
+      "title": "Use Power Query to transform data (the Power Query interface)",
       "url": "https://learn.microsoft.com/en-us/training/modules/automate-data-cleaning-power-query/2-explore-power-query",
       "source": "Microsoft Learn",
       "kind": "course",
       "minutes": 25,
       "free": true,
-      "why": "A free Learn module that walks the editor, applied steps and loading, which you can follow with the practice CSVs.",
+      "why": "Microsoft's walkthrough of the Power Query editor: the ribbon, the query list, Applied Steps, and merging and grouping. Its examples use a sample online data feed, not Excel files, but the editor is the same one Excel opens.",
       "units": [
         "excel-u10"
       ],
@@ -220,7 +271,7 @@
         "excel-u4",
         "excel-u10"
       ],
-      "priority": "core",
+      "priority": "optional",
       "useWhen": "Watch the pivot, XLOOKUP and Power Query videos after the matching HireFly units, because seeing the real interface does what text cannot.",
       "versus": "Video shows every click in the current Excel, which HireFly cannot; HireFly is better for timed drills, honest wording about your level and the shift-data labs."
     },

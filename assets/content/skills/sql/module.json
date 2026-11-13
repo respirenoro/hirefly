@@ -13,6 +13,7 @@
     "unit-8.json",
     "unit-9.json",
     "unit-10.json",
+    "unit-11.json",
     "unit-6.json"
   ],
   "interviewQuestions": [
@@ -100,17 +101,72 @@
       "id": "sql-iq-17",
       "prompt": "Why can't you use a column alias in a WHERE clause?",
       "strongAnswer": "Because of the order SQL evaluates a query. FROM and joins come first, then WHERE, then GROUP BY, HAVING, SELECT, and finally ORDER BY. The alias is created in SELECT, which happens after WHERE, so WHERE cannot see it, while ORDER BY can. The same reasoning explains why aggregates belong in HAVING rather than WHERE, and why window functions need a CTE to be filtered. When someone hands me a query I did not write, I walk through it in that order."
+    },
+    {
+      "id": "sql-iq-18",
+      "prompt": "What is the difference between a primary key, a foreign key and a unique constraint?",
+      "strongAnswer": "A primary key identifies one row. It is unique, it cannot be NULL and a table has one. A foreign key is a column that points at another table's primary key, so it can repeat and it is what you join on. A unique constraint also forbids duplicates, but it is an extra rule and not the row's identity, so a table can have several. In the scheduling data, a shift's id was the primary key and its pharmacy id was a foreign key. I did not design those tables, but I checked them: counting distinct ids against total rows, and looking for assignments whose shift did not exist."
+    },
+    {
+      "id": "sql-iq-19",
+      "prompt": "What are DDL and DML, and which have you used?",
+      "strongAnswer": "DML changes rows: INSERT, UPDATE and DELETE. DDL changes the objects themselves: CREATE, ALTER and DROP. SELECT only reads, and some people give it its own name, DQL. There are also permission commands, GRANT and REVOKE, and transaction commands, COMMIT and ROLLBACK. Nearly all of my work was reading: SELECT queries for reports and for checking bugs. I understand UPDATE and DELETE well enough to read them and to know the precautions, like running the WHERE as a SELECT first and working inside a transaction, but I was not the person changing production data or creating tables."
+    },
+    {
+      "id": "sql-iq-20",
+      "prompt": "What is an index, and what does it cost?",
+      "strongAnswer": "An index is a sorted structure on one or more columns that lets the database go straight to matching rows without reading the whole table, like the index in a book. The cost is that it takes space and has to be updated on every insert, update and delete, so you do not index everything. In SQL Server a table has one clustered index, which is the order the table is stored in, and can have many nonclustered ones. I have not created indexes. What I did was write filters that can use them, for example a date range on the column and not a function wrapped around it."
+    },
+    {
+      "id": "sql-iq-21",
+      "prompt": "What is a view, and when would you use one?",
+      "strongAnswer": "A view is a saved SELECT with a name. You query it like a table, but it holds no data of its own and runs its query each time. I would use one when several people need the same definition, for example one agreed meaning of a filled shift, or to hide columns people should not see, or to save writing the same join repeatedly. A CTE does a similar job inside a single query. A materialized view stores the result, so it is faster to read but has to be refreshed. I have queried views; I did not create them in production."
+    },
+    {
+      "id": "sql-iq-22",
+      "prompt": "What is normalization, and why does it matter to someone writing reports?",
+      "strongAnswer": "Normalization means organising tables so each fact is stored once. In the scheduling data a shift stored the pharmacy's id, and the pharmacy's name and city lived once in the pharmacies table. If a pharmacy changed its name, one row changed and nothing could disagree. For a report writer it explains why you need joins, and it tells you where to look when numbers disagree: if a value is repeated in two places, one of them may be stale. Reporting models often go the other way on purpose and repeat values so reads are simple. I can explain the first three normal forms, but I have not designed a schema."
+    },
+    {
+      "id": "sql-iq-23",
+      "prompt": "What is the difference between a correlated subquery and a regular one?",
+      "strongAnswer": "A regular subquery runs once on its own and hands back a value or a list, for example the overall average. A correlated subquery refers to the current row of the outer query, so it cannot run on its own and is in effect answered for each outer row. A typical use is comparing each row with its own group, like shifts that took longer to fill than their own pharmacy's average. It reads naturally, but on a large table I would usually write it as a join to a grouped CTE or a window function, and I would check that both versions return the same row count."
+    },
+    {
+      "id": "sql-iq-24",
+      "prompt": "When would you use EXISTS instead of IN or a join?",
+      "strongAnswer": "I use EXISTS when the question is yes or no: does this pharmacy have any cancelled emergency shift? It returns each outer row once, where a join would repeat the pharmacy for every matching shift. For the negative case I always use NOT EXISTS, because NOT IN returns nothing if the list contains a NULL. I hit that looking for pharmacists with no shifts: unfilled shifts had no pharmacist id, so the list had NULLs and the query came back empty. If I need columns from both tables, I join. If I only need to test for related rows, I use EXISTS."
+    },
+    {
+      "id": "sql-iq-25",
+      "prompt": "What is the difference between DELETE, TRUNCATE and DROP?",
+      "strongAnswer": "DELETE removes the rows that match a WHERE clause, one row at a time, and can be rolled back inside a transaction. TRUNCATE empties the whole table quickly, takes no WHERE and resets identity counters. DROP removes the table itself, structure and all. So DELETE is for removing some rows, TRUNCATE for emptying a table you are about to reload, and DROP for a table that should no longer exist. I would not run any of them on production data without a backup or a transaction and someone's sign-off. In my role I read data; changes went through the developers."
+    },
+    {
+      "id": "sql-iq-26",
+      "prompt": "A query is running slowly. How do you approach it?",
+      "strongAnswer": "I start by asking what changed: more data, a changed query or a new join. Then I look at what the query writer controls. I select only the columns needed, filter as early as possible, and keep filters on bare columns, so a date range and not a function on the date. I check the row count after each join, because a wrong join condition multiplies rows. If there is a subquery that runs for every row, I try a join to a grouped result. If it is still slow I look at the execution plan for a scan on a large table and take that, with the query and timings, to whoever owns the database. Indexes are their call."
+    },
+    {
+      "id": "sql-iq-27",
+      "prompt": "Name the types of joins and say when you use each.",
+      "strongAnswer": "An inner join returns only rows that match in both tables. A left join keeps every row from the left table and fills the right side with NULLs where there is no match, so I use it when missing matches matter, like shifts with no pharmacist yet. A right join is the mirror image, and I rewrite it as a left join for readability. A full outer join keeps unmatched rows from both sides, which is useful for reconciling two lists. A cross join pairs every row with every row, and a self join joins a table to itself. Most reporting work is inner and left joins, plus checking the row count afterwards."
+    },
+    {
+      "id": "sql-iq-28",
+      "prompt": "Find customers who signed up but never placed an order. How would you write it?",
+      "strongAnswer": "That is an anti-join. I would take the customers table and keep the rows with no matching order, either with a LEFT JOIN to orders and a WHERE on the order id being NULL, or with NOT EXISTS and a subquery correlated on the customer id. I avoid NOT IN, because one NULL in the order table's customer column makes it return nothing. Then I would check the result: the count of customers with orders plus the count without should equal the total. I used the same pattern to find pharmacists who had never been assigned a shift."
     }
   ],
   "resources": [
     {
-      "title": "Get Started Querying with Transact-SQL",
+      "title": "Query and modify data with Transact-SQL",
       "url": "https://learn.microsoft.com/en-us/training/paths/get-started-querying-with-transact-sql",
       "source": "Microsoft Learn",
       "kind": "course",
       "minutes": 480,
       "free": true,
-      "why": "The official T-SQL path for SELECT, filtering, joins and grouping; use it to practise the T-SQL forms this module teaches.",
+      "why": "The official T-SQL path (formerly \"Get Started Querying with Transact-SQL\"): six modules on SELECT, sorting and filtering, joins, subqueries, built-in functions with GROUP BY, and modifying data.",
       "units": [
         "sql-u1",
         "sql-u2",
@@ -140,9 +196,9 @@
       "url": "https://learn.microsoft.com/en-us/training/modules/write-advanced-sql-code",
       "source": "Microsoft Learn",
       "kind": "course",
-      "minutes": 60,
+      "minutes": 141,
       "free": true,
-      "why": "A short module on CTEs and window functions in T-SQL, matching units 4 and 8.",
+      "why": "An intermediate module of about two and a half hours: CTEs and recursive CTEs, window functions, correlated subqueries and error handling, plus JSON and pattern matching you can skip.",
       "units": [
         "sql-u4",
         "sql-u8"
@@ -189,7 +245,7 @@
     },
     {
       "title": "Mode SQL Tutorial: Intermediate SQL",
-      "url": "https://mode.com/sql-tutorial/intro-to-intermediate-sql",
+      "url": "https://www.thoughtspot.com/sql-tutorial/intro-to-intermediate-sql",
       "source": "Mode",
       "kind": "course",
       "minutes": 240,
@@ -206,7 +262,7 @@
     },
     {
       "title": "Mode SQL Tutorial: Window functions",
-      "url": "https://mode.com/sql-tutorial/sql-window-functions",
+      "url": "https://www.thoughtspot.com/sql-tutorial/sql-window-functions",
       "source": "Mode",
       "kind": "course",
       "minutes": 60,
@@ -246,7 +302,7 @@
       "units": [
         "sql-u10"
       ],
-      "priority": "core",
+      "priority": "worthwhile",
       "useWhen": "Start it in week two, once \"Joins\" and \"Aggregation: counting, grouping and rates\" are done, and keep going on the job.",
       "versus": "HireFly cannot match fifty fresh problems with hidden test cases and a community of solutions; HireFly is better for explaining queries aloud and for the shift domain."
     },
@@ -281,7 +337,24 @@
       ],
       "priority": "optional",
       "useWhen": "Watch parts of it if you learn better by seeing a query built, before units 1 to 4.",
-      "versus": "A long video shows typing and mistakes that text cannot; it is not tied to interviews, and HireFly gets to joins and rates faster."
+      "versus": "The freeCodeCamp course is a long video that uses MySQL, so some syntax differs from the T-SQL in this module; HireFly is shorter, uses shifts and pharmacies you already know, and grades your answers."
+    },
+    {
+      "title": "DataLemur SQL Tutorial",
+      "url": "https://datalemur.com/sql-tutorial",
+      "source": "DataLemur",
+      "kind": "course",
+      "minutes": 600,
+      "free": true,
+      "why": "A free 33-lesson tutorial written for interviews, with practice questions after each lesson, including execution order, CTE versus subquery and pivoting.",
+      "units": [
+        "sql-u8",
+        "sql-u9",
+        "sql-u11"
+      ],
+      "priority": "worthwhile",
+      "useWhen": "Use it for extra unseen problems once you have finished \"Joins\" and want more volume before a technical screen.",
+      "versus": "DataLemur has many more interview-style problems on unfamiliar tables; HireFly ties each idea to reports you actually built and to what you can honestly claim."
     }
   ],
   "labs": [

@@ -1,0 +1,171 @@
+{
+  "id": "ticket-u14",
+  "title": "Business analysis basics",
+  "summary": "How analysts find out what is needed and write it down: elicitation techniques, kinds of requirement and the documents that hold them, and process maps with swimlanes.",
+  "lessons": [
+    {
+      "id": "ticket-u14-l1",
+      "title": "Eliciting requirements and telling the kinds apart",
+      "minutes": 12,
+      "body": "You were the liaison between customers and developers, turning requests into stories. Business analysis is the formal name for that work. Analyst interviews ask how you gather requirements and what kinds there are, and your experience answers both once you have the vocabulary.\n\n## Elicitation\n\nRequirements are not lying around to be collected. People describe solutions (\"add a button\") when what they have is a problem (\"I cannot tell which shifts are urgent\"). **Elicitation** is drawing out the need.\n\n| Technique | Use it when | Watch for |\n|---|---|---|\n| Interview | You need depth from one person | Leading questions; ask open ones and ask \"why\" more than once |\n| Workshop | Several groups must agree | The loudest voice; give everyone a turn |\n| Observation (shadowing) | People cannot describe what they do out of habit | They behave differently when watched |\n| Document analysis | There are existing forms, reports, tickets or contracts | Documents show the official process, not the real one |\n| Survey | You need many answers to a few questions | Low response; no chance to follow up |\n| Prototype or mock-up | People cannot react to words but can react to a picture | They mistake it for the finished thing |\n\nYour support tickets were document analysis: sorting them showed that people were confused by features that worked, which no interview had revealed. Use two techniques where you can, since each covers the other's blind spot.\n\nAlways play back what you heard, in writing, and get agreement. \"So the need is to see urgent shifts first, and today you scan the whole list. Is that right?\"\n\n## Stakeholders\n\nA stakeholder is anyone affected by the change or able to affect it: users, their managers, the people paying, developers, support, compliance. Map them by how much influence they have and how much they care, and plan contact accordingly: work closely with high influence and high interest, keep high influence and low interest satisfied, keep the rest informed. Missing a stakeholder is the classic cause of a requirement that appears a week before release.\n\n## Kinds of requirement\n\n| Kind | Answers | Example |\n|---|---|---|\n| Business | Why is the organisation doing this? | Reduce unfilled emergency shifts by a quarter |\n| Stakeholder (user) | What does this group need? | Coordinators need to reach nearby pharmacists quickly |\n| Functional | What must the system do? | Send an alert to pharmacists within a chosen radius |\n| Non-functional | How well must it do it? | Alerts arrive within 30 seconds; works on mobile; logs who sent what |\n| Transition | What is needed to move from old to new? | Import existing pharmacist contacts; train coordinators |\n\nNon-functional requirements are the ones most often missed: performance, security, availability, accessibility, auditability. Ask about each deliberately. A good requirement of any kind is clear, testable, necessary and traceable to a business need. \"Fast\" is not testable; \"within 30 seconds\" is.\n\n## Where they are written down\n\n- **BRD**, business requirements document: the why and the high-level what, for sponsors.\n- **SRS**, software requirements specification, or **FRD**, functional requirements document: the detailed what, for the build team.\n- **User stories with acceptance criteria**: the agile form, which is the one you wrote.\n- **Use case**: a step-by-step account of an actor achieving a goal, with a main flow and alternative and exception flows.\n\nA short use case:\n\n> **Send an emergency alert.** Actor: coordinator. Precondition: an open shift exists. Main flow: 1. Coordinator opens the shift and chooses Send alert. 2. System shows pharmacists within the default radius. 3. Coordinator confirms. 4. System sends the alert and shows a confirmation. Alternative: 2a. No pharmacists in range; system offers to widen the radius. Exception: 4a. Sending fails; system reports the failure and keeps the shift open.\n\nThe alternative and exception flows are where the test cases come from.\n\n## Traceability\n\nEach requirement should link back to a business need and forward to its tests. When scope is questioned, traceability answers \"why are we building this?\" and \"what breaks if we drop it?\".",
+      "keyPoints": [
+        "Elicitation draws out the underlying need; people tend to state solutions.",
+        "Choose techniques to fit: interviews for depth, workshops for agreement, observation for habit, documents and tickets for evidence.",
+        "Requirements come in kinds: business, stakeholder, functional, non-functional and transition.",
+        "A good requirement is clear, testable, necessary and traceable.",
+        "A use case has a main flow plus alternative and exception flows, which become test cases."
+      ],
+      "interviewAngle": "\"How do you gather requirements?\" should get a specific story: a customer asked for a feature, you asked what problem it solved, you checked the tickets, you wrote it back to them and then wrote the story. Name the techniques as you go. Be straightforward that you wrote user stories and acceptance criteria, not formal BRDs or SRS documents, and that you can read and contribute to those. Do not claim CBAP, ECBA or UML modelling experience.",
+      "exercises": [
+        {
+          "id": "ticket-u14-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "\"Alerts must reach pharmacists within 30 seconds of being sent.\" What kind of requirement is this?",
+          "choices": [
+            "Business",
+            "Functional",
+            "Non-functional",
+            "Transition"
+          ],
+          "answer": 2,
+          "explanation": "It says how well the system must perform, not what it does. Sending the alert is the functional requirement; the 30 seconds is non-functional."
+        },
+        {
+          "id": "ticket-u14-l1-e2",
+          "type": "mcq",
+          "prompt": "Experienced coordinators cannot explain how they decide which shift to fill first; they \"just know\". Which technique is most likely to reveal it?",
+          "choices": [
+            "A survey",
+            "Observation (shadowing) while they work",
+            "Reading the contract",
+            "A prototype"
+          ],
+          "answer": 1,
+          "explanation": "When knowledge has become habit, watching the work shows what people cannot put into words."
+        },
+        {
+          "id": "ticket-u14-l1-e3",
+          "type": "mcq",
+          "prompt": "A customer says: \"We need a red flag icon on the shift list.\" What is the best next step?",
+          "choices": [
+            "Write a story for a red flag icon.",
+            "Ask what problem the flag would solve and what they do today.",
+            "Tell them icons are a design decision.",
+            "Estimate the work."
+          ],
+          "answer": 1,
+          "explanation": "A red flag is a solution. The need behind it, perhaps spotting urgent shifts, may be met better another way, and it is the need that should be written down."
+        },
+        {
+          "id": "ticket-u14-l1-e4",
+          "type": "short",
+          "prompt": "In a use case, what are the flows called that describe what happens when something goes wrong?",
+          "accept": [
+            "exception flows",
+            "exception flow",
+            "exceptions",
+            "exception",
+            "exception paths"
+          ],
+          "answer": "Exception flows",
+          "explanation": "Alternative flows are other valid routes to the goal; exception flows cover failures."
+        },
+        {
+          "id": "ticket-u14-l1-e5",
+          "type": "open",
+          "prompt": "Rewrite this vague requirement so that it is clear and testable, and list two questions you would ask the stakeholder first: \"The roster page should load fast and be easy to use.\"",
+          "answer": "Questions first:\n1. Fast for whom and on what? How many shifts are on a typical roster, and is it used on a phone over mobile data?\n2. What is hard about it today? Which task takes too long or goes wrong?\n\nRewritten, assuming the answers:\n- The roster for one pharmacy and one week (up to 60 shifts) displays within 2 seconds on a standard office connection.\n- A coordinator can find a named pharmacist's shifts for the week in no more than two actions from the roster page.\n- The page is usable at a phone screen width without horizontal scrolling.\n\nEach line can now be tested and failed. \"Easy to use\" was split into the specific tasks that were hard, and anything I assumed is stated so the stakeholder can correct it.",
+          "rubric": [
+            "Asks clarifying questions about the user, context or current problem",
+            "Replaces \"fast\" with a measurable figure and conditions",
+            "Replaces \"easy to use\" with specific, checkable behaviour",
+            "States assumptions or notes that the figures need the stakeholder's agreement"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u14-l2",
+      "title": "Process mapping: as-is, to-be and swimlanes",
+      "minutes": 10,
+      "body": "Postings for analyst, operations and implementation roles ask for \"process mapping\" or \"process documentation\" more often than for any diagramming tool. A process map is a picture of who does what, in what order. You can draw a useful one on paper with five shapes.\n\n## Why map at all\n\n- People who do a process every day disagree about how it works. A map puts the disagreement on the table.\n- Problems show up as shapes: a loop back, a queue, a handoff that happens three times.\n- It gives you a baseline, so that after a change you can say what is different.\n\n## As-is and to-be\n\nThe **as-is** map shows the process as it runs today, including the workarounds, not as the manual says. The **to-be** map shows it after the change. The work between them is **gap analysis**: what must change in systems, roles, data and training to get from one to the other. Draw the as-is first. Skipping it is how projects automate a process nobody actually follows.\n\n## The shapes\n\nMost maps use a small subset of BPMN, the standard notation:\n\n| Shape | Meaning |\n|---|---|\n| Circle (thin line) | Start event: what triggers the process |\n| Circle (thick line) | End event: an outcome |\n| Rounded rectangle | Task: one piece of work, named verb first (\"Confirm shift\") |\n| Diamond | Gateway: a decision or a split, with a labelled path for each answer |\n| Arrow | Sequence flow: the order |\n| Horizontal band | Swimlane: one role or system; tasks sit in the lane of whoever does them |\n\n## A swimlane example in words\n\nFilling an emergency shift, as-is:\n\n- **Pharmacy lane**: *start* Staff shortage found, then *task* Phone the staffing firm.\n- **Coordinator lane**: *task* Log the request, then *task* Search the list for nearby pharmacists, then *task* Call each one in turn, then *gateway* Anyone available? If no, loop back to Search with a wider area. If yes, *task* Assign the shift.\n- **Pharmacist lane**: *task* Confirm by phone.\n- **Coordinator lane**: *task* Tell the pharmacy, then *end* Shift filled.\n\nDrawn out, two things are obvious: the loop of phone calls, and the number of times work crosses between lanes. Each crossing is a **handoff**, and handoffs are where things wait and get lost. The to-be map replaces the call loop with one task, Send alert to pharmacists within radius, and a pharmacist task, Accept in the app. That was the SOS feature.\n\n## What to look for\n\n- **Handoffs**: every arrow that crosses a lane line.\n- **Loops and rework**: arrows pointing backwards.\n- **Waiting**: tasks that depend on someone being available.\n- **Decisions with no owner**: a diamond in no one's lane.\n- **Dead ends**: a gateway path that leads nowhere, often the unhappy case nobody designed.\n- **Duplicate entry**: the same data typed into two systems.\n\n## Making one\n\n1. Agree the start and the end before anything else. \"From the shortage being noticed to the pharmacy being told.\"\n2. List the roles: these are the lanes.\n3. Walk through one real case with the people who do it, writing a task per step.\n4. Add the decisions and what happens on each branch, including when it fails.\n5. Walk it again with a second case, then show it to someone who was not in the room.\n\nAny drawing tool will do: Visio, Lucidchart, draw.io or a whiteboard photographed. Say which you have used and that the notation carries across.",
+      "keyPoints": [
+        "An as-is map shows today's real process; a to-be map shows the target; gap analysis is what lies between.",
+        "Five shapes cover most maps: start and end circles, task rectangles, decision diamonds, arrows, and swimlanes for roles.",
+        "Every arrow crossing a lane is a handoff, where delays and losses concentrate.",
+        "Look for loops, waiting, ownerless decisions, dead ends and duplicate data entry.",
+        "Fix the start and end points first, then walk real cases with the people who do the work."
+      ],
+      "interviewAngle": "If you have not drawn formal BPMN diagrams, do not say you have. What you can say is strong: you understood a manual process well enough to propose the SOS alert that replaced a chain of phone calls, which is as-is to to-be analysis. Offer to sketch it. In a practical exercise, start by asking for the start and end of the process and the roles, then talk through one case; interviewers are watching the method more than the drawing.",
+      "exercises": [
+        {
+          "id": "ticket-u14-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What does a swimlane represent in a process map?",
+          "choices": [
+            "A time period",
+            "One role, team or system responsible for the tasks in it",
+            "A priority level",
+            "An optional step"
+          ],
+          "answer": 1,
+          "explanation": "Each lane belongs to a participant. A task sits in the lane of whoever performs it, so handoffs show as arrows crossing lanes."
+        },
+        {
+          "id": "ticket-u14-l2-e2",
+          "type": "mcq",
+          "prompt": "Why draw the as-is process before designing the to-be?",
+          "choices": [
+            "It is required by BPMN.",
+            "It exposes the real steps and workarounds, so the change fixes the actual problem.",
+            "It makes the project longer.",
+            "The to-be cannot use swimlanes otherwise."
+          ],
+          "answer": 1,
+          "explanation": "Without the as-is, teams design against the process in the manual and miss the workarounds people depend on."
+        },
+        {
+          "id": "ticket-u14-l2-e3",
+          "type": "short",
+          "prompt": "Which shape represents a decision point in a process map?",
+          "accept": [
+            "diamond",
+            "a diamond",
+            "gateway",
+            "a gateway",
+            "diamond (gateway)"
+          ],
+          "answer": "A diamond (gateway)",
+          "explanation": "A gateway splits the flow; each outgoing arrow is labelled with its condition."
+        },
+        {
+          "id": "ticket-u14-l2-e4",
+          "type": "mcq",
+          "prompt": "In the as-is emergency shift process, which feature of the map most clearly signals wasted time?",
+          "choices": [
+            "The single start event",
+            "The loop from \"Anyone available?\" back to \"Search\" and the repeated phone calls",
+            "The end event",
+            "The pharmacy lane having two shapes"
+          ],
+          "answer": 1,
+          "explanation": "A backward arrow is rework. Here it is a cycle of calls that repeats until someone says yes."
+        },
+        {
+          "id": "ticket-u14-l2-e5",
+          "type": "open",
+          "prompt": "Describe, as lanes and steps in words, the as-is process for a customer reporting a bug until it is fixed and they are told. Then name two problems the map would make visible.",
+          "answer": "**Start**: customer notices a problem. **End**: customer told it is fixed.\n\n- **Customer**: Report problem by phone or email.\n- **Support / liaison**: Log ticket. Reproduce? (gateway). If no, Ask customer for details and loop back. If yes, Write bug report with steps and evidence. Set severity.\n- **Product owner**: Prioritise against backlog (gateway: now or later).\n- **Developer**: Fix. Open pull request.\n- **Tester / liaison**: Retest. Passed? (gateway). If no, back to Developer. If yes, include in release.\n- **Support / liaison**: Tell customer; close ticket.\n\nProblems the map shows:\n1. The loop between customer and support for missing details. A better intake form or a short list of questions would shorten it.\n2. The customer hears nothing between logging and closing; there is no task that updates them while the bug waits in the backlog. That gap is where repeat contacts come from.",
+          "rubric": [
+            "States a start and end point",
+            "Places steps in named role lanes",
+            "Includes at least one decision with both outcomes",
+            "Identifies two real weaknesses such as a loop, a handoff, waiting or missing customer updates"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -81,7 +81,16 @@ Rules:
   `pharmacists`, `assignments`; tickets about dispatch, notifications, schedules.
 - Be accurate. If unsure a feature or menu name is current, describe what it does rather than
   where it is. Plain direct prose; no filler, no hype.
-- 5 to 8 `interviewQuestions` per module.
+- 8 or more `interviewQuestions` per module: one for every question that recurs in public
+  interview lists for the skill, including the definition and comparison questions.
+- `unverified` (optional, in `module.json`): a list of what the author could not confirm, such
+  as syntax not run on the real product or a price. The app shows it on the module page under
+  "Check before you rely on it".
+
+What a module must cover, and how each part is verified, is in `assets/content/authoring.md`.
+That file is the standard for every author: a Claude Code session (the `hirefly-module` skill
+in `integrations/claude-skill/`) and the assistant inside the app (New skill) are both given
+it. Check a module folder with `python tool/check_module.py <folder> [--links] [--bundled]`.
 
 ## Question bank: `assets/content/questions/<category>.json`
 

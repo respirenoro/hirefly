@@ -14,6 +14,7 @@
     "unit-9.json",
     "unit-10.json",
     "unit-11.json",
+    "unit-12.json",
     "unit-6.json"
   ],
   "interviewQuestions": [
@@ -96,6 +97,61 @@
       "id": "power-bi-iq-16",
       "prompt": "The totals in your report do not match another team's. How do you investigate?",
       "strongAnswer": "I start by comparing definitions, because most gaps come from different filters or metrics, such as filled versus completed shifts. Then I check my model: relationships, whether the measure is a measure and not an averaged column, any blank rows from unmatched keys, and date ranges including partial months. I reconcile to an independent count, like a SQL query on the same data, and note any differences I cannot explain. Then I document the agreed definition so the question does not come back."
+    },
+    {
+      "id": "power-bi-iq-17",
+      "prompt": "What is the difference between row context and filter context?",
+      "strongAnswer": "Filter context is the set of filters in force when a measure is calculated: the row of the visual, slicers and anything CALCULATE adds. It decides which rows are visible. Row context is the current row, and it exists in a calculated column or inside an iterator like SUMX. A plain measure has no row context, which is why it has to aggregate. The two meet when a measure is used inside an iterator: CALCULATE turns the current row into a filter, which is called context transition. I learned this building a practice model, where an average per state and an overall average gave different numbers."
+    },
+    {
+      "id": "power-bi-iq-18",
+      "prompt": "When do you need SUMX instead of SUM?",
+      "strongAnswer": "SUM adds up one column that already exists. SUMX walks a table row by row, works out an expression for each row and adds the results, so I need it when the value is not stored, such as quantity times price. The same applies to AVERAGEX when I want an average per group and then the average of those. On my practice data the average hours to fill was 9.52 per shift, but 9.88 when each state counted once, because a small state had slower fills. Both were correct, so the label has to say which one it is."
+    },
+    {
+      "id": "power-bi-iq-19",
+      "prompt": "Explain ALL, ALLEXCEPT and ALLSELECTED.",
+      "strongAnswer": "All three remove filters inside CALCULATE, usually to build the bottom of a percentage. ALL removes every filter on a table or column, so I get a share of the grand total. ALLEXCEPT removes everything except the columns I name, so a pharmacy can be shown as a share of its own state. ALLSELECTED removes the filters that come from the rows of the visual but respects the slicers, so the percentages add up to 100 for whatever the user picked. I choose by asking what the total should be. I have used these on a practice model, not in production."
+    },
+    {
+      "id": "power-bi-iq-20",
+      "prompt": "When would you use the FILTER function instead of a simple filter in CALCULATE?",
+      "strongAnswer": "For a condition on one column I use the short form, like CALCULATE of total shifts where the emergency flag is 1. It is simpler and faster. I use FILTER when the condition cannot be written that way: comparing two columns in the same row, or testing a measure, such as counting pharmacies whose total shifts are above thirty. FILTER returns a table and goes row by row, so I point it at a small table like the list of pharmacies and not at the whole fact table. That keeps it quick and avoids surprising results."
+    },
+    {
+      "id": "power-bi-iq-21",
+      "prompt": "How would you show the top five items and group the rest as \"Others\"?",
+      "strongAnswer": "I would rank the items with RANKX over the full list, using ALL so each item is ranked against everyone. Then I would add a small table with the top names plus an Others row, and write a measure that returns the item's value when its rank is five or better and the remaining total on the Others row. Before building it I would check for ties, because TOPN keeps ties and a top five can come back as seven. I would ask the report owner whether tied items should all show. I have built ranking on a practice model; the Others pattern I know as a method."
+    },
+    {
+      "id": "power-bi-iq-22",
+      "prompt": "What is the difference between static and dynamic row-level security?",
+      "strongAnswer": "Static security has a fixed filter per role, for example one role where state equals Florida and another for Georgia, and people are assigned to roles in the Service. It is easy to understand but needs a role for every slice. Dynamic security uses one role whose filter compares a column with the signed-in user, through USERPRINCIPALNAME, against a table that maps people to what they may see. Adding a manager is then a data change. I would also remember that roles add up, and that security only restricts people who view. I have tested both on a practice model."
+    },
+    {
+      "id": "power-bi-iq-23",
+      "prompt": "What is the difference between Import, DirectQuery and a live connection?",
+      "strongAnswer": "Import copies the data into the model, so reports are fast and every feature works, but the data is only as fresh as the last refresh. DirectQuery leaves the data in the source and sends a query whenever a visual loads, which suits very large or near-real-time data at the cost of speed and load on the source. A live connection points a report at a semantic model someone else published, so many reports share one set of definitions. I would default to Import and change only for a size or freshness reason. My own experience so far is Import."
+    },
+    {
+      "id": "power-bi-iq-24",
+      "prompt": "Should a new column be created in Power Query or in DAX?",
+      "strongAnswer": "My default is Power Query, or better still the source query. A column built there is calculated once at refresh, compresses well and is available to every measure. I would use a DAX calculated column when the value depends on the model, for example something that needs a relationship or another measure. And if the value is an aggregate that should change with slicers, it should not be a column at all; it should be a measure. That is the same rule I followed in SQL: shape the data as early as possible and keep the report layer for calculations."
+    },
+    {
+      "id": "power-bi-iq-25",
+      "prompt": "What does DAX time intelligence need in order to work?",
+      "strongAnswer": "It needs a proper date table: one row per day with no gaps, covering the whole range of the data, marked as a date table, and related to the fact table on a date column, not a date and time. Slicers and axes should use columns from that date table, not the date on the fact table. With that in place, functions like TOTALYTD, DATEADD and SAMEPERIODLASTYEAR work. Without it you get blanks or wrong totals. I would also check partial months before comparing periods, which I learned on practice data where the first and last months were incomplete."
+    },
+    {
+      "id": "power-bi-iq-26",
+      "prompt": "How do you manage changes to a report that people already use?",
+      "strongAnswer": "I would not edit the live report directly. The usual arrangement is separate development, test and production workspaces, with a deployment pipeline that moves content forward, so a change is made in one place, checked in a second and released from a third. Before release I would compare key totals against the previous version and against a query on the source, and tell the readers what changed. I have not run a deployment pipeline myself. I did run release testing for software, with test cases and sign-off before go-live, and I would apply the same discipline to reports."
+    },
+    {
+      "id": "power-bi-iq-27",
+      "prompt": "How do you explain a number to a stakeholder who is not technical?",
+      "strongAnswer": "I start with the question they asked, then the answer in one sentence, then how sure I am. For example: fill rate was 89 percent last month, meaning 89 of every 100 requested shifts got a pharmacist, and that excludes shifts still open. I define the measure in plain words, because most disagreements turn out to be about the definition. If the number moved, I say what moved it and show one chart, not five. I did this with customers and developers in my last role, where the same word often meant different things to each side."
     }
   ],
   "resources": [
@@ -115,18 +171,18 @@
       "versus": "It is the vendor's skills list and free practice assessment, and the only route to a certificate; HireFly cannot certify you but gives a shorter drill and honest talk about learning the tool."
     },
     {
-      "title": "Get started with Power BI",
+      "title": "Get started with Microsoft data analytics",
       "url": "https://learn.microsoft.com/en-us/training/paths/get-started-power-bi/",
       "source": "Microsoft Learn",
       "kind": "course",
       "minutes": 120,
       "free": true,
-      "why": "Microsoft's beginner path on reports and the Power BI service, no prerequisites.",
+      "why": "Microsoft renamed and widened this path: four modules covering the analytics process, building in Power BI, an introduction to Microsoft Fabric and Copilot in Power BI. Only the second module is hands-on Power BI.",
       "units": [
         "power-bi-u1",
         "power-bi-u10"
       ],
-      "priority": "worthwhile",
+      "priority": "optional",
       "useWhen": "Do it first if you have never opened Power BI, before \"Getting started: Power BI and Power Query\".",
       "versus": "Microsoft shows the current service and Desktop screens; HireFly's lessons tie the workflow to your shift data and your SQL and Excel background."
     },
@@ -197,13 +253,13 @@
       "versus": "A short authoritative page without exercises; HireFly adds a built-and-checked schema from the practice tables."
     },
     {
-      "title": "Row-level security (RLS) with Power BI Desktop",
+      "title": "Row-level security (RLS) with Power BI",
       "url": "https://learn.microsoft.com/power-bi/create-reports/desktop-rls",
       "source": "Microsoft Learn",
       "kind": "docs",
       "minutes": 20,
       "free": true,
-      "why": "The step-by-step for defining roles, testing with View as, and assigning members.",
+      "why": "The step-by-step for defining roles in Desktop, testing them (View as in Desktop, Test as role in the Service) and assigning members.",
       "units": [
         "power-bi-u5",
         "power-bi-u10"

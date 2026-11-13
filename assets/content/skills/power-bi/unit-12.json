@@ -1,0 +1,245 @@
+{
+  "id": "power-bi-u12",
+  "title": "Deeper DAX and the wider platform",
+  "summary": "Row context and iterators, the DAX functions interview lists keep asking about, and how storage modes, Fabric and licences fit together.",
+  "lessons": [
+    {
+      "id": "power-bi-u12-l1",
+      "title": "Row context, iterators and SUMX",
+      "minutes": 12,
+      "body": "Unit 3 taught **filter context**: the set of filters a visual, slicer or `CALCULATE` puts on the model before a measure is worked out. DAX has a second kind of context, and \"what is the difference?\" is one of the most asked DAX interview questions.\n\n## Row context\n\n**Row context** means \"the current row\". It exists in two places:\n\n1. A **calculated column**. `hours_to_fill = DATEDIFF(Shifts[requested_at], Shifts[filled_at], MINUTE) / 60` is worked out once per row, and `Shifts[requested_at]` means this row's value.\n2. An **iterator** function, which walks a table one row at a time.\n\nA plain measure has no row context. That is why `= Shifts[hours_to_fill] * 2` fails as a measure: Power BI does not know which row you mean. You must aggregate.\n\n| | Row context | Filter context |\n|---|---|---|\n| Answers | Which row am I on? | Which rows are visible? |\n| Created by | Calculated columns, iterators | Visuals, slicers, `CALCULATE` |\n| Follows relationships by itself | No (use `RELATED`) | Yes |\n\n## Iterators: the X functions\n\n`SUM(Shifts[hours_to_fill])` adds up one existing column. `SUMX(table, expression)` goes row by row, evaluates the expression for each row, then adds the results. The same pattern gives `AVERAGEX`, `MINX`, `MAXX`, `COUNTX` and `RANKX`.\n\nUse an iterator when the thing you want to add up is not already a column:\n\n```dax\nTotal Hours Waiting = SUMX(Shifts, DATEDIFF(Shifts[requested_at], Shifts[filled_at], MINUTE) / 60)\n```\n\nThis gives the same total as summing the `hours_to_fill` column, without storing the column. For a large table that saves memory; for row labels you slice by, a column is still right.\n\n## Averages of averages\n\nThe more important use is choosing the level you average at. On the practice data:\n\n```dax\nAvg Hours to Fill = AVERAGE(Shifts[hours_to_fill])\n\nAvg of State Averages =\nAVERAGEX(VALUES(Pharmacies[state]), [Avg Hours to Fill])\n```\n\n| Measure | Result | What it means |\n|---|---|---|\n| Avg Hours to Fill | 9.52 | Every filled shift counts once |\n| Avg of State Averages | 9.88 | Every state counts once |\n\nThe state averages are AL 10.95, FL 9.45, GA 9.32 and SC 9.77. Alabama has only 50 filled shifts against Florida's 481, yet in the second measure it carries a quarter of the weight, which pulls the figure up. Neither number is wrong. They answer different questions, and a report must say which it shows. This is the usual cause when \"the total does not match the average of the rows\".\n\n## Context transition\n\nInside `AVERAGEX` above, how does `[Avg Hours to Fill]` know which state it is on? A measure used inside an iterator is wrapped in an invisible `CALCULATE`, and `CALCULATE` turns the current row into a filter. That step is called **context transition**. You do not need to go further than this sentence in an interview: \"a measure called inside an iterator is filtered to the current row, because CALCULATE turns row context into filter context.\"\n\n## When to use which\n\n- Adding up a stored column: `SUM`.\n- Adding up something calculated per row: `SUMX`.\n- An average per group, then averaged: `AVERAGEX` over `VALUES(column)`.\n- A row label you put on an axis or slicer: a calculated column, or better, a Power Query column.",
+      "keyPoints": [
+        "Row context is the current row (calculated columns and iterators); filter context is which rows are visible.",
+        "A plain measure has no row context, so it must aggregate.",
+        "SUMX and the other X functions evaluate an expression per row, then aggregate the results.",
+        "AVERAGE over shifts and AVERAGEX over states give different, equally valid numbers: 9.52 against 9.88.",
+        "A measure inside an iterator is filtered to the current row; this is context transition."
+      ],
+      "interviewAngle": "Expect \"row context versus filter context\" and \"SUM versus SUMX\" in any interview that lists Power BI. Give the one-line definitions, then the average-of-averages example, because it shows you understand why two correct numbers can disagree. Keep the framing honest: you built these measures on a practice model while learning Power BI, and at work you made the same choice in SQL when deciding whether a rate was per shift or per pharmacy.",
+      "exercises": [
+        {
+          "id": "power-bi-u12-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which statement describes row context correctly?",
+          "choices": [
+            "It is the set of filters applied by slicers and visuals.",
+            "It is the current row during a calculated column or an iterator such as SUMX.",
+            "It exists in every measure automatically.",
+            "It is created by the CALCULATE function."
+          ],
+          "answer": 1,
+          "explanation": "Row context means \"this row\" and exists in calculated columns and iterators. Slicers and CALCULATE create filter context, and a plain measure has no row context."
+        },
+        {
+          "id": "power-bi-u12-l1-e2",
+          "type": "mcq",
+          "prompt": "You need total revenue, but the table has only `quantity` and `unit_price` columns. Which measure works without adding a column?",
+          "choices": [
+            "`SUM(Sales[quantity] * Sales[unit_price])`",
+            "`SUMX(Sales, Sales[quantity] * Sales[unit_price])`",
+            "`SUM(Sales[quantity]) * SUM(Sales[unit_price])`",
+            "`CALCULATE(Sales[quantity] * Sales[unit_price])`"
+          ],
+          "answer": 1,
+          "explanation": "SUM accepts only a column. SUMX multiplies per row and then adds. Multiplying the two totals gives a meaningless number."
+        },
+        {
+          "id": "power-bi-u12-l1-e3",
+          "type": "mcq",
+          "prompt": "On the practice data, `AVERAGE(Shifts[hours_to_fill])` is 9.52 and `AVERAGEX(VALUES(Pharmacies[state]), [Avg Hours to Fill])` is 9.88. Why is the second higher?",
+          "choices": [
+            "AVERAGEX ignores blank rows and AVERAGE does not.",
+            "Each state counts once, so Alabama's slow average weighs as much as Florida's despite far fewer shifts.",
+            "AVERAGEX rounds each value up.",
+            "The relationship between Shifts and Pharmacies is inactive."
+          ],
+          "answer": 1,
+          "explanation": "The second measure averages four state averages. Alabama (10.95 hours on 50 filled shifts) gets a quarter of the weight, which lifts the result."
+        },
+        {
+          "id": "power-bi-u12-l1-e4",
+          "type": "short",
+          "prompt": "What is the name for CALCULATE turning the current row into a filter when a measure is used inside an iterator?",
+          "accept": [
+            "context transition",
+            "the context transition"
+          ],
+          "answer": "Context transition",
+          "explanation": "A measure reference is wrapped in an implicit CALCULATE, which converts row context into filter context."
+        },
+        {
+          "id": "power-bi-u12-l1-e5",
+          "type": "open",
+          "prompt": "Write a measure for the average number of shifts per pharmacy (each pharmacy counts once), using the existing `[Total Shifts]` measure. Say what it returns on the practice data and how it differs from `[Total Shifts]`.",
+          "answer": "```dax\nAvg Shifts per Pharmacy =\nAVERAGEX(VALUES(Pharmacies[id]), [Total Shifts])\n```\n\n`VALUES(Pharmacies[id])` gives one row per pharmacy visible in the current filters. For each, `[Total Shifts]` is evaluated for that pharmacy only (context transition), and the results are averaged. On the practice data that is 1019 shifts over 40 pharmacies, about 25.5. `[Total Shifts]` on its own would show 1019. A pharmacy with no shifts returns blank and is left out of the average.",
+          "rubric": [
+            "Uses AVERAGEX over a one-row-per-pharmacy table such as VALUES(Pharmacies[id])",
+            "Evaluates [Total Shifts] per pharmacy",
+            "States a result near 25.5",
+            "Explains that each pharmacy counts once"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u12-l2",
+      "title": "The DAX functions interviewers name",
+      "minutes": 13,
+      "body": "Public Power BI interview lists return to the same dozen functions. You know `CALCULATE`, `ALL`, `DIVIDE` and the time functions from earlier units. These are the rest, each on the practice model.\n\n## Counting\n\n| Function | Counts | On Shifts |\n|---|---|---|\n| `COUNTROWS(Shifts)` | Rows | 1019 |\n| `COUNT(Shifts[filled_at])` | Non-blank values in a column | 906 |\n| `DISTINCTCOUNT(Shifts[pharmacy_id])` | Different values | 40 |\n| `DISTINCTCOUNT(Shifts[pharmacist_id])` | Different values, **including blank** | 57 |\n| `DISTINCTCOUNTNOBLANK(Shifts[pharmacist_id])` | Different values, blank left out | 56 |\n\nThe last two rows are a real trap: unfilled shifts have a blank pharmacist, and `DISTINCTCOUNT` counts blank as one more pharmacist. Prefer `COUNTROWS` to `COUNT` for \"how many rows\"; it says what you mean.\n\n## ALL, ALLEXCEPT, ALLSELECTED\n\nAll three remove filters inside `CALCULATE`, to build a denominator.\n\n- `ALL(Pharmacies)` removes every filter on the table: share of the grand total.\n- `ALLEXCEPT(Pharmacies, Pharmacies[state])` removes every filter on the table except state: share within the state.\n- `ALLSELECTED(Pharmacies)` removes the filters from the visual's rows but keeps slicers: share of what the user selected.\n\n```dax\nShare of State =\nDIVIDE([Total Shifts],\n       CALCULATE([Total Shifts], ALLEXCEPT(Pharmacies, Pharmacies[state])))\n```\n\nFor one Florida pharmacy with 32 shifts this returns 32 / 537, about 6.0%.\n\n## FILTER against a plain filter\n\n`CALCULATE([Total Shifts], Shifts[is_emergency] = 1)` is the short form and covers a condition on one column. `FILTER` returns a table and goes row by row, so use it when the condition compares two columns or uses a measure:\n\n```dax\nBusy Pharmacies =\nCOUNTROWS(FILTER(VALUES(Pharmacies[id]), [Total Shifts] > 30))\n```\n\nOn the practice data that is 9. Do not write `FILTER(Shifts, ...)` over a whole fact table when the short form would do; it is slower and can change the result.\n\n## RANKX and TOPN\n\n```dax\nPharmacy Rank =\nRANKX(ALL(Pharmacies[pharmacy_name]), [Total Shifts], , DESC, DENSE)\n```\n\n`ALL` is needed because, on a row of a table visual, only one pharmacy is visible, and ranking one item against itself always gives 1. `DENSE` leaves no gaps after ties.\n\n`TOPN(5, table, expression)` returns the top rows as a table, for use inside `CALCULATE`. It **keeps ties**: the practice data's busiest pharmacies have 35, 35, 33, 32, 32, 32 and 32 shifts, so \"top 5\" returns seven pharmacies and 231 shifts, not five and 167. State that when you present a top-N figure.\n\n## SELECTEDVALUE, RELATED and RELATEDTABLE\n\n- `SELECTEDVALUE(Pharmacies[state], \"All states\")` returns the one value in context, or the fallback when there are several. Use it for dynamic titles and to switch logic on a slicer.\n- `RELATED(Pharmacies[state])` fetches a value from the one side of a relationship into a row on the many side, in a calculated column on Shifts or inside an iterator over Shifts.\n- `RELATEDTABLE(Shifts)` goes the other way: from a pharmacy row to all its shifts, so `COUNTROWS(RELATEDTABLE(Shifts))` in a Pharmacies column counts each pharmacy's shifts.\n\n## Keeping a period fixed\n\nA common scenario question: \"show the last three months whatever the date slicer says\". Remove the slicer's filter and put your own period in its place:\n\n```dax\nShifts Last 3 Months =\nCALCULATE([Total Shifts],\n          REMOVEFILTERS(Dates),\n          DATESINPERIOD(Dates[Date], MAX(Shifts[request_date]), -3, MONTH))\n```\n\n`REMOVEFILTERS` clears the slicer; `DATESINPERIOD` supplies the three months ending at the latest request.",
+      "keyPoints": [
+        "COUNTROWS counts rows; DISTINCTCOUNT counts different values and includes blank as one of them.",
+        "ALL gives a share of everything, ALLEXCEPT a share within a group, ALLSELECTED a share of what the slicers allow.",
+        "Use a plain CALCULATE filter for one column; use FILTER when the condition needs a measure or two columns.",
+        "RANKX needs ALL on the ranked column; TOPN keeps ties, so it can return more than N rows.",
+        "RELATED reads from the one side; RELATEDTABLE returns the many side."
+      ],
+      "interviewAngle": "You will not be asked to recite syntax so much as to choose: \"ALL or ALLSELECTED here?\", \"why did your rank show 1 everywhere?\". Explain the choice in terms of the question being answered, as with the tie in the top five. Say that you learned these on a practice model. If asked what you have shipped, the truthful answer is the same logic in SQL: window ranks, distinct counts and percent-of-group, which map directly onto these functions.",
+      "exercises": [
+        {
+          "id": "power-bi-u12-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A matrix shows pharmacies grouped by state. Which measure gives each pharmacy's share of its own state's shifts?",
+          "choices": [
+            "`DIVIDE([Total Shifts], CALCULATE([Total Shifts], ALL(Pharmacies)))`",
+            "`DIVIDE([Total Shifts], CALCULATE([Total Shifts], ALLEXCEPT(Pharmacies, Pharmacies[state])))`",
+            "`DIVIDE([Total Shifts], [Total Shifts])`",
+            "`DIVIDE([Total Shifts], COUNTROWS(Pharmacies))`"
+          ],
+          "answer": 1,
+          "explanation": "ALLEXCEPT removes the pharmacy filter but keeps state, so the denominator is the state total. ALL would give a share of every state combined."
+        },
+        {
+          "id": "power-bi-u12-l2-e2",
+          "type": "mcq",
+          "prompt": "`DISTINCTCOUNT(Shifts[pharmacist_id])` returns 57 on the practice data, but only 56 pharmacists have worked a shift. Why?",
+          "choices": [
+            "One pharmacist is duplicated in the Pharmacists table.",
+            "DISTINCTCOUNT counts the blank on unfilled shifts as a value.",
+            "DISTINCTCOUNT rounds up.",
+            "A slicer is filtering Pharmacists."
+          ],
+          "answer": 1,
+          "explanation": "Unfilled shifts have no pharmacist. DISTINCTCOUNT includes blank as one distinct value; DISTINCTCOUNTNOBLANK leaves it out."
+        },
+        {
+          "id": "power-bi-u12-l2-e3",
+          "type": "mcq",
+          "prompt": "A table visual lists pharmacies with `RANKX(Pharmacies, [Total Shifts])`, and every row shows rank 1. What is wrong?",
+          "choices": [
+            "RANKX cannot rank measures.",
+            "Each row filters Pharmacies to one pharmacy, so it is ranked only against itself; wrap the table in ALL.",
+            "The order must be ASC.",
+            "Total Shifts needs to be a calculated column."
+          ],
+          "answer": 1,
+          "explanation": "The first argument is evaluated in the row's filter context. `ALL(Pharmacies[pharmacy_name])` restores the full list to rank against."
+        },
+        {
+          "id": "power-bi-u12-l2-e4",
+          "type": "short",
+          "prompt": "Which function returns the single value in the current context, or a fallback when there is more than one?",
+          "accept": [
+            "selectedvalue",
+            "selectedvalue()"
+          ],
+          "answer": "SELECTEDVALUE",
+          "explanation": "SELECTEDVALUE(column, alternate) is the usual way to read a slicer choice or build a dynamic title."
+        },
+        {
+          "id": "power-bi-u12-l2-e5",
+          "type": "open",
+          "prompt": "A manager asks for \"shifts at our top five pharmacies\". Write the measure using TOPN and `[Total Shifts]`. Then say what it returns on the practice data and what you would tell the manager about it.",
+          "answer": "```dax\nTop 5 Pharmacy Shifts =\nCALCULATE([Total Shifts],\n          TOPN(5, ALL(Pharmacies[pharmacy_name]), [Total Shifts], DESC))\n```\n\nOn the practice data this returns 231, not 167. The pharmacies run 35, 35, 33, 32, 32, 32, 32, so four are tied for fourth place and TOPN keeps all of them: seven pharmacies. I would tell the manager that the fifth place is a four-way tie, show the seven, and ask whether they want all tied pharmacies or a tie-break rule such as name order.",
+          "rubric": [
+            "Uses TOPN(5, ...) over the pharmacy list inside CALCULATE",
+            "Uses ALL so the whole list is considered",
+            "Knows TOPN keeps ties (seven pharmacies, 231 shifts)",
+            "Tells the stakeholder about the tie instead of hiding it"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power-bi-u12-l3",
+      "title": "Storage modes, Fabric and who can see what",
+      "minutes": 11,
+      "body": "Unit 5 covered publishing and unit 10 covered workspaces. This lesson fills in the platform vocabulary that interviewers use, so that you can follow the conversation and answer at an informed beginner's level. Product names and licence rules change often; describe what each thing does and say you would confirm the current rules.\n\n## Where the data lives: storage modes\n\n| Mode | What happens | Good for | Cost |\n|---|---|---|---|\n| Import | Data is copied into the model and compressed | Most reports. Fastest to use, full DAX and Power Query | Only as fresh as the last refresh; size limits |\n| DirectQuery | Nothing is copied. Each visual sends a query to the source | Very large or near-real-time data | Slower visuals, load on the source, some features limited |\n| Live connection | The report connects to a semantic model someone else published | Many reports on one governed model | You cannot change that model from the report |\n| Direct Lake | The model reads files in a Fabric lakehouse directly | Large data with near-Import speed, in organisations on Fabric | Needs Fabric capacity |\n| Composite | A mix: some tables Import, some DirectQuery | Big fact table with small imported dimensions | More to design and test |\n\nThe default answer to \"which would you choose?\" is Import, then say what would change your mind: data too large to import, or a need for figures that are minutes old.\n\n## The pieces\n\n- **Semantic model** (formerly \"dataset\"): the tables, relationships and measures. Reports sit on top of it.\n- **Dataflow**: Power Query that runs in the Service and saves its output for several models to reuse, so the cleaning is done once.\n- **Report** and **dashboard**: unit 5.\n- **App**: a packaged set of reports published from a workspace for readers.\n- **Microsoft Fabric**: the wider platform Power BI is now part of, which adds data storage and engineering tools (lakehouse, warehouse, pipelines) under one capacity and one workspace model.\n\n## Licences, in outline\n\nThere are per-user licences and there is capacity.\n\n- **Free**: build in Desktop, publish to your own workspace. Cannot share, with one exception below.\n- **Pro**: publish to shared workspaces and view others' content.\n- **Premium Per User**: Pro plus larger models and extra features, per person.\n- **Capacity** (Fabric F SKUs): compute the organisation buys. Content in a large enough capacity (F64 and above) can be viewed by people who have only the free licence.\n\nSo \"can this manager see my report?\" depends on their licence and on where the workspace lives. You would ask the administrator, and you would know what to ask.\n\n## Who can see and do what\n\nAccess is layered, and interview scenarios often hinge on which layer applies:\n\n1. **Workspace roles** (Admin, Member, Contributor, Viewer) cover everything in the workspace.\n2. **Item permissions** share one report or model with someone outside the workspace. **Build** permission lets them create their own reports on your model.\n3. **Row-level security** filters rows for people who only view. Roles add up: a person in two roles sees both sets of rows.\n4. **Sensitivity labels and endorsement** (Promoted, Certified) tell readers how far to trust and share an item.\n\n## Moving from development to production\n\nTeams do not edit the live report. A common setup is three workspaces, development, test and production, linked by a **deployment pipeline** that copies content forward and lets each stage point at its own data source. A smaller team may keep one workspace and publish a tested file. Either way, be ready to describe the idea: change in one place, check in a second, release to readers from a third.",
+      "keyPoints": [
+        "Import copies data and is the default; DirectQuery queries the source live; a live connection reuses a published model; Direct Lake reads Fabric lakehouse files.",
+        "A semantic model holds tables, relationships and measures; a dataflow is reusable Power Query in the Service.",
+        "Sharing needs Pro or Premium Per User, unless content sits in a large Fabric capacity that free users can view.",
+        "Access is layered: workspace role, item permission and Build, then row-level security for viewers.",
+        "Deployment pipelines move content through development, test and production workspaces."
+      ],
+      "interviewAngle": "Nobody expects an entry-level candidate to administer Fabric. They want to know you will not be lost in the meeting. Use the format \"what it does, when you would pick it, what I would confirm\": \"I would default to Import, and move to DirectQuery if the data were too large or had to be current to the minute. I have only used Import on a practice model.\" For licences, name the three layers and say you would check current rules with the administrator, because they change.",
+      "exercises": [
+        {
+          "id": "power-bi-u12-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A report must show figures no more than a few minutes old from a very large database. Which storage mode is the natural first choice?",
+          "choices": [
+            "Import with a daily refresh",
+            "DirectQuery",
+            "A static Excel export",
+            "Live connection to an imported model refreshed weekly"
+          ],
+          "answer": 1,
+          "explanation": "DirectQuery sends queries to the source when a visual loads, so it reflects current data and avoids importing a very large table. The price is slower visuals and load on the source."
+        },
+        {
+          "id": "power-bi-u12-l3-e2",
+          "type": "mcq",
+          "prompt": "Several reports need the same cleaned pharmacy list. Which item lets you do the Power Query work once in the Service and reuse it?",
+          "choices": [
+            "A dashboard",
+            "A dataflow",
+            "A bookmark",
+            "A sensitivity label"
+          ],
+          "answer": 1,
+          "explanation": "A dataflow runs Power Query in the Service and stores the result for several semantic models to use."
+        },
+        {
+          "id": "power-bi-u12-l3-e3",
+          "type": "mcq",
+          "prompt": "A colleague in another team should be able to build their own report on your published model but not edit it. What do they need?",
+          "choices": [
+            "The workspace Admin role",
+            "Build permission on the semantic model",
+            "A row-level security role",
+            "A copy of the .pbix file"
+          ],
+          "answer": 1,
+          "explanation": "Build permission lets someone create reports on a model without a workspace role that could change it."
+        },
+        {
+          "id": "power-bi-u12-l3-e4",
+          "type": "short",
+          "prompt": "What is the current name for what Power BI used to call a \"dataset\"?",
+          "accept": [
+            "semantic model",
+            "a semantic model",
+            "semantic models"
+          ],
+          "answer": "Semantic model",
+          "explanation": "Microsoft renamed datasets to semantic models; older articles and colleagues may still say dataset."
+        },
+        {
+          "id": "power-bi-u12-l3-e5",
+          "type": "open",
+          "prompt": "An interviewer asks: \"Would you use Import or DirectQuery for our operations dashboard?\" Write your spoken answer. You do not know their data size or freshness needs.",
+          "answer": "I would start by asking two things: how much data there is, and how current the figures need to be. If the data fits comfortably and a refresh every hour or every morning is acceptable, I would use Import. It is faster for the people using the report and gives the full set of modelling features. If the tables are too large to import, or the dashboard has to show what happened in the last few minutes, I would look at DirectQuery, knowing that visuals will be slower and each one puts a query on the source system. A mix is possible too: import the small lookup tables and keep the big fact table in DirectQuery. I should say that my own experience is Import on a practice model, so I would confirm the choice with whoever owns the data source.",
+          "rubric": [
+            "Asks about data volume and freshness before choosing",
+            "Defaults to Import and says why",
+            "Gives the conditions that favour DirectQuery and its costs",
+            "Is honest that experience so far is on a practice model"
+          ]
+        }
+      ]
+    }
+  ]
+}

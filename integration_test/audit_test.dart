@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:project_hirefly/ai/ai_client.dart';
+import 'package:project_hirefly/ai/prompts.dart';
 import 'package:project_hirefly/data/content.dart';
 import 'package:project_hirefly/data/db.dart';
 import 'package:project_hirefly/engine/inbox.dart';
@@ -43,6 +44,8 @@ Object? fill(Map<String, dynamic> schema, String path, List<String> problems, {r
       return [fill(schema['items'] as Map<String, dynamic>, '$path[]', problems, lastTurnSaysEnd: lastTurnSaysEnd)];
     case 'number':
       return 8.5;
+    case 'boolean':
+      return true;
     case 'string':
       final e = schema['enum'] as List?;
       if (e != null) return path.endsWith('.move') ? (lastTurnSaysEnd ? 'end' : 'next') : e.first;
@@ -334,6 +337,19 @@ void main() {
     await tap(find.text('Done'));
     await until(find.text('What you wrote'), 'the told story');
     await shot('story-told');
+
+    step('new skill: the request reaches the assistant, and a thin plan is refused, not saved');
+    await tap(find.text('New skill'));
+    await shot('new-skill');
+    await t.enterText(find.byKey(const Key('skill-name')), 'Salesforce');
+    await tap(find.text('Write the module'));
+    await until(find.textContaining('did not plan enough units'), 'the refused module');
+    expect(Directory(p.join(home.path, 'content', 'skills')).existsSync(), isFalse);
+    // The two later requests are never reached with a one-unit plan, so their
+    // shapes are checked against the same structured-output rules here.
+    for (final schema in [moduleUnitSchema, moduleAnswersSchema]) {
+      fill(jsonDecode(jsonEncode(schema)) as Map<String, dynamic>, r'$', problems, lastTurnSaysEnd: false);
+    }
 
     step('know your role, settings');
     await tap(find.text('Know your role'));

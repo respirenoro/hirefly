@@ -421,6 +421,46 @@
       "id": "jira-iq-16",
       "prompt": "What would you do on your first day in a new team's Jira?",
       "strongAnswer": "I would find the board and read its filter and columns, then look at the workflow to see what each status means. I would check the backlog's top items, the definition of ready if there is one, and the saved filters and dashboards the team already uses. I would ask which issue types and labels they use and what a good ticket looks like. Because I used Jira and Azure DevOps at the same level, the model is familiar and I only need local conventions."
+    },
+    {
+      "id": "jira-iq-17",
+      "prompt": "Jira now says \"work item\" and \"space\". What do those mean?",
+      "strongAnswer": "They are Atlassian's new names for things Jira users already know. An issue is now called a work item, and a project is now called a space. The rename is being rolled out in Jira Cloud, so for a while you see both sets of words in the product and in documentation, and older queries and filters keep working. I learned Jira with issues and projects and still tend to say that. If a team has moved to the new terms I would follow them. Nothing about how you plan a sprint or write a ticket changes."
+    },
+    {
+      "id": "jira-iq-18",
+      "prompt": "Can Jira be used for test case management?",
+      "strongAnswer": "Not well on its own. You can create an issue type called Test and link it to stories, but Jira has no built-in idea of test steps, test runs or pass and fail history. Teams that test in Jira add a marketplace app such as Xray or Zephyr, which supply those. My test management was in Azure DevOps Test Plans, where plans, suites, cases and runs are built in. I have not used Xray or Zephyr. The concepts transfer directly: cases linked to requirements, executed in cycles, with bugs linked back to the failing case."
+    },
+    {
+      "id": "jira-iq-19",
+      "prompt": "What is the difference between Jira Cloud and Jira Data Center?",
+      "strongAnswer": "Cloud is hosted and updated by Atlassian, and it is what most teams now use; new features such as team-managed projects and the built-in automation arrive there first. Data Center is the edition a company runs on its own infrastructure, chosen for control over data and customisation, and it can lag behind in features. Menus and some names differ between them. I used Jira as a daily user for tickets, backlog and sprints, not as an administrator, so on a new site I would check which edition and which project type I am in before assuming where things are."
+    },
+    {
+      "id": "jira-iq-20",
+      "prompt": "What is a custom field, and when is one justified?",
+      "strongAnswer": "A custom field is an extra field an administrator adds to issues beyond the built-in ones, for example Customer or Environment. It is justified when the team needs to filter, report or automate on that information, because then free text in the description is not enough. The cost is that every field makes the create screen longer and can slow the site, so I would first ask whether a label or a component would do. I have requested fields and used them in filters and boards. Creating and configuring them was the administrator's job."
+    },
+    {
+      "id": "jira-iq-21",
+      "prompt": "What tools does Jira usually integrate with?",
+      "strongAnswer": "The common ones are Confluence for documentation, where pages and issues link to each other. Bitbucket, GitHub or GitLab, so branches, commits and pull requests appear on the issue. Slack or Microsoft Teams for notifications. And Jira Service Management for customer requests that escalate to development issues. There are also marketplace apps for test management and time tracking. What matters to me as a user is the traceability: from a customer request to the ticket, to the code change, to the release it shipped in."
+    },
+    {
+      "id": "jira-iq-22",
+      "prompt": "How would you onboard a new team member to the team's Jira process?",
+      "strongAnswer": "I would start with the board, not the tool: what each column means, what done means for us, and who moves a card when. Then how we write a ticket, using a good recent bug and a good story as models, and the fields we rely on for filters. I would have them file one real ticket and take one through to done in their first week, and save them two or three filters: my open work, the current sprint, and bugs awaiting retest. I wrote this kind of guidance for customers and for our own knowledge base."
+    },
+    {
+      "id": "jira-iq-23",
+      "prompt": "How would you show a defect trend in Jira?",
+      "strongAnswer": "The Created versus Resolved chart shows whether bugs are arriving faster than they are being closed, filtered to the bug issue type for a project. For where they are, I would use a filter grouped by component or priority on a dashboard, with a two-dimensional statistics gadget. For how long they take, the control chart or average age. Before showing any of it I would check the filter itself, because a chart on a wrong query looks just as convincing. Then I would say what the trend means for the release, not just show it."
+    },
+    {
+      "id": "jira-iq-24",
+      "prompt": "When would you clone an issue?",
+      "strongAnswer": "When I need a new issue that starts as a copy of an existing one: the same bug found on a second platform, a recurring task, or a story template the team reuses. Cloning copies the fields and can include links and sub-tasks. I would then change the summary so the two can be told apart, and link them. What I would not do is clone to reopen old work. If a fixed bug comes back, I reopen it or raise a new one linked to the original, so the history stays honest."
     }
   ],
   "pathway": {

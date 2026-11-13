@@ -85,6 +85,11 @@ class _Lessons extends ConsumerWidget {
           const SizedBox(height: 10),
           const Label('What you are backing up'),
           Text(m.claim, style: readStyle(context).copyWith(color: p.textMuted)),
+          if (m.unverified.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Label('Check before you rely on it'),
+            Bullets(m.unverified),
+          ],
           const SizedBox(height: 12),
           Bar(total == 0 ? 0 : done / total, color: p.ratingHigh),
         ]),

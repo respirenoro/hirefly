@@ -96,6 +96,26 @@
       "id": "doc-iq-16",
       "prompt": "Write a one-paragraph requirement for an emergency request feature.",
       "strongAnswer": "When a pharmacy has a shift it cannot fill, a dispatcher needs to alert nearby pharmacists quickly. Given a dispatcher on a shift page, when they select Emergency and send the request, then the system alerts pharmacists within the pharmacy's alert distance and the shift is marked Emergency. The first pharmacist to accept is assigned, and the others are told it is filled. Open questions: the default distance, how long before the request widens, and who is told if nobody accepts. I scoped this feature in my last role."
+    },
+    {
+      "id": "doc-iq-17",
+      "prompt": "How would you edit a page of documentation you were handed in an interview?",
+      "strongAnswer": "I would read it once as the user, noting where I got lost, before changing anything. Then I would fix the structure first: is the title the task, does it say who it is for and what you need before starting, are the steps numbered with one action each and the result stated? After that the sentences: active voice, the same word for the same thing throughout, and no step hidden in a paragraph. Last, typos and formatting. I would hand back the edit with a short list of questions for the author about anything I could not verify."
+    },
+    {
+      "id": "doc-iq-18",
+      "prompt": "How do you write for readers whose first language is not English?",
+      "strongAnswer": "Short sentences with one idea each, and the same term for the same thing every time, since synonyms look like different things to a translator. I avoid idioms, humour and phrasal verbs where a plain verb exists, write dates so they cannot be misread, and keep interface labels exactly as they appear on screen. Numbered steps help, because structure survives translation better than prose. It is the same discipline as plain language generally, and it makes the text easier for native speakers too."
+    },
+    {
+      "id": "doc-iq-19",
+      "prompt": "How do you measure whether documentation is working?",
+      "strongAnswer": "By what readers do afterwards. The measure I used was support tickets: after I rewrote our help centre, tickets fell by about 35 percent, and the how-do-I category fell most. I would also look at searches that return nothing, which articles are opened before a ticket is raised, article feedback, and whether support agents link to articles when they answer. Page views alone say little. A heavily viewed article can mean it is useful or that the feature is confusing, so I read it alongside the tickets."
+    },
+    {
+      "id": "doc-iq-20",
+      "prompt": "What is the difference between a tutorial, a how-to guide, reference and explanation?",
+      "strongAnswer": "They serve four different needs, following the Diataxis framework. A tutorial teaches a beginner by having them complete a small project, and it must work every time. A how-to guide helps someone who already knows the basics to finish a specific task, with steps and no teaching. Reference describes the product exactly, such as fields and statuses, and is laid out to be looked up. Explanation gives background and reasons. Most bad documentation mixes them, for example a how-to that stops to explain theory. When I rewrote our knowledge base, separating task articles from reference was the main change."
     }
   ],
   "resources": [
@@ -225,12 +245,12 @@
     },
     {
       "title": "Federal Plain Language Guidelines",
-      "url": "https://plainlanguage.gov/guidelines/",
-      "source": "plainlanguage.gov",
+      "url": "https://centerforplainlanguage.org/learning-training/tools-training/",
+      "source": "Center for Plain Language",
       "kind": "reference",
       "minutes": 45,
       "free": true,
-      "why": "Free, concrete rules on short sentences, active voice and common words; check the page, as the site changed in 2025.",
+      "why": "The Federal Plain Language Guidelines, reposted by the Center for Plain Language after the original plainlanguage.gov address began redirecting to a different guide. Short rules with before-and-after examples.",
       "units": [
         "doc-u1",
         "doc-u8"

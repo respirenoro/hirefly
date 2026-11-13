@@ -1,0 +1,181 @@
+{
+  "id": "tp-u13",
+  "title": "Testing vocabulary and principles",
+  "summary": "The terms and ideas from the ISTQB Foundation syllabus that QA interviews ask by name: error, defect and failure, the testing principles, verification and validation, test levels of confidence, the pyramid and estimation.",
+  "lessons": [
+    {
+      "id": "tp-u13-l1",
+      "title": "Error, defect, failure and the seven principles",
+      "minutes": 12,
+      "body": "You tested software for nearly two years without a course, so you have the practice and may be missing the names. QA interviews, including entry-level ones, ask the names. This lesson follows the ISTQB Foundation Level syllabus, which is where most interviewers' definitions come from.\n\n## Error, defect, failure, root cause\n\n| Term | Meaning | Dispatch example |\n|---|---|---|\n| Error (mistake) | A person gets something wrong | A developer assumes all pharmacies are in one time zone |\n| Defect (bug, fault) | The flaw that results, in code or a document | The start time is saved without a time zone |\n| Failure | The software visibly does the wrong thing when the defect is exercised | A pharmacist in another zone sees the shift an hour off |\n| Root cause | The underlying reason the error was made | No requirement mentioned time zones |\n\nA defect can sit unnoticed for months if nothing exercises it, which is why \"it passed testing\" does not mean \"it has no defects\". **Testing** finds failures and defects; **debugging** is the developer's work of locating and fixing the cause. A tester reports and retests; they do not usually debug.\n\n## Verification and validation; QA and QC\n\n- **Verification**: are we building the product right? Checking against the specification: reviews, test cases traced to requirements.\n- **Validation**: are we building the right product? Checking that it meets the user's actual need. UAT is validation.\n- **Quality assurance (QA)** is about the process: how work is done so that defects are prevented. **Quality control (QC)** is about the product: checking it, of which testing is the main form. Job titles say \"QA\" for both.\n\n## The seven testing principles\n\n1. **Testing shows the presence of defects, not their absence.** A clean run reduces risk; it proves nothing is left.\n2. **Exhaustive testing is impossible.** The SOS radius field alone accepts thousands of values. You choose tests by risk and by technique.\n3. **Early testing saves time and money.** A missing rule caught in refinement costs a comment; caught in production it costs a release. This is also called shift-left.\n4. **Defects cluster.** A few areas hold most of the bugs. In your product, notifications and scheduling drew most tickets, so they earned the most tests.\n5. **Tests wear out** (the pesticide paradox). The same cases stop finding anything new. Update them and add exploratory sessions.\n6. **Testing depends on context.** A pharmacy staffing tool, a game and a medical device need different rigour.\n7. **Absence of defects is a fallacy.** Software can match its specification perfectly and still not help the user. That is the case for validation.\n\n## The words around a test\n\n- **Test condition**: something worth testing, such as \"alert radius limits\".\n- **Test scenario**: a situation in plain words, \"coordinator sends an alert at the maximum radius\".\n- **Test case**: preconditions, steps, data and an expected result.\n- **Test script**: the procedure, often meaning the automated version.\n- **Test basis**: what you derive tests from, such as stories and acceptance criteria.\n- **Testware**: everything testing produces: plans, cases, data, results, reports.\n\n## Smoke, sanity, retest, regression\n\n- **Smoke**: a short broad check that a build is worth testing at all.\n- **Sanity**: a short narrow check that one changed area basically works. This term is informal and not defined in the syllabus, so say how you use it.\n- **Confirmation testing (retest)**: rerun the failed test to confirm the fix.\n- **Regression**: check that the change did not break what worked before.",
+      "keyPoints": [
+        "A person makes an error, which leaves a defect, which causes a failure when exercised; the root cause is why the error happened.",
+        "Verification checks against the specification; validation checks against the user's need.",
+        "Testing shows defects are present, never that none remain, and exhaustive testing is impossible.",
+        "Defects cluster, and repeated tests stop finding new ones, so target risk and refresh the cases.",
+        "Confirmation testing reruns the failed case; regression testing checks everything around the fix."
+      ],
+      "interviewAngle": "These are asked as quick definitions, and a self-taught tester is exactly who they are aimed at. Give the definition, then one example from the dispatch product, which shows you did the thing before you knew its name. If you are asked about certification, the truthful line is: \"I am not ISTQB certified. I have studied the Foundation syllabus, and my testing experience is hands-on: writing and running cases in Azure DevOps Test Plans and running UAT.\"",
+      "exercises": [
+        {
+          "id": "tp-u13-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A developer misreads a requirement and writes code that saves the wrong time. A user later sees a shift listed an hour late. Which term names what the user saw?",
+          "choices": [
+            "Error",
+            "Defect",
+            "Failure",
+            "Root cause"
+          ],
+          "answer": 2,
+          "explanation": "The misreading is the error, the wrong code is the defect, and the visible wrong behaviour is the failure."
+        },
+        {
+          "id": "tp-u13-l1-e2",
+          "type": "mcq",
+          "prompt": "All 240 regression cases passed, yet customers report a bug the next day. Which principle does this illustrate best?",
+          "choices": [
+            "Defects cluster together.",
+            "Testing shows the presence of defects, not their absence.",
+            "Testing is context dependent.",
+            "Early testing saves time and money."
+          ],
+          "answer": 1,
+          "explanation": "Passing tests reduce the chance of undiscovered defects but cannot prove there are none."
+        },
+        {
+          "id": "tp-u13-l1-e3",
+          "type": "mcq",
+          "prompt": "Customers confirm in UAT that the new alert screen fits how they actually work. What kind of check is this?",
+          "choices": [
+            "Verification",
+            "Validation",
+            "Debugging",
+            "Static testing"
+          ],
+          "answer": 1,
+          "explanation": "Validation asks whether the right product was built for the user's need. Verification asks whether it matches the specification."
+        },
+        {
+          "id": "tp-u13-l1-e4",
+          "type": "short",
+          "prompt": "What is the informal name for the principle that the same tests, run again and again, stop finding new defects?",
+          "accept": [
+            "pesticide paradox",
+            "the pesticide paradox",
+            "tests wear out"
+          ],
+          "answer": "Pesticide paradox",
+          "explanation": "The syllabus calls it \"tests wear out\"; most interviewers know it as the pesticide paradox."
+        },
+        {
+          "id": "tp-u13-l1-e5",
+          "type": "mcq",
+          "prompt": "A developer says a bug is fixed. You rerun the exact test that failed and it passes. What have you done?",
+          "choices": [
+            "Regression testing",
+            "Confirmation testing (retest)",
+            "Smoke testing",
+            "Exploratory testing"
+          ],
+          "answer": 1,
+          "explanation": "Rerunning the failed test to confirm the fix is confirmation testing. Regression testing would check the surrounding features still work."
+        },
+        {
+          "id": "tp-u13-l1-e6",
+          "type": "open",
+          "prompt": "An interviewer asks: \"What is the difference between QA and QC, and which did you do?\" Write your answer.",
+          "answer": "Quality assurance is about the process: how the team works so that defects are prevented, for example clear acceptance criteria, reviews and a definition of done. Quality control is about the product: checking what was built, mainly by testing it. I did both, in a small team. On the QC side I wrote test cases in Azure DevOps Test Plans, ran release and regression testing and coordinated UAT with customers. On the QA side I wrote the acceptance criteria and pushed for them to be testable before work started, and I fed recurring bugs back into how we wrote tickets. My title was project manager, so I would describe it as owning quality for our releases, not as a dedicated QA engineer.",
+          "rubric": [
+            "QA is process-focused and preventive",
+            "QC is product-focused checking, mainly testing",
+            "Gives real examples of each from the last role",
+            "Is accurate about title and scope"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp-u13-l2",
+      "title": "The test pyramid, the life cycle and estimating test effort",
+      "minutes": 11,
+      "body": "Three planning ideas from the syllabus appear in interviews as \"how would you...\" questions: where tests should sit, what the stages of testing are, and how long it will take.\n\n## The test pyramid\n\nThe pyramid is a picture of how many tests to have at each level.\n\n| Layer | What it checks | Speed and cost | In your product |\n|---|---|---|---|\n| Top: end-to-end / UI | Whole journeys through the screen | Slowest, most fragile | Your Playwright tests; manual UAT scripts |\n| Middle: integration / API | Parts talking to each other, without the screen | Faster | A call that creates a shift and checks the response |\n| Base: unit | One function in isolation | Milliseconds, written by developers | A function that calculates distance for the alert radius |\n\nThe advice is many tests at the base and few at the top. A suite that is all UI tests is slow and fails for reasons unrelated to the change, sometimes called an ice-cream cone. For a tester the practical use is a question to ask in refinement: \"can this rule be checked lower down?\". If a discount rule has twelve combinations, twelve unit tests and one UI test beat twelve UI tests.\n\n## The software test life cycle\n\nInterviewers call it the STLC; the syllabus calls them test activities. In Azure DevOps Test Plans terms:\n\n| Stage | What happens | Where it lives |\n|---|---|---|\n| Planning | Scope, approach, who, when, entry and exit criteria | The test plan and its settings |\n| Analysis | Decide what to test from the stories | Requirement-based suites |\n| Design | Write cases and data | Test cases, shared steps, parameters |\n| Implementation | Prepare the environment and order the runs | Configurations, test points |\n| Execution | Run, record outcomes, raise bugs | Test Runner, bugs linked to cases |\n| Completion | Report, keep what is reusable, review what to improve | Progress report, a closure summary |\n\nMonitoring and control run throughout: comparing progress to the plan and acting on the difference.\n\n**Entry criteria** say when testing may start (build deployed, smoke test passed, test data loaded). **Exit criteria** say when it may stop (all priority 1 cases run, no open critical bugs, known issues accepted by the product owner). Naming them is the best answer to \"how do you know when you are done testing?\".\n\n## Estimating test effort\n\nThree techniques at a reader's level:\n\n- **By ratio.** Use your own history. If testing has taken about 30% of development time on past releases, a 100-hour feature needs about 30 hours of testing.\n- **By extrapolation.** Measure early and project. If the first 20 cases took 5 hours, 80 similar cases will take about 20.\n- **Three-point.** Ask for optimistic (a), most likely (m) and pessimistic (b) figures and combine them as (a + 4m + b) / 6. For 6, 9 and 18 hours: (6 + 36 + 18) / 6 = 10 hours.\n\nWhichever you use, list what the number includes: writing cases, test data, execution, retesting fixes, regression and reporting. The retest and regression time is what people forget, and it is why \"just test it Friday\" slips.\n\n## Risk decides the order\n\nWhen there is not enough time, which is the normal case, order tests by risk: how likely is a failure and how bad would it be? The SOS alert is used rarely but must work, so it goes first. A report's column order goes last. Say this out loud in an interview; \"I would test everything\" is the answer they are listening for you not to give.",
+      "keyPoints": [
+        "The pyramid wants many fast unit tests, fewer integration tests and few end-to-end UI tests.",
+        "Test activities run from planning and analysis through design, implementation and execution to completion.",
+        "Entry criteria say when testing can start; exit criteria say when it can stop.",
+        "Estimate by ratio, by extrapolating from early results, or with the three-point formula (a + 4m + b) / 6.",
+        "With limited time, order tests by likelihood and impact of failure."
+      ],
+      "interviewAngle": "\"How do you decide what to test when there is no time?\" and \"how do you know when testing is finished?\" are the two questions this lesson answers: by risk, and by exit criteria agreed beforehand. Use your releases as the example, with the alert feature tested first. For the pyramid, be exact about your layer: you worked at the top, with manual tests and basic Playwright end-to-end tests, and you understand why the lower layers exist.",
+      "exercises": [
+        {
+          "id": "tp-u13-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A pricing rule has 15 input combinations. According to the test pyramid, what is the better way to cover them?",
+          "choices": [
+            "15 end-to-end UI tests",
+            "15 unit tests and one or two UI tests for the journey",
+            "15 manual UAT scripts",
+            "One exploratory session"
+          ],
+          "answer": 1,
+          "explanation": "Rule combinations are cheap and stable to check at the unit level. A UI test or two confirms the rule is wired to the screen."
+        },
+        {
+          "id": "tp-u13-l2-e2",
+          "type": "short",
+          "prompt": "Using the three-point formula (a + 4m + b) / 6, what is the estimate for optimistic 4 hours, most likely 6 hours and pessimistic 14 hours? Answer with the number.",
+          "accept": [
+            "7",
+            "7 hours",
+            "7h",
+            "7.0"
+          ],
+          "answer": "7",
+          "explanation": "(4 + 24 + 14) / 6 = 42 / 6 = 7 hours."
+        },
+        {
+          "id": "tp-u13-l2-e3",
+          "type": "mcq",
+          "prompt": "Which of these is an exit criterion?",
+          "choices": [
+            "The build is deployed to the test environment.",
+            "Test data has been loaded.",
+            "All priority 1 cases have run and no critical bugs are open.",
+            "The smoke test passed."
+          ],
+          "answer": 2,
+          "explanation": "Exit criteria define when testing may stop. The other three are conditions for starting: entry criteria."
+        },
+        {
+          "id": "tp-u13-l2-e4",
+          "type": "mcq",
+          "prompt": "In which test activity do you decide, from the user stories, what needs to be tested?",
+          "choices": [
+            "Test analysis",
+            "Test execution",
+            "Test completion",
+            "Test implementation"
+          ],
+          "answer": 0,
+          "explanation": "Analysis identifies the test conditions from the test basis. Design then turns them into cases."
+        },
+        {
+          "id": "tp-u13-l2-e5",
+          "type": "open",
+          "prompt": "A release has 120 test cases and you have one day, enough for about 50. Explain to the product owner how you will choose and what you will tell them at the end of the day.",
+          "answer": "I will order the cases by risk: how likely each area is to have broken in this release and how much harm a failure would do. First come cases for what changed, and for the things that must never fail, such as sending an SOS alert and saving a shift. Next come the areas that have produced the most bugs before, notifications and scheduling. Cosmetic and rarely used screens go last. I will run a short smoke test before anything else so we do not spend the day on a broken build.\n\nAt the end of the day I will report what was run and what was not, by area, the bugs found and their severity, and the risk left in the untested 70 or so cases. Then the decision to release is yours, made with that list in front of you.",
+          "rubric": [
+            "Prioritises by likelihood and impact of failure",
+            "Puts changed and business-critical areas first",
+            "Starts with a smoke test or names entry criteria",
+            "Reports what was not tested and the remaining risk, leaving the release decision to the owner"
+          ]
+        }
+      ]
+    }
+  ]
+}

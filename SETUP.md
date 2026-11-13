@@ -37,29 +37,33 @@ Ask: **"Shall I start a research session to build lessons for the missing skills
 for your target roles?"** If yes, start a subagent or session on Opus at medium effort with:
 
 - the skills without a module, and the target roles from the resumes;
-- `docs/content-schema.md` as the format;
+- `assets/content/authoring.md` as the standard to follow and `docs/content-schema.md` as the
+  format. The steps are in `integrations/claude-skill/hirefly-module/SKILL.md`;
 - output to `Documents\HireFly\content\skills\<id>\` (a `module.json` and unit files, with
-  `resources`, `labs` and `pathway`) and `Documents\HireFly\content\questions\<name>.json`;
-- the rule that every resource link must be one it found in this session, and that it checks
-  its files parse.
+  `resources`, `labs`, `pathway` and an `unverified` list) and
+  `Documents\HireFly\content\questions\<name>.json`;
+- the rules that pages are opened and read, never taken from search snippets, that every
+  resource link is one it opened in this session, and that it runs
+  `python tool/check_module.py <module folder> --links` on each module before finishing.
 
 Add each new module id to `skills.json`. HireFly reads these folders when it starts.
 
 ## 3. Sending jobs through Claude (no API key needed)
 
-Copy `integrations/claude-skill/hirefly-role` into the `.claude/skills/` folder of the project
-where the user runs their job search. Ask which project. Then tell them:
+Copy `integrations/claude-skill/hirefly-role` and `integrations/claude-skill/hirefly-module` into
+the `.claude/skills/` folder of the project where the user runs their job search. Ask which project. Then tell them:
 
 > With HireFly open, say "send the <company> <role> job to HireFly" in that project. Claude
 > writes the role brief and tailored questions and HireFly builds the plan. Later, say "coach
-> my HireFly answers". Formats are in `docs/inbox.md`.
+> my HireFly answers". For a skill the app does not teach yet, say "build a HireFly module
+> for <skill>". Formats are in `docs/inbox.md`.
 
 ## 4. Optional
 
 Ask which of these they want, and do only those:
 
-- **Claude API key** (Settings): turns on the in-app coach, live mock interviewer and lesson
-  tutor. Without it, coaching comes through step 3 and mocks run in a Claude conversation.
+- **Claude API key** (Settings): turns on the in-app coach, live mock interviewer, lesson
+  tutor and New skill, which writes a module inside the app (without web research). Without it, coaching comes through step 3 and mocks run in a Claude conversation.
 - **Speaking answers** (Settings, Voice): a one-time 661 MB speech model download. Runs on
   their PC; no audio is kept.
 - **An interview date**: set it on the role; Today then paces the work.

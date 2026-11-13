@@ -1,0 +1,168 @@
+{
+  "id": "ado-u11",
+  "title": "Pipeline vocabulary for people who do not build pipelines",
+  "summary": "Agents and pools, service connections, secrets, triggers and pull request completion: enough to read a pipeline, explain a failure and answer the questions DevOps interview lists ask, without claiming to be an engineer.",
+  "lessons": [
+    {
+      "id": "ado-u11-l1",
+      "title": "Agents, pools, service connections and secrets",
+      "minutes": 11,
+      "body": "You ran Playwright tests in a pipeline someone helped set up. Interview lists for any role that mentions Azure DevOps ask about the machinery underneath. You need the vocabulary and one honest sentence about what you did with it.\n\n## Agents and pools\n\nA pipeline is a list of steps. An **agent** is the machine that runs them. An **agent pool** is a named group of agents that a pipeline asks for.\n\n| | Microsoft-hosted agent | Self-hosted agent |\n|---|---|---|\n| What it is | A fresh virtual machine Microsoft starts for each job, then discards | A machine you or your company keeps running, with the agent software installed |\n| You choose it with | `pool: vmImage: 'ubuntu-latest'` | `pool: name: 'MyPool'` |\n| Good | Nothing to maintain; always clean | Can reach internal systems; keeps installed tools and caches between runs |\n| Cost | Free grant is limited; more parallel jobs are paid | Your own hardware and upkeep |\n\nBecause a hosted agent starts clean every time, the pipeline installs everything it needs on each run. That is why your Playwright pipeline had `npm ci` and `npx playwright install --with-deps` near the top.\n\nA **parallel job** is the right to run one job at a time. With one parallel job, a second pipeline run waits in a queue. \"Why is my run stuck on Queued?\" usually has that answer.\n\n## Service connections\n\nA pipeline often needs to reach something outside Azure DevOps: an Azure subscription to deploy to, a container registry, a GitHub repository. A **service connection** is a saved, named credential for that, created once by an administrator under Project settings. The pipeline refers to it by name and never sees the password. As a tester you would not create one, but you should recognise the failure: a message that a service connection could not be found or is not authorized means a permissions request, not a broken test.\n\n## Variables and secrets\n\nValues that change between environments go in **variables**, written `$(baseUrl)` in YAML. Three places hold them:\n\n- In the YAML file itself, for values that are not sensitive.\n- In the pipeline's settings, where a variable can be marked **secret** (shown as a padlock). Secrets are masked as `***` in logs.\n- In a **variable group** under Library, shared by several pipelines and optionally backed by Azure Key Vault.\n\nOne rule catches people out: a secret variable is not passed to scripts automatically. You must map it in explicitly:\n\n```yaml\n- script: npx playwright test\n  env:\n    TEST_PASSWORD: $(testPassword)\n```\n\nWithout the `env:` block the test reads an empty password and the login step fails with a confusing error. And the reason for all this: a password typed into a YAML file is in the repository's history for good, visible to everyone with read access.\n\n## Reading a failed run\n\nSort a failure into one of four kinds before you report it:\n\n1. **Queue or agent**: no agent available, no parallelism, agent offline. Nothing ran.\n2. **Setup**: a restore or install step failed; a missing secret or service connection.\n3. **Test failure**: the tests ran and one or more failed. Open the Tests tab and the trace.\n4. **Publish**: the tests ran but results or artifacts were not uploaded, often a wrong file path.\n\nOnly the third is a possible product bug. Saying which kind it is in the first line of your message saves a developer ten minutes.",
+      "keyPoints": [
+        "An agent is the machine that runs a job; a pool is a named group of agents.",
+        "Microsoft-hosted agents start clean each run, so the pipeline installs its own tools; self-hosted agents persist and can reach internal systems.",
+        "A service connection is a named, stored credential for something outside Azure DevOps, created by an administrator.",
+        "Secret variables are masked in logs and must be mapped into a script with env:.",
+        "Classify a failed run as queue, setup, test or publish before reporting it."
+      ],
+      "interviewAngle": "State your level first, then show you can read the system: \"I did not build our pipelines. A developer set up the YAML and I added and maintained the Playwright stage with help. I can read a run, tell a setup failure from a test failure, and I know why secrets go in variables and not in the file.\" That is a strong answer for QA, support and coordinator roles. Do not describe yourself as a DevOps or build engineer.",
+      "exercises": [
+        {
+          "id": "ado-u11-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A pipeline run sits at \"Queued\" for twenty minutes while another run is in progress. What is the most likely cause?",
+          "choices": [
+            "A test is failing.",
+            "The organization has one parallel job and it is in use.",
+            "The YAML has a syntax error.",
+            "A secret variable is missing."
+          ],
+          "answer": 1,
+          "explanation": "One parallel job runs one job at a time. Further runs wait in the queue until it is free. A YAML error or failing test would show as a failure, not a wait."
+        },
+        {
+          "id": "ado-u11-l1-e2",
+          "type": "mcq",
+          "prompt": "Why does a pipeline on a Microsoft-hosted agent install browsers and packages on every run?",
+          "choices": [
+            "Hosted agents are slow.",
+            "Each job gets a fresh machine that is discarded afterwards.",
+            "Playwright deletes its browsers after each test.",
+            "The YAML file is cached incorrectly."
+          ],
+          "answer": 1,
+          "explanation": "A hosted agent is a new virtual machine per job, so nothing installed in an earlier run is still there."
+        },
+        {
+          "id": "ado-u11-l1-e3",
+          "type": "short",
+          "prompt": "What is the name for a stored, named credential that lets a pipeline reach an outside system such as an Azure subscription?",
+          "accept": [
+            "service connection",
+            "a service connection",
+            "service connections"
+          ],
+          "answer": "Service connection",
+          "explanation": "An administrator creates it once under Project settings; pipelines refer to it by name."
+        },
+        {
+          "id": "ado-u11-l1-e4",
+          "type": "mcq",
+          "prompt": "A login test passes on your PC but fails in the pipeline with \"password is empty\". The password is a secret pipeline variable named `testPassword`. What is missing?",
+          "choices": [
+            "The variable must be renamed in capitals.",
+            "An `env:` mapping on the script step, because secrets are not passed to scripts automatically.",
+            "A service connection.",
+            "A second parallel job."
+          ],
+          "answer": 1,
+          "explanation": "Secret variables must be mapped explicitly, for example `env: TEST_PASSWORD: $(testPassword)`. Otherwise the script sees nothing."
+        },
+        {
+          "id": "ado-u11-l1-e5",
+          "type": "open",
+          "prompt": "Last night's pipeline run is red. The log shows `npm ci` succeeded, `npx playwright test` ran 42 tests with 2 failed, and results were published. Write the short message you would post to the team channel.",
+          "answer": "Last night's run on main (link) is red from **test failures**, not a pipeline problem: setup and publish steps succeeded, 40 of 42 tests passed.\n\nFailing:\n1. `sos-alert.spec.ts` > sends alert within radius: timed out waiting for the confirmation banner.\n2. `roster.spec.ts` > shows saved shift: expected 1 row, received 0.\n\nBoth passed in the previous run. Traces are attached to the run under Artifacts. I am checking whether they fail locally and against yesterday's build, and will raise bugs with the trace if they reproduce. No action needed from anyone yet.",
+          "rubric": [
+            "Classifies the failure as test failures, with setup and publish fine",
+            "Names the failing tests and what each reported",
+            "Points to the evidence (run link, trace or Tests tab)",
+            "Says what you will do next and whether anyone else needs to act"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ado-u11-l2",
+      "title": "Triggers, pull request completion and the comparison questions",
+      "minutes": 10,
+      "body": "This lesson covers when a pipeline runs, how a pull request gets merged, and three comparison questions that interview lists repeat.\n\n## What starts a pipeline\n\n| Trigger | Runs when | YAML |\n|---|---|---|\n| CI trigger | Code is pushed to a matching branch | `trigger:` |\n| PR trigger | A pull request is opened or updated | `pr:` (GitHub repos); for Azure Repos, a build validation branch policy |\n| Scheduled | At set times | `schedules:` with a cron expression |\n| Pipeline completion | Another pipeline finishes | a `pipelines:` resource |\n| Manual | Someone presses Run | none needed |\n\n```yaml\ntrigger:\n  branches:\n    include: [ main ]\n\nschedules:\n- cron: '0 6 * * 1-5'\n  displayName: Weekday regression\n  branches:\n    include: [ main ]\n  always: true\n```\n\nThe cron line reads minute, hour, day of month, month, day of week: 06:00 on Monday to Friday. Schedules use UTC, so 06:00 is one or two o'clock in the morning on the US east coast. `always: true` runs it even when nothing changed; without it a scheduled run is skipped if there are no new commits.\n\nA common test setup: a short smoke suite on every pull request, and the full regression on a nightly schedule.\n\n## Completing a pull request\n\nYou know the votes from the Repos unit: Approve, Approve with suggestions, Wait for author, Reject. Some further terms:\n\n- **Draft** pull request: open for early comments, cannot be completed, and does not notify reviewers as ready.\n- **Auto-complete**: the author sets it, and the pull request merges by itself once every required policy passes. Useful, and the reason a PR can merge when nobody is looking.\n- **Branch policies** on `main` decide what \"required\" means: a minimum number of reviewers, a linked work item, resolved comments, and a passing build (build validation).\n- **Merge types**: a merge commit keeps every commit; a squash merge combines the branch into one commit, which keeps history short.\n- **Abandon** closes a pull request without merging; it can be reactivated.\n\nFor a tester the useful question is \"what guarantees did this change pass before it reached main?\". The branch policy answers it.\n\n## Three comparisons\n\n**Azure DevOps Services or Server?** Services is the cloud product at dev.azure.com, hosted and updated by Microsoft. Server is the version a company installs and runs itself, chosen when data must stay on its own machines. Features arrive in Services first.\n\n**Git or TFVC?** Both are version control inside Azure Repos. Git is distributed: everyone has the full history and works in branches. TFVC is the older centralized system where files are checked out from a server. New projects use Git; you may meet TFVC in long-lived codebases.\n\n**Azure DevOps or GitHub?** Both are Microsoft's. GitHub is centred on the repository and open collaboration, with GitHub Actions for automation and Issues and Projects for tracking. Azure DevOps is a suite with heavier planning and test tools: Boards, Test Plans, Pipelines. Many companies mix them, for example code in GitHub with work tracked in Azure Boards, linking commits by writing `AB#123` in the message.\n\n**YAML or classic pipelines?** Classic pipelines are built in a visual editor and stored as settings. YAML pipelines are a file in the repository, so they are reviewed and versioned like code. YAML is the current default.",
+      "keyPoints": [
+        "Pipelines start from pushes (CI), pull requests, schedules, another pipeline finishing, or a manual run.",
+        "Cron schedules are in UTC and skip runs with no new commits unless always is true.",
+        "Auto-complete merges a pull request once all required branch policies pass.",
+        "Services is Microsoft's cloud product; Server is self-hosted. Git is distributed; TFVC is the older centralized system.",
+        "YAML pipelines live in the repository and are versioned; classic pipelines are configured in a visual editor."
+      ],
+      "interviewAngle": "The comparison questions are checks that you know where your experience sits. Answer briefly and then place yourself: \"We used Azure DevOps Services with Git repos and YAML pipelines. I have not used Server or TFVC.\" For triggers, the practical answer is the one to give: smoke tests on each pull request, full regression nightly, and why. You are describing how the tests you maintained were run, which you know first-hand.",
+      "exercises": [
+        {
+          "id": "ado-u11-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A pull request merged into main overnight although no one pressed Complete this morning. Which feature explains it?",
+          "choices": [
+            "A scheduled trigger",
+            "Auto-complete, which merged it once the required policies passed",
+            "A draft pull request",
+            "A squash merge"
+          ],
+          "answer": 1,
+          "explanation": "With auto-complete set, the pull request completes by itself as soon as reviewers, build validation and other required policies are satisfied."
+        },
+        {
+          "id": "ado-u11-l2-e2",
+          "type": "mcq",
+          "prompt": "What does `cron: '0 6 * * 1-5'` in a `schedules:` block mean?",
+          "choices": [
+            "Every 6 minutes on weekdays",
+            "06:00 UTC, Monday to Friday",
+            "06:00 local time every day",
+            "On the 6th of each month"
+          ],
+          "answer": 1,
+          "explanation": "The fields are minute, hour, day of month, month, day of week. Azure Pipelines schedules are in UTC."
+        },
+        {
+          "id": "ado-u11-l2-e3",
+          "type": "mcq",
+          "prompt": "A company must keep all source code on servers in its own building. Which product fits?",
+          "choices": [
+            "Azure DevOps Services",
+            "Azure DevOps Server",
+            "GitHub.com",
+            "Classic pipelines"
+          ],
+          "answer": 1,
+          "explanation": "Server is installed and run by the company itself. Services and GitHub.com are hosted in the cloud."
+        },
+        {
+          "id": "ado-u11-l2-e4",
+          "type": "short",
+          "prompt": "Which merge type combines all of a branch's commits into one commit on the target branch?",
+          "accept": [
+            "squash",
+            "squash merge",
+            "a squash merge",
+            "squash commit"
+          ],
+          "answer": "Squash merge",
+          "explanation": "A squash merge keeps the target branch history to one commit per pull request."
+        },
+        {
+          "id": "ado-u11-l2-e5",
+          "type": "open",
+          "prompt": "Your team has a 3-minute smoke suite and a 40-minute full regression suite, and one parallel job. Propose when each should run and give the reason.",
+          "answer": "Run the smoke suite as build validation on every pull request to main. It is short enough not to slow developers, and it stops an obviously broken change from merging. Run the full regression on a nightly schedule against main, with `always: true` only if we want a run on days with no commits. With one parallel job, a 40-minute suite on every pull request would queue every other run behind it, so reviews would stall. If the nightly run fails, the team sees it first thing and the cause is one day's changes. Before a release I would also start the full suite manually on the release branch.",
+          "rubric": [
+            "Smoke suite on every pull request (build validation)",
+            "Full regression on a schedule, typically nightly",
+            "Uses the single parallel job as a reason",
+            "Mentions a manual or release-time run of the full suite, or how failures are picked up"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -15,6 +15,8 @@
     "unit-9.json",
     "unit-10.json",
     "unit-12.json",
+    "unit-13.json",
+    "unit-14.json",
     "unit-6.json"
   ],
   "resources": [
@@ -396,6 +398,56 @@
       "id": "ticket-iq-16",
       "prompt": "You see 50 tickets with the same title. What do you do?",
       "strongAnswer": "I treat it as one problem, not 50 fixes. I link the tickets to a primary record, count how many customers and what it costs, and raise it as a problem needing a root-cause fix. Meanwhile I publish a workaround for the front line. In practice data I analysed, 'Duplicate assignment created on double click' appeared 50 times. I would propose a server-side check and a database constraint, then verify by watching the count fall."
+    },
+    {
+      "id": "ticket-iq-17",
+      "prompt": "How do you prioritise a backlog?",
+      "strongAnswer": "I rank by value against effort, with risk as a tie-breaker. For each item I want to know how many customers it affects, how much it costs them, whether there is a workaround, and what the developers estimate. That is the same thinking as RICE, though we did not calculate scores. For a release I sort into what it must have, what it should have and what can wait, and I write down what is out. Bugs are handled separately by severity and priority. I brought the ranking to planning every two weeks with the evidence, and the decision was made there, not by whoever asked last."
+    },
+    {
+      "id": "ticket-iq-18",
+      "prompt": "What is the difference between agile and waterfall?",
+      "strongAnswer": "Waterfall fixes the requirements first and then moves through design, build, test and release in order, so change late in the project is expensive and testing comes near the end. It suits fixed, regulated scope. Agile delivers in short cycles, expects requirements to be refined as you learn, and tests throughout. It suits products where needs change. My experience is agile: two-week sprints with planning, daily standups and retrospectives, and a backlog I reordered as customer needs became clearer. Many companies run a mix, with fixed milestones and iterative delivery inside them."
+    },
+    {
+      "id": "ticket-iq-19",
+      "prompt": "What are the Scrum roles, events and artifacts?",
+      "strongAnswer": "Three accountabilities: the Product Owner orders the backlog for value, the Scrum Master helps the team work well and removes blockers, and the Developers build the increment. Five events: the Sprint itself, Sprint Planning, the Daily Scrum, the Sprint Review and the Retrospective. Three artifacts: the Product Backlog, the Sprint Backlog and the Increment, each with a commitment, the last being the Definition of Done. Refinement is an ongoing activity, not an event. In a small company I owned the backlog and facilitated the events, without holding either title."
+    },
+    {
+      "id": "ticket-iq-20",
+      "prompt": "How do you gather requirements?",
+      "strongAnswer": "I start with the problem, not the request. When a customer asked for a feature I asked what they were trying to do and what they did today, because people describe solutions. I used more than one source: conversations with the customer's staff, the support tickets, which showed what actually went wrong, and watching how they used the software. Then I wrote the need back to them in plain words and got agreement before writing the user story and acceptance criteria. I also asked about the things nobody mentions, such as how fast it must be and who needs to see it."
+    },
+    {
+      "id": "ticket-iq-21",
+      "prompt": "What is the difference between functional and non-functional requirements?",
+      "strongAnswer": "A functional requirement says what the system must do: send an alert to pharmacists within a chosen radius. A non-functional requirement says how well: the alert arrives within thirty seconds, it works on a phone, and there is a record of who sent it. Non-functional requirements cover performance, security, availability, accessibility and auditing. They are missed most often because users assume them, so I ask about each one deliberately. Both kinds have to be testable. Fast is not a requirement; within thirty seconds is."
+    },
+    {
+      "id": "ticket-iq-22",
+      "prompt": "What is a RAID log?",
+      "strongAnswer": "It is a single list of a project's risks, assumptions, issues and dependencies. A risk is something that might go wrong, an issue is something that already has, an assumption is something you are treating as true without proof, and a dependency is something you need from someone else. Each row has an owner, a date and a next action, and the list is reviewed every week. I did not keep a document by that name. I tracked the same things on tickets and raised them in standups, and I would use a RAID log on anything larger than our team."
+    },
+    {
+      "id": "ticket-iq-23",
+      "prompt": "What goes into a good status report?",
+      "strongAnswer": "The overall status first, usually red, amber or green, and any decision I need from the reader, so that someone who reads two lines knows whether to worry and what to do. Then what was completed against the plan, what is next with dates, and the risks and issues with owners. One page. I report amber as soon as something is at risk and say what the plan is, because a report that stays green until the week it fails loses people's trust. I wrote this kind of update for customers before and after each release."
+    },
+    {
+      "id": "ticket-iq-24",
+      "prompt": "How do you handle scope creep?",
+      "strongAnswer": "By making the cost of each addition visible before anyone agrees to it. When a new request arrives mid-sprint or mid-project, I write it down, find out what it is for, get an estimate and say what it would displace or delay. Then the person who owns the priorities decides. Often the answer is yes, next sprint. What I do not do is quietly squeeze it in, because that is how dates slip without anyone having chosen it. Customers accepted this well when I could tell them where their request sat and why."
+    },
+    {
+      "id": "ticket-iq-25",
+      "prompt": "What is a process map, and have you made one?",
+      "strongAnswer": "It is a diagram of who does what in what order, usually with a lane for each role, boxes for tasks and diamonds for decisions. You draw the process as it really runs today, then the version you want, and the differences are the work. I have not produced formal BPMN diagrams. I did the analysis behind one: filling an emergency shift meant a coordinator phoning pharmacists one after another, and I proposed an alert to everyone nearby, which removed that loop. I could sketch that as-is and to-be now."
+    },
+    {
+      "id": "ticket-iq-26",
+      "prompt": "What is the three amigos practice?",
+      "strongAnswer": "Before work starts on a story, three viewpoints look at it together: someone who represents the business need, a developer and a tester. The business person explains what is wanted and why, the developer raises how it could be built and what is hard, and the tester asks what could go wrong and how it will be checked. Gaps surface before any code is written, when they are cheapest to fix. In our team I was usually the business voice and the tester, so I made a habit of walking stories through with a developer before planning."
     }
   ],
   "pathway": {

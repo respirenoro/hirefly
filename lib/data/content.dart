@@ -100,7 +100,8 @@ class SkillModule {
         interviewQuestions = [for (final q in (j['interviewQuestions'] as List? ?? const [])) q as Json],
         resources = [for (final q in (j['resources'] as List? ?? const [])) q as Json],
         labs = [for (final q in (j['labs'] as List? ?? const [])) q as Json],
-        pathway = j['pathway'] as Json?;
+        pathway = j['pathway'] as Json?,
+        unverified = _strings(j['unverified']);
 
   final String id, title, tagline, claim;
   final List<Unit> units;
@@ -111,6 +112,10 @@ class SkillModule {
 
   /// When to use outside courses and when these lessons are the better choice.
   final Json? pathway;
+
+  /// What the author could not confirm (`assets/content/authoring.md`), shown
+  /// to the learner so a module never looks more certain than it is.
+  final List<String> unverified;
 
   Iterable<Lesson> get lessons => units.expand((u) => u.lessons);
 }

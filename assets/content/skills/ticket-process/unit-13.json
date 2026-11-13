@@ -1,0 +1,245 @@
+{
+  "id": "ticket-u13",
+  "title": "Agile, prioritisation and project vocabulary",
+  "summary": "Scrum as the Scrum Guide defines it, agile against waterfall, the three amigos, MoSCoW and RICE, and the RAID log, RACI chart and status report that coordinator and analyst interviews ask about by name.",
+  "lessons": [
+    {
+      "id": "ticket-u13-l1",
+      "title": "Scrum by the book, and agile against waterfall",
+      "minutes": 11,
+      "body": "You ran sprints, standups and retrospectives. Interviewers test whether you know the official version, because teams adapt Scrum and candidates often describe only their own team's habits. The source is the Scrum Guide (2020), which is short and free.\n\n## Scrum in one table\n\n| | The Scrum Guide's term | What it means |\n|---|---|---|\n| Three accountabilities | Product Owner | Orders the Product Backlog to maximise value. One person, not a committee |\n| | Scrum Master | Helps the team and organisation use Scrum well; removes impediments |\n| | Developers | Everyone who builds the increment, testers and analysts included |\n| Five events | The Sprint | A fixed period of one month or less that contains the others |\n| | Sprint Planning | Why this sprint, what can be done, how |\n| | Daily Scrum | 15 minutes for the Developers to plan the next day's work |\n| | Sprint Review | Inspect the increment with stakeholders and adapt the backlog |\n| | Sprint Retrospective | Inspect how the team worked and choose improvements |\n| Three artifacts | Product Backlog | Commitment: the Product Goal |\n| | Sprint Backlog | Commitment: the Sprint Goal |\n| | Increment | Commitment: the Definition of Done |\n\nPoints people get wrong:\n\n- **Backlog refinement is not an event.** It is an ongoing activity: breaking items down and adding detail so they are ready for a future sprint.\n- **The Daily Scrum is not a status report** to a manager. It belongs to the Developers.\n- **Story points, velocity and user stories are not in the Scrum Guide.** They are common practices that teams add.\n- **Definition of Done** applies to every item: tested, reviewed, documented, whatever the team agreed. **Acceptance criteria** are specific to one item. **Definition of Ready** is a team convention for when an item may enter a sprint, and is not in the Guide either.\n\n## Where you sat\n\nIn a small company one person covers several accountabilities. You owned and ordered the backlog and wrote the stories, which is Product Owner work. You ran planning, standups and retrospectives, which is facilitation a Scrum Master usually does. You did not hold either title and are not certified, so describe the work, not the title: \"I owned the backlog and facilitated our sprint events.\"\n\n## Agile against waterfall\n\n| | Waterfall (sequential) | Agile (iterative) |\n|---|---|---|\n| Plan | Requirements fixed up front, then design, build, test, release in order | Work delivered in short cycles; requirements refined as you learn |\n| Change | Expensive late; goes through formal change control | Expected; the backlog is reordered |\n| Testing | A phase near the end | Throughout each cycle |\n| Suits | Fixed scope and regulation: construction, a compliance deadline, hardware | Uncertain or evolving needs: most software products |\n| Risk | Finding out late that it is the wrong thing | Losing sight of the whole; scope that never closes |\n\nMany organisations run a hybrid: fixed milestones and budget with iterative delivery inside them. **Kanban** is a third option with no sprints: work flows continuously across a board, with limits on work in progress, which suits support queues and operations.\n\n## Three amigos and the three Cs\n\n- **Three amigos**: before work starts on a story, someone from the business side, a developer and a tester talk it through together. Each asks different questions, and the gaps surface before code is written. You were often the business voice and the tester at once.\n- **The three Cs** of a user story: the **Card** (a short written reminder), the **Conversation** (where the detail is worked out) and the **Confirmation** (the acceptance criteria that show it is done). The card is a placeholder for the conversation, not a specification.\n- **Given / When / Then** is a format for the confirmation: given a starting state, when something happens, then an outcome. Writing criteria this way and agreeing them before development is called acceptance test-driven development.",
+      "keyPoints": [
+        "Scrum has three accountabilities, five events and three artifacts, each artifact with a commitment.",
+        "Refinement is an ongoing activity, not an event; story points and velocity are not in the Scrum Guide.",
+        "Definition of Done applies to every item; acceptance criteria belong to one item.",
+        "Waterfall fixes requirements first and suits stable scope; agile delivers in cycles and suits changing needs; Kanban flows without sprints.",
+        "Three amigos brings business, development and testing views to a story before work starts."
+      ],
+      "interviewAngle": "When asked about your agile experience, lead with what you actually did and name it in the standard terms: you ordered the backlog, wrote stories with acceptance criteria, and facilitated planning, the daily standup and retrospectives in two-week sprints. Then show you know the difference between your team's habits and the Guide, for instance that refinement is not a formal event. Never say Scrum Master or Product Owner as a title you held, and do not claim certification.",
+      "exercises": [
+        {
+          "id": "ticket-u13-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "According to the Scrum Guide, which of these is NOT one of the five Scrum events?",
+          "choices": [
+            "Sprint Review",
+            "Backlog refinement",
+            "Daily Scrum",
+            "Sprint Retrospective"
+          ],
+          "answer": 1,
+          "explanation": "Refinement is an ongoing activity. The five events are the Sprint, Sprint Planning, Daily Scrum, Sprint Review and Sprint Retrospective."
+        },
+        {
+          "id": "ticket-u13-l1-e2",
+          "type": "mcq",
+          "prompt": "A team agrees that every item must be code-reviewed, tested and have its help article updated before it counts as finished. What is this?",
+          "choices": [
+            "Acceptance criteria",
+            "Definition of Done",
+            "Definition of Ready",
+            "The Sprint Goal"
+          ],
+          "answer": 1,
+          "explanation": "The Definition of Done is the shared standard for every item. Acceptance criteria are the conditions specific to one item."
+        },
+        {
+          "id": "ticket-u13-l1-e3",
+          "type": "mcq",
+          "prompt": "A hospital must replace a billing interface by a legal deadline, with requirements set by regulation and little expected change. Which approach fits most naturally?",
+          "choices": [
+            "Kanban with no deadline",
+            "A mostly sequential (waterfall) plan, possibly with iterative delivery inside it",
+            "Scrum with no fixed scope",
+            "No plan; respond to requests"
+          ],
+          "answer": 1,
+          "explanation": "Fixed, regulated scope and a hard date favour up-front planning. Many teams still build and test in iterations inside those milestones."
+        },
+        {
+          "id": "ticket-u13-l1-e4",
+          "type": "short",
+          "prompt": "In Scrum, which accountability orders the Product Backlog?",
+          "accept": [
+            "product owner",
+            "the product owner",
+            "po"
+          ],
+          "answer": "Product Owner",
+          "explanation": "The Product Owner is accountable for the backlog's content and order. Others may do the work, but the accountability stays with one person."
+        },
+        {
+          "id": "ticket-u13-l1-e5",
+          "type": "open",
+          "prompt": "An interviewer asks: \"Were you the Scrum Master or the Product Owner?\" Write your answer.",
+          "answer": "Neither as a title. I was the project manager at a small company, and in practice I covered parts of both. On the Product Owner side, I owned and ordered the backlog, wrote the user stories and acceptance criteria, and was the voice of the customer to the developers. On the Scrum Master side, I facilitated sprint planning, the daily standup and the retrospective for our two-week sprints and chased the things blocking the team. I am not certified in either. I know the Scrum Guide separates the two on purpose, because one protects value and the other protects the process, and in a larger team I would expect to do one of them properly.",
+          "rubric": [
+            "Does not claim either title or a certification",
+            "Names the Product Owner work actually done (backlog order, stories, criteria)",
+            "Names the facilitation actually done (planning, standups, retrospectives)",
+            "Shows awareness of why Scrum separates the accountabilities"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u13-l2",
+      "title": "Prioritising: MoSCoW, RICE and value against effort",
+      "minutes": 10,
+      "body": "\"How do you prioritise?\" is asked in nearly every analyst, product and coordinator interview. \"By importance\" is not an answer. Name a method, show it on an example, and say who makes the final call.\n\n## MoSCoW\n\nSort items for a release into four groups:\n\n- **Must have**: the release fails without it. Legal, safety, or the feature the release exists for.\n- **Should have**: important, painful to leave out, but there is a workaround.\n- **Could have**: wanted, small impact if dropped. The first to go when time runs short.\n- **Won't have this time**: agreed as out of scope for now. Writing these down is the point, since it stops them creeping back.\n\nA useful rule of thumb is that Musts should take no more than about 60% of the effort, so there is room to drop Coulds and still deliver. If everything is a Must, nothing has been prioritised. The test for a Must is \"what happens if we ship without it?\".\n\n## RICE\n\nRICE gives each item a score so different requests can be compared:\n\n```\nscore = (Reach x Impact x Confidence) / Effort\n```\n\n- **Reach**: how many people or events it affects in a period, such as 400 coordinators a month.\n- **Impact**: how much it helps each one, on a fixed scale such as 3 massive, 2 high, 1 medium, 0.5 low.\n- **Confidence**: how sure you are of the first two, as a percentage.\n- **Effort**: person-weeks or person-months.\n\n| Item | Reach | Impact | Confidence | Effort | Score |\n|---|---|---|---|---|---|\n| Text message when a shift is filled | 400 | 1 | 80% | 2 | 160 |\n| Bulk edit of shift start times | 60 | 2 | 100% | 1 | 120 |\n| Redesigned reports page | 150 | 1 | 50% | 6 | 12.5 |\n\nThe numbers are estimates, so do not defend a difference of a few points. The value is in the conversation: the reports redesign scores low because confidence is low and effort is high, which tells you to go and find out more before committing.\n\n## Value against effort\n\nThe quickest method is a two-by-two grid:\n\n| | Low effort | High effort |\n|---|---|---|\n| **High value** | Do first (quick wins) | Plan properly (big bets) |\n| **Low value** | Fit in when convenient | Do not do |\n\nIt works on a whiteboard in ten minutes with the people who know the value and the people who know the effort both present.\n\n## Bugs are different\n\nFor defects, the ticket-triage units already gave you severity (how bad) and priority (how soon). Keep the two apart here too: a method like RICE is for choosing what to build, and severity and priority are for deciding what to fix.\n\n## Who decides\n\nA method produces a recommendation. The Product Owner, or whoever holds that responsibility, decides, and should be able to say why. Your part is to bring the evidence: how many customers asked, what it costs them, what the developers estimate. When two stakeholders both insist theirs is first, do not pick a side yourself. Put both items through the same method in front of both of them, and escalate to the owner with the comparison if they still disagree.",
+      "keyPoints": [
+        "MoSCoW sorts a release into Must, Should, Could and Won't have this time; everything cannot be a Must.",
+        "RICE scores an item as Reach times Impact times Confidence, divided by Effort.",
+        "A value-against-effort grid is the fastest way to rank a short list with a group.",
+        "Severity and priority are for defects; MoSCoW and RICE are for choosing what to build.",
+        "The method recommends; the Product Owner decides and explains."
+      ],
+      "interviewAngle": "Use a real case: you ordered a backlog every two weeks. Say what you weighed, such as how many customers were affected, whether there was a workaround, what the developers estimated, and which named method that resembles. If you did not use RICE by name, say so: \"We did not calculate scores, but I ranked on the same things: reach, impact and effort.\" For the conflicting-stakeholders question, describe making the trade-off visible and letting the accountable person decide.",
+      "exercises": [
+        {
+          "id": "ticket-u13-l2-e1",
+          "type": "short",
+          "placement": true,
+          "prompt": "An item reaches 200 users a month, with impact 2, confidence 50% and effort 4 person-weeks. What is its RICE score?",
+          "accept": [
+            "50",
+            "50.0"
+          ],
+          "answer": "50",
+          "explanation": "(200 x 2 x 0.5) / 4 = 200 / 4 = 50."
+        },
+        {
+          "id": "ticket-u13-l2-e2",
+          "type": "mcq",
+          "prompt": "In a MoSCoW session every stakeholder marks their own items as Must have. What is the best response?",
+          "choices": [
+            "Accept them all; they know their needs.",
+            "Ask of each one \"what happens if we ship without it?\" and move those with a workaround to Should.",
+            "Remove MoSCoW and use first come, first served.",
+            "Let the developers choose."
+          ],
+          "answer": 1,
+          "explanation": "A Must is something the release fails without. If there is a tolerable workaround, it is a Should. Testing each item this way restores the distinction."
+        },
+        {
+          "id": "ticket-u13-l2-e3",
+          "type": "mcq",
+          "prompt": "Which item belongs in \"Won't have this time\"?",
+          "choices": [
+            "A legal requirement for this release",
+            "A requested feature everyone agrees is out of scope for now",
+            "A bug that blocks login",
+            "The feature the release was planned around"
+          ],
+          "answer": 1,
+          "explanation": "The fourth group records what was deliberately left out, which prevents it from quietly returning to scope."
+        },
+        {
+          "id": "ticket-u13-l2-e4",
+          "type": "mcq",
+          "prompt": "On a value-against-effort grid, where do \"quick wins\" sit?",
+          "choices": [
+            "High value, high effort",
+            "High value, low effort",
+            "Low value, low effort",
+            "Low value, high effort"
+          ],
+          "answer": 1,
+          "explanation": "High value for low effort is done first. High value with high effort needs planning; low value with high effort is dropped."
+        },
+        {
+          "id": "ticket-u13-l2-e5",
+          "type": "open",
+          "prompt": "The sales lead wants a new export for a prospect; the support lead wants a fix for a workflow that generates ten tickets a week. Both say theirs must be first, and there is room for one this sprint. Describe what you do.",
+          "answer": "I would not choose between them myself, and I would not let it be decided by who asks loudest. I would get the same facts for both. For the export: how firm is the deal, what is it worth, is there a deadline, and can the prospect manage with a manual export for now? For the workflow fix: ten tickets a week costs how many support hours, how many customers does it touch, and is there a workaround? Then the developers' estimate for each.\n\nI would put the two side by side, in the same terms, and take them to the product owner with both leads present or informed. The owner decides and I record the reason on both tickets. Whoever waits gets a date or a condition for when theirs is next, and the support lead gets a workaround article in the meantime if the fix is the one that waits.",
+          "rubric": [
+            "Does not decide alone or by seniority or volume",
+            "Gathers comparable evidence for both: reach, value or cost, deadline, workaround, effort",
+            "Takes a side-by-side comparison to the accountable owner",
+            "Communicates the decision and what happens to the item that waits"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ticket-u13-l3",
+      "title": "Project coordination: RAID logs, RACI and status reports",
+      "minutes": 11,
+      "body": "Project coordinator, implementation and analyst roles use a small set of documents. You did most of this work informally in a small company. Learn the standard names and shapes so that you can say \"yes, I kept one\" truthfully, or \"I tracked the same things in tickets\".\n\n## The RAID log\n\nRAID stands for **Risks, Assumptions, Issues and Dependencies**. (Some teams use Actions and Decisions for the A and D. Ask which.)\n\n| Type | Meaning | Example from a dispatch release |\n|---|---|---|\n| Risk | Something that might happen and would hurt | The SMS provider may not approve our sender ID before launch |\n| Assumption | Something you are treating as true without proof | Customers will accept alerts by email if SMS is late |\n| Issue | Something that has already happened and needs resolving | The test environment has been down since Tuesday |\n| Dependency | Something you need from someone else, or they from you | Training cannot be scheduled until the release date is fixed |\n\nA risk that comes true becomes an issue. Each row needs an owner, a date and a next action. For a risk, add likelihood and impact (high, medium, low is enough) and a response: avoid it, reduce it, transfer it, or accept it. A RAID log nobody reviews is decoration; go through it at a fixed point each week.\n\n## RACI\n\nA RACI chart lists tasks down the side and people across the top, and marks each cell:\n\n- **R**esponsible: does the work.\n- **A**ccountable: answers for the result and signs off. Exactly one per task.\n- **C**onsulted: asked for input before the work, two-way.\n- **I**nformed: told afterwards, one-way.\n\n| Task | Coordinator | Product owner | Dev lead | Customer lead |\n|---|---|---|---|---|\n| Write UAT scripts | R | A | C | C |\n| Sign off UAT | I | A | I | R |\n| Send release notes | R | A | C | I |\n\nThe two faults to look for: a task with no A, which means nobody owns it, and a task with two, which means the same.\n\n## The status report\n\nA weekly status report answers four questions on one page:\n\n1. **Overall status**, usually **RAG**: Red (off track and needs help), Amber (at risk, with a plan), Green (on track).\n2. **Done since last report**, against what was planned.\n3. **Next**, with dates.\n4. **Risks, issues and decisions needed**, each with an owner and what you need from the reader.\n\nWrite the status and the ask first. A sponsor who reads only two lines should learn whether to worry and what to do. Do not report Green until the week it turns Red; that pattern is known as a watermelon report, green outside and red inside, and it destroys trust. Amber with a plan is a professional status.\n\n## Scope, change and the baseline\n\n- **Scope** is what the project will deliver. **Scope creep** is scope growing without anyone agreeing to the cost.\n- **Change control** is the remedy: a requested change is written down with its effect on time, cost and quality, and an agreed person approves or declines it. In an agile team the equivalent is adding it to the backlog and reordering, with the trade-off stated.\n- A **milestone** is a dated checkpoint with no duration. A **Gantt chart** shows tasks as bars on a timeline with their dependencies; the **critical path** is the chain of dependent tasks that sets the earliest finish, so a delay on it delays the project.\n- After go-live, **hypercare** is a short period of extra support while new users settle in, followed by a handover to normal support and a **lessons learned** review.\n\n## Kickoff\n\nA kickoff meeting sets the goal, scope and what is out of scope, the people and their roles, the timeline and milestones, how and how often you will communicate, and the first risks. You ran customer onboarding and release communication; that is the same skill.",
+      "keyPoints": [
+        "A RAID log tracks risks, assumptions, issues and dependencies, each with an owner, a date and a next action.",
+        "RACI: Responsible does the work, Accountable signs off (exactly one), Consulted gives input, Informed is told.",
+        "A status report leads with RAG status and the decision or help needed.",
+        "Scope creep is growth nobody agreed to; change control makes the cost of a change explicit before it is accepted.",
+        "The critical path is the chain of dependent tasks that determines the finish date."
+      ],
+      "interviewAngle": "Your title was project manager, so expect these words. Match each to something you did. Risks and blockers you raised in standups and tracked on tickets are a RAID log in another form. Telling customers what would ship and when is status reporting. Say plainly that the company was small and the documents were light: \"I did not keep a formal RACI, but who signed off UAT and who was informed was written into each release ticket.\" Do not claim PMP, CAPM or experience running large budgets.",
+      "exercises": [
+        {
+          "id": "ticket-u13-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "\"The vendor might not deliver the API key before our test window\" belongs in which part of a RAID log?",
+          "choices": [
+            "Risk",
+            "Assumption",
+            "Issue",
+            "Decision"
+          ],
+          "answer": 0,
+          "explanation": "It has not happened yet and would hurt if it did, so it is a risk. If the key is already late, it becomes an issue."
+        },
+        {
+          "id": "ticket-u13-l3-e2",
+          "type": "mcq",
+          "prompt": "In a RACI chart, a task shows \"A\" under two different people. What is wrong?",
+          "choices": [
+            "Nothing; shared accountability is ideal.",
+            "A task should have exactly one Accountable person, or ownership is unclear.",
+            "A means Assistant, so two is fine.",
+            "The task needs two Responsible people instead."
+          ],
+          "answer": 1,
+          "explanation": "Several people can be Responsible, but one person must answer for the result. Two A's behaves like none."
+        },
+        {
+          "id": "ticket-u13-l3-e3",
+          "type": "mcq",
+          "prompt": "A project is two weeks behind, but the coordinator has a recovery plan the sponsor has not yet seen. Which RAG status is honest?",
+          "choices": [
+            "Green, because there is a plan",
+            "Amber, with the plan and what is needed from the sponsor",
+            "Red, with no further comment",
+            "No status until the plan works"
+          ],
+          "answer": 1,
+          "explanation": "Amber means at risk with a plan. Reporting Green hides the slip, and Red without a plan or an ask gives the reader nothing to act on."
+        },
+        {
+          "id": "ticket-u13-l3-e4",
+          "type": "short",
+          "prompt": "What is the name for the chain of dependent tasks that determines the earliest date a project can finish?",
+          "accept": [
+            "critical path",
+            "the critical path"
+          ],
+          "answer": "Critical path",
+          "explanation": "Any delay to a task on the critical path delays the whole project; tasks off it have some slack."
+        },
+        {
+          "id": "ticket-u13-l3-e5",
+          "type": "open",
+          "prompt": "Write a five-line weekly status report for this situation: the SOS alert release is planned for the 20th; UAT found two bugs, one fixed and one still open; the customer's trainer is on leave next week.",
+          "answer": "**SOS alert release: AMBER.** Release date of the 20th is at risk; decision needed by Thursday (see line 4).\n\n**Done:** UAT completed with the customer, 28 of 30 scenarios passed. Bug 1 (alert sent outside radius) fixed and retested.\n\n**Next:** Bug 2 (confirmation not shown on mobile) fix due Wednesday; retest and regression Thursday; release notes drafted Friday.\n\n**Risks and issues:** Bug 2 is still open; if it is not fixed by Thursday the 20th cannot be met. The customer's trainer is on leave next week, so user training cannot happen before release.\n\n**Needed from you:** agree by Thursday whether to release on the 20th with training the week after and a quick-reference guide in the meantime, or move the release to the 27th.",
+          "rubric": [
+            "Leads with a RAG status and it is Amber or Red, not Green",
+            "States what was done and what is next with dates",
+            "Names the open bug and the trainer's absence as risk or issue",
+            "Ends with a specific decision or help needed from the reader"
+          ]
+        }
+      ]
+    }
+  ]
+}

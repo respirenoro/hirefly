@@ -11,6 +11,7 @@
     "unit-4.json",
     "unit-8.json",
     "unit-5.json",
+    "unit-9.json",
     "unit-6.json"
   ],
   "interviewQuestions": [
@@ -93,6 +94,46 @@
       "id": "pw-iq-16",
       "prompt": "Retries pass a test on the second attempt and the pipeline is green. Is that fine?",
       "strongAnswer": "Not fully. Playwright reports a test that fails and then passes on retry as flaky, and the build can still be green, so I look at the flaky count, not only the colour. A small number of retries absorbs rare infrastructure noise, but a test that needs them regularly has a cause: timing, shared data, order dependence, or a real intermittent bug. I would open the trace of the failed attempt, find the cause, and quarantine the test with a ticket if I cannot fix it that day."
+    },
+    {
+      "id": "pw-iq-17",
+      "prompt": "Why Playwright rather than Selenium or Cypress?",
+      "strongAnswer": "Playwright waits automatically for elements to be ready before acting, which removes most of the timing code that makes Selenium tests flaky. It drives Chromium, Firefox and WebKit with one API, handles several tabs and frames, and ships with a test runner, traces and a report, so there is little to assemble. Cypress is also pleasant to use but runs inside the browser, which limits multi-tab and cross-origin cases. Selenium has the widest language and legacy browser support. I should be clear that I have only used Playwright, at a basic level, so my comparison comes from reading and not from running all three."
+    },
+    {
+      "id": "pw-iq-18",
+      "prompt": "Which languages and browsers does Playwright support?",
+      "strongAnswer": "The main version is for JavaScript and TypeScript, and there are official versions for Python, Java and .NET. It runs tests on Chromium, which covers Chrome and Edge, on Firefox, and on WebKit, the engine behind Safari, and it can emulate mobile screen sizes and devices. Tests can run headless, with no visible window, which is what a pipeline uses, or headed when you want to watch. I wrote mine in TypeScript and ran them on Chromium in Azure Pipelines. I did not set up the Firefox or WebKit projects."
+    },
+    {
+      "id": "pw-iq-19",
+      "prompt": "How do you handle a link that opens a new tab?",
+      "strongAnswer": "A new tab is a new page object, and the important part is the order. I start waiting for the popup event first, then do the click that opens it, then await the promise to get the new page. If you click first, the tab can open before anything is listening and the wait times out. After that I can assert on the new page, such as its title or address, and the original page is still there to return to. Downloads follow the same pattern: start waiting, act, then await."
+    },
+    {
+      "id": "pw-iq-20",
+      "prompt": "How would you test something inside an iframe?",
+      "strongAnswer": "Locators on the page do not look inside an iframe, because it is a separate document. I would get a frame locator for the iframe, usually by its title or another stable attribute, and then use the normal role and label locators inside it. The sign that you need this is a locator that looks correct and finds nothing while the element is plainly on screen. Embedded payment forms, maps and help widgets are the usual cases. I have not had to do this in my own tests, but that is the approach I would take."
+    },
+    {
+      "id": "pw-iq-21",
+      "prompt": "What is the difference between fill, pressSequentially and press?",
+      "strongAnswer": "Fill clears the field and sets the whole value at once, and it is what I use for nearly every input. PressSequentially types one character at a time and fires the keyboard events for each, so it is for fields that react as you type, like an autocomplete that searches on every keystroke. Press sends one key or a combination, such as Enter or Control and A. There is an older method called type, which is deprecated in favour of these. Reaching for per-key typing everywhere just makes tests slower."
+    },
+    {
+      "id": "pw-iq-22",
+      "prompt": "How do you avoid logging in through the screen in every test?",
+      "strongAnswer": "Sign in once and reuse the session. A setup step logs in, through the screen or better through the API, and saves the cookies and local storage to a file with storageState. The config then points the tests at that file, so each one starts already signed in. If there are several roles, there is one saved state per role. It makes the suite faster and removes the login page as a reason for unrelated tests to fail. The login screen keeps its own one or two tests. I understand this pattern; my own small suite logged in at the start of each test."
+    },
+    {
+      "id": "pw-iq-23",
+      "prompt": "How do you test a login that has a CAPTCHA or multi-factor authentication?",
+      "strongAnswer": "I would not try to automate past either. They exist to stop automation, so a test that defeats them is fragile and the wrong thing to build. I would ask for the test environment to have the CAPTCHA switched off or a test key that always passes, and for a test account exempt from the second factor, or a fixed code. Then sign in once and reuse the session. The CAPTCHA and the second-factor flow themselves get a manual check before release. Asking for testability like this is a normal request to make of developers."
+    },
+    {
+      "id": "pw-iq-24",
+      "prompt": "How do you choose which tests run on a pull request and which run nightly?",
+      "strongAnswer": "I tag tests by purpose. A small set tagged as smoke covers the things that must work: sign in, create a shift, send an alert. That set runs on every pull request with grep, and it has to finish in a few minutes or people stop waiting for it. The full suite runs on a nightly schedule against the main branch, and again before a release. I also set forbidOnly in the pipeline, so a test.only left in by mistake fails the run. Any skipped test carries a reason and a bug number."
     }
   ],
   "resources": [

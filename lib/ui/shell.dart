@@ -12,6 +12,7 @@ import '../engine/engine.dart';
 import '../engine/inbox.dart';
 import 'home_screen.dart';
 import 'new_session_screen.dart';
+import 'new_skill_screen.dart';
 import 'sandbox_screen.dart';
 import 'session_screen.dart';
 import 'settings_screen.dart';
@@ -117,6 +118,7 @@ class _ShellState extends ConsumerState<Shell> {
       'skill' => SkillScreen(nav.id!, key: ValueKey('skill-${nav.id}'), tab: nav.sub),
       'lesson' => LessonScreen(nav.id!, nav.sub!, key: ValueKey('lesson-${nav.sub}')),
       'sandbox' => const SandboxScreen(),
+      'new-skill' => const NewSkillScreen(),
       'dossier' => const DossierScreen(),
       'stories' => const StoriesScreen(),
       'settings' => const SettingsScreen(),
@@ -216,6 +218,7 @@ class _SidebarState extends ConsumerState<_Sidebar> {
                 on: (nav.page == 'skill' || nav.page == 'lesson') && nav.id == m.id || (nav.page == 'sandbox' && m.id == 'sql'),
                 onTap: () => ref.go('skill', m.id),
               ),
+            JLi(text: 'New skill', leading: const LineIcon('plus', size: 15), on: nav.page == 'new-skill', onTap: () => ref.go('new-skill'), faint: nav.page != 'new-skill'),
             const JGl('You'),
             JLi(text: 'Know your role', leading: const LineIcon('person', size: 15), on: nav.page == 'dossier', onTap: () => ref.go('dossier')),
             JLi(text: 'Your stories', leading: const LineIcon('book-open', size: 15), on: nav.page == 'stories', onTap: () => ref.go('stories')),

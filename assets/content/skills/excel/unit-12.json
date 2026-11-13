@@ -1,0 +1,248 @@
+{
+  "id": "excel-u12",
+  "title": "Everyday workbook skills that tests assume",
+  "summary": "The small tasks certification outlines and screening tests are built from: copying formats, Paste Special, filling, grouped sheets, the counting and rounding functions, weighted averages, and knowing which Excel version has which feature.",
+  "lessons": [
+    {
+      "id": "excel-u12-l1",
+      "title": "Housekeeping: formats, fills and Paste Special",
+      "minutes": 11,
+      "body": "The Microsoft Office Specialist outline and most hiring tests are not made of pivot tables and lookups. A large share is small housekeeping: make this range look like that one, paste values only, fill a series, fix the column widths. They are easy marks if you know where each command is, and slow if you hunt for it.\n\n## Copying a format\n\n**Format Painter** (Home tab, the paintbrush) copies formatting from the selected cell to the next cells you click or drag over. Double-click the paintbrush to keep it on for several targets, and press Esc to finish. It copies number format, font, fill, borders and alignment, and leaves the values alone.\n\n## Paste Special\n\nCopy, then **Ctrl+Alt+V** opens Paste Special. The options that tests ask for:\n\n| Option | Pastes | Use it when |\n|---|---|---|\n| Values | Results only, no formulas | Freezing a calculated column before deleting its inputs |\n| Formats | Formatting only | Same job as Format Painter |\n| Formulas | Formulas without formatting | Keeping the target's look |\n| Transpose | Rows become columns | Turning a header row into a list |\n| Column widths | Widths only | Matching a layout |\n| Multiply (under Operation) | Multiplies the target by what you copied | Converting text-numbers by multiplying by 1, or changing units |\n\nPasting values over the formulas themselves is the standard way to stop a lookup column from breaking when the lookup table is removed.\n\n## Filling\n\n- Drag the **fill handle** (the small square at the corner of the selection) to copy a formula or extend a series. Double-click it to fill down as far as the neighbouring column has data.\n- **Ctrl+D** fills down from the cell above; **Ctrl+R** fills right.\n- Type `Jan`, or `1` and `2` in two cells, select them and drag: Excel continues the pattern (**Auto Fill**).\n- **Flash Fill**, **Ctrl+E**, copies a pattern from an example. Type the first initial and surname for one row next to a list of full names, press Ctrl+E, and the rest fill in. The results are plain values, so they do not update if the source changes; a formula does.\n\n## Widths, wrapping and clearing\n\n- Double-click a column border to auto-fit it. To fit many, select the columns first. The ribbon path is Home, Format, AutoFit Column Width.\n- **Wrap Text** keeps long text inside the column on several lines. **Merge & Center** joins cells; avoid it inside data, because merged cells break sorting, filtering and pivots. Use *Center Across Selection* (Format Cells, Alignment) for a title instead.\n- Home, **Clear** has separate commands: Clear Formats removes the look and keeps the values, Clear Contents (the Delete key) does the reverse, Clear All does both.\n\n## Working on several sheets at once\n\nClick the first sheet tab, then Ctrl+click or Shift+click others. The title bar shows **Group**. Whatever you type or format now happens on every grouped sheet in the same cells, which is how you give twelve monthly sheets one header. Right-click a tab and choose Ungroup Sheets as soon as you finish; forgetting is how people overwrite eleven sheets by accident.\n\n## Small objects the outline names\n\n- **Sparklines** (Insert tab) are tiny charts inside a cell, one per row, for a trend at a glance.\n- **Hyperlinks**, Ctrl+K, can jump to a web address, a file, or a cell or named range in the workbook.\n- **Go To**, Ctrl+G or F5, jumps to a cell or named range; the Name Box left of the formula bar does the same.\n- **Convert to Range** (Table Design tab) turns a Table back into ordinary cells and keeps the formatting.\n- **Alt text** for a chart (right-click, View Alt Text) describes it for screen-reader users.",
+      "keyPoints": [
+        "Format Painter copies formatting; double-click it to apply to several places.",
+        "Ctrl+Alt+V opens Paste Special: Values, Formats, Transpose and the Multiply operation are the ones tests ask for.",
+        "Double-click the fill handle to fill down; Ctrl+E is Flash Fill, which produces static values.",
+        "Clear Formats keeps values; Clear Contents keeps formatting.",
+        "Grouped sheets take every edit at once, so ungroup as soon as you finish."
+      ],
+      "interviewAngle": "A practical test may give you forty small tasks in twelve minutes, and these are the ones that eat time. In an interview they come up as quick checks: \"how do you paste only the values?\", \"how would you format all twelve sheets the same way?\". Answer with the command and one reason it matters, for example that you paste values before sending a file so nothing breaks when a source sheet is removed. Your honest level is moderate, daily-use Excel, which is exactly what these questions test.",
+      "exercises": [
+        {
+          "id": "excel-u12-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A column holds VLOOKUP formulas. You need to delete the lookup sheet without the column turning into errors. What do you do first?",
+          "choices": [
+            "Format the column as Text.",
+            "Copy the column and use Paste Special, Values over itself.",
+            "Use Clear Formats on the column.",
+            "Merge the cells."
+          ],
+          "answer": 1,
+          "explanation": "Pasting values replaces each formula with its current result, so nothing depends on the lookup sheet any more."
+        },
+        {
+          "id": "excel-u12-l1-e2",
+          "type": "short",
+          "prompt": "What is the keyboard shortcut for Flash Fill?",
+          "accept": [
+            "ctrl+e",
+            "ctrl + e",
+            "ctrl e",
+            "control+e",
+            "ctrl-e"
+          ],
+          "answer": "Ctrl+E",
+          "explanation": "Type one or two examples of the pattern, then press Ctrl+E in the next cell."
+        },
+        {
+          "id": "excel-u12-l1-e3",
+          "type": "mcq",
+          "prompt": "You typed a header into Sheet1 and found it has appeared on five other sheets as well. What happened?",
+          "choices": [
+            "The workbook is shared.",
+            "The sheets were grouped, so the edit applied to all of them.",
+            "A macro copied it.",
+            "The cells are merged across sheets."
+          ],
+          "answer": 1,
+          "explanation": "With several tabs selected the title bar shows Group and every edit lands on each sheet. Right-click a tab and choose Ungroup Sheets."
+        },
+        {
+          "id": "excel-u12-l1-e4",
+          "type": "mcq",
+          "prompt": "Which command removes bold, colours and borders from a range but leaves the numbers in place?",
+          "choices": [
+            "Clear Contents",
+            "Clear All",
+            "Clear Formats",
+            "Delete Cells"
+          ],
+          "answer": 2,
+          "explanation": "Clear Formats resets the appearance only. Clear Contents does the opposite, and Clear All removes both."
+        },
+        {
+          "id": "excel-u12-l1-e5",
+          "type": "open",
+          "prompt": "You receive a workbook with twelve monthly sheets laid out identically. Describe, step by step, how you would give all twelve the same bold header row and column widths, and how you would avoid damaging the data.",
+          "answer": "1. Save a copy first, because grouped edits cannot be told apart from normal ones afterwards.\n2. Click the first month's tab, hold Shift and click the last, so all twelve are grouped. Check that the title bar shows Group.\n3. Select row 1, make it bold and set the fill; set the column widths (or select the columns and double-click a border to auto-fit).\n4. Right-click a tab and choose Ungroup Sheets straight away.\n5. Click through two or three sheets to confirm the header changed and the data did not.\n\nAn alternative that never risks the data is to format one sheet, then copy its header row and use Paste Special, Formats and Column widths on each other sheet.",
+          "rubric": [
+            "Groups the sheets (Shift or Ctrl+click on tabs)",
+            "Applies the formatting once while grouped",
+            "Ungroups immediately afterwards",
+            "Protects the data: a copy first, a check afterwards, or a Paste Special alternative"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u12-l2",
+      "title": "The functions tests assume you know",
+      "minutes": 13,
+      "body": "Earlier units covered lookups, the IFS family and text and date functions. Screening tests also assume a layer of basic functions that nobody thinks to teach. Most are simple; each has one trap.\n\n## Order of operations\n\nExcel works out brackets first, then exponents (`^`), then multiplication and division, then addition and subtraction, left to right. `=2+3*4` is 14, not 20. One Excel-specific surprise: a leading minus is applied before the exponent, so `=-2^2` returns 4. Write `=-(2^2)` if you mean -4.\n\n## The counting family\n\nTake a column of six cells holding `12`, `7`, `n/a`, an empty cell, `7` and `0`.\n\n| Function | Counts | Result |\n|---|---|---|\n| `COUNT` | Cells with numbers | 4 |\n| `COUNTA` | Cells that are not empty | 5 |\n| `COUNTBLANK` | Empty cells | 1 |\n| `COUNTIF(range, 7)` | Cells that meet a condition | 2 |\n\nThe trap is numbers stored as text: `COUNT` and `SUM` skip them silently. If `COUNT` and `COUNTA` disagree on a column that should be all numbers, that difference is your count of bad cells.\n\n## Rounding\n\n`ROUND(9.525, 2)` is 9.53. `ROUNDDOWN(9.529, 2)` is 9.52 and `ROUNDUP(9.521, 2)` is 9.53. A negative second argument rounds left of the decimal point: `ROUND(1019, -1)` is 1020. Formatting a cell to two decimals only changes what you see; the stored value keeps every digit, which is why a column of displayed numbers may not add up to its displayed total. `ROUND` changes the value itself.\n\n## Typical value and rank\n\n- `AVERAGE` and `MEDIAN` differ when a few values are extreme. On the practice shifts the average time to fill is 9.52 hours and the median is 9.35; with a handful of very slow fills the gap would grow, and the median would be the fairer \"typical\" figure.\n- `LARGE(range, 2)` is the second largest value and `SMALL(range, 1)` the smallest. `MAX` and `MIN` are the first of each.\n- `RANK.EQ(value, range)` gives a position, 1 for the largest; ties share a rank and the next rank is skipped.\n- `MAXIFS(max_range, criteria_range, criterion)` and `MINIFS` give a conditional maximum or minimum, in the same pattern as `SUMIFS`.\n\n## Weighted averages with SUMPRODUCT\n\n`SUMPRODUCT` multiplies ranges pair by pair and adds the results. Its classic use is the weighted average, and it answers a question that trips up many reports:\n\n| State | Shifts | Fill rate |\n|---|---|---|\n| FL | 537 | 89.6% |\n| GA | 340 | 88.5% |\n| AL | 57 | 87.7% |\n| SC | 85 | 87.1% |\n\n`=AVERAGE(C2:C5)` gives 88.2%, treating Alabama's 57 shifts as equal to Florida's 537. The overall rate is weighted by shifts:\n\n```\n=SUMPRODUCT(B2:B5, C2:C5) / SUM(B2:B5)\n```\n\nwhich gives 88.9%, the same as dividing total filled shifts by total shifts (906 / 1019). Never average percentages that sit on different-sized groups.\n\n## Joining text\n\n`CONCAT(A2, \" \", B2)` joins values; `&` does the same. `TEXTJOIN(\", \", TRUE, A2:A6)` joins a whole range with a separator and, with `TRUE`, skips empty cells. Older workbooks use `CONCATENATE`, which still works.\n\n## Working days\n\n`NETWORKDAYS(start, end, holidays)` counts weekdays between two dates, including both ends, and leaves out any dates in the optional holiday range. `NETWORKDAYS.INTL` lets you choose which days are the weekend. `WORKDAY(start, 5, holidays)` returns the date five working days later. Use these for service-level questions such as \"was this ticket closed within three business days?\".",
+      "keyPoints": [
+        "Excel evaluates brackets, exponents, multiply and divide, then add and subtract; -2^2 returns 4.",
+        "COUNT counts numbers, COUNTA non-empty cells, COUNTBLANK empties; a gap between COUNT and COUNTA reveals text-numbers.",
+        "ROUND changes the stored value; number formatting only changes the display.",
+        "Average percentages with SUMPRODUCT weights, never with a plain AVERAGE, when groups differ in size.",
+        "NETWORKDAYS counts working days inclusive of both ends and can skip a holiday list."
+      ],
+      "interviewAngle": "Multiple-choice screens ask \"what does this formula return?\" far more than they ask you to build anything, so the traps here are worth more than their size suggests. In conversation, the weighted-average point is the one to raise: \"I do not average percentages across groups of different sizes; I recalculate from the totals or weight with SUMPRODUCT.\" It is true of how you built fill-rate reports, and it signals care with numbers without overstating your Excel level.",
+      "exercises": [
+        {
+          "id": "excel-u12-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Four regions have fill rates of 90%, 88%, 86% and 60%. The first three have about 500 shifts each; the last has 20. Which formula gives the company-wide fill rate?",
+          "choices": [
+            "`=AVERAGE(rates)`",
+            "`=SUMPRODUCT(shifts, rates) / SUM(shifts)`",
+            "`=MEDIAN(rates)`",
+            "`=SUM(rates) / COUNT(shifts)`"
+          ],
+          "answer": 1,
+          "explanation": "The overall rate must be weighted by the number of shifts. A plain average lets the 20-shift region count as much as a 500-shift one and drags the figure to 81%."
+        },
+        {
+          "id": "excel-u12-l2-e2",
+          "type": "short",
+          "prompt": "What does `=2+3*4` return?",
+          "accept": [
+            "14"
+          ],
+          "answer": "14",
+          "explanation": "Multiplication comes before addition: 3*4 is 12, plus 2 is 14."
+        },
+        {
+          "id": "excel-u12-l2-e3",
+          "type": "mcq",
+          "prompt": "A column should contain 200 numbers. `COUNTA` returns 200 and `COUNT` returns 193. What does that tell you?",
+          "choices": [
+            "Seven cells are empty.",
+            "Seven cells hold text, probably numbers stored as text.",
+            "Seven cells contain zero.",
+            "Seven cells are hidden by a filter."
+          ],
+          "answer": 1,
+          "explanation": "COUNTA counts every non-empty cell; COUNT counts only true numbers. The seven extra cells are text, and SUM will skip them too."
+        },
+        {
+          "id": "excel-u12-l2-e4",
+          "type": "short",
+          "prompt": "What does `=ROUND(1019, -1)` return?",
+          "accept": [
+            "1020",
+            "1,020"
+          ],
+          "answer": "1020",
+          "explanation": "A negative number of digits rounds to the left of the decimal point: -1 rounds to the nearest ten."
+        },
+        {
+          "id": "excel-u12-l2-e5",
+          "type": "mcq",
+          "prompt": "A ticket was opened on Monday 2 March and closed on Friday 6 March, with no holidays. What does `=NETWORKDAYS(opened, closed)` return?",
+          "choices": [
+            "3",
+            "4",
+            "5",
+            "7"
+          ],
+          "answer": 2,
+          "explanation": "NETWORKDAYS counts both the start and end dates: Monday to Friday is five working days. Subtract 1 if you want elapsed days."
+        },
+        {
+          "id": "excel-u12-l2-e6",
+          "type": "open",
+          "prompt": "A manager averages the four state fill rates in the lesson table and reports 88.2%. Finance reports 88.9% from the same data. Explain the difference in plain words and write the formula that reconciles them.",
+          "answer": "Both started from the same shifts. The manager's 88.2% is the plain average of four percentages, so each state counts equally, although Florida has 537 shifts and Alabama 57. Finance's 88.9% is filled shifts divided by all shifts (906 / 1019), so every shift counts equally. To get the overall figure from the state table, weight each rate by its shifts:\n\n```\n=SUMPRODUCT(B2:B5, C2:C5) / SUM(B2:B5)\n```\n\nThat returns 88.9%. The overall rate is the one to report for the company; the simple average only answers \"what does a typical state look like\". I would label whichever is shown.",
+          "rubric": [
+            "Says the plain average weights each state equally regardless of size",
+            "Says the overall rate is total filled divided by total shifts",
+            "Gives the SUMPRODUCT / SUM formula (or recalculates from totals)",
+            "States which figure to report and that it should be labelled"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "excel-u12-l3",
+      "title": "Which Excel do they have?",
+      "minutes": 7,
+      "body": "A formula that works on your computer can show `#NAME?` on someone else's. Newer functions exist only in newer versions, and many employers still run older ones. Knowing the boundaries stops you from handing over a broken file, and it is a quick way to show judgement in an interview.\n\n## What needs what\n\n| Feature | Excel 2016 / 2019 | Excel 2021 / 2024 | Microsoft 365 |\n|---|---|---|---|\n| `VLOOKUP`, `INDEX`/`MATCH`, `SUMIFS`, PivotTables | Yes | Yes | Yes |\n| `XLOOKUP`, `XMATCH` | No | Yes | Yes |\n| Dynamic arrays: `FILTER`, `SORT`, `UNIQUE`, `SEQUENCE` | No | Yes | Yes |\n| `TEXTJOIN`, `IFS`, `MAXIFS` | 2019 only | Yes | Yes |\n| Power Query (Get & Transform) | Yes, on Windows | Yes | Yes |\n\nTwo more boundaries:\n\n- **Mac.** Excel for Mac has the functions above in current versions, but Microsoft describes its Power Query support as partial. Build queries on Windows when you can.\n- **Excel for the web** opens and edits most workbooks and supports the modern functions, but lacks some features of the desktop app. Check before relying on it for Power Query or macros.\n\n## How to find out\n\n1. Ask. \"Which version of Excel does the team use?\" is a normal question on day one and a good one in an interview.\n2. On a machine, look at File, Account, which shows the product name and version.\n3. In a test, type `=XLOOKUP(` and see whether Excel offers the function. If it does not, you are on an older version.\n\n## The safe default\n\nWhen you do not know who will open the file:\n\n- Use `INDEX`/`MATCH` or `VLOOKUP` for lookups. They work everywhere.\n- Use a PivotTable or `SUMIFS` where you might have reached for `FILTER` and `UNIQUE`.\n- Wrap lookups in `IFERROR`, which every supported version has, not `IFNA` alone if very old versions are in play.\n- If you do use a newer function, say so in a note on the sheet.\n\nA formula written with a newer function still shows its last calculated value when opened in an older version, but it turns into an error as soon as that version recalculates it. So a file can look fine when you send it and break when the recipient edits one cell.\n\n## Why this is asked\n\n\"VLOOKUP or XLOOKUP?\" is partly a version question. A complete answer names the better function and the condition: XLOOKUP is clearer and safer where everyone has it; INDEX/MATCH is the choice when the file must open on older installations.",
+      "keyPoints": [
+        "XLOOKUP and dynamic array functions need Excel 2021 or later, or Microsoft 365; they are missing from 2016 and 2019.",
+        "VLOOKUP, INDEX/MATCH, SUMIFS and PivotTables work in every version.",
+        "Power Query is full-featured on Windows and partial on Mac.",
+        "Find the version by asking, by File then Account, or by typing a new function name.",
+        "When the audience is unknown, build with the functions that work everywhere and note any exception."
+      ],
+      "interviewAngle": "This turns a syntax question into a judgement answer. If asked which lookup you prefer, say: \"XLOOKUP where the team is on Microsoft 365, because it defaults to an exact match and can look left. If the file has to open on older versions, INDEX and MATCH.\" On the job you used pivot tables and VLOOKUP, so you are not claiming more than you did; you are showing you know the newer tools and when they are safe.",
+      "exercises": [
+        {
+          "id": "excel-u12-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "You build a workbook with XLOOKUP and FILTER. A colleague on Excel 2019 edits it and sees `#NAME?`. Why?",
+          "choices": [
+            "The workbook is protected.",
+            "Those functions do not exist in Excel 2019.",
+            "Their regional settings use semicolons.",
+            "The lookup values are text."
+          ],
+          "answer": 1,
+          "explanation": "XLOOKUP and the dynamic array functions arrived with Excel 2021 and Microsoft 365. Older versions cannot calculate them."
+        },
+        {
+          "id": "excel-u12-l3-e2",
+          "type": "mcq",
+          "prompt": "You do not know which version the recipients use. Which lookup is the safe choice?",
+          "choices": [
+            "XLOOKUP",
+            "INDEX with MATCH",
+            "FILTER",
+            "XMATCH"
+          ],
+          "answer": 1,
+          "explanation": "INDEX and MATCH (and VLOOKUP) work in every version of Excel still in use."
+        },
+        {
+          "id": "excel-u12-l3-e3",
+          "type": "short",
+          "prompt": "Which menu path shows the Excel product name and version? Answer as \"Menu > Item\".",
+          "accept": [
+            "file > account",
+            "file>account",
+            "file account",
+            "file, account",
+            "file then account",
+            "file -> account"
+          ],
+          "answer": "File > Account",
+          "explanation": "File, Account lists the product (for example Microsoft 365 or Excel 2019) and the version number."
+        },
+        {
+          "id": "excel-u12-l3-e4",
+          "type": "open",
+          "prompt": "In an interview you are asked: \"Do you use VLOOKUP or XLOOKUP?\" Write the answer you would give, including what you used at work.",
+          "answer": "At work I used VLOOKUP and pivot tables, and I know its limits: it only looks to the right, it breaks if someone inserts a column, and you have to remember the exact-match argument. Since then I have learned XLOOKUP, which defaults to an exact match, can look in either direction and has a built-in value for not found. So where the team is on Microsoft 365 or Excel 2021 and later, I would use XLOOKUP. If a file has to open on older versions, I would use INDEX and MATCH, which works everywhere and avoids VLOOKUP's column-number problem. I would ask which version the team uses before choosing.",
+          "rubric": [
+            "Is honest about what was used at work (VLOOKUP, pivot tables)",
+            "Names at least two real advantages of XLOOKUP",
+            "Ties the choice to the Excel version in use",
+            "Gives INDEX/MATCH as the compatible alternative"
+          ]
+        }
+      ]
+    }
+  ]
+}

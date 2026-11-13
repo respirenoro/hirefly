@@ -1,0 +1,157 @@
+{
+  "id": "pw-u9",
+  "title": "Running subsets and handling awkward pages",
+  "summary": "Tags and grep for running the right tests at the right time, and the scenarios that trip up first tests: new tabs, frames, dialogs, uploads and typing.",
+  "lessons": [
+    {
+      "id": "pw-u9-l1",
+      "title": "Tags, grep and running part of a suite",
+      "minutes": 9,
+      "body": "Once a suite has more than a few dozen tests, you rarely want to run all of it. You want the smoke tests on every pull request, the tests for the feature you are working on, and everything overnight. Playwright gives you several ways to choose.\n\n## Tagging tests\n\nA tag is a label starting with `@`. Add it in the details object of a test or a describe block:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('coordinator can sign in', { tag: '@smoke' }, async ({ page }) => {\n  // ...\n});\n\ntest.describe('SOS alert', { tag: '@sos' }, () => {\n  test('sends within radius', { tag: ['@smoke', '@critical'] }, async ({ page }) => {\n    // ...\n  });\n});\n```\n\nA test inherits the tags of its describe block, so the second test has `@sos`, `@smoke` and `@critical`. Older suites put the tag in the title, `test('signs in @smoke', ...)`, which also works because grep matches titles.\n\n## Choosing what runs\n\n| Command | Runs |\n|---|---|\n| `npx playwright test --grep @smoke` | Tests tagged or titled with `@smoke` |\n| `npx playwright test --grep-invert @slow` | Everything except `@slow` |\n| `npx playwright test --grep \"@smoke|@critical\"` | Either tag (a regular expression) |\n| `npx playwright test tests/sos.spec.ts` | One file |\n| `npx playwright test tests/sos.spec.ts:24` | The test at line 24 |\n| `npx playwright test -g \"sends within radius\"` | Tests whose title matches |\n| `npx playwright test --project=chromium` | One configured browser project |\n| `npx playwright test --last-failed` | Only the tests that failed last time |\n\nIn UI mode (`--ui`) the filter box accepts the same tags.\n\n## In the test file\n\n- `test.only(...)` runs just that test. It is for local debugging; set `forbidOnly: !!process.env.CI` in the config so a forgotten `.only` fails the pipeline instead of silently skipping the rest.\n- `test.skip(condition, 'reason')` skips, with a reason that appears in the report.\n- `test.fixme(...)` marks a test as known broken and skips it.\n- `test.slow()` triples the timeout for a test that is legitimately long.\n\nEvery skip should carry a reason and, ideally, a bug number. A suite full of unexplained skips is a suite nobody trusts.\n\n## Putting it in the pipeline\n\nA pull request run can be one line different from the nightly run:\n\n```yaml\n- script: npx playwright test --grep @smoke\n  displayName: Smoke tests\n  env:\n    CI: 'true'\n```\n\nKeep the smoke set small enough to finish in a few minutes, and review it when a critical feature is added. Larger teams also **shard** a long suite across several machines with `--shard=1/3`, `--shard=2/3` and so on, then merge the reports. Sharding needs more than one parallel job, so know the term and that you have not needed it.",
+      "keyPoints": [
+        "Tag tests with { tag: '@smoke' }; tests inherit tags from their describe block.",
+        "--grep runs matching tests and --grep-invert excludes them; both accept regular expressions.",
+        "A file path, file:line, -g and --last-failed narrow a run further.",
+        "forbidOnly on CI stops a forgotten test.only from hiding the rest of the suite.",
+        "Run a small smoke set on each pull request and the full suite on a schedule."
+      ],
+      "interviewAngle": "\"How do you organise a growing test suite?\" is answered here: tags by purpose, a short smoke set on each change, the full run nightly, and no skip without a reason. That is a tester's answer and within your level. If sharding or parallel machines comes up, say you understand the idea and your suite was small enough to run on one agent. Basic end-to-end tests in a pipeline is your honest claim; this lesson does not change it.",
+      "exercises": [
+        {
+          "id": "pw-u9-l1-e1",
+          "type": "short",
+          "placement": true,
+          "prompt": "Write the command that runs only the tests tagged `@smoke`.",
+          "accept": [
+            "npx playwright test --grep @smoke",
+            "npx playwright test -g @smoke",
+            "npx playwright test --grep \"@smoke\"",
+            "npx playwright test --grep '@smoke'",
+            "playwright test --grep @smoke"
+          ],
+          "answer": "npx playwright test --grep @smoke",
+          "explanation": "--grep (short form -g) matches test titles and tags."
+        },
+        {
+          "id": "pw-u9-l1-e2",
+          "type": "mcq",
+          "prompt": "A pipeline suddenly reports 1 test passed where yesterday it ran 60. Nothing failed. What is the most likely cause?",
+          "choices": [
+            "The browsers were not installed.",
+            "A `test.only` was committed and `forbidOnly` is not set.",
+            "The trace viewer is disabled.",
+            "The base URL changed."
+          ],
+          "answer": 1,
+          "explanation": "test.only runs a single test and skips the rest. forbidOnly on CI turns that into a failure so it cannot slip through."
+        },
+        {
+          "id": "pw-u9-l1-e3",
+          "type": "mcq",
+          "prompt": "A describe block is tagged `@sos`. A test inside it is tagged `@smoke`. Which command runs that test?",
+          "choices": [
+            "Only `--grep @smoke`",
+            "Only `--grep @sos`",
+            "Either `--grep @smoke` or `--grep @sos`",
+            "Neither; tags cannot be combined"
+          ],
+          "answer": 2,
+          "explanation": "A test carries its own tags and those of its describe block, so it matches both."
+        },
+        {
+          "id": "pw-u9-l1-e4",
+          "type": "open",
+          "prompt": "A test for exporting a report fails every run because of a known bug, DISP-482, that will not be fixed this sprint. How should the test be handled in the suite, and why not delete it?",
+          "answer": "Mark it as known broken with a reason that names the bug, for example `test.fixme(true, 'DISP-482: export omits cancelled shifts')` inside the test, or `test.fixme('exports the report', ...)`. It then shows as skipped in the report with that reason, the pipeline goes green for everything else, and nobody wastes time re-investigating the same failure.\n\nDeleting it loses the coverage and the knowledge of what to check when the bug is fixed. Leaving it failing trains the team to ignore a red pipeline, which hides the next real failure. I would also add a note on DISP-482 that the test must be re-enabled as part of the fix.",
+          "rubric": [
+            "Uses test.fixme or test.skip with a reason",
+            "Links the skip to the bug number",
+            "Explains why a permanently red test is harmful",
+            "Plans to re-enable it when the bug is fixed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pw-u9-l2",
+      "title": "New tabs, frames, dialogs, uploads and typing",
+      "minutes": 12,
+      "body": "Most first tests click and fill on one page. Real applications also open new tabs, embed other pages, show browser dialogs and ask for files. Each has one idiom, and each is a favourite interview question.\n\n## A link that opens a new tab\n\nA new tab is a new `Page`. Start waiting for it before the click that causes it:\n\n```ts\nconst popupPromise = page.waitForEvent('popup');\nawait page.getByRole('link', { name: 'Print roster' }).click();\nconst popup = await popupPromise;\nawait expect(popup).toHaveTitle(/Roster/);\n```\n\nThe order matters. If you click first and wait afterwards, the tab may already have opened and the wait never finishes. The original `page` is still usable; you now hold two.\n\n## Content inside a frame\n\nAn `<iframe>` is a page inside the page: embedded payment forms, maps and help widgets are common ones. Locators on `page` do not look inside it. Go through the frame:\n\n```ts\nconst help = page.frameLocator('iframe[title=\"Help centre\"]');\nawait help.getByRole('searchbox').fill('cancel a shift');\n```\n\nIf a locator that looks right finds nothing, check whether the element is inside a frame.\n\n## Browser dialogs\n\n`alert`, `confirm` and `prompt` boxes belong to the browser, not the page. Playwright dismisses them automatically, so a \"Delete this shift?\" confirm is cancelled unless you say otherwise. Register a handler before the action:\n\n```ts\npage.once('dialog', dialog => dialog.accept());\nawait page.getByRole('button', { name: 'Delete shift' }).click();\n```\n\nA styled confirmation built from page elements is not a dialog in this sense. Treat it as ordinary buttons.\n\n## Uploading and downloading\n\n```ts\nawait page.getByLabel('Import pharmacists').setInputFiles('data/pharmacists.csv');\n\nconst downloadPromise = page.waitForEvent('download');\nawait page.getByRole('button', { name: 'Export CSV' }).click();\nconst download = await downloadPromise;\nexpect(download.suggestedFilename()).toBe('shifts.csv');\n```\n\n`setInputFiles` sets the file directly, with no operating-system file window to drive. Downloads follow the same wait-then-act pattern as popups.\n\n## fill, pressSequentially and press\n\n- `fill('text')` clears the field and sets the value in one step. Use it almost always.\n- `pressSequentially('text')` types one key at a time, firing key events. Use it only when the page reacts per keystroke, such as an autocomplete that searches as you type.\n- `press('Enter')` sends a single key or a combination such as `Control+A`.\n- The older `type()` method is deprecated in favour of these.\n\n## Waiting for the right thing\n\nWeb-first assertions wait for you, so explicit waits are rare. When you need one:\n\n- `page.waitForURL('**/roster')` waits for navigation to a matching address.\n- `page.waitForResponse(r => r.url().includes('/api/shifts') && r.ok())` waits for a particular network reply, started before the action like a popup.\n- `page.waitForLoadState('networkidle')` is discouraged; it is slow and unreliable on pages that poll. Assert on what the user should see instead.\n- `page.waitForTimeout(3000)` is a fixed sleep and is for debugging only.\n\n## What not to automate\n\nCAPTCHA and multi-factor prompts exist to stop automation. The professional answer is to ask for a test environment where they are switched off or bypassed for a test account, and to sign in through the API or a saved `storageState`. Never try to defeat them.",
+      "keyPoints": [
+        "Start waiting for a popup or download before the click that triggers it.",
+        "Elements inside an iframe need frameLocator; page locators do not see into frames.",
+        "Browser dialogs are dismissed by default; register a handler to accept them.",
+        "Use fill for almost everything and pressSequentially only when the page reacts to each key.",
+        "Do not automate CAPTCHA or MFA; ask for a test bypass and sign in with storageState or the API."
+      ],
+      "interviewAngle": "Each of these is a stock question: \"how do you handle a new tab?\", \"an iframe?\", \"an alert?\". The answers are short and exact, so learn the idiom and the reason, especially why the wait starts before the click. If you have not met one of them in your own tests, say so and then give the approach; that is better than a vague claim. For CAPTCHA, the right answer is the refusal to automate it and the request for a test bypass.",
+      "exercises": [
+        {
+          "id": "pw-u9-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "A test clicks \"Print roster\", which opens a new tab, and then calls `page.waitForEvent('popup')`. It hangs until timeout. Why?",
+          "choices": [
+            "Popups cannot be tested.",
+            "The wait was started after the click, so the popup event had already happened.",
+            "The new tab needs `frameLocator`.",
+            "The test needs `test.slow()`."
+          ],
+          "answer": 1,
+          "explanation": "Create the waiting promise first, click, then await the promise. Otherwise the event can fire before anything is listening."
+        },
+        {
+          "id": "pw-u9-l2-e2",
+          "type": "mcq",
+          "prompt": "A search box is visible on screen, but `page.getByRole('searchbox')` finds nothing. The box is part of an embedded help widget. What is the fix?",
+          "choices": [
+            "Add `waitForTimeout(5000)`.",
+            "Use `page.frameLocator(...)` for the iframe, then locate the search box inside it.",
+            "Switch to an XPath selector.",
+            "Use `force: true`."
+          ],
+          "answer": 1,
+          "explanation": "An embedded widget is usually an iframe, and page-level locators do not search inside frames."
+        },
+        {
+          "id": "pw-u9-l2-e3",
+          "type": "mcq",
+          "prompt": "A test clicks \"Delete shift\", the browser shows a confirm box, and the shift is still there afterwards. No error is reported. Why?",
+          "choices": [
+            "The click missed the button.",
+            "Playwright dismissed the dialog by default, which cancelled the delete.",
+            "Confirm boxes block all tests.",
+            "The assertion ran too early."
+          ],
+          "answer": 1,
+          "explanation": "Unhandled dialogs are dismissed automatically. Register `page.once('dialog', d => d.accept())` before the click."
+        },
+        {
+          "id": "pw-u9-l2-e4",
+          "type": "short",
+          "prompt": "Which locator method sets a file on a file input without opening the operating system's file window?",
+          "accept": [
+            "setinputfiles",
+            "setinputfiles()",
+            ".setinputfiles()",
+            "locator.setinputfiles()"
+          ],
+          "answer": "setInputFiles()",
+          "explanation": "setInputFiles takes a path (or several) and assigns it to the input directly."
+        },
+        {
+          "id": "pw-u9-l2-e5",
+          "type": "open",
+          "prompt": "The application you test adds a CAPTCHA to the login page. Your login test now fails. An interviewer asks how you would handle it. Write your answer.",
+          "answer": "I would not try to get past the CAPTCHA with automation. Its purpose is to block exactly that, and a test that depends on beating it will be fragile at best. I would ask the developers for one of the usual arrangements in the test environment: the CAPTCHA switched off, a test key that always passes, or an allow-list for the test account.\n\nI would also stop logging in through the screen in every test. One setup step signs in once, through the API if there is one, and saves the session with storageState, and the other tests start already signed in. The login screen itself keeps one or two dedicated tests. The CAPTCHA's own behaviour I would cover with a manual check.",
+          "rubric": [
+            "Refuses to automate or defeat the CAPTCHA",
+            "Asks for a test-environment bypass, test key or allow-listed account",
+            "Signs in once and reuses the session (storageState or API login)",
+            "Keeps separate coverage for the login screen or the CAPTCHA itself"
+          ]
+        }
+      ]
+    }
+  ]
+}

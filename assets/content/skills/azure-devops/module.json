@@ -13,6 +13,7 @@
     "unit-9.json",
     "unit-5.json",
     "unit-10.json",
+    "unit-11.json",
     "unit-6.json"
   ],
   "interviewQuestions": [
@@ -90,6 +91,46 @@
       "id": "ado-iq-15",
       "prompt": "A pipeline passed but the Tests tab shows nothing. What do you check?",
       "strongAnswer": "First whether a publish step exists and ran. Then the results file path and format: the task needs the right format, like JUnit, and a file pattern that matches where the tests wrote the file. Then the condition: if the test step fails and the publish step lacks succeededOrFailed, it is skipped. I would also check the reporter configuration in the test project. I fixed this kind of gap when setting up my Playwright runs."
+    },
+    {
+      "id": "ado-iq-16",
+      "prompt": "What is the difference between a Microsoft-hosted agent and a self-hosted agent?",
+      "strongAnswer": "An agent is the machine that runs a pipeline's steps. A Microsoft-hosted agent is a fresh virtual machine that Microsoft starts for each job and throws away afterwards, so there is nothing to maintain but every run installs its own tools. A self-hosted agent is a machine the company keeps running with the agent software on it. It can reach internal systems and keeps its installed tools between runs, but someone has to look after it. Our Playwright tests ran on hosted agents, which is why the pipeline installed the browsers each time. I did not administer agents or pools."
+    },
+    {
+      "id": "ado-iq-17",
+      "prompt": "What is a service connection?",
+      "strongAnswer": "It is a saved, named credential that lets a pipeline reach something outside Azure DevOps, such as an Azure subscription, a container registry or a GitHub repository. An administrator creates it once in project settings and decides which pipelines may use it. The pipeline refers to it by name, so nobody puts a password in the YAML. I never created one. Where it mattered to me was reading failures: if a run says a service connection cannot be found or is not authorized, that is a permissions request to an admin, not a bug in the tests."
+    },
+    {
+      "id": "ado-iq-18",
+      "prompt": "How do you keep passwords and keys out of a pipeline?",
+      "strongAnswer": "They never go in the YAML file, because the file is in the repository and its history is permanent. They go in secret variables on the pipeline, or in a variable group in the Library that can be backed by Azure Key Vault. Secrets are masked in the logs. One detail matters for tests: a secret is not handed to a script automatically, so it has to be mapped in with an env block on that step. Our test account's password was stored that way. I used the variables; an administrator owned where the secrets were kept."
+    },
+    {
+      "id": "ado-iq-19",
+      "prompt": "What kinds of triggers can start a pipeline?",
+      "strongAnswer": "A CI trigger runs when code is pushed to a matching branch. A pull request trigger, or a build validation policy in Azure Repos, runs when a pull request is opened or updated. A scheduled trigger runs at set times from a cron expression, in UTC. A pipeline can also start when another pipeline completes, and anyone with permission can start one manually. For tests, the usual pattern is a short smoke suite on every pull request and the full regression on a nightly schedule, so developers get fast feedback and the long run does not block the queue."
+    },
+    {
+      "id": "ado-iq-20",
+      "prompt": "What is the difference between Azure DevOps Services and Azure DevOps Server?",
+      "strongAnswer": "Services is the cloud product, hosted and updated by Microsoft, and it is what most teams use. Server is the edition a company installs on its own machines, usually because its data has to stay on premises. New features reach Services first. The concepts are the same in both: Boards, Repos, Pipelines, Test Plans. My experience is with Services, in a small company, using Boards for the backlog and sprints, Test Plans for test cases and Pipelines to run our Playwright tests. I have not used Server."
+    },
+    {
+      "id": "ado-iq-21",
+      "prompt": "What is the difference between Git and TFVC?",
+      "strongAnswer": "Both are version control systems available in Azure Repos. Git is distributed: every developer has the full history locally, works on branches and merges through pull requests. TFVC, Team Foundation Version Control, is the older centralized model where files are checked out from a server and history lives there. New projects use Git, and Microsoft recommends it; TFVC survives in older codebases. We used Git. As the person writing tickets and tests I mostly read pull requests and linked work items to them, and I committed test code with help."
+    },
+    {
+      "id": "ado-iq-22",
+      "prompt": "How does Azure DevOps compare with GitHub?",
+      "strongAnswer": "Both belong to Microsoft and overlap. GitHub is centred on the repository, with GitHub Actions for automation and Issues and Projects for tracking, and it is where open source lives. Azure DevOps is a suite with stronger built-in planning and test management: Boards with configurable processes, Test Plans, and Pipelines. Many companies combine them, for example code in GitHub and work in Azure Boards, linked by writing AB and the work item number in a commit. I worked in Azure DevOps. I would expect to be productive in GitHub quickly, since the ideas carry over."
+    },
+    {
+      "id": "ado-iq-23",
+      "prompt": "What is the difference between YAML and classic pipelines?",
+      "strongAnswer": "A classic pipeline is built in a visual editor and stored as configuration in Azure DevOps. A YAML pipeline is a text file in the repository. Because it lives with the code, a change to it goes through a pull request, has a history, and can differ per branch. YAML is the default for new work. Ours was YAML, which meant that when I added a step to publish Playwright results, a developer reviewed that change like any other. I can read and make small edits to a pipeline file. I would not claim to design one."
     }
   ],
   "resources": [
@@ -391,7 +432,7 @@
       "title": "Add a YAML pipeline that publishes test results",
       "minutes": 45,
       "goal": "A pipeline run with a Tests tab and a downloadable artifact.",
-      "setup": "Lab 5 repo. Node is not needed on your PC; the hosted agent installs it. If your new organization says no hosted parallelism is available, Microsoft documents how to request it; alternatively run a self-hosted agent on your own computer. Do not enter payment details.",
+      "setup": "Lab 5 repo. Node is not needed on your PC; the hosted agent installs it. A new organization may report that no hosted parallelism is available. Microsoft's current route to the free Microsoft-hosted grant (one job of up to 60 minutes, 1,800 minutes a month for private projects) is to link the organization to an Azure subscription under Organization settings, Billing, which asks for payment details even though the grant is free. The route that needs no card is a self-hosted agent on your own computer, which is free and enabled automatically. Choose whichever you are comfortable with.",
       "steps": [
         "In the repo create `results.xml` as a small JUnit file with two passing tests and one failing test (`<testsuite><testcase name=\"radius 10 alerts nearby\"/><testcase name=\"busy pharmacist not alerted\"><failure message=\"alerted\"/></testcase></testsuite>`).",
         "Create `azure-pipelines.yml` with trigger on main, `pool: vmImage: ubuntu-latest`, a script step `echo run tests`, a PublishTestResults@2 step (JUnit, `results.xml`, condition succeededOrFailed()) and a PublishPipelineArtifact@1 step that uploads results.xml.",

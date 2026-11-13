@@ -1,0 +1,260 @@
+{
+  "id": "sql-u11",
+  "title": "Database concepts interviewers ask about",
+  "summary": "Keys, constraints, command families, EXISTS, views, indexes and normal forms: the vocabulary questions that screens ask even for reporting roles, taught at the level of someone who reads a database rather than designs one.",
+  "lessons": [
+    {
+      "id": "sql-u11-l1",
+      "title": "Keys, constraints and the families of SQL commands",
+      "minutes": 10,
+      "body": "Screens for analyst, QA and support roles open with vocabulary before they ask for a query. \"What is a primary key?\" is asked far more often than anything about window functions. You have used every idea here; this lesson gives you the names.\n\n## Keys\n\n| Term | What it means | In the practice data |\n|---|---|---|\n| Primary key | The column (or columns) that identifies one row. Unique and never NULL. One per table. | `shifts.id` |\n| Foreign key | A column that points at the primary key of another table. It may repeat and may be NULL. | `shifts.pharmacy_id` points at `pharmacies.id` |\n| Unique constraint | Values may not repeat, but the column is not the row's identity. A table can have several. | A pharmacy's licence number would be one |\n| Composite key | A key made of more than one column. | (`shift_id`, `pharmacist_id`) could identify an assignment |\n\nThe difference people get wrong: a primary key and a unique constraint both forbid duplicates, but a table has one primary key, it cannot hold NULL, and it is what other tables point at.\n\n## Constraints\n\nA constraint is a rule the database enforces on every insert and update:\n\n- `NOT NULL`: the column must have a value.\n- `UNIQUE`: no two rows share the value.\n- `CHECK`: a condition must hold, such as `status IN ('open','completed','cancelled')`.\n- `DEFAULT`: the value used when none is given.\n- `FOREIGN KEY`: the value must exist in the parent table. This is called referential integrity.\n\nWhen a foreign key is not enforced, you can get an **orphan**: a child row whose parent does not exist. Checking for orphans is a standard data-quality test, and you can run it yourself:\n\n```sql\nSELECT COUNT(*) AS orphans\nFROM assignments a\nWHERE NOT EXISTS (SELECT 1 FROM shifts s WHERE s.id = a.shift_id);\n```\n\nOn the practice data this returns 0. A second check proves a column really behaves as a key:\n\n```sql\nSELECT COUNT(*) AS total_rows, COUNT(DISTINCT id) AS distinct_ids\nFROM shifts;\n```\n\nBoth numbers are 1019, so `id` has no duplicates.\n\n## The command families\n\n| Family | Stands for | Statements | What it changes |\n|---|---|---|---|\n| DQL | Data Query Language | `SELECT` | Nothing. It reads. |\n| DML | Data Manipulation Language | `INSERT`, `UPDATE`, `DELETE`, `MERGE` | Rows |\n| DDL | Data Definition Language | `CREATE`, `ALTER`, `DROP`, `TRUNCATE` | Tables and other objects |\n| DCL | Data Control Language | `GRANT`, `REVOKE` | Permissions |\n| TCL | Transaction Control Language | `BEGIN`, `COMMIT`, `ROLLBACK` | Whether changes are kept |\n\nSome sources fold `SELECT` into DML. If asked, give the families and say which one you worked in: almost all of your work was DQL.\n\n`DELETE`, `TRUNCATE` and `DROP` are asked as a set. `DELETE` removes the rows that match a `WHERE` and can be rolled back inside a transaction. `TRUNCATE` empties the whole table quickly and takes no `WHERE`. `DROP` removes the table itself, structure included.",
+      "keyPoints": [
+        "A primary key identifies the row: unique, never NULL, one per table. A foreign key points at another table's primary key.",
+        "A unique constraint also forbids duplicates but is not the row's identity, and a table can have several.",
+        "Constraints (NOT NULL, UNIQUE, CHECK, DEFAULT, FOREIGN KEY) are rules the database enforces on every change.",
+        "DQL reads, DML changes rows, DDL changes objects, DCL changes permissions, TCL keeps or undoes changes.",
+        "DELETE removes chosen rows, TRUNCATE empties the table, DROP removes the table."
+      ],
+      "interviewAngle": "These are definition questions, so answer in two sentences and then tie it to something you did: \"A foreign key points at another table's primary key. When I checked a report, I looked for assignments whose shift did not exist, which is a foreign-key check.\" Be direct that you queried tables other people designed. You never created or altered production tables, and saying so costs nothing in a reporting or QA interview.",
+      "exercises": [
+        {
+          "id": "sql-u11-l1-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "Which statement about a primary key and a unique constraint is correct?",
+          "choices": [
+            "A table can have several primary keys but only one unique constraint.",
+            "Both allow NULL in every row.",
+            "A table has one primary key, which cannot be NULL; it can have several unique constraints.",
+            "A unique constraint is what foreign keys must point at; a primary key cannot be referenced."
+          ],
+          "answer": 2,
+          "explanation": "Both forbid duplicates. The primary key is the single identity of the row and cannot be NULL; unique constraints are extra no-duplicates rules, and a table can have several."
+        },
+        {
+          "id": "sql-u11-l1-e2",
+          "type": "mcq",
+          "prompt": "Which list contains only DDL statements?",
+          "choices": [
+            "SELECT, INSERT, UPDATE",
+            "CREATE, ALTER, DROP",
+            "GRANT, REVOKE, COMMIT",
+            "INSERT, DELETE, TRUNCATE"
+          ],
+          "answer": 1,
+          "explanation": "DDL defines objects: CREATE, ALTER, DROP (and TRUNCATE). INSERT, UPDATE and DELETE are DML; GRANT and REVOKE are DCL; COMMIT is TCL."
+        },
+        {
+          "id": "sql-u11-l1-e3",
+          "type": "short",
+          "prompt": "What is the name for a child row whose foreign key points at a parent row that does not exist?",
+          "accept": [
+            "orphan",
+            "an orphan",
+            "orphan row",
+            "orphaned row",
+            "orphan record",
+            "orphaned record",
+            "an orphan row",
+            "an orphaned row"
+          ],
+          "answer": "An orphan",
+          "explanation": "Orphans appear when a foreign key is not enforced. Counting them is a standard data-quality check."
+        },
+        {
+          "id": "sql-u11-l1-e4",
+          "type": "mcq",
+          "prompt": "You need to remove last week's test shifts from a table and keep everything else. Which statement fits?",
+          "choices": [
+            "TRUNCATE TABLE shifts",
+            "DROP TABLE shifts",
+            "DELETE FROM shifts WHERE ...",
+            "ALTER TABLE shifts"
+          ],
+          "answer": 2,
+          "explanation": "Only DELETE takes a WHERE. TRUNCATE would empty the table and DROP would remove it."
+        },
+        {
+          "id": "sql-u11-l1-e5",
+          "type": "open",
+          "prompt": "Prove that `shifts.pharmacy_id` behaves as a foreign key to `pharmacies.id`: write a query that counts the shifts whose pharmacy does not exist (`orphans`). Say what a result above zero would mean.",
+          "answer": "```sql\nSELECT COUNT(*) AS orphans\nFROM shifts s\nWHERE NOT EXISTS (SELECT 1 FROM pharmacies p WHERE p.id = s.pharmacy_id);\n```\n\nA `LEFT JOIN ... WHERE p.id IS NULL` gives the same count. On the practice data the result is 0. Any number above zero means shifts point at a pharmacy that is missing, so the foreign key is not being enforced and any report that joins shifts to pharmacies silently drops those shifts.",
+          "rubric": [
+            "Finds shifts with no matching pharmacy (NOT EXISTS or LEFT JOIN with IS NULL)",
+            "Returns a single count",
+            "Explains that a non-zero result means missing parent rows",
+            "Notes the effect on joined reports or on integrity"
+          ],
+          "sqlite": "SELECT COUNT(*) AS orphans FROM shifts s WHERE NOT EXISTS (SELECT 1 FROM pharmacies p WHERE p.id = s.pharmacy_id)"
+        }
+      ]
+    },
+    {
+      "id": "sql-u11-l2",
+      "title": "Correlated subqueries, EXISTS and IN",
+      "minutes": 12,
+      "body": "Unit 4 used subqueries that run once and hand back a value or a list. A **correlated** subquery is different: it refers to the row of the outer query, so in effect it is answered again for each outer row.\n\n## Spotting the difference\n\nNot correlated. The inner query runs once and knows nothing about the outer row:\n\n```sql\nSELECT pharmacy_id, COUNT(*) AS n\nFROM shifts\nGROUP BY pharmacy_id\nHAVING COUNT(*) > (SELECT COUNT(*) * 1.0 / COUNT(DISTINCT pharmacy_id) FROM shifts);\n```\n\nThe inner query is the average number of shifts per pharmacy (25.475), and 18 pharmacies are above it.\n\nCorrelated. The inner query mentions `ph.id`, which belongs to the outer query:\n\n```sql\nSELECT ph.name,\n       (SELECT COUNT(*) FROM shifts s WHERE s.pharmacy_id = ph.id) AS shift_count\nFROM pharmacies ph\nORDER BY shift_count DESC, ph.name;\n```\n\nThe test is simple: can you run the inner query on its own? If it fails because it names an outer alias, it is correlated.\n\n## EXISTS\n\n`EXISTS` asks one question: does the subquery return at least one row? It does not care what the row contains, which is why people write `SELECT 1`. It is nearly always correlated.\n\n```sql\nSELECT ph.id, ph.name\nFROM pharmacies ph\nWHERE EXISTS (SELECT 1 FROM shifts s\n              WHERE s.pharmacy_id = ph.id\n                AND s.is_emergency = 1\n                AND s.status = 'cancelled');\n```\n\nThis lists the 21 pharmacies that have had at least one emergency shift cancelled. Each pharmacy appears once however many such shifts it has. A join would repeat the pharmacy per matching shift, and you would need `DISTINCT` to clean it up.\n\n## EXISTS and IN, and the trap\n\nFor \"is in the list\", `IN` and `EXISTS` give the same answer. The difference shows with `NOT` and NULLs. Find pharmacists who have never been given a shift:\n\n```sql\n-- Returns 0 rows on the practice data. Wrong.\nSELECT id, name FROM pharmacists\nWHERE id NOT IN (SELECT pharmacist_id FROM shifts);\n\n-- Returns 4 rows. Right.\nSELECT p.id, p.name FROM pharmacists p\nWHERE NOT EXISTS (SELECT 1 FROM shifts s WHERE s.pharmacist_id = p.id);\n```\n\n113 shifts have no pharmacist yet, so the list contains NULL. `id NOT IN (..., NULL)` can never be true, because the database cannot say that `id` is different from an unknown value. `NOT EXISTS` compares row by row and is not affected. The rule: for \"has none\", write `NOT EXISTS` (or a `LEFT JOIN ... IS NULL`), and if you must use `NOT IN`, filter the NULLs out of the list.\n\n## Subquery or join?\n\n- You need columns from both tables: join.\n- You only need to test whether related rows exist: `EXISTS`.\n- You need one aggregated number per row, or to compare a row with its own group: a correlated subquery works, and a window function or a join to a grouped CTE usually reads better and runs faster on large tables.\n\nSay that last point when asked. Interviewers want to hear that you know more than one way and can say why you chose one.",
+      "keyPoints": [
+        "A correlated subquery refers to the outer row, so it cannot run on its own.",
+        "EXISTS tests whether any related row exists and never duplicates the outer row.",
+        "NOT IN returns nothing when the list contains a NULL; use NOT EXISTS for \"has none\".",
+        "Join when you need columns from both tables; use EXISTS when you only need a yes or no.",
+        "A row-versus-its-group comparison can be a correlated subquery, a window function or a join to a grouped CTE."
+      ],
+      "interviewAngle": "\"What is a correlated subquery?\" and \"EXISTS or IN?\" are common follow-ups once you have written a join correctly. Define it in one line, then give the NULL trap, because it shows you have been caught by real data: \"NOT IN returned nothing because the list had a NULL in it, so I use NOT EXISTS for anti-joins.\" Do not claim to tune queries. Say which form you find clearer and that you would check the row count either way.",
+      "exercises": [
+        {
+          "id": "sql-u11-l2-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "`SELECT id FROM pharmacists WHERE id NOT IN (SELECT pharmacist_id FROM shifts)` returns no rows, although some pharmacists have no shifts. What is the most likely cause?",
+          "choices": [
+            "NOT IN cannot be used with a subquery.",
+            "The subquery returns at least one NULL, so NOT IN can never be true.",
+            "The subquery needs DISTINCT.",
+            "pharmacists needs an alias."
+          ],
+          "answer": 1,
+          "explanation": "Unfilled shifts have a NULL pharmacist_id. Comparing against a list that contains NULL gives unknown, never true, so every row is rejected. NOT EXISTS avoids it."
+        },
+        {
+          "id": "sql-u11-l2-e2",
+          "type": "mcq",
+          "prompt": "Which subquery is correlated?",
+          "choices": [
+            "`WHERE pharmacy_id IN (SELECT id FROM pharmacies WHERE state = 'FL')`",
+            "`WHERE requested_at > (SELECT MIN(requested_at) FROM shifts)`",
+            "`WHERE EXISTS (SELECT 1 FROM shifts s WHERE s.pharmacy_id = ph.id)`",
+            "`HAVING COUNT(*) > (SELECT AVG(n) FROM counts)`"
+          ],
+          "answer": 2,
+          "explanation": "It names `ph.id`, an alias from the outer query, so it cannot run on its own. The others run once, independently."
+        },
+        {
+          "id": "sql-u11-l2-e3",
+          "type": "short",
+          "prompt": "Which keyword tests only whether a subquery returns at least one row?",
+          "accept": [
+            "exists",
+            "where exists"
+          ],
+          "answer": "EXISTS",
+          "explanation": "EXISTS is true as soon as one row is found; what the row contains does not matter."
+        },
+        {
+          "id": "sql-u11-l2-e4",
+          "type": "open",
+          "prompt": "List the pharmacists who have never been given a shift (`id`, `name`), ordered by id. Write it so that NULL pharmacist ids in `shifts` cannot break it.",
+          "answer": "```sql\nSELECT p.id, p.name\nFROM pharmacists p\nWHERE NOT EXISTS (SELECT 1 FROM shifts s WHERE s.pharmacist_id = p.id)\nORDER BY p.id;\n```\n\nA `LEFT JOIN shifts s ON s.pharmacist_id = p.id WHERE s.id IS NULL` is equally good. On the practice data this returns 4 rows; the first is 16, Carlos Fischer. `NOT IN (SELECT pharmacist_id FROM shifts)` returns nothing, because 113 unfilled shifts put NULL in the list.",
+          "rubric": [
+            "Uses NOT EXISTS or LEFT JOIN with IS NULL (or NOT IN with the NULLs filtered out)",
+            "Correlates on pharmacist_id = pharmacists.id",
+            "Returns id and name ordered by id",
+            "Can say why plain NOT IN fails here"
+          ],
+          "sqlite": "SELECT p.id, p.name FROM pharmacists p WHERE NOT EXISTS (SELECT 1 FROM shifts s WHERE s.pharmacist_id = p.id) ORDER BY p.id",
+          "ordered": true
+        },
+        {
+          "id": "sql-u11-l2-e5",
+          "type": "open",
+          "prompt": "List each pharmacy that has had at least one emergency shift cancelled (`id`, `name`), once each, ordered by id. Then say in one sentence why you chose EXISTS or a join.",
+          "answer": "```sql\nSELECT ph.id, ph.name\nFROM pharmacies ph\nWHERE EXISTS (SELECT 1 FROM shifts s\n              WHERE s.pharmacy_id = ph.id\n                AND s.is_emergency = 1\n                AND s.status = 'cancelled')\nORDER BY ph.id;\n```\n\nThis returns 21 rows. EXISTS fits because the question is yes or no per pharmacy; a join would return one row per cancelled emergency shift and need `DISTINCT` to remove the repeats.",
+          "rubric": [
+            "Returns each pharmacy once",
+            "Filters on is_emergency = 1 and status = cancelled",
+            "Uses EXISTS, or a join with DISTINCT, or IN",
+            "Gives a reason for the choice"
+          ],
+          "sqlite": "SELECT ph.id, ph.name FROM pharmacies ph WHERE EXISTS (SELECT 1 FROM shifts s WHERE s.pharmacy_id = ph.id AND s.is_emergency = 1 AND s.status = 'cancelled') ORDER BY ph.id",
+          "ordered": true
+        }
+      ]
+    },
+    {
+      "id": "sql-u11-l3",
+      "title": "Views, indexes, slow queries and normal forms",
+      "minutes": 12,
+      "body": "These four topics belong to the people who build databases. You are asked about them anyway, because someone who queries a database every day should know why it is shaped the way it is. Aim to explain each in plain words and to say what you have and have not done.\n\n## Views\n\nA view is a saved `SELECT` with a name. You query it like a table, but it stores no data of its own; it runs its query each time.\n\n```sql\nCREATE VIEW filled_shifts AS\nSELECT id, pharmacy_id, requested_at, filled_at\nFROM shifts\nWHERE filled_at IS NOT NULL;\n```\n\nTeams use views to give one agreed definition (everyone's \"filled shift\" is the same), to hide columns people should not see, and to simplify a join that is written often. A CTE does a similar job for one query only; a view is kept in the database for everyone. A **materialized view** (SQL Server calls its version an indexed view) stores the result, so it reads faster but has to be refreshed or maintained.\n\n## Indexes\n\nAn index is a sorted copy of one or more columns with pointers back to the rows, like the index of a book. Without one, the database reads every row to find a match (a **scan**). With one, it goes straight to the matching rows (a **seek**).\n\nThe cost: every index takes space and must be updated on each insert, update and delete, so more indexes mean faster reads and slower writes.\n\nIn SQL Server a **clustered** index is the table itself, stored in that order, so a table has only one; the primary key is clustered by default. A **nonclustered** index is a separate structure, and a table can have many.\n\n## \"This query is slow. What do you do?\"\n\nAn **execution plan** is the database's description of how it will run a query: which tables it reads, by scan or seek, and how it joins them. In SQL Server Management Studio you can display it next to the result. You are not expected to tune plans. You are expected to work through the causes a query writer controls:\n\n1. Return less. Name the columns instead of `SELECT *`, and filter early.\n2. Keep filters index-friendly. `WHERE YEAR(requested_at) = 2026` hides the column inside a function; a date range does not. A pattern starting with a wildcard, `LIKE '%alert'`, cannot use an index either.\n3. Check the joins. A missing or wrong join condition multiplies rows; compare the row count to what you expect.\n4. Replace a correlated subquery that runs per row with a join to a grouped result or a window function.\n5. Look at the plan for a scan on a large table, then ask whoever owns the database whether an index is appropriate.\n\nStep 5 is the honest ending for your level: you find the cause and bring evidence, and the owner decides on indexes.\n\n## Normal forms\n\nNormalization means organising tables so each fact is stored once.\n\n| Form | Rule in plain words | Example of breaking it |\n|---|---|---|\n| 1NF | One value per cell, no repeating columns | A `pharmacists` cell holding \"Ana, Wei, Tom\" |\n| 2NF | Every column depends on the whole key | In a table keyed by (shift, pharmacist), storing the pharmacy's city |\n| 3NF | Columns depend on the key and nothing else | Storing the pharmacy's name on every shift row |\n\nThe practice data is normalized: a shift stores `pharmacy_id`, and the name lives once in `pharmacies`. Rename a pharmacy and one row changes. The price is that reports need joins. Reporting databases often go the other way on purpose and repeat values to make reads simple (the star schema in the Power BI module), which is called denormalization.\n\n## Stored procedures and functions\n\nA stored procedure is a named block of SQL kept in the database and run with `EXEC`; it can take parameters, change data and return several results. A function returns a value or a table and is used inside a query; it should not change data. If you have run procedures others wrote but not written them, say exactly that.",
+      "keyPoints": [
+        "A view is a saved query that stores no data; a materialized or indexed view stores the result.",
+        "An index speeds reads (seek instead of scan) and slows writes; a table has one clustered index and can have many nonclustered ones.",
+        "For a slow query: return less, keep filters index-friendly, check joins, avoid per-row subqueries, then read the plan.",
+        "Normalization stores each fact once; reports then need joins, and reporting models often denormalize on purpose.",
+        "A stored procedure is run and can change data; a function returns a value inside a query."
+      ],
+      "interviewAngle": "Answer these at a reader's level and stop. For indexes: \"It lets the database find rows without reading the whole table, at the cost of slower writes. I did not create indexes; I wrote filters that could use them, such as date ranges instead of functions on the column.\" For a slow query, list what you would check in order and end with handing the plan to the database owner. Never say you tuned or designed a database. Interviewers for these roles are checking that you understand the idea and know where your job ends.",
+      "exercises": [
+        {
+          "id": "sql-u11-l3-e1",
+          "type": "mcq",
+          "placement": true,
+          "prompt": "What is the main trade-off of adding an index to a table?",
+          "choices": [
+            "Queries get faster and nothing else changes.",
+            "Reads that use it get faster; inserts, updates and deletes get slower and it takes space.",
+            "The table can no longer be joined.",
+            "It removes duplicate rows from the table."
+          ],
+          "answer": 1,
+          "explanation": "An index is an extra sorted structure. It helps lookups, but every change to the table must also update it."
+        },
+        {
+          "id": "sql-u11-l3-e2",
+          "type": "mcq",
+          "prompt": "Which statement about a standard view is true?",
+          "choices": [
+            "It stores a copy of the data that must be refreshed.",
+            "It is a saved query that runs each time it is used.",
+            "It exists only for the duration of one query.",
+            "It can only select from one table."
+          ],
+          "answer": 1,
+          "explanation": "A view stores the query, not the rows. A copy that must be refreshed is a materialized view, and something that lasts one query is a CTE."
+        },
+        {
+          "id": "sql-u11-l3-e3",
+          "type": "mcq",
+          "prompt": "A `shifts` table stores `pharmacy_name` and `pharmacy_city` on every row as well as `pharmacy_id`. Which problem does that cause?",
+          "choices": [
+            "Queries will need more joins.",
+            "A pharmacy that changes its name must be updated on every one of its shifts, and rows can disagree.",
+            "The table cannot have a primary key.",
+            "COUNT(*) will be wrong."
+          ],
+          "answer": 1,
+          "explanation": "The name depends on the pharmacy, not on the shift, so repeating it breaks third normal form and invites inconsistent copies."
+        },
+        {
+          "id": "sql-u11-l3-e4",
+          "type": "short",
+          "prompt": "In an execution plan, what is it called when the database reads every row of a table to find matches?",
+          "accept": [
+            "scan",
+            "a scan",
+            "table scan",
+            "a table scan",
+            "full table scan",
+            "a full table scan",
+            "full scan",
+            "index scan"
+          ],
+          "answer": "A scan (table scan)",
+          "explanation": "A scan reads everything; a seek uses an index to go straight to the matching rows."
+        },
+        {
+          "id": "sql-u11-l3-e5",
+          "type": "open",
+          "prompt": "An interviewer says: \"A report query that used to take two seconds now takes two minutes. What do you check?\" Write your answer as you would say it, in order, and end with what you would hand to someone else.",
+          "answer": "First I would confirm what changed: more data, a changed query, or a new join. Then I would look at the query itself. Is it selecting only the columns the report needs? Are the filters on bare columns, for example a date range instead of a function wrapped around the date? I would check each join's row count, because a wrong join condition multiplies rows and that alone can explain it. If there is a subquery that runs per row, I would try it as a join to a grouped result. If it is still slow, I would capture the execution plan, look for a scan on a large table, and take that to whoever owns the database with the query and the timings, because adding an index is their decision.",
+          "rubric": [
+            "Asks what changed (data volume, query, schema)",
+            "Names at least two query-level causes: SELECT *, functions on filtered columns, leading wildcards, row-multiplying joins, per-row subqueries",
+            "Mentions the execution plan and scan versus seek",
+            "Ends by escalating index decisions to the database owner with evidence"
+          ]
+        }
+      ]
+    }
+  ]
+}

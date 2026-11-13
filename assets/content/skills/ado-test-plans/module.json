@@ -15,6 +15,7 @@
     "unit-12.json",
     "unit-7.json",
     "unit-5.json",
+    "unit-13.json",
     "unit-6.json"
   ],
   "interviewQuestions": [
@@ -117,6 +118,56 @@
       "id": "tp-iq-20",
       "prompt": "What would you do if you found a serious bug the day before release?",
       "strongAnswer": "I confirm it is reproducible and capture evidence, then tell the product owner and developer straight away with severity, user impact and the steps. I check what else it touches and whether a workaround or rollback exists. The decision to delay or ship with the risk is the owner's. I give a recommendation and the options: fix and retest the affected suites, or ship with a documented known issue. Then I record the outcome and add a regression case."
+    },
+    {
+      "id": "tp-iq-21",
+      "prompt": "What is the difference between verification and validation?",
+      "strongAnswer": "Verification asks whether we are building the product right: does it match the specification? Reviews of requirements and test cases traced to acceptance criteria are verification. Validation asks whether we are building the right product: does it meet what the user actually needs? User acceptance testing is validation. I did both. I wrote test cases against the acceptance criteria and ran them before each release, and I ran UAT with the customer's staff, where more than once a feature met the written criteria and still did not fit how they worked. That gap is why you need both."
+    },
+    {
+      "id": "tp-iq-22",
+      "prompt": "What is the difference between an error, a defect and a failure?",
+      "strongAnswer": "A person makes an error, for example a developer misreads a requirement. That leaves a defect in the code or a document. When the defective part runs, the software does the wrong thing, and that visible wrong behaviour is the failure. So a user reports a failure, the developer finds the defect, and a good retrospective asks what caused the error. In practice people say bug for all three. I keep them apart when writing a report: I describe the failure I observed and leave the diagnosis of the defect to the developer."
+    },
+    {
+      "id": "tp-iq-23",
+      "prompt": "What are the principles of software testing?",
+      "strongAnswer": "The ones I use most: testing can show defects are present but never that none remain, so a clean run reduces risk and proves nothing. Exhaustive testing is impossible, so you choose by risk and technique. Testing early is cheaper, which is why I pushed for testable acceptance criteria in refinement. Defects cluster in a few areas; for us that was notifications and scheduling. Tests wear out if you only repeat them, so I added exploratory sessions. Testing depends on context. And software can match its specification and still fail the user, which is the case for UAT."
+    },
+    {
+      "id": "tp-iq-24",
+      "prompt": "What is the difference between smoke, sanity and regression testing?",
+      "strongAnswer": "A smoke test is a short, broad check that a new build is worth testing at all: can I log in, create a shift, see the roster. If it fails, the build goes back. Sanity testing is an informal term for a short, narrow check of one area after a small change. Regression testing checks that features which worked before still work after a change, and it is the larger suite I ran before each release. I would add confirmation testing: rerunning the exact case that failed to confirm the fix, before running regression around it."
+    },
+    {
+      "id": "tp-iq-25",
+      "prompt": "What are the phases of the software test life cycle?",
+      "strongAnswer": "Planning, where you agree scope, approach and the entry and exit criteria. Analysis, deciding what to test from the stories. Design, writing the test cases and data. Implementation, getting the environment and the run order ready. Execution, running the tests, recording outcomes and raising bugs. And completion, where you report, keep what can be reused and note what to improve. Monitoring runs through all of it. In Azure DevOps Test Plans that mapped to the plan, requirement-based suites, test cases, configurations, the test runner and the progress report."
+    },
+    {
+      "id": "tp-iq-26",
+      "prompt": "How do you estimate how long testing will take?",
+      "strongAnswer": "I start from history. If I know roughly how long similar cases took to write and run on the last release, I extrapolate from that. For something new I ask for three figures, optimistic, likely and pessimistic, and weight the likely one, which gives a number with some honesty about uncertainty. Then I list what it includes, because the parts people forget are retesting fixes and the regression pass afterwards. I give the estimate with its assumptions, for example that the build arrives on Tuesday, and I say early if those assumptions break."
+    },
+    {
+      "id": "tp-iq-27",
+      "prompt": "What is a requirements traceability matrix?",
+      "strongAnswer": "It is a table that links each requirement to the test cases that cover it, and usually on to results and bugs. It answers two questions: is every requirement tested, and which requirement does this failing test put at risk? I did not keep one as a spreadsheet. In Azure DevOps Test Plans I got the same thing from requirement-based suites, where test cases are linked to the user story, and the story then shows its tests and their outcomes. Before a release I checked for stories with no linked test cases, which is the coverage gap a matrix is meant to expose."
+    },
+    {
+      "id": "tp-iq-28",
+      "prompt": "How do you decide what to test when there is not enough time?",
+      "strongAnswer": "By risk: how likely is a failure, and how bad would it be. What changed in this release comes first, then the things that must never fail. For us that was sending an emergency alert and saving a shift. Then the areas with a history of bugs. Cosmetic and rarely used screens go last. I start with a smoke test so I do not waste the time on a broken build. At the end I tell the product owner what I ran, what I did not, and the risk in what is left. The decision to release is theirs, made with that information."
+    },
+    {
+      "id": "tp-iq-29",
+      "prompt": "What is the test pyramid?",
+      "strongAnswer": "It is a guide to how many tests to have at each level. At the base are unit tests: many, fast, written by developers. In the middle are integration or API tests. At the top are end-to-end tests through the screen: few, because they are slow and break for unrelated reasons. My own work sat at the top, manual test cases and basic Playwright end-to-end tests. Knowing the pyramid changed what I asked in refinement: if a rule had many combinations, I asked whether the developers could cover them in unit tests, and kept one or two UI tests for the journey."
+    },
+    {
+      "id": "tp-iq-30",
+      "prompt": "What is the difference between a test scenario, a test case and a test script?",
+      "strongAnswer": "A test scenario is a situation described in plain words, such as a coordinator sending an emergency alert at the maximum radius. A test case makes it executable: preconditions, steps, test data and an expected result for each step. A test script is the detailed procedure, and people often mean the automated version, like a Playwright test file. One scenario usually produces several cases: the normal path, the boundary values and the error paths. I wrote scenarios first when reviewing a story, then turned the important ones into test cases in Azure DevOps Test Plans."
     }
   ],
   "resources": [
